@@ -13,6 +13,12 @@ function addMoney(time, value) {
     updateMoneyMade();
 }
 
+// Exit the current window if the underlying python process is closing
+eel.expose(js_exit);
+function js_exit() {
+    window.close();
+}
+
 function updateMoneyMade() {
     var newList = []
     var tm = new Date().getTime();

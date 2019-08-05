@@ -21,6 +21,21 @@ startstop.addEventListener('click', function() {
     }
 });
 
+eel.expose(keycomb_start);
+function keycomb_start() {
+  startstop.disabled = true;
+  startTimer();
+  startstop.disabled = false;
+  startstop.innerHTML = "stop";
+  statusinfo.innerHTML = "Running"
+  statusinfo.className = "text status_running maintext"
+}
+
+eel.expose(keycomb_stop);
+function keycomb_stop() {
+  pause(true);
+}
+
 function start() {
   startstop.disabled = true;
   var time = 15;
@@ -53,8 +68,9 @@ function is_paused() {
   }
 }
 
-function pause() {
-  eel.stop_s_function();
+function pause(nstoppy) {
+  if(!nstoppy)
+    eel.stop_s_function();
   pausing = 1;
   progressbar.className = "mdc-linear-progress mdc-linear-progress--indeterminate";
   messagecontainer.className = "";

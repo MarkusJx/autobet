@@ -25,6 +25,7 @@ running = False
 waiting = 0
 stopping = False
 thread = 0
+eel_running = False
 
 
 def getWindowTitle(wName):
@@ -224,16 +225,22 @@ def start_stop():
     global running
     global stopping
     if not running and not stopping:
+        eel.keycomb_start()
         start_script()
     else:
+        eel.keycomb_stop()
         stop_script()
 
 
 def kill():
+    global eel_running
     print("Killed program.")
+    if eel_running:
+        eel.js_exit()
     os._exit(0)
 
 
+# Key combos stolen from: https://nitratine.net/blog/post/how-to-make-hotkeys-in-python/ ----------------------
 combination_to_function = {
     frozenset([Key.shift, Key.ctrl_l, Key.f10]): start_stop,
     frozenset([Key.shift, Key.ctrl_l, Key.f9]): kill
@@ -242,17 +249,22 @@ combination_to_function = {
 current_keys = set()
 
 
-def add_key_combos():
-    def on_press(key):
-        current_keys.add(key)
-        if frozenset(current_keys) in combination_to_function:
-            combination_to_function[frozenset(current_keys)]()
+def on_press(key):
+    current_keys.add(key)
+    if frozenset(current_keys) in combination_to_function:
+        combination_to_function[frozenset(current_keys)]()
 
-    def on_release(key):
-        current_keys.remove(key)
 
+def on_release(key):
+    current_keys.remove(key)
+
+
+def add_listener():
     with Listener(on_press=on_press, on_release=on_release) as listener:
         listener.join()
+
+# -------------------------------------------------------------------------------------------------------------
+# Eel init ----------------------------------------------------------------------------------------------------
 
 
 eel.init('web', allowed_extensions=['.js', '.html', '.css'])
@@ -274,18 +286,26 @@ def stopped():
 
 
 def start_ui():
-    print("starting ui")
+    global eel_running
     options = {
         'mode': 'custom',
         'args': ['electron-win32-x64/electron.exe', '.']
     }
 
-    eel.start('main.html', size=(700, 670))
+    eel_running = True
+    try:
+        eel.start('main.html', size=(700, 670), options=options)
+    except (SystemExit, MemoryError, KeyboardInterrupt):
+        pass
+    eel_running = False
+    kill()
+# -------------------------------------------------------------------------------------------------------------
 
 
 def main():
+    t = threading.Thread(target=add_listener, args=())
+    t.start()
     start_ui()
-    add_key_combos()
 
 
 if __name__ == "__main__":
