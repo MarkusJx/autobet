@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GTA Online Autobet</title>
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script type="text/javascript" src="/eel.js"></script>
+</head>
+<body>
+    <div id="frosted-glass">
+            <div id="Container">
+                    <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
+            
+                    <div id="status" class="subcontainer right">
+                        <div class="textalign">
+                            <h1 class="text subheading">Status</h1>
+                            <h1 class="text status_stopped maintext" id="statusinfo">Stopped</h1>
+                        </div>
+                    </div>
+            
+                    <div id="timecontainer" class="subcontainer left">
+                        <div class="textalign">
+                            <h1 class="text subheading">Time running</h1>
+                            <h1 class="text maintext maintext-maincolor" id="time">00:00:00</h1>
+                        </div>
+                    </div>
+            
+                    <div id="moneythishourcontainer" class="subcontainer right">
+                        <div class="textalign">
+                            <h1 class="text subheading">Money earned in the last hour</h1>
+                            <h1 class="text maintext maintext-maincolor" id="moneythishour">0 $</h1>
+                        </div>
+                    </div>
+            
+                    <div id="moneyallcontainer" class="subcontainer left">
+                        <div class="textalign">
+                            <h1 class="text subheading">Money earned all time</h1>
+                            <h1 class="text maintext maintext-maincolor" id="moneyall">0 $</h1>
+                        </div>
+                    </div>
+            
+                    <div id="raceswoncontainer" class="subcontainer right">
+                        <div class="textalign">
+                            <h1 class="text subheading">Races won</h1>
+                            <h1 class="text maintext maintext-maincolor" id="raceswon">0</h1>
+                        </div>
+                    </div>
+            
+                    <div id="winprobabilitycontainer" class="subcontainer left">
+                        <div class="textalign">
+                            <h1 class="text subheading">Probability of winning</h1>
+                            <h1 class="text maintext maintext-maincolor" id="winprobability">0.0%</h1>
+                        </div>
+                    </div>
+                </div>
+    </div>
+
+    <div id="messagecontainer" class="invisible">
+        <div role="progressbar" class="mdc-linear-progress" id="progressbar">
+            <div class="mdc-linear-progress__buffering-dots"></div>
+            <div class="mdc-linear-progress__buffer" id="progressbuffer"></div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+              <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+              <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+          </div>
+
+        <h1 class="maintext-maincolor text" id="stoptext">Please wait while the program stops...</h1>
+        <h1 class="text" id="quitinfo">To quit the program press CTRL+SHIFT+F9</h1>
+    </div>
+
+    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="startstop.js"></script>
+</body>
+</html>
