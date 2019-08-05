@@ -33,6 +33,7 @@ body {
     font-size: 3em;
     font-weight: normal;
     margin: 5px auto auto auto;
+    white-space: nowrap;
 }
 
 #Container { 

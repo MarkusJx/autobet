@@ -7,11 +7,22 @@ mdc.linearProgress.MDCLinearProgress.attachTo(progressbar);
 var moneythishour = document.getElementById('moneythishour');
 var raceswon = document.getElementById('raceswon');
 var winprobability = document.getElementById('winprobability');
+var moneyall = document.getElementById('moneyall');
 
 var moneyMadeList = [];
 var moneyMade = 0;
 var won = 0;
 var lost = 0;
+
+function makeSumsDisplayable(sum) {
+    if(sum > 1000000) {
+        return Math.round(sum / 10000) / 100 + "M";
+    } else if (sum > 1000000000) {
+        return Math.round(sum / 10000000) / 100 + "B";
+    } else {
+        return sum;
+    }
+}
 
 eel.expose(addMoney);
 function addMoney(value) {
@@ -25,8 +36,13 @@ function addMoney(value) {
     updateValues();
 }
 
+eel.expose(setAllMoneyMade);
+function setAllMoneyMade(value) {
+    moneyall.innerHTML = makeSumsDisplayable(value) + " $";
+}
+
 function updateValues() {
-    moneythishour.innerHTML = moneyMade + " $";
+    moneythishour.innerHTML = makeSumsDisplayable(moneyMade) + " $";
     raceswon.innerHTML = won;
     winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
 }
@@ -53,3 +69,5 @@ function updateMoneyMade() {
         moneyMade += value[1];
     });
 }
+
+eel.get_winnings();

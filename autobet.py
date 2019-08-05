@@ -1,15 +1,17 @@
-import pyautogui
-from PIL import ImageGrab as ig
-import cv2
-import time
-import win32api, win32con
-import numpy as np
-from pynput.keyboard import Key, Listener
+import ctypes
 import os
 import threading
-import win32gui
-import ctypes
+import time
+
+import cv2
 import eel
+import numpy as np
+import pyautogui
+import win32api
+import win32con
+import win32gui
+from PIL import ImageGrab as ig
+from pynput.keyboard import Key, Listener
 
 odds_orig = [cv2.imread("img/2_1.jpg", 0), cv2.imread("img/3_1.jpg", 0), cv2.imread("img/4_1.jpg", 0), cv2.imread("img/5_1.jpg", 0)]
 evens_orig = cv2.imread("img/evens.jpg", 0)
@@ -29,6 +31,7 @@ waiting = 0
 stopping = False
 thread = 0
 eel_running = False
+winnings = 0
 
 xPos = 0
 yPos = 0
@@ -161,7 +164,7 @@ def place_bet():
     click(634, 448)
 
     click(2028, 680)
-    for x in range(29):
+    for x in range(30):
         click(2028, 680, move=False)
 
     click(1765, 1050)
@@ -175,11 +178,19 @@ def reset():
 
 def avoid_kick():
     click(633, 448)
-
     click(1720, 1036)
 
 
-def get_winnings():
+def update_winnings(to_add):
+    global winnings
+    winnings = winnings + to_add
+    eel.setAllMoneyMade(winnings)
+    f = open("winnings.txt", "w")
+    f.write(str(winnings))
+    f.close()
+
+
+def get_winnings_py():
     screen = ig.grab(bbox=(xPos, yPos, width, height))
     img_g = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2GRAY)
 
@@ -189,7 +200,9 @@ def get_winnings():
     for pt in zip(*loc[::-1]):
         i = i + 1
     if i > 0:
+        print("30k")
         eel.addMoney(30000)
+        update_winnings(30000)
         return
 
     res = cv2.matchTemplate(img_g, cv2.cvtColor(p40k, cv2.COLOR_RGB2GRAY), cv2.TM_CCOEFF_NORMED)
@@ -198,7 +211,9 @@ def get_winnings():
     for pt in zip(*loc[::-1]):
         i = i + 1
     if i > 0:
+        print("40k")
         eel.addMoney(40000)
+        update_winnings(40000)
         return
 
     res = cv2.matchTemplate(img_g, cv2.cvtColor(p50k, cv2.COLOR_RGB2GRAY), cv2.TM_CCOEFF_NORMED)
@@ -207,7 +222,8 @@ def get_winnings():
     for pt in zip(*loc[::-1]):
         i = i + 1
     if i > 0:
-        eel.addMoney(50000)
+        print("50k")
+        update_winnings(50000)
         return
 
     eel.addMoney(0)
@@ -227,8 +243,9 @@ def main_f():
             refreshes = 0
             place_bet()
             eel.addMoney(-10000)
+            update_winnings(-10000)
             time.sleep(34)
-            get_winnings()
+            get_winnings_py()
             reset()
         else:
             if refreshes > 3:
@@ -248,7 +265,6 @@ def start_script():
     global running
     global stopping
     if not running and not stopping:
-        print("Starting script...")
         running = True
         thread = threading.Thread(target=main_f, args=())
         thread.start()
@@ -330,6 +346,22 @@ def stopped():
     return not running and not stopping
 
 
+@eel.expose
+def get_winnings():
+    global winnings
+    try:
+        f = open("winnings.txt", "r+")
+        s = f.read()
+        if s:
+            winnings = int(s)
+            f.close()
+    except FileNotFoundError:
+        f = open("winnings.txt", "w")
+        f.write("0")
+        f.close()
+    eel.setAllMoneyMade(winnings)
+
+
 def start_ui():
     global eel_running
     options = {
@@ -339,7 +371,7 @@ def start_ui():
 
     eel_running = True
     try:
-        eel.start('main.html', size=(700, 670), options=options)
+        eel.start('main.html', size=(700, 670))
     except (SystemExit, MemoryError, KeyboardInterrupt):
         pass
     eel_running = False
@@ -348,11 +380,6 @@ def start_ui():
 
 
 def main():
-    time.sleep(10)
-    # Get and print the mouse coordinates.
-    #x, y = pyautogui.position()
-    #positionStr = 'X: ' + str(x).rjust(4) + ' Y: ' + str(y).rjust(4)
-    #print(positionStr)
     t = threading.Thread(target=add_listener, args=())
     t.start()
     start_ui()
