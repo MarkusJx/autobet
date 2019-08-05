@@ -4,21 +4,24 @@ import cv2
 import time
 import win32api, win32con
 import numpy as np
-from pynput.keyboard import Key, KeyCode, Listener
+from pynput.keyboard import Key, Listener
 import os
 import threading
 import win32gui
 import ctypes
 import eel
 
-odds = [cv2.imread("img/2_1.jpg", 0), cv2.imread("img/3_1.jpg", 0), cv2.imread("img/4_1.jpg", 0), cv2.imread("img/5_1.jpg", 0)]
-evens = cv2.imread("img/evens.jpg", 0)
-cancel = cv2.imread("img/cancel.jpg", 0)
-place_bet_main = cv2.imread("img/place_bet.jpg", 0)
-place_bet = cv2.imread("img/place_bet_1.jpg", 0)
-arrow_right = cv2.imread("img/arrow_right.jpg")
-one = cv2.imread("img/one.jpg")
-bet_again = cv2.imread("img/bet_again.jpg")
+odds_orig = [cv2.imread("img/2_1.jpg", 0), cv2.imread("img/3_1.jpg", 0), cv2.imread("img/4_1.jpg", 0), cv2.imread("img/5_1.jpg", 0)]
+evens_orig = cv2.imread("img/evens.jpg", 0)
+p30k_orig = cv2.imread("img/30k.jpg")
+p40k_orig = cv2.imread("img/40k.jpg")
+p50k_orig = cv2.imread("img/50k.jpg")
+
+odds = odds_orig
+evens = evens_orig
+p30k = p30k_orig
+p40k = p40k_orig
+p50k = p50k_orig
 
 threshold = 0.98
 running = False
@@ -27,28 +30,35 @@ stopping = False
 thread = 0
 eel_running = False
 
+xPos = 0
+yPos = 0
+multiplierW = 0
+multiplierH = 0
+width = 0
+height = 0
 
-def getWindowTitle(wName):
-    enumWindows = ctypes.windll.user32.EnumWindows
-    enumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
-    getWindowText = ctypes.windll.user32.GetWindowTextW
-    getWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-    isWindowVisible = ctypes.windll.user32.IsWindowVisible
+
+def get_window_title(w_name):
+    enum_windows = ctypes.windll.user32.EnumWindows
+    enum_windows_process = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
+    get_window_text = ctypes.windll.user32.GetWindowTextW
+    get_window_text_length = ctypes.windll.user32.GetWindowTextLengthW
+    is_window_visible = ctypes.windll.user32.IsWindowVisible
 
     titles = []
 
     def foreach_window(hwnd, lparam):
-        if isWindowVisible(hwnd):
-            length = getWindowTextLength(hwnd)
+        if is_window_visible(hwnd):
+            length = get_window_text_length(hwnd)
             buff = ctypes.create_unicode_buffer(length + 1)
-            getWindowText(hwnd, buff, length + 1)
+            get_window_text(hwnd, buff, length + 1)
             titles.append(buff.value)
         return True
 
-    enumWindows(enumWindowsProc(foreach_window), 0)
+    enum_windows(enum_windows_process(foreach_window), 0)
 
     for title in titles:
-        if wName in title:
+        if w_name in title:
             return title
 
 
@@ -61,28 +71,45 @@ def callback(hwnd):
     return x, y, w, h
 
 
-def getWindowSize(windowName):
-    return callback(win32gui.FindWindow(None, getWindowTitle(windowName)))
+def get_window_size(window_name):
+    return callback(win32gui.FindWindow(None, get_window_title(window_name)))
 
 
-# Definition of width, height, x, y pos of window and multiplier of positions
-xPos, yPos, width, height = getWindowSize("Opera")
-multiplierW = width / 2560
-multiplierH = height / 1440
+def set_positions():
+    global xPos, yPos, multiplierH, multiplierW, width, height
+    # Definition of width, height, x, y pos of window and multiplier of positions
+    xPos, yPos, width, height = get_window_size("Grand Theft Auto V")
+    multiplierW = width / 2560
+    multiplierH = height / 1440
 
-# Set x and y pos to 0 if they are below 0. This happens when a window is maximised
-if xPos < 0:
-    xPos = 0
+    # Set x and y pos to 0 if they are below 0. This happens when a window is maximised
+    if xPos < 0:
+        xPos = 0
 
-if yPos < 0:
-    yPos = 0
+    if yPos < 0:
+        yPos = 0
 
 
 def resize(image):
     return cv2.resize(image, None, fx=multiplierW, fy=multiplierH)
 
 
+def resize_images():
+    global odds, odds_orig, evens, evens_orig, p30k, p30k_orig, p40k, p40k_orig, p50k, p50k_orig
+    odds[0] = resize(odds_orig[0])
+    odds[1] = resize(odds_orig[1])
+    odds[2] = resize(odds_orig[2])
+    odds[3] = resize(odds_orig[3])
+    evens = resize(evens_orig)
+    p30k = resize(p30k_orig)
+    p40k = resize(p40k_orig)
+    p50k = resize(p50k_orig)
+
+
 def click(x, y, move=True):
+    x = round(x * multiplierW + xPos)
+    y = round(y * multiplierH + yPos)
+
     if move:
         pyautogui.moveTo(x, y, duration=0.25)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
@@ -90,7 +117,10 @@ def click(x, y, move=True):
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
 
 
-def rightClick(x, y, move=True):
+def right_click(x, y, move=True):
+    x = round(x * multiplierW + xPos)
+    y = round(y * multiplierH + yPos)
+
     if move:
         pyautogui.moveTo(x, y, duration=0.25)
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, 0, 0)
@@ -118,81 +148,96 @@ def usable(img_gray):
     return True
 
 
-def refreshOdds():
-    screen = ig.grab(bbox=(0, 0, 2560, 1440))
-    img = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-    img_g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    res = cv2.matchTemplate(img_g, cancel, eval("cv2.TM_CCOEFF_NORMED"))
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+def refresh_odds():
+    click(1670, 1312)
 
-    click(max_loc[0], max_loc[1])
-    rightClick(max_loc[0], max_loc[1], move=False)
-    click(max_loc[0], max_loc[1], move=False)
+    right_click(1670, 1312, move=False)
+    click(1670, 1312, move=False)
 
-    click(1905, 1187)
+    click(1906, 1186)
 
 
-def placeBet():
-    click(633, 448)
+def place_bet():
+    click(634, 448)
 
-    pyautogui.moveTo(2027, 681, duration=0.25)
-    for x in range(30):
-        click(2027, 681, move=False)
+    click(2028, 680)
+    for x in range(29):
+        click(2028, 680, move=False)
 
-    screen = ig.grab(bbox=(0, 0, 2560, 1440))
-    img = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-    img_g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    res = cv2.matchTemplate(img_g, place_bet, eval("cv2.TM_CCOEFF_NORMED"))
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-
-    click(max_loc[0], max_loc[1])
+    click(1765, 1050)
 
 
 def reset():
-    screen = ig.grab(bbox=(0, 0, 2560, 1440))
-    img = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-    img_g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    res = cv2.matchTemplate(img_g, cv2.cvtColor(bet_again, cv2.COLOR_RGB2GRAY), eval("cv2.TM_CCOEFF_NORMED"))
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-
-    click(max_loc[0], max_loc[1])
+    click(1286, 1304)
 
     click(1905, 1187)
 
 
-def avoidKick():
+def avoid_kick():
     click(633, 448)
 
-    screen = ig.grab(bbox=(0, 0, 2560, 1440))
-    img = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-    img_g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    res = cv2.matchTemplate(img_g, place_bet, eval("cv2.TM_CCOEFF_NORMED"))
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-
-    click(max_loc[0], max_loc[1])
+    click(1720, 1036)
 
 
-def maint():
+def get_winnings():
+    screen = ig.grab(bbox=(xPos, yPos, width, height))
+    img_g = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2GRAY)
+
+    res = cv2.matchTemplate(img_g, cv2.cvtColor(p30k, cv2.COLOR_RGB2GRAY), cv2.TM_CCOEFF_NORMED)
+    loc = np.where(res >= 0.90)
+    i = 0
+    for pt in zip(*loc[::-1]):
+        i = i + 1
+    if i > 0:
+        eel.addMoney(30000)
+        return
+
+    res = cv2.matchTemplate(img_g, cv2.cvtColor(p40k, cv2.COLOR_RGB2GRAY), cv2.TM_CCOEFF_NORMED)
+    loc = np.where(res >= 0.90)
+    i = 0
+    for pt in zip(*loc[::-1]):
+        i = i + 1
+    if i > 0:
+        eel.addMoney(40000)
+        return
+
+    res = cv2.matchTemplate(img_g, cv2.cvtColor(p50k, cv2.COLOR_RGB2GRAY), cv2.TM_CCOEFF_NORMED)
+    loc = np.where(res >= 0.90)
+    i = 0
+    for pt in zip(*loc[::-1]):
+        i = i + 1
+    if i > 0:
+        eel.addMoney(50000)
+        return
+
+    eel.addMoney(0)
+
+
+def main_f():
     print("Started main thread")
+    set_positions()
+    resize_images()
+
     refreshes = 0
     global running
     while running:
-        screen1 = ig.grab(bbox=(0, 0, 2560, 1440))
-        img1 = cv2.cvtColor(np.array(screen1), cv2.COLOR_RGB2BGR)
-        img_g1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-        if usable(img_g1):
+        screen = ig.grab(bbox=(xPos, yPos, width, height))
+        img_g = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2GRAY)
+        if usable(img_g):
             refreshes = 0
-            placeBet()
+            place_bet()
+            eel.addMoney(-10000)
             time.sleep(34)
+            get_winnings()
             reset()
         else:
             if refreshes > 3:
                 refreshes = 0
-                avoidKick()
+                avoid_kick()
                 time.sleep(34)
                 reset()
             else:
-                refreshOdds()
+                refresh_odds()
                 refreshes = refreshes + 1
 
     print("Stopped main thread")
@@ -205,7 +250,7 @@ def start_script():
     if not running and not stopping:
         print("Starting script...")
         running = True
-        thread = threading.Thread(target=maint, args=())
+        thread = threading.Thread(target=main_f, args=())
         thread.start()
 
 
@@ -303,6 +348,11 @@ def start_ui():
 
 
 def main():
+    time.sleep(10)
+    # Get and print the mouse coordinates.
+    #x, y = pyautogui.position()
+    #positionStr = 'X: ' + str(x).rjust(4) + ' Y: ' + str(y).rjust(4)
+    #print(positionStr)
     t = threading.Thread(target=add_listener, args=())
     t.start()
     start_ui()
