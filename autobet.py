@@ -371,7 +371,7 @@ def start_ui():
 
     eel_running = True
     try:
-        eel.start('main.html', size=(700, 670))
+        eel.start('main.html', size=(700, 670), options=options)
     except (SystemExit, MemoryError, KeyboardInterrupt):
         pass
     eel_running = False
