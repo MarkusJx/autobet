@@ -8,17 +8,32 @@ var moneythishour = document.getElementById('moneythishour');
 var raceswon = document.getElementById('raceswon');
 var winprobability = document.getElementById('winprobability');
 var moneyall = document.getElementById('moneyall');
+var errordialog = document.getElementById("error-dialog-container");
 
-var moneyMadeList = [];
+errordialog = new mdc.dialog.MDCDialog(errordialog);
+
 var moneyMade = 0;
 var won = 0;
 var lost = 0;
 
-function makeSumsDisplayable(sum) {
-    if(sum > 1000000) {
-        return Math.round(sum / 10000) / 100 + "M";
-    } else if (sum > 1000000000) {
+console.log("a")
+exception();
+
+eel.expose(exception)
+function exception() {
+    errordialog.open();
+    errordialog.listen("MDCDialog:closed", function() {
+        window.close();
+    })
+}
+
+function makeSumsDisplayable(sum, k = false) {
+    if (sum > 1000000000) {
         return Math.round(sum / 10000000) / 100 + "B";
+    } else if(sum > 1000000) {
+        return Math.round(sum / 10000) / 100 + "M";
+    } else if(k && sum > 1000) {
+        return Math.round(sum / 10) / 100 + "K";
     } else {
         return sum;
     }
@@ -27,7 +42,7 @@ function makeSumsDisplayable(sum) {
 eel.expose(addMoney);
 function addMoney(value) {
     if(value != 0){
-        moneyMadeList.push([new Date().getTime(), value]);
+        moneyMade += value
         if(value > 0) won++;
         updateMoneyMade();
     } else {
@@ -42,32 +57,19 @@ function setAllMoneyMade(value) {
 }
 
 function updateValues() {
-    moneythishour.innerHTML = makeSumsDisplayable(moneyMade) + " $";
+    moneythishour.innerHTML = makeSumsDisplayable(getMoneyPerHour(), true) + " $/hr";
     raceswon.innerHTML = won;
     winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
+}
+
+function getMoneyPerHour() {
+    return moneyMade * (3600000 / difference);
 }
 
 // Exit the current window if the underlying python process is closing
 eel.expose(js_exit);
 function js_exit() {
     window.close();
-}
-
-function updateMoneyMade() {
-    var newList = []
-    var tm = new Date().getTime();
-    moneyMadeList.forEach(function(value) {
-        if ((value[0] + 3600000) > tm) {
-            newList.push(value);
-        }
-    });
-
-    moneyMadeList = newList;
-    moneyMade = 0;
-
-    moneyMadeList.forEach(function(value) {
-        moneyMade += value[1];
-    });
 }
 
 eel.get_winnings();

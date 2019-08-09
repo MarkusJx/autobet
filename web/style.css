@@ -78,6 +78,11 @@ body {
     color: rgb(201, 37, 37);
 }
 
+#errordialogbutton {
+    --mdc-theme-primary: #e46e00;
+    color: #e46e00;
+}
+
 #startstop {
     --mdc-theme-primary: #e46e00;
     --mdc-theme-on-primary: #191919;
