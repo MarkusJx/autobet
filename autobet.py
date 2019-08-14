@@ -3,7 +3,6 @@ import os
 import threading
 import time
 
-# import cv2
 import eel
 import numpy as np
 import pyautogui
@@ -11,34 +10,19 @@ import win32api
 import win32con
 import win32gui
 from PIL import ImageGrab as ig
-from pynput.keyboard import Key, Listener
+from system_hotkey import SystemHotkey
 
 import ai
 
-# import numpy.random.common
-# import numpy.random.bounded_integers
-# import numpy.random.entropy
+# from pynput import keyboard
+# from pynput.keyboard import Key, Listener
 
-# odds_orig = [cv2.imread("img/2_1.jpg", 0), cv2.imread("img/3_1.jpg", 0), cv2.imread("img/4_1.jpg", 0), cv2.imread("img/5_1.jpg", 0)]
-# evens_orig = cv2.imread("img/evens.jpg", 0)
-# p30k_orig = cv2.imread("img/30k.jpg", 0)
-# p40k_orig = cv2.imread("img/40k.jpg", 0)
-# p50k_orig = cv2.imread("img/50k.jpg", 0)
-
-# odds = odds_orig
-# evens = evens_orig
-# p30k = p30k_orig
-# p40k = p40k_orig
-# p50k = p50k_orig
-
-# threshold = 0.98
 running = False
 waiting = 0
 stopping = False
 thread = 0
 eel_running = False
 winnings = 0
-error = False
 
 xPos = 0
 yPos = 0
@@ -88,7 +72,7 @@ def get_window_size(window_name):
 def set_positions():
     global xPos, yPos, multiplierH, multiplierW, width, height
     # Definition of width, height, x, y pos of window and multiplier of positions
-    xPos, yPos, width, height = get_window_size("Grand Theft Auto V")
+    xPos, yPos, width, height = get_window_size("Grand Theft Auto V")  # TODO add error if not running
     multiplierW = width / 2560
     multiplierH = height / 1440
 
@@ -100,27 +84,8 @@ def set_positions():
         yPos = 0
 
 
-# def resize_images():
-#    global odds, evens, p30k, p40k, p50k
-#    if width == 1920 and height == 1080:
-#        print("1080")
-#        odds = [cv2.imread("img/2_1_1080.jpg", 0), cv2.imread("img/3_1_1080.jpg", 0), cv2.imread("img/4_1_1080.jpg", 0),
-#                cv2.imread("img/5_1_1080.jpg", 0)]
-#        evens = cv2.imread("img/evens_1080.jpg", 0)
-#        p30k = cv2.imread("img/30k_1080.jpg", 0)
-#        p40k = cv2.imread("img/40k_1080.jpg", 0)
-#        p50k = cv2.imread("img/50k_1080.jpg", 0)
-#    else:
-#        print("1440")
-#        odds = odds_orig
-#        evens = evens_orig
-#        p30k = p30k_orig
-#        p40k = p40k_orig
-#        p50k = p50k_orig
-
-
 def click(x, y, move=True):
-    if not error:  # failsafe
+    if not stopping:
         x = round(x * multiplierW + xPos)
         y = round(y * multiplierH + yPos)
 
@@ -132,7 +97,7 @@ def click(x, y, move=True):
 
 
 def right_click(x, y, move=True):
-    if not error:  # failsafe
+    if not stopping:
         x = round(x * multiplierW + xPos)
         y = round(y * multiplierH + yPos)
 
@@ -141,26 +106,6 @@ def right_click(x, y, move=True):
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, 0, 0)
         time.sleep(0.25)
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, x, y, 0, 0)
-
-
-# def usable(img_gray):
-#    res = cv2.matchTemplate(img_gray, evens, cv2.TM_CCOEFF_NORMED)
-#    loc = np.where(res >= threshold)
-#    i = 0
-#    for pt in zip(*loc[::-1]):
-#        i = i + 1
-#    if i > 0:
-#        return False
-#
-#    for img in odds:
-#        res = cv2.matchTemplate(img_gray, img, cv2.TM_CCOEFF_NORMED)
-#        loc = np.where(res >= threshold)
-#        i = 0
-#        for pt in zip(*loc[::-1]):
-#            i = i + 1
-#        if i > 1:
-#            return False
-#    return True
 
 
 def refresh_odds():
@@ -176,7 +121,7 @@ def place_bet():
     click(634, 448)
 
     click(2028, 680)
-    for x in range(30):
+    for x in range(32):
         click(2028, 680, move=False)
 
     click(1765, 1050)
@@ -202,10 +147,9 @@ def update_winnings(to_add):
     f.close()
 
 
-def get_winnings_py():
-    #global p30k, p40k, p50k
+def get_winnings_py(w_ai):
     screen = ig.grab(bbox=(xPos, yPos, width, height))
-    res = ai.predict_winnings(np.array(screen), multiplierW, multiplierH)
+    res = w_ai.predict_winnings(np.array(screen), multiplierW, multiplierH)
 
     print("Results:")
     print(res)
@@ -231,77 +175,27 @@ def get_winnings_py():
     elif res == "running":
         print("running")
         time.sleep(1)
-        get_winnings_py()
-
-    # img_g = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2GRAY)
-
-    # res = cv2.matchTemplate(img_g, p30k, cv2.TM_CCOEFF_NORMED)
-    # loc = np.where(res >= 0.98)
-    # i = 0
-    # for pt in zip(*loc[::-1]):
-    #    i = i + 1
-    # if i > 0:
-    #    print("30k")
-    #    eel.addMoney(30000)
-    #    update_winnings(30000)
-    #    return
-
-    # res = cv2.matchTemplate(img_g, p40k, cv2.TM_CCOEFF_NORMED)
-    # loc = np.where(res >= 0.98)
-    # i = 0
-    # for pt in zip(*loc[::-1]):
-    #    i = i + 1
-    # if i > 0:
-    #    print("40k")
-    #    eel.addMoney(40000)
-    #    update_winnings(40000)
-    #    return
-
-    # res = cv2.matchTemplate(img_g, p50k, cv2.TM_CCOEFF_NORMED)
-    # loc = np.where(res >= 0.98)
-    # i = 0
-    # for pt in zip(*loc[::-1]):
-    #    i = i + 1
-    # if i > 0:
-    #    print("50k")
-    #    eel.addMoney(50000)
-    #    update_winnings(50000)
-    #    return
-
-
-#screens = 0
-# errors = 0
+        get_winnings_py(w_ai)
 
 
 def main_f():
-    #global errors, screens
     print("Started main thread")
     set_positions()
-    # resize_images()
 
-    ai.init_betting_prediction()
-    ai.init_winnings_prediction()
+    betting_ai = ai.Betting()
+    # winnings_ai = ai.Winnings()
 
     refreshes = 0
     global running
     while running:
         screen = ig.grab(bbox=(xPos, yPos, width, height))
-        # img_g = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2GRAY)
-        # _usable = usable(img_g)
-        # if _usable == ai.usable(np.array(screen), multiplierW, multiplierW):
-        #    print("Errors: " + str(errors) + ", Screens: " + str(screens))
-        # else:
-        #    print("ERROR")
-        #    errors = errors + 1
-        #    print("Errors: " + str(errors) + ", Screens: " + str(screens))
-        # screens = screens + 1
-        if ai.usable(np.array(screen), multiplierW, multiplierH):
+        if betting_ai.usable(np.array(screen), multiplierW, multiplierH):
             refreshes = 0
             place_bet()
-            eel.addMoney(-10000)
-            update_winnings(-10000)
+            # eel.addMoney(-10000)
+            #update_winnings(-10000)
             time.sleep(34)
-            #get_winnings_py() does not work
+            #get_winnings_py(winnings_ai)
             reset()
         else:
             if refreshes > 3:
@@ -338,9 +232,15 @@ def stop_script():
         stopping = False
 
 
+def kill():
+    print("Killed program.")
+    if eel_running:
+        eel.js_exit()
+    os._exit(0)
+
+
+# Key combos stolen from: https://nitratine.net/blog/post/how-to-make-hotkeys-in-python/ ----------------------
 def start_stop():
-    global running
-    global stopping
     if not running and not stopping:
         eel.keycomb_start()
         start_script()
@@ -349,36 +249,34 @@ def start_stop():
         stop_script()
 
 
-def kill():
-    global eel_running
-    print("Killed program.")
-    if eel_running:
-        eel.js_exit()
-    os._exit(0)
+hk1 = SystemHotkey()
+hk1.register(('control', 'shift', 'f10'), callback=lambda x: start_stop())
+
+hk2 = SystemHotkey()
+hk2.register(('control', 'shift', 'f9'), callback=lambda x: kill())
 
 
-# Key combos stolen from: https://nitratine.net/blog/post/how-to-make-hotkeys-in-python/ ----------------------
-combination_to_function = {
-    frozenset([Key.shift, Key.ctrl_l, Key.f10]): start_stop,
-    frozenset([Key.shift, Key.ctrl_l, Key.f9]): kill
-}
+# combination_to_function = {
+#    frozenset([Key.shift, Key.ctrl_l, Key.f10]): start_stop,
+#    frozenset([Key.shift, Key.ctrl_l, Key.f9]): kill
+# }
 
-current_keys = set()
-
-
-def on_press(key):
-    current_keys.add(key)
-    if frozenset(current_keys) in combination_to_function:
-        combination_to_function[frozenset(current_keys)]()
+# current_keys = set()
 
 
-def on_release(key):
-    current_keys.remove(key)
+# def on_press(key):
+#    current_keys.add(key)
+#    if frozenset(current_keys) in combination_to_function:
+#        combination_to_function[frozenset(current_keys)]()
 
 
-def add_listener():
-    with Listener(on_press=on_press, on_release=on_release) as listener:
-        listener.join()
+# def on_release(key):
+#    current_keys.remove(key)
+
+
+# def add_listener():
+#    with Listener(on_press=on_press, on_release=on_release) as listener:
+#        listener.join()
 
 # -------------------------------------------------------------------------------------------------------------
 # Eel init ----------------------------------------------------------------------------------------------------
@@ -437,8 +335,8 @@ def start_ui():
 def main():
     pyautogui.FAILSAFE = False
     try:
-        t = threading.Thread(target=add_listener, args=())
-        t.start()
+        # t = threading.Thread(target=add_listener, args=())
+        #t.start()
         start_ui()
     except:
         kill()

@@ -13,20 +13,6 @@ from imageai.Prediction.Custom import CustomImagePrediction
 # lost = 129
 # running = 52
 
-prediction = None
-prediction_w = None
-
-y1b = 448
-y2b = 680
-x1b = 220
-x2b = 644
-
-y1w = 1060
-y2w = 1146
-x1w = 1286
-x2w = 1590
-
-
 # Functions used for training ---------------------------------------------------------------------------------
 
 # def resize():
@@ -90,7 +76,6 @@ x2w = 1590
 #    model_trainer.trainModel(num_objects=5, num_experiments=300, enhance_data=True, batch_size=32,
 #                             show_network_summary=True)
 
-
 # def train_betting():
 #    model_trainer = ModelTraining()
 #    model_trainer.setModelTypeAsResNet()
@@ -100,48 +85,56 @@ x2w = 1590
 
 # -------------------------------------------------------------------------------------------------------------
 
-def init_betting_prediction():
-    global prediction
-    prediction = CustomImagePrediction()
-    prediction.setModelTypeAsResNet()
-    prediction.setModelPath("models/betting.h5")
-    prediction.setJsonPath("models/betting.json")
-    prediction.loadModel(num_objects=2)
+y1b = 448
+y2b = 680
+x1b = 220
+x2b = 644
+
+y1w = 1060
+y2w = 1146
+x1w = 1286
+x2w = 1590
 
 
-def predict_betting(img, multiplier_w, multiplier_h):
-    y1 = round(y1b * multiplier_h)
-    y2 = round(y2b * multiplier_h)
-    x1 = round(x1b * multiplier_w)
-    x2 = round(x2b * multiplier_w)
-    crop_img = img[y1:y2, x1:x2]
-    return prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
+class Betting:
+    def __init__(self):
+        self.prediction = CustomImagePrediction()
+        self.prediction.setModelTypeAsResNet()
+        self.prediction.setModelPath("models/betting.h5")
+        self.prediction.setJsonPath("models/betting.json")
+        self.prediction.loadModel(num_objects=2)
+
+    def predict_betting(self, img, multiplier_w, multiplier_h):
+        y1 = round(y1b * multiplier_h)
+        y2 = round(y2b * multiplier_h)
+        x1 = round(x1b * multiplier_w)
+        x2 = round(x2b * multiplier_w)
+        crop_img = img[y1:y2, x1:x2]
+        return self.prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
+
+    def usable(self, img, multiplier_w, multiplier_h):
+        predict, probability = self.predict_betting(img, multiplier_w, multiplier_h)
+        print(predict)
+        if predict[0] == "usable":
+            return True
+        else:
+            return False
 
 
-def usable(img, multiplier_w, multiplier_h):
-    predict, probability = predict_betting(img, multiplier_w, multiplier_h)
-    print(predict)
-    if predict[0] == "usable":
-        return True
-    else:
-        return False
+class Winnings:
+    def __init__(self):
+        self.prediction = CustomImagePrediction()
+        self.prediction.setModelTypeAsInceptionV3()
+        self.prediction.setModelPath("models/winnings.h5")
+        self.prediction.setJsonPath("models/winnings.json")
+        self.prediction.loadModel(num_objects=5)
 
-
-def init_winnings_prediction():
-    global prediction_w
-    prediction_w = CustomImagePrediction()
-    prediction_w.setModelTypeAsResNet()
-    prediction_w.setModelPath("models/winnings.h5")
-    prediction_w.setJsonPath("models/winnings.json")
-    prediction_w.loadModel(num_objects=5)
-
-
-def predict_winnings(img, multiplier_w, multiplier_h):
-    y1 = round(y1w * multiplier_h)
-    y2 = round(y2w * multiplier_h)
-    x1 = round(x1w * multiplier_w)
-    x2 = round(x2w * multiplier_w)
-    crop_img = img[y1:y2, x1:x2]
-    predict, prob = prediction_w.predictImage(image_input=crop_img, result_count=1, input_type="array")
-    print(predict)
-    return predict[0]
+    def predict_winnings(self, img, multiplier_w, multiplier_h):
+        y1 = round(y1w * multiplier_h)
+        y2 = round(y2w * multiplier_h)
+        x1 = round(x1w * multiplier_w)
+        x2 = round(x2w * multiplier_w)
+        crop_img = img[y1:y2, x1:x2]
+        predict, prob = self.prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
+        print(predict)
+        return predict[0]
