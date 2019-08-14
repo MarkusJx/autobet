@@ -10,14 +10,13 @@ var winprobability = document.getElementById('winprobability');
 var moneyall = document.getElementById('moneyall');
 var errordialog = document.getElementById("error-dialog-container");
 
+var stoptext = document.getElementById("stoptext");
+
 errordialog = new mdc.dialog.MDCDialog(errordialog);
 
 var moneyMade = 0;
 var won = 0;
 var lost = 0;
-
-console.log("a")
-exception();
 
 eel.expose(exception)
 function exception() {
@@ -37,6 +36,24 @@ function makeSumsDisplayable(sum, k = false) {
     } else {
         return sum;
     }
+}
+
+eel.expose(init_started);
+function init_started() {
+    progressbar.className = "mdc-linear-progress mdc-linear-progress--indeterminate";
+    messagecontainer.className = "";
+    frosted_glass.className = "frosted-glass-blur";
+    stoptext.innerHTML = "Please wait while the program initializes..."
+    startstop.disabled = true;
+}
+
+eel.expose(init_finished);
+function init_finished() {
+    progressbar.className = "mdc-linear-progress";
+    frosted_glass.className = "frosted-glass-unblur";
+    messagecontainer.className = "invisible";
+    stoptext.innerHTML = "Please wait while the program stops..."
+    startstop.disabled = false;
 }
 
 eel.expose(addMoney);
