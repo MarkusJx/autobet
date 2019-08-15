@@ -5,9 +5,11 @@
     "start": "electron ."
   },
   "devDependencies": {
-    "electron": "^6.0.0"
+    "electron": "^6.0.0",
+    "node-cmd": "^3.0.0"
   },
   "dependencies": {
-    "custom-electron-titlebar": "^3.1.0"
+    "electron": "^6.0.0",
+    "node-cmd": "^3.0.0"
   }
 }
