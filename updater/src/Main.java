@@ -72,7 +72,7 @@ public class Main {
     }
 
     private static void startUpdate() throws IOException {
-        String[] command = new String[]{"autobet_installer.exe", "/VERYSILENT", "/CURRENTUSER", "/SUPPRESSMSGBOXES", "/LOG=\"" + System.getProperty("user.dir") + "/log.txt\""};
+        String[] command = new String[]{"autobet_installer.exe", "/VERYSILENT", "/CURRENTUSER", "/SUPPRESSMSGBOXES", "/CLOSEAPPLICATIONS", "/LOG=\"" + System.getProperty("user.dir") + "/log.txt\""};
         Process p = Runtime.getRuntime().exec(command);
         try {
             p.waitFor();
@@ -93,7 +93,7 @@ public class Main {
             String[] ln = line.split("\\s+");
             line = ln[ln.length - 1];
 
-            Runtime.getRuntime().exec(new File(line + "/electron-win32-x64/electron.exe").getAbsolutePath(), null, new File(line + "/electron-win32-x64").getAbsoluteFile());
+            Runtime.getRuntime().exec(new File(line + "/autobet.exe").getAbsolutePath(), null, new File(line).getAbsoluteFile());
         }
     }
 
