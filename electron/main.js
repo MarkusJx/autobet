@@ -19,6 +19,10 @@ let mainWindow
 var args = process.argv;
 
 try {
+  process.chdir(app.getAppPath());
+  console.log(`New directory: ${process.cwd()}`);
+  process.chdir('..');
+  process.chdir('..');
   process.chdir('..');
   console.log(`New directory: ${process.cwd()}`);
 } catch (err) {
@@ -30,7 +34,7 @@ function createWindow() {
     if (available) {
       console.log("Update available!")
       console.log(args);
-      if (args[1] == "--runupdate" || (fs.existsSync("autobet_installer.exe") && fs.existsSync("RUNUPDATE"))) {
+      if (args[1] == "--runupdate" || fs.existsSync("RUNUPDATE")) {
         console.log("Updating...")
         updating = true;
         startUpdate();
