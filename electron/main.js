@@ -1,27 +1,134 @@
-// Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
-const path = require('path')
+const { app, BrowserWindow } = require('electron')
+
+const { spawn } = require('child_process');
+var cmd = require('node-cmd');
+const fs = require('fs');
+
+var updating = false;
+
+function execute(command, callback) {
+  cmd.get(command, (error, stdout, stderr) => {
+    console.log(error);
+    console.log(stderr);
+    callback(stdout);
+  });
+};
 
 let mainWindow
 
-function createWindow () {
-  mainWindow = new BrowserWindow({
-    width: 700,
-    height: 670,
-    minHeight: 670,
-    minWidth: 700,
-    frame: true,
-    webPreferences: {
-      nodeIntegration: true
+var args = process.argv;
+
+try {
+  process.chdir('..');
+  console.log(`New directory: ${process.cwd()}`);
+} catch (err) {
+  console.error(`chdir: ${err}`);
+}
+
+function createWindow() {
+  updateAvailable((available) => {
+    if (available) {
+      console.log("Update available!")
+      console.log(args);
+      if (args[1] == "--runupdate" || (fs.existsSync("autobet_installer.exe") && fs.existsSync("RUNUPDATE"))) {
+        console.log("Updating...")
+        updating = true;
+        startUpdate();
+        createWindows();
+      } else {
+        canUpdate((updatable) => {
+          if (updatable) {
+            console.log("Initializing update...")
+            initUpdate();
+            updating = true;
+            createWindows();
+          } else {
+            console.log("Downloading...")
+            downloadUpdate();
+            createWindows();
+          }
+        })
+      }
+    } else {
+      createWindows();
     }
   })
+}
 
-  mainWindow.removeMenu();
-  mainWindow.loadURL('http://localhost:8000/main.html');
+function createWindows() {
+  if (updating) {
+    mainWindow = new BrowserWindow({
+      width: 340,
+      height: 170,
+      frame: false,
+      resizable: false,
+      webPreferences: {
+        nodeIntegration: true
+      }
+    })
+
+    mainWindow.loadFile("update.html")
+  } else {
+    mainWindow = new BrowserWindow({
+      width: 670,
+      height: 700,
+      minHeight: 670,
+      minWidth: 700,
+      frame: true,
+      resizable: true,
+      webPreferences: {
+        nodeIntegration: true
+      }
+    });
+    mainWindow.removeMenu();
+    mainWindow.loadURL('http://localhost:8025/main.html');
+  }
+
 
   mainWindow.on('closed', function () {
     mainWindow = null
   })
+}
+
+function updateAvailable(available) {
+  execute("jre\\bin\\java.exe -jar updater.jar --check", (output) => {
+    available(output.trim() == "true");
+  })
+}
+
+function canUpdate(updatable) {
+  execute("jre\\bin\\java.exe -jar updater.jar --downloaded", (output) => {
+    console.log("output: " + output);
+    updatable(output.trim() == "true");
+  })
+}
+
+function initUpdate() {
+  execute("jre\\bin\\java.exe -jar updater.jar --initupdate", (output) => {
+    app.quit();
+  });
+}
+
+function downloadUpdate() {
+  var process = spawn("jre\\bin\\java.exe", ["-jar", "updater.jar", "--downloadupdate"]);
+
+  process.stdout.on("data", (data) => {
+    console.log(data);
+  })
+
+  process.stderr.on("data", (err) => {
+    console.log(err);
+  })
+
+  process.on("exit", (code) => {
+    console.log("Process finished with code " + code);
+  })
+}
+
+function startUpdate() {
+  execute("jre\\bin\\java.exe -jar updater.jar --runupdate", (output) => {
+    app.quit();
+   });
 }
 
 app.on('ready', createWindow)
