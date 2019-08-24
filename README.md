@@ -11,7 +11,7 @@ Navigate on the betting computers to the betting screen
 
 Press the 'start' button on the UI (a countdown will start, giving you time to head back into the game) or use the Key combination ALT+CTRL+F10. You can also use that combo to stop the program from doing its thing. Using the combo ALT+CTRL+F9 you can always kill the program instantly.
 
-After starting, the script will automatically bet, refresh the screens and earn about 300k - 500k per hour. Fully AFK. Please don't move your mouse. Be aware that Rockstar games might ban you and will ban you after making a lot of money (about 10 - 20 mil) for a week from betting.
+After starting, the script will automatically bet, refresh the screens and earn about 300k - 500k per hour. Fully AFK. Please don't move your mouse. Be aware that Rockstar Games might ban you and will ban you after making a lot of money (about 10 - 20 mil) for a week from betting.
 
 BTW, this script does **not** use any glitches or inject code into the game. Just plain taking-over-your-mouse-action.
 
