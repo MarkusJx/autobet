@@ -13,6 +13,8 @@ Press the 'start' button on the UI (a countdown will start, giving you time to h
 
 After starting, the script will automatically bet, refresh the screens and earn about 300k - 500k per hour. Fully AFK. Please don't move your mouse. Be aware that Rockstar games might ban you and will ban you after making a lot of money (about 10 - 20 mil) for a week from betting.
 
+BTW, this script does **not** use any glitches or inject code into the game. Just plain taking-over-your-mouse-action.
+
 ## Download
 
 Pick the newest version under the [Releases](https://github.com/MarkusJx/GTA-Online-Autobet/releases) section.
