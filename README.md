@@ -1,1 +1,20 @@
 # GTA-Online-Autobet
+
+A simple GTA Online horseracing-autobetting-bot
+
+## Usage
+
+For this to work, you need at least 100.000 chips in-Game.
+Navigate on the betting computers to the betting screen
+![This one](betting.jpg)
+(This one)
+
+Press the 'start' button on the UI (a countdown will start, giving you time to head back into the game) or use the Key combination ALT+CTRL+F10. You can also use that combo to stop the program from doing its thing. Using the combo ALT+CTRL+F9 you can always kill the program instantly.
+
+After starting, the script will automatically bet, refresh the screens and earn about 300k - 500k per hour. Fully AFK. Please don't move your mouse. Be aware that Rockstar games might ban you and will ban you after making a lot of money (about 10 - 20 mil) for a week from betting.
+
+## Download
+
+Pick the newest version under the [Releases](https://github.com/MarkusJx/GTA-Online-Autobet/releases) section.
+
+Installing the program may also be a great Idea.
