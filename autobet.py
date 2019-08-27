@@ -2,7 +2,7 @@ import os
 import socket
 import threading
 import time
-from subprocess import Popen
+from subprocess import Popen, PIPE
 
 import eel
 import numpy as np
@@ -12,13 +12,14 @@ import win32con
 from PIL import ImageGrab
 from system_hotkey import SystemHotkey
 
+import ai
+
 """
 import numpy.random.common
 import numpy.random.bounded_integers
 import numpy.random.entropy
 """
 
-import ai
 from utils import get_window_size
 
 running = False
@@ -164,7 +165,8 @@ def stop_script():
 # winnings ------------------------------------------------------------------------------------------------------------
 def start_winnings_ai():
     global winnings_ai, winnings_ai_con
-    winnings_ai = Popen(["python", "winnings.py"])
+    # winnings_ai = Popen(["python", "winnings.py"]) # used for testing
+    winnings_ai = Popen(["winnings/winnings.exe"], stderr=PIPE, stdout=PIPE)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ('localhost', 8026)
     sock.bind(server_address)
@@ -335,7 +337,7 @@ def start_ui():
 
     eel_running = True
     try:
-        eel.start('main.html', size=(700, 670))
+        eel.start('main.html', size=(700, 670), options=options)
     except (SystemExit, MemoryError, KeyboardInterrupt):
         pass
     eel_running = False

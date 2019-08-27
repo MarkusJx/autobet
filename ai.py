@@ -1,3 +1,13 @@
+import os
+
+import tensorflow as tf
+import tensorflow.python.util.deprecation as deprecation
+
+deprecation._PRINT_DEPRECATION_WARNINGS = False
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+os.environ['KMP_WARNINGS'] = "0"
+
 from imageai.Prediction.Custom import CustomImagePrediction
 
 """

@@ -21,7 +21,7 @@ var lost = 0;
 eel.expose(exception)
 function exception() {
     errordialog.open();
-    errordialog.listen("MDCDialog:closed", function() {
+    errordialog.listen("MDCDialog:closed", function () {
         window.close();
     })
 }
@@ -29,9 +29,9 @@ function exception() {
 function makeSumsDisplayable(sum, k = false) {
     if (sum > 1000000000) {
         return Math.round(sum / 10000000) / 100 + "B";
-    } else if(sum > 1000000) {
+    } else if (sum > 1000000) {
         return Math.round(sum / 10000) / 100 + "M";
-    } else if(k && sum > 1000) {
+    } else if (k && sum > 1000) {
         return Math.round(sum / 10) / 100 + "K";
     } else {
         return sum;
@@ -58,10 +58,9 @@ function init_finished() {
 
 eel.expose(addMoney);
 function addMoney(value) {
-    if(value != 0){
+    if (value != 0) {
         moneyMade += value
-        if(value > 0) won++;
-        updateMoneyMade();
+        if (value > 0) won++;
     } else {
         lost++;
     }
