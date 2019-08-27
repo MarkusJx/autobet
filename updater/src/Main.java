@@ -8,7 +8,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Main {
 
-    private static final String currentVersion = "0.2";
+    private static final String currentVersion = "0.3";
     private static Boolean download = false;
 
     public static void main(String[] args) {
@@ -61,6 +61,7 @@ public class Main {
         copyFolder(new File("jre").toPath(), new File(tmp.toFile(), "jre").toPath());
         copy(new File("updater.jar").toPath(), new File(tmp.toFile(), "updater.jar").toPath());
         copy(new File("autobet_installer-NEW.exe").toPath(), new File(tmp.toFile(), "autobet_installer.exe").toPath());
+        Files.deleteIfExists(new File("autobet_installer-NEW.exe").toPath());
         copyFolder(new File("electron-win32-x64").toPath(), new File(tmp.toFile(), "electron-win32-x64").toPath());
         File tmpFile = new File(tmp.toFile(), "RUNUPDATE");
         tmpFile.createNewFile();
