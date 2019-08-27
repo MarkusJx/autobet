@@ -1,21 +1,49 @@
-// Credit: https://gist.github.com/straker/ff00b4b49669ad3dec890306d348adc4
+// Credit (to most of the following): https://gist.github.com/straker/ff00b4b49669ad3dec890306d348adc4
 
 var canvas = document.getElementById('game');
 var context = canvas.getContext('2d');
 
+var loadingcontainer = document.getElementById("loadingcontainer");
 var frosted_glass = document.getElementById("frosted-glass");
+var continue_button = document.getElementById("continue");
+var loadingtext = document.getElementById("loadingtext");
+
+mdc.ripple.MDCRipple.attachTo(continue_button);
+continue_button.disabled = true;
 
 var grid = 16;
-var count = 0;
 
 var runGame = true;
 
+// Set FPS. Source: http://jsfiddle.net/m1erickson/CtsY3/
+var frameCount = 0;
+var fps, fpsInterval, startTime, now, then, elapsed;
+
+function startAnimating(fps) {
+    fpsInterval = 1000 / fps;
+    then = Date.now();
+    startTime = then;
+    loop();
+}
+
+continue_button.addEventListener('click', function () {
+    switchScreen();
+});
+
 eel.expose(doneLoading);
 function doneLoading() {
-    runGame = false;
-    document.removeEventListener('keydown', handleKeyDownEvent);
-    frosted_glass.className = "";
-    canvas.className = "invisible";
+    loadingtext.innerHTML = "GTA Online Autobet has now finished initializing. To continue press the 'continue' button."
+    continue_button.disabled = false;
+}
+
+function switchScreen() {
+    if (runGame) {
+        runGame = false;
+        document.removeEventListener('keydown', handleKeyDownEvent);
+        frosted_glass.className = "";
+        continue_button.disabled = true;
+        loadingcontainer.className = "invisible";
+    }
 }
 
 var snake = {
@@ -49,12 +77,22 @@ function loop() {
     if (runGame)
         requestAnimationFrame(loop);
 
-    // slow game loop to 15 fps instead of 60 (60/15 = 4)
-    if (++count < 6) {
-        return;
-    }
+    now = Date.now();
+    elapsed = now - then;
 
-    count = 0;
+    // if enough time has elapsed, draw the next frame
+
+    if (elapsed > fpsInterval) {
+
+        // Get ready for next frame by setting then=now, but...
+        // Also, adjust for fpsInterval not being multiple of 16.67
+        then = now - (elapsed % fpsInterval);
+
+        playGame();
+    }
+}
+
+function playGame() {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     // move snake by it's velocity
@@ -157,4 +195,4 @@ function handleKeyDownEvent(e) {
 
 // start the game
 eel.init_ai();
-requestAnimationFrame(loop);
+startAnimating(13);

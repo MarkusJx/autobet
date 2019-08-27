@@ -198,6 +198,40 @@ body {
     visibility: hidden;
 }
 
+#loadingcontainer {
+    width: 100%;
+    height: 100%;
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: min-content min-content;
+    grid-row-gap: 20px
+}
+
+#loadingtext {
+    font-size: 1.5em;
+    font-weight: normal;
+    color: rgb(207, 207, 207);
+    font-family: Roboto, sans-serif;
+    text-align: center;
+    grid-row: 1;
+    grid-column: 1
+}
+
 #game {
-    border: 1px solid white;
+    position: relative;
+    left: 50%;
+    margin-left: -200px;
+    border: 1.5px solid white;
+    grid-row: 2;
+    grid-column: 1
+}
+
+#continue {
+    --mdc-theme-primary: #e46e00;
+    --mdc-theme-on-primary: #191919;
+    font-weight: 500;
+    margin: auto;
+    grid-row: 3;
+    grid-column: 1
 }

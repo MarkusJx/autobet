@@ -23,6 +23,7 @@ startstop.addEventListener('click', function () {
 
 eel.expose(keycomb_start);
 function keycomb_start() {
+  switchScreen();
   startstop.disabled = true;
   startTimer();
   startstop.disabled = false;
