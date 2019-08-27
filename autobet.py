@@ -2,6 +2,7 @@ import os
 import socket
 import threading
 import time
+from subprocess import Popen
 
 import eel
 import numpy as np
@@ -117,6 +118,8 @@ def main_f():
     initializing = False
     while run_main:
         set_positions()
+        if winnings_ai_con is not None:
+            set_winnings_positions()
 
         refreshes = 0
         while running:
@@ -160,8 +163,7 @@ def stop_script():
 # winnings ------------------------------------------------------------------------------------------------------------
 def start_winnings_ai():
     global winnings_ai, winnings_ai_con
-    # winnings_ai = Popen(["python", "winnings.py"])
-
+    winnings_ai = Popen(["python", "winnings.py"])
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ('localhost', 8026)
     sock.bind(server_address)
@@ -178,6 +180,17 @@ def start_winnings_ai():
         print("Winnings_ai initialized successfully")
     else:
         print("ERROR")
+
+
+def set_winnings_positions():
+    winnings_ai_con.sendall(int.to_bytes(2, 1, "big"))
+
+    send = str(xPos) + ":" + str(yPos) + ":" + str(width) + ":" + str(height)
+    winnings_ai_con.sendall(int.to_bytes(len(send), 1, "big"))
+    winnings_ai_con.sendall(bytes(send, "utf-8"))
+
+    if int.from_bytes(winnings_ai_con.recv(1), "big") == 0:
+        print("Positions sent successfully.")
 
 
 def get_winnings_py():
@@ -219,8 +232,6 @@ def update_winnings(to_add):
     f = open("winnings.txt", "w")
     f.write(str(winnings))
     f.close()
-
-
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -272,6 +283,7 @@ def init_ai():
     thread.start()
     while initializing:
         eel.sleep(1)
+    start_winnings_ai()
     eel.doneLoading()
 
 
