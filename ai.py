@@ -129,7 +129,7 @@ class Betting:
 class Winnings:
     def __init__(self):
         self.prediction = CustomImagePrediction()
-        self.prediction.setModelTypeAsInceptionV3()
+        self.prediction.setModelTypeAsResNet()
         self.prediction.setModelPath("models/winnings.h5")
         self.prediction.setJsonPath("models/winnings.json")
         self.prediction.loadModel(num_objects=5)
@@ -141,5 +141,4 @@ class Winnings:
         x2 = round(x2w * multiplier_w)
         crop_img = img[y1:y2, x1:x2]
         predict, prob = self.prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
-        # print(predict)
         return predict[0]

@@ -5,10 +5,12 @@ import numpy as np
 from PIL import ImageGrab
 
 import ai
-from utils import get_window_size
 
-# """
-# """
+"""
+import numpy.random.common
+import numpy.random.bounded_integers
+import numpy.random.entropy
+"""
 
 winnings_ai = None
 
@@ -19,24 +21,12 @@ multiplierH = 0
 width = 0
 height = 0
 
-
-def set_positions():
-    global xPos, yPos, multiplierH, multiplierW, width, height
-    # Definition of width, height, x, y pos of window and multiplier of positions
-    xPos, yPos, width, height = get_window_size("Grand Theft Auto V")  # TODO add error if not running
-    multiplierW = width / 2560
-    multiplierH = height / 1440
-
-    # Set x and y pos to 0 if they are below 0. This happens when a window is maximised
-    if xPos < 0:
-        xPos = 0
-
-    if yPos < 0:
-        yPos = 0
+sock = None
 
 
 def main():
-    global winnings_ai
+    global winnings_ai, sock
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ('localhost', 8026)
     sock.connect(server_address)
@@ -50,10 +40,23 @@ def main():
 
 def handle_input(line):
     print(line)
-    # line = line.strip()
     if line == 1:
-        set_positions()
         return get_winnings()
+    elif line == 2:
+        global xPos, yPos, multiplierH, multiplierW, width, height
+        length = int.from_bytes(sock.recv(1), "big")
+        rec = sock.recv(length).decode("utf-8")
+        xp, yp, w, h = rec.split(":")
+
+        xPos = int(xp)
+        yPos = int(yp)
+        width = int(w)
+        height = int(h)
+
+        multiplierW = width / 2560
+        multiplierH = height / 1440
+
+        return 0
     elif line == 0:
         sys.exit(0)
     else:
