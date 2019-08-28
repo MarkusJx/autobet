@@ -11,6 +11,7 @@ import win32api
 import win32con
 from PIL import ImageGrab
 from system_hotkey import SystemHotkey
+from win32process import DETACHED_PROCESS
 
 import ai
 
@@ -157,8 +158,6 @@ def stop_script():
         print("Waiting for main thread to finish...")
         running = False
         stopping = True
-
-
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -277,10 +276,12 @@ hk1.register(('control', 'shift', 'f10'), callback=lambda x: start_stop())
 
 hk2 = SystemHotkey()
 hk2.register(('control', 'shift', 'f9'), callback=lambda x: kill())
-# -------------------------------------------------------------------------------------------------------------
 
 
-# Eel init ----------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# Eel init ------------------------------------------------------------------------------------------------------------
 @eel.expose
 def init_ai():
     global initializing, thread
@@ -341,13 +342,37 @@ def start_ui():
     except (SystemExit, MemoryError, KeyboardInterrupt):
         pass
     eel_running = False
-# -------------------------------------------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# Updating ------------------------------------------------------------------------------------------------------------
+def update_available():
+    process = Popen(["jre/bin/java", "-jar", "updater.jar", "--check"], stdout=PIPE)
+    res = process.communicate()[0].decode("utf-8").strip()
+    available = (res == "true")
+
+    process = Popen(["jre/bin/java", "-jar", "updater.jar", "--downloaded"], stdout=PIPE)
+    res = process.communicate()[0].decode("utf-8").strip()
+
+    return available and (res == "true")
+
+
+def start_electron():
+    Popen(["electron-win32-x64/electron.exe"], creationflags=DETACHED_PROCESS)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
 
 
 def main():
     pyautogui.FAILSAFE = False
     try:
-        start_ui()
+        if update_available():
+            start_electron()
+        else:
+            start_ui()
     finally:
         kill()
 
