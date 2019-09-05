@@ -4,11 +4,22 @@ var progressbar = document.getElementById('progressbar');
 mdc.ripple.MDCRipple.attachTo(startstop);
 mdc.linearProgress.MDCLinearProgress.attachTo(progressbar);
 
+var showqrbutton = document.getElementById('showqrbutton');
+var qrcontainer = document.getElementById('qrcontainer');
+var qrdonebutton = document.getElementById('qrdonebutton');
+
+mdc.ripple.MDCRipple.attachTo(showqrbutton);
+
 var moneythishour = document.getElementById('moneythishour');
 var raceswon = document.getElementById('raceswon');
 var winprobability = document.getElementById('winprobability');
 var moneyall = document.getElementById('moneyall');
 var errordialog = document.getElementById("error-dialog-container");
+
+mdc.autoInit();
+
+var qrdialog = document.getElementById("qrdialog");
+qrdialog = new mdc.dialog.MDCDialog(qrdialog);
 
 var stoptext = document.getElementById("stoptext");
 
@@ -17,6 +28,21 @@ errordialog = new mdc.dialog.MDCDialog(errordialog);
 var moneyMade = 0;
 var won = 0;
 var lost = 0;
+
+function showQRCode() {
+    qrdialog.open();
+    startstop.disabled = true;
+    showqrbutton.disabled = true;
+}
+
+qrdialog.listen('MDCDialog:closing', function () {
+    startstop.disabled = false;
+    showqrbutton.disabled = false;
+});
+
+showqrbutton.addEventListener('click', function () {
+    showQRCode();
+});
 
 eel.expose(exception)
 function exception() {
@@ -27,14 +53,33 @@ function exception() {
 }
 
 function makeSumsDisplayable(sum, k = false) {
+    var negative = sum < 0;
+    sum = Math.abs(sum);
+
     if (sum > 1000000000) {
-        return Math.round(sum / 10000000) / 100 + "B";
+        if (negative) {
+            return ((Math.round(sum / 100000000) / 10) * (-1)) + "B";
+        } else {
+            return Math.round(sum / 100000000) / 10 + "B";
+        }
     } else if (sum > 1000000) {
-        return Math.round(sum / 10000) / 100 + "M";
+        if (negative) {
+            return ((Math.round(sum / 100000) / 10) * (-1)) + "M";
+        } else {
+            return Math.round(sum / 100000) / 10 + "M";
+        }
     } else if (k && sum > 1000) {
-        return Math.round(sum / 10) / 100 + "K";
+        if (negative) {
+            return ((Math.round(sum / 100) / 10) * (-1)) + "K";
+        } else {
+            return Math.round(sum / 100) / 10 + "K";
+        }
     } else {
-        return sum;
+        if (negative) {
+            return sum * (-1);
+        } else {
+            return sum;
+        }
     }
 }
 
@@ -87,5 +132,19 @@ eel.expose(js_exit);
 function js_exit() {
     window.close();
 }
+
+async function setQRCode() {
+    let ip = await eel.get_ip()();
+    console.log("Got own IP: " + ip);
+    new QRCode(document.getElementById("qrcode"), {
+        text: "http://" + ip + ":8027",
+        width: 352,
+        height: 352,
+        colorDark: "#000000",
+        colorLight: "#ffffff"
+    });
+}
+
+setQRCode();
 
 eel.get_winnings();
