@@ -8,7 +8,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class Main {
 
-    private static final String currentVersion = "0.3.1";
+    private static final String currentVersion = "0.4";
     private static Boolean download = false;
 
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow } = require('electron');
 
 const { spawn } = require('child_process');
 var cmd = require('node-cmd');
@@ -11,10 +11,9 @@ function execute(command, callback) {
     console.log(error);
     console.log(stderr);
     callback(stdout);
-  });
-};
-
-let mainWindow
+})
+}
+let mainWindow;
 
 var args = process.argv;
 
@@ -32,17 +31,17 @@ try {
 function createWindow() {
   updateAvailable((available) => {
     if (available) {
-      console.log("Update available!")
+      console.log("Update available!");
       console.log(args);
       if (args[1] == "--runupdate" || fs.existsSync("RUNUPDATE")) {
-        console.log("Updating...")
+        console.log("Updating...");
         updating = true;
         startUpdate();
         createWindows();
       } else {
         canUpdate((updatable) => {
           if (updatable) {
-            console.log("Initializing update...")
+            console.log("Initializing update...");
             initUpdate();
             updating = true;
             createWindows();
@@ -69,7 +68,7 @@ function createWindows() {
       webPreferences: {
         nodeIntegration: true
       }
-    })
+    });
 
     mainWindow.loadFile("update.html")
   } else {
@@ -85,7 +84,7 @@ function createWindows() {
       }
     });
     mainWindow.removeMenu();
-    mainWindow.loadURL('http://localhost:8025/main.html');
+    mainWindow.loadURL('http://localhost:8025/main.html', {"extraHeaders" : "pragma: no-cache\n"});
   }
 
 
@@ -96,8 +95,9 @@ function createWindows() {
 
 function updateAvailable(available) {
   execute("jre\\bin\\java.exe -jar updater.jar --check", (output) => {
-    available(output.trim() == "true");
-  })
+      available(output.trim() == "true";
+)
+})
 }
 
 function canUpdate(updatable) {
@@ -110,7 +110,7 @@ function canUpdate(updatable) {
 function initUpdate() {
   execute("jre\\bin\\java.exe -jar updater.jar --initupdate", (output) => {
     app.quit();
-  });
+})
 }
 
 function downloadUpdate() {
@@ -132,10 +132,10 @@ function downloadUpdate() {
 function startUpdate() {
   execute("jre\\bin\\java.exe -jar updater.jar --runupdate", (output) => {
     app.quit();
-   });
+})
 }
 
-app.on('ready', createWindow)
+app.on('ready', createWindow);
 
 app.on('window-all-closed', function () {
   app.quit()
@@ -145,4 +145,4 @@ app.on('activate', function () {
   if (mainWindow === null) {
     createWindow()
   }
-})
+});
