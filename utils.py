@@ -38,3 +38,7 @@ def callback(hwnd):
 
 def get_window_size(window_name):
     return callback(win32gui.FindWindow(None, get_window_title(window_name)))
+
+
+def window_open(window_name):
+    return get_window_title("Grand Theft Auto V") is not None

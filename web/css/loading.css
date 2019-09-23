@@ -1,0 +1,24 @@
+#container {
+    grid-template-rows: 100%;
+    grid-template-columns: auto auto;
+}
+
+.waittext {
+    font-size: 2em;
+    font-weight: normal;
+    color: rgb(121, 121, 121);
+    left: 50%;
+    top: 50%;
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 50px;
+    text-align: center
+}
+
+#spinner {
+    left: 50%;
+    top: 50%;
+    grid-column: 2;
+    grid-row: 1;
+    margin-left: -32px;
+}
