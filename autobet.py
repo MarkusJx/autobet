@@ -1,7 +1,6 @@
 import os
 import socket
 import threading
-import time
 from subprocess import Popen, PIPE
 
 import eel
@@ -11,8 +10,12 @@ import win32api
 import win32con
 from PIL import ImageGrab
 from system_hotkey import SystemHotkey
+from win32process import DETACHED_PROCESS
+import webserver
+import logging
 
 import ai
+from utils import get_window_size, window_open
 
 """
 import numpy.random.common
@@ -20,14 +23,13 @@ import numpy.random.bounded_integers
 import numpy.random.entropy
 """
 
-from utils import get_window_size
+winnings = 0
+winnings_all = 0
+main_defined = False
 
 running = False
-waiting = 0
 stopping = False
-thread = 0
 eel_running = False
-winnings = 0
 initializing = False
 run_main = True
 
@@ -38,15 +40,25 @@ multiplierH = 0
 width = 0
 height = 0
 
+thread = None
 betting_ai = None
 winnings_ai = None
 winnings_ai_con = None
+
+server = None
+server_thread = None
+races_won = 0
+races_lost = 0
+
+dummy = False
+
+debug = True
 
 
 def set_positions():
     global xPos, yPos, multiplierH, multiplierW, width, height
     # Definition of width, height, x, y pos of window and multiplier of positions
-    xPos, yPos, width, height = get_window_size("Grand Theft Auto V")  # TODO add error if not running
+    xPos, yPos, width, height = get_window_size("Grand Theft Auto V")
     multiplierW = width / 2560
     multiplierH = height / 1440
 
@@ -67,7 +79,7 @@ def click(x, y, move=True):
         if move:
             pyautogui.moveTo(x, y, duration=0.25)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y, 0, 0)
-        time.sleep(0.25)
+        eel.sleep(0.25)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
 
 
@@ -79,7 +91,7 @@ def right_click(x, y, move=True):
         if move:
             pyautogui.moveTo(x, y, duration=0.25)
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, 0, 0)
-        time.sleep(0.25)
+        eel.sleep(0.25)
         win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, x, y, 0, 0)
 
 
@@ -106,6 +118,8 @@ def reset():
     click(1286, 1304)
 
     click(1905, 1187)
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -116,9 +130,13 @@ def main_f():
     betting_ai = ai.Betting()
     initializing = False
     while run_main:
-        set_positions()
-        if winnings_ai_con is not None:
-            set_winnings_positions()
+        if window_open("Grand Theft Auto V"):
+            set_positions()
+            if winnings_ai_con is not None:
+                set_winnings_positions()
+        else:
+            eel.sleep(0.5)
+            continue  # TODO add error
 
         refreshes = 0
         while running:
@@ -126,22 +144,21 @@ def main_f():
             if betting_ai.usable(np.array(screen), multiplierW, multiplierH):
                 refreshes = 0
                 place_bet()
-                eel.addMoney(-10000)
                 update_winnings(-10000)
-                time.sleep(34)
+                eel.sleep(34)
                 get_winnings_py()
                 reset()
             else:
                 if refreshes > 3:
                     refreshes = 0
                     avoid_kick()
-                    time.sleep(34)
+                    eel.sleep(34)
                     reset()
                 else:
                     refresh_odds()
                     refreshes = refreshes + 1
         stopping = False
-        time.sleep(0.5)
+        eel.sleep(0.5)
     print("Stopped main thread")
 
 
@@ -165,8 +182,10 @@ def stop_script():
 # winnings ------------------------------------------------------------------------------------------------------------
 def start_winnings_ai():
     global winnings_ai, winnings_ai_con
-    # winnings_ai = Popen(["python", "winnings.py"]) # used for testing
-    winnings_ai = Popen(["winnings/winnings.exe"], stderr=PIPE, stdout=PIPE)
+    if debug:
+        winnings_ai = Popen(["python", "winnings.py"])  # used for testing
+    else:
+        winnings_ai = Popen(["winnings/winnings.exe"], stderr=PIPE, stdout=PIPE)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ('localhost', 8026)
     sock.bind(server_address)
@@ -205,36 +224,67 @@ def get_winnings_py():
     print(res)
     if res == 3:
         print("30k")
-        eel.addMoney(30000)
         update_winnings(30000)
         return
     elif res == 4:
         print("40k")
-        eel.addMoney(40000)
         update_winnings(40000)
         return
     elif res == 5:
         print("50k")
-        eel.addMoney(50000)
         update_winnings(50000)
         return
     elif res == 0:
         print("zero")
         eel.addMoney(0)
+        server.add_money(0)
         return
     elif res == 1:
         print("running")
-        time.sleep(1)
+        eel.sleep(1)
         get_winnings_py()
 
 
 def update_winnings(to_add):
-    global winnings
-    winnings = winnings + to_add
-    eel.setAllMoneyMade(winnings)
+    if to_add != 0:
+        global winnings_all, winnings
+        winnings += to_add
+        winnings_all += to_add
+
+        eel.setAllMoneyMade(winnings_all)
+        server.set_all_money_made(winnings_all)
+
+        if to_add > 0:
+            global races_won
+            races_won += 1
+    else:
+        global races_lost
+        races_lost += 1
+
+    eel.addMoney(to_add)
+    server.add_money(to_add)
+
     f = open("winnings.txt", "w")
-    f.write(str(winnings))
+    f.write(str(winnings_all))
     f.close()
+
+
+def get_races_won():
+    return races_won
+
+
+def get_races_lost():
+    return races_lost
+
+
+def get_all_winnings():
+    return winnings_all
+
+
+def get_current_winnings():
+    return winnings
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -242,6 +292,13 @@ def update_winnings(to_add):
 def avoid_kick():
     click(633, 448)
     click(1720, 1036)
+
+
+def eel_kill(page, sockets):
+    if dummy:
+        print(page)
+        print(sockets)
+    kill()
 
 
 def kill():
@@ -254,9 +311,15 @@ def kill():
         winnings_ai.kill()
 
     run_main = False
-    if eel_running:
+    try:
+        server.exit()
+    except Exception as e:
+        logging.error(e)
+
+    try:
         eel.js_exit()
-    os._exit(0)
+    finally:
+        os._exit(0)
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -277,10 +340,12 @@ hk1.register(('control', 'shift', 'f10'), callback=lambda x: start_stop())
 
 hk2 = SystemHotkey()
 hk2.register(('control', 'shift', 'f9'), callback=lambda x: kill())
-# -------------------------------------------------------------------------------------------------------------
 
 
-# Eel init ----------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# Eel init ------------------------------------------------------------------------------------------------------------
 @eel.expose
 def init_ai():
     global initializing, thread
@@ -291,6 +356,7 @@ def init_ai():
         eel.sleep(1)
     start_winnings_ai()
     eel.doneLoading()
+    server.initialized()
 
 
 @eel.expose
@@ -310,44 +376,92 @@ def stopped():
 
 @eel.expose
 def get_winnings():
-    global winnings
+    global winnings_all
     try:
         f = open("winnings.txt", "r+")
         s = f.read()
         if s:
-            winnings = int(s)
+            winnings_all = int(s)
             f.close()
     except FileNotFoundError:
         f = open("winnings.txt", "w")
         f.write("0")
         f.close()
-    eel.setAllMoneyMade(winnings)
+    eel.setAllMoneyMade(winnings_all)
+
+
+@eel.expose
+def get_ip():
+    import socket
+    return socket.gethostbyname(socket.gethostname())
 
 
 def start_ui():
     global eel_running
-    eel.init('web', allowed_extensions=['.js', '.html', '.css'])
+    eel.init('ui', allowed_extensions=['.js', '.html', '.css'])
 
-    options = {
-        'mode': 'custom',
-        'host': 'localhost',
-        'port': 8025,
-        'args': ['electron-win32-x64/electron.exe', '.']
-    }
+    if debug:
+        options = {'mode': 'chrome-app', 'host': 'localhost', 'port': 8025}
+        try:
+            eel.start('main.html', size=(700, 810), options=options, callback=print, block=True)
+        except Exception as e:
+            logging.error(e)
+    else:
+        options = {
+            'mode': 'custom',
+            'host': 'localhost',
+            'port': 8025,
+            'args': ['electron-win32-x64/electron.exe', '.']
+        }
 
-    eel_running = True
-    try:
-        eel.start('main.html', size=(700, 670), options=options)
-    except (SystemExit, MemoryError, KeyboardInterrupt):
-        pass
-    eel_running = False
-# -------------------------------------------------------------------------------------------------------------
+        try:
+            eel.start('main.html', size=(700, 810), options=options, callback=eel_kill)
+        except Exception as e:
+            logging.error(e)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+# Updating ------------------------------------------------------------------------------------------------------------
+def update_available():
+    process = Popen(["jre/bin/java", "-jar", "updater.jar", "--check"], stdout=PIPE)
+    res = process.communicate()[0].decode("utf-8").strip()
+    available = (res == "true")
+
+    process = Popen(["jre/bin/java", "-jar", "updater.jar", "--downloaded"], stdout=PIPE)
+    res = process.communicate()[0].decode("utf-8").strip()
+
+    return available and (res == "true")
+
+
+def start_electron():
+    Popen(["electron-win32-x64/electron.exe"], creationflags=DETACHED_PROCESS)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+def start_web_server():
+    global server
+    webserver.start()
 
 
 def main():
+    global server_thread
     pyautogui.FAILSAFE = False
+    print(get_ip())
     try:
-        start_ui()
+        if update_available():
+            start_electron()
+        else:
+            webserver.set_functions(start_function=start_script, stop_function=stop_script,
+                                    get_all_money_function=get_all_winnings, get_money_function=get_current_winnings,
+                                    get_races_won_function=get_races_won, get_races_lost_function=get_races_lost)
+
+            threading.Thread(target=start_ui(), args=()).start()
+            # start_web_server()
+    except Exception as e:
+        logging.error(e)
     finally:
         kill()
 

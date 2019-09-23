@@ -194,5 +194,6 @@ function handleKeyDownEvent(e) {
 }
 
 // start the game
-eel.init_ai();
-startAnimating(13);
+//eel.init_ai();
+//startAnimating(13);
+switchScreen();
