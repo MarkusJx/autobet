@@ -4,17 +4,14 @@ var statusinfo = document.getElementById("statusinfo");
 var messagecontainer = document.getElementById("messagecontainer");
 var frosted_glass = document.getElementById("frosted-glass");
 
-var startTime;
-var updatedTime;
-var difference;
-var tInterval;
-var savedTime;
 var paused = 0;
 var running = 0;
 var pausing = 0;
+var timer = null;
+var time = 0;
 
 startstop.addEventListener('click', function () {
-  if (!difference || !running) {
+  if (!running) {
     start();
   } else if (!paused & !pausing) {
     pause();
@@ -28,8 +25,8 @@ function keycomb_start() {
   startTimer();
   startstop.disabled = false;
   startstop.innerHTML = "stop";
-  statusinfo.innerHTML = "Running"
-  statusinfo.className = "text status_running maintext"
+  statusinfo.innerHTML = "Running";
+  statusinfo.className = "text status_running maintext";
 }
 
 eel.expose(keycomb_stop);
@@ -39,18 +36,20 @@ function keycomb_stop() {
 
 function start() {
   startstop.disabled = true;
-  var time = 15;
+  eel.set_starting(true);
+  let time = 15;
   var x = setInterval(function () {
     startstop.innerHTML = "Starting in " + time + "s";
     time--;
     if (time < 0) {
       clearInterval(x);
       startTimer();
+      eel.set_starting(false);
       eel.start_s_function();
       startstop.disabled = false;
       startstop.innerHTML = "stop";
-      statusinfo.innerHTML = "Running"
-      statusinfo.className = "text status_running maintext"
+      statusinfo.innerHTML = "Running";
+      statusinfo.className = "text status_running maintext";
     }
   }, 1000);
 }
@@ -78,7 +77,7 @@ function pause(nstoppy) {
   frosted_glass.className = "frosted-glass-blur";
   startstop.disabled = true;
   var x = setInterval(async function () {
-    let value = await eel.stopped()()
+    let value = await eel.stopped()();
     if (value) {
       clearInterval(x);
       is_paused();
@@ -86,36 +85,30 @@ function pause(nstoppy) {
   }, 1000)
 }
 
-// Timer was stolen from: https://medium.com/@olinations/an-accurate-vanilla-js-stopwatch-script-56ceb5c6f45b
 function startTimer() {
-  startTime = new Date().getTime();
-  tInterval = setInterval(getShowTime, 1);
-
   paused = 0;
   running = 1;
+
+  timer = setInterval(function () {
+    time += 1;
+    eel.add_sec();
+    timeDisp.innerHTML = convertToTime(time);
+    console.log(time)
+  }, 1000);
 }
 
 function pauseTimer() {
-  clearInterval(tInterval);
-  savedTime = difference;
+  clearInterval(timer);
   paused = 1;
   running = 0;
 }
 
-function getShowTime() {
-  updatedTime = new Date().getTime();
-  if (savedTime) {
-    difference = (updatedTime - startTime) + savedTime;
-  } else {
-    difference = updatedTime - startTime;
-  }
-
-  var hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  var minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-  var seconds = Math.floor((difference % (1000 * 60)) / 1000);
-  var milliseconds = Math.floor((difference % (1000 * 60)) / 100);
+function convertToTime(secs) {
+  let hours = Math.floor((secs % 86400) / 3600);
+  let minutes = Math.floor((secs % 3600) / 60);
+  let seconds = secs % 60;
   hours = (hours < 10) ? "0" + hours : hours;
   minutes = (minutes < 10) ? "0" + minutes : minutes;
   seconds = (seconds < 10) ? "0" + seconds : seconds;
-  timeDisp.innerHTML = hours + ':' + minutes + ':' + seconds;
+  return hours + ':' + minutes + ':' + seconds;
 }

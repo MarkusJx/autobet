@@ -48,6 +48,13 @@
         max-width: 400px;
         display: flex
     }
+
+    #startstop {
+        width: 250px;
+        height: 50px;
+        font-size: 1.1em;
+        margin-left: -125px;
+    }
 }
 
 .subcontainer:hover {
@@ -92,13 +99,17 @@
     color: rgb(201, 37, 37);
 }
 
+.status_stopping {
+    color: #ff8c00;
+}
+
 #errordialogbutton {
     --mdc-theme-primary: #e46e00;
     color: #e46e00;
 }
 
-.mdc-button--raised:disabled {
-    background-color: #191919;
+#startstop:disabled {
+    background-color: #1b1b1b;
     color: rgb(121, 121, 121);
 }
 
@@ -108,4 +119,14 @@
 
 #moneythishour {
     white-space: nowrap;
+}
+
+#configurebutton {
+    --mdc-theme-primary: rgb(207, 207, 207);
+    margin-left: -8px
+}
+
+#settingsdonebutton {
+    --mdc-theme-primary: rgb(0, 0, 0, .95);
+    margin: 0 auto;
 }

@@ -19,7 +19,7 @@
     <button class="mdc-button mdc-button--raised" id="continue">Continue</button>
 </div>
 
-<div class="frosted-glass-blur" id="frosted-glass">
+<div class="frosted-glass-blur invisible" id="frosted-glass">
     <div id="Container">
         <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
 
@@ -69,8 +69,9 @@
             <div class="textalign-big">
                 <h1 class="text subheading">Webserver</h1>
                 <h1 class="text maintext-maincolor" id="webinfotext">Webserver running on:</h1>
-                <a class="text maintext-maincolor" href="http://192.168.178.39:8027"
-                   id="weblink">http://192.168.178.39:8027</a>
+                <button class="mdc-button mdc-ripple-upgraded" id="weblink"
+                        style="--mdc-theme-primary: rgb(207, 207, 207)">http://localhost:8027
+                </button>
             </div>
 
             <button class="mdc-button" id="showqrbutton">Show QR-Code</button>
@@ -97,10 +98,6 @@
         </div>
     </div>
     <div class="mdc-dialog__scrim"></div>
-</div>
-
-<div class="invisible" id="qrcontainer">
-    <div id="qrcode"></div>
 </div>
 
 <div class="invisible" id="messagecontainer">

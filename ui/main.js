@@ -16,6 +16,9 @@ var winprobability = document.getElementById('winprobability');
 var moneyall = document.getElementById('moneyall');
 var errordialog = document.getElementById("error-dialog-container");
 
+var weblink = document.getElementById("weblink");
+mdc.ripple.MDCRipple.attachTo(weblink);
+
 mdc.autoInit();
 
 var qrdialog = document.getElementById("qrdialog");
@@ -44,7 +47,7 @@ showqrbutton.addEventListener('click', function () {
     showQRCode();
 });
 
-eel.expose(exception)
+eel.expose(exception);
 function exception() {
     errordialog.open();
     errordialog.listen("MDCDialog:closed", function () {
@@ -88,7 +91,7 @@ function init_started() {
     progressbar.className = "mdc-linear-progress mdc-linear-progress--indeterminate";
     messagecontainer.className = "";
     frosted_glass.className = "frosted-glass-blur";
-    stoptext.innerHTML = "Please wait while the program initializes..."
+    stoptext.innerHTML = "Please wait while the program initializes...";
     startstop.disabled = true;
 }
 
@@ -97,14 +100,14 @@ function init_finished() {
     progressbar.className = "mdc-linear-progress";
     frosted_glass.className = "frosted-glass-unblur";
     messagecontainer.className = "invisible";
-    stoptext.innerHTML = "Please wait while the program stops..."
+    stoptext.innerHTML = "Please wait while the program stops...";
     startstop.disabled = false;
 }
 
 eel.expose(addMoney);
 function addMoney(value) {
     if (value != 0) {
-        moneyMade += value
+        moneyMade += value;
         if (value > 0) won++;
     } else {
         lost++;
@@ -124,7 +127,7 @@ function updateValues() {
 }
 
 function getMoneyPerHour() {
-    return moneyMade * (3600000 / difference);
+    return moneyMade * (3600 / time);
 }
 
 // Exit the current window if the underlying python process is closing
@@ -133,8 +136,7 @@ function js_exit() {
     window.close();
 }
 
-async function setQRCode() {
-    let ip = await eel.get_ip()();
+function setQRCode(ip) {
     console.log("Got own IP: " + ip);
     new QRCode(document.getElementById("qrcode"), {
         text: "http://" + ip + ":8027",
@@ -145,6 +147,15 @@ async function setQRCode() {
     });
 }
 
-setQRCode();
+async function setIPs() {
+    let ip = await eel.get_ip()();
+    setQRCode(ip);
+    weblink.innerHTML = "http://" + ip + ":8027";
+}
 
+weblink.addEventListener('click', () => {
+    eel.open_website();
+});
+
+setIPs();
 eel.get_winnings();

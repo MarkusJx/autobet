@@ -3,7 +3,7 @@ var x = setInterval(function () {
         wuy.connected().then(function (res) {
             if (res) {
                 clearInterval(x);
-                console.log("Connected!")
+                console.log("Connected!");
                 main();
             }
         })
@@ -13,9 +13,19 @@ var x = setInterval(function () {
 }, 100);
 
 function main() {
-    wuy.js_initialized().then(function(res) {
-        wuy.on("isInitialized", initialized);
-    })
+    wuy.js_initialized().then(res => {
+        if (res) {
+            initialized();
+        } else {
+            var initWaitTimer = setInterval(async function () {
+                let res = await wuy.js_initialized();
+                if (res) {
+                    clearInterval(initWaitTimer);
+                    initialized();
+                }
+            }, 250);
+        }
+    });
 
     setTimeout(initialized, 10000);
 }

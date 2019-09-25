@@ -273,9 +273,10 @@ body {
 #weblink {
     font-size: 1em;
     font-weight: normal;
-    margin: 5px auto auto auto;
+    margin: -6px auto auto -8px;
     grid-column: 1;
     grid-row: 1;
+    text-transform: lowercase
 }
 
 #showqrbutton {

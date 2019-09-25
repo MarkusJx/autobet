@@ -22,53 +22,82 @@
 <div id="grid">
     <div class="noselect" id="Container">
         <div class="subcontainer" id="status">
-                <div class="textalign">
-                    <h1 class="text subheading">Status</h1>
-                    <h1 class="text status_stopped maintext" id="statusinfo">Stopped</h1>
-                </div>
-            </div>
-
-        <div class="subcontainer" id="timecontainer">
-                <div class="textalign">
-                    <h1 class="text subheading">Time running</h1>
-                    <h1 class="text maintext maintext-maincolor" id="time">00:00:00</h1>
-                </div>
-            </div>
-
-        <div class="subcontainer" id="moneythishourcontainer">
-                <div class="textalign">
-                    <h1 class="text subheading">Money earned per hour</h1>
-                    <h1 class="text maintext maintext-maincolor" id="moneythishour">0 $/hr</h1>
-                </div>
-            </div>
-
-        <div class="subcontainer" id="moneyallcontainer">
-                <div class="textalign">
-                    <h1 class="text subheading">Money earned all time</h1>
-                    <h1 class="text maintext maintext-maincolor" id="moneyall">0 $</h1>
-                </div>
-            </div>
-
-        <div class="subcontainer" id="raceswoncontainer">
-                <div class="textalign">
-                    <h1 class="text subheading">Races won</h1>
-                    <h1 class="text maintext maintext-maincolor" id="raceswon">0</h1>
-                </div>
-            </div>
-
-        <div class="subcontainer" id="winprobabilitycontainer">
-                <div class="textalign">
-                    <h1 class="text subheading">Probability of winning</h1>
-                    <h1 class="text maintext maintext-maincolor" id="winprobability">0.0%</h1>
-                </div>
+            <div class="textalign">
+                <h1 class="text subheading">Status</h1>
+                <h1 class="text status_stopped maintext" id="statusinfo">Stopped</h1>
             </div>
         </div>
 
-    <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
+        <div class="subcontainer" id="timecontainer">
+            <div class="textalign">
+                <h1 class="text subheading">Time running</h1>
+                <h1 class="text maintext maintext-maincolor" id="time">00:00:00</h1>
+            </div>
+        </div>
+
+        <div class="subcontainer" id="moneythishourcontainer">
+            <div class="textalign">
+                <h1 class="text subheading">Money earned per hour</h1>
+                <h1 class="text maintext maintext-maincolor" id="moneythishour">0 $/hr</h1>
+            </div>
+        </div>
+
+        <div class="subcontainer" id="moneyallcontainer">
+            <div class="textalign">
+                <h1 class="text subheading">Money earned all time</h1>
+                <h1 class="text maintext maintext-maincolor" id="moneyall">0 $</h1>
+            </div>
+        </div>
+
+        <div class="subcontainer" id="raceswoncontainer">
+            <div class="textalign">
+                <h1 class="text subheading">Races won</h1>
+                <h1 class="text maintext maintext-maincolor" id="raceswon">0</h1>
+            </div>
+        </div>
+
+        <div class="subcontainer" id="winprobabilitycontainer">
+            <div class="textalign">
+                <h1 class="text subheading">Probability of winning</h1>
+                <h1 class="text maintext maintext-maincolor" id="winprobability">0.0%</h1>
+            </div>
+        </div>
+
+        <div class="subcontainer" id="autostopcontainer">
+            <div class="textalign">
+                <h1 class="text subheading">Autostop</h1>
+                <h1 class="text maintext maintext-maincolor" id="stopenabled">Enabled</h1>
+                <button class="mdc-button" id="configurebutton">Configure</button>
+            </div>
+        </div>
     </div>
 
+    <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
+</div>
+
+<div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog"
+     id="settingsdialog" role="alertdialog">
+    <div class="mdc-dialog__container">
+        <div class="mdc-dialog__surface">
+            <h2 class="mdc-dialog__title" id="my-dialog-title">
+                Autostop settings
+            </h2>
+            <div class="mdc-dialog__content" id="my-dialog-content">
+
+            </div>
+            <footer class="mdc-dialog__actions">
+                <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="settingsdonebutton"
+                        type="button">
+                    <span class="mdc-button__label">Done</span>
+                </button>
+            </footer>
+        </div>
+    </div>
+    <div class="mdc-dialog__scrim"></div>
+</div>
+
+<script src="js/jquery.min.js" type="text/javascript"></script>
 <script src="js/materialize.min.js" type="text/javascript"></script>
-<script src="js/qrcode.min.js" type="text/javascript"></script>
 <script src="js/main.js" type="text/javascript"></script>
 </body>
 
