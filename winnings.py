@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 from PIL import ImageGrab
+import customlogger
 
 import ai
 
@@ -22,24 +23,36 @@ width = 0
 height = 0
 
 sock = None
+logger = None
 
 
 def main():
-    global winnings_ai, sock
+    global winnings_ai, sock, logger
+
+    logger = customlogger.create_logger("winnings", mode=customlogger.FILE)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ('localhost', 8026)
+    logger.debug("Creating socket")
     sock.connect(server_address)
+
+    logger.debug("Socket creation finished")
+
     winnings_ai = ai.Winnings()
+
+    logger.debug("AI initialized")
+    logger.debug("Sending 'done' message")
+
     sock.sendall(bytes("done", "utf-8"))
     sock.setblocking(True)
     while True:
         res = handle_input(int.from_bytes(sock.recv(1), "big"))
+        logger.debug("Sending result " + res)
         sock.sendall(int.to_bytes(res, 1, "big"))
 
 
 def handle_input(line):
-    print(line)
+    logger.debug("Got input: " + line)
     if line == 1:
         return get_winnings()
     elif line == 2:
@@ -66,6 +79,7 @@ def handle_input(line):
 def get_winnings():
     screen = ImageGrab.grab(bbox=(xPos, yPos, width, height))
     res = winnings_ai.predict_winnings(np.array(screen), multiplierW, multiplierH)
+    logger.debug("Got result from AI: " + res)
 
     if res == "running":
         return 1
@@ -80,4 +94,7 @@ def get_winnings():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        logger.exception(e)
