@@ -130,8 +130,15 @@ function getMoneyPerHour() {
     return moneyMade * (3600 / time);
 }
 
+eel.expose(set_gta_running);
+
+function set_gta_running(val) {
+    console.log("set gta v running to " + val);
+}
+
 // Exit the current window if the underlying python process is closing
 eel.expose(js_exit);
+
 function js_exit() {
     window.close();
 }
