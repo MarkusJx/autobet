@@ -7,6 +7,20 @@ mdc.ripple.MDCRipple.attachTo(configurebutton);
 var settingsdialog = document.getElementById("settingsdialog");
 settingsdialog = new mdc.dialog.MDCDialog(settingsdialog);
 
+var datasaverdialog = document.getElementById("datasaverdialog");
+datasaverdialog = new mdc.dialog.MDCDialog(datasaverdialog);
+var enabledatasaverbutton = document.getElementById("enabledatasaverbutton");
+
+var gtanotrunningmessage = document.getElementById("gta-not-running-message");
+gtanotrunningmessage = new mdc.snackbar.MDCSnackbar(gtanotrunningmessage);
+gtanotrunningmessage.timeoutMs = 10000;
+
+var notconnectedmessage = document.getElementById("notconnectedmessage");
+notconnectedmessage = new mdc.snackbar.MDCSnackbar(notconnectedmessage);
+notconnectedmessage.timeoutMs = 10000;
+
+var notconnectedlabel = document.getElementById("notconnectedlabel");
+
 var moneyall = document.getElementById("moneyall");
 var timeDisp = document.getElementById("time");
 var winprobability = document.getElementById("winprobability");
@@ -18,20 +32,42 @@ var lastTime = 0;
 var mainInterval = null;
 
 var start = true;
+var initialized = false;
+var scriptRunning = -1;
 
 startstop.addEventListener('click', () => {
-    if (start != null) {
-        startstop.disabled = true;
-        if (start == true) {
-            wuy.js_start();
+    wuy.get_gta_v_running().then(running => {
+        if (!running) {
+            gtanotrunningmessage.open();
+            startstop.disabled = true;
         } else {
-            wuy.js_stop();
+            if (start != null) {
+                startstop.disabled = true;
+                if (start == true) {
+                    wuy.js_start();
+                } else {
+                    wuy.js_stop();
+                }
+            }
         }
-    }
+    });
 });
 
 configurebutton.addEventListener('click', function () {
     settingsdialog.open();
+});
+
+gtanotrunningmessage.listen('MDCSnackbar:closing', () => {
+    if (scriptRunning != 0 || scriptRunning != 2) {
+        startstop.disabled = false;
+    }
+});
+
+notconnectedmessage.listen('MDCSnackbar:closing', () => {
+    let lastMessage = notconnectedlabel.innerHTML;
+    notconnectedlabel.innerHTML = "";
+    notconnectedmessage.open();
+    notconnectedlabel.innerHTML = lastMessage;
 });
 
 var x = setInterval(function () {
@@ -86,6 +122,30 @@ function makeSumsDisplayable(sum, k = false) {
 }
 
 function main() {
+    if (isMobile()) {
+        console.log("Running on a mobile device");
+
+        datasaverdialog.listen('MDCDialog:closing', ev => {
+            if (ev.detail.action == "yes") {
+                console.log("Enabling Data Saver");
+                if (!initialized) init(true);
+                initialized = true;
+            } else {
+                console.log("Not enabling Data Saver");
+                if (!initialized) init(false);
+                initialized = true;
+            }
+        });
+
+        datasaverdialog.open();
+    } else {
+        console.log("Running on a desktop device");
+        if (!initialized) init(false);
+        initialized = true;
+    }
+}
+
+function init(datasaver) {
     wuy.js_get_money().then(function (val) {
         console.log(val);
     });
@@ -95,31 +155,48 @@ function main() {
         moneyall.innerHTML = makeSumsDisplayable(val) + " $";
     });
 
-    let disconnectedCount = 0;
+    let waitTime = 500;
+    if (datasaver) waitTime = 5000;
 
     mainInterval = setInterval(async function () {
         try {
             await asyncMain();
-            if (disconnectedCount > 0) {
-                disconnectedCount = 0;
-                console.info("Reconnected.");
-
-                wuy.js_initialized().then(res => {
-                    if (!res) {
-                        document.location.href = "index.html";
-                    }
-                });
-            }
         } catch (error) {
-            console.log("Connection lost. " + (120 - disconnectedCount) + " retries left.");
-            disconnectedCount++;
-
-            if (disconnectedCount > 120) {
-                clearInterval(mainInterval);
-                console.info("Disconnected.");
-            }
+            clearInterval(mainInterval);
+            disconnected();
         }
-    }, 500);
+    }, waitTime);
+}
+
+function disconnected() {
+    console.log("Connection lost.");
+    let timeUntilRetry = 10;
+    notconnectedlabel.innerHTML = "Connection lost.";
+    notconnectedmessage.open();
+    let x = setInterval(async () => {
+        if (timeUntilRetry < 1) {
+            notconnectedlabel.innerHTML = "Trying to reconnect...";
+            timeUntilRetry = 10;
+            let connected = false;
+            try {
+                connected = await wuy.connected();
+            } catch (error) {
+                connected = false;
+            }
+
+            if (connected) {
+                clearInterval(x);
+                notconnectedlabel.innerHTML = "Reconnected. Reloading page in 3 seconds";
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            }
+        } else {
+            notconnectedlabel.innerHTML = "Connection lost. Retrying in " + timeUntilRetry + " seconds.";
+            startstop.disabled = true;
+            timeUntilRetry--;
+        }
+    }, 1000)
 }
 
 async function asyncMain() {
@@ -144,17 +221,22 @@ async function asyncMain() {
     });
 
     wuy.js_get_running().then(running => {
+        let statusChanged = scriptRunning != running;
+        scriptRunning = running;
+        if (!statusChanged) return;
+        gtanotrunningmessage.close();
+
         if (running == 1) {
             statusinfo.innerHTML = "Running";
             statusinfo.className = "text status_running maintext";
             startstop.innerHTML = "stop";
-            startstop.disabled = false;
             start = false;
+            startstop.disabled = false;
         } else if (running == -1) {
             statusinfo.innerHTML = "Stopped";
             statusinfo.className = "text status_stopped maintext";
-            startstop.disabled = false;
             startstop.innerHTML = "start";
+            startstop.disabled = false;
         } else if (running == 0) {
             statusinfo.innerHTML = "Stopping";
             statusinfo.className = "text status_stopping maintext";
@@ -175,4 +257,16 @@ function convertToTime(secs) {
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;
     return hours + ':' + minutes + ':' + seconds;
+}
+
+function isMobile() {
+    try {
+        if (/Android|webOS|iPhone|iPad|iPod|pocket|psp|kindle|avantgo|blazer|midori|Tablet|Palm|maemo|plucker|phone|BlackBerry|symbian|IEMobile|mobile|ZuneWP7|Windows Phone|Opera Mini/i.test(navigator.userAgent)) {
+            return true;
+        }
+        return false;
+    } catch (e) {
+        console.log("Error in isMobile");
+        return false;
+    }
 }

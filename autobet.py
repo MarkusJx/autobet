@@ -34,6 +34,7 @@ starting = False
 eel_running = False
 initializing = False
 run_main = True
+gta_v_running = False
 
 xPos = 0
 yPos = 0
@@ -52,7 +53,7 @@ races_lost = 0
 time_running = 0
 
 dummy = False
-debug = True
+debug = False
 logger = None
 
 
@@ -145,6 +146,7 @@ def main_f():
                 stopping = False
                 running = False
             eel.sleep(0.5)
+            set_gta_v_running(False)
             continue  # TODO add error
 
         refreshes = 0
@@ -175,6 +177,7 @@ def main_f():
 
 def start_script():
     global running
+    logger.debug("Starting script")
     if not running and not stopping:
         running = True
 
@@ -182,9 +185,15 @@ def start_script():
 def stop_script():
     global running, stopping
     if running and not stopping:
-        logger.debug("Waiting for main thread to finish...")
+        logger.debug("Waiting for main thread to finish")
         running = False
         stopping = True
+
+
+def set_gta_v_running(val):
+    global gta_v_running
+    gta_v_running = val
+    eel.set_gta_running(val)
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -193,9 +202,12 @@ def stop_script():
 # winnings ------------------------------------------------------------------------------------------------------------
 def start_winnings_ai():
     global winnings_ai, winnings_ai_con
-    if debug:
+    logger.debug("Starting winnings ai")
+    if True:  # TODO set back to 'debug'
+        logger.warning("Winnings_ai is starting in debug mode")
         winnings_ai = Popen(["python", "winnings.py"])  # used for testing
     else:
+        logger.debug("Winnings_ai is starting in production mode")
         winnings_ai = Popen(["winnings/winnings.exe"], stderr=PIPE, stdout=PIPE)
     logger.debug("Starting socket for winnings_ai")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -320,6 +332,10 @@ def get_time():
     return time_running
 
 
+def get_gta_running():
+    return gta_v_running
+
+
 def get_running():
     if running and not stopping:  # running
         return 1
@@ -400,27 +416,36 @@ hk2.register(('control', 'shift', 'f9'), callback=lambda x: kill())
 # Eel init ------------------------------------------------------------------------------------------------------------
 @eel.expose
 def init_ai():
-    global initializing, thread
-    logger.debug("Initializing AIs")
-    initializing = True
-    thread = threading.Thread(target=main_f, args=())
-    thread.start()
-    while initializing:
-        eel.sleep(1)
-    start_winnings_ai()
-    eel.doneLoading()
-    webserver.initialized()
-    logger.debug("All AIs successfully initialized")
+    try:
+        global initializing, thread
+        logger.debug("Initializing AIs")
+        initializing = True
+        thread = threading.Thread(target=main_f, args=())
+        thread.start()
+        while initializing:
+            eel.sleep(1)
+        start_winnings_ai()
+        eel.doneLoading()
+        webserver.initialized()
+        logger.debug("All AIs successfully initialized")
+    except Exception as e:
+        logger.exception(e)
 
 
 @eel.expose
 def start_s_function():
-    start_script()
+    try:
+        start_script()
+    except Exception as e:
+        logger.exception(e)
 
 
 @eel.expose
 def stop_s_function():
-    stop_script()
+    try:
+        stop_script()
+    except Exception as e:
+        logger.exception(e)
 
 
 @eel.expose
@@ -437,27 +462,33 @@ def set_starting(val):
 
 @eel.expose
 def get_winnings():
-    global winnings_all
-    logger.debug("Reading winnings from file")
     try:
-        f = open("winnings.txt", "r+")
-        s = f.read()
-        if s:
-            winnings_all = int(s)
+        global winnings_all
+        logger.debug("Reading winnings from file")
+        try:
+            f = open("winnings.txt", "r+")
+            s = f.read()
+            if s:
+                winnings_all = int(s)
+                f.close()
+        except FileNotFoundError:
+            logger.debug("File not found, creating one")
+            f = open("winnings.txt", "w")
+            f.write("0")
             f.close()
-    except FileNotFoundError:
-        logger.debug("File not found, creating one")
-        f = open("winnings.txt", "w")
-        f.write("0")
-        f.close()
-    eel.setAllMoneyMade(winnings_all)
+        eel.setAllMoneyMade(winnings_all)
+    except Exception as e:
+        logger.exception(e)
 
 
 @eel.expose
 def open_website():
-    import webbrowser
-    logging.debug("Opening website on " + get_ip())
-    webbrowser.open("http://" + get_ip() + ":8027", new=2)
+    try:
+        import webbrowser
+        logging.debug("Opening website on " + get_ip())
+        webbrowser.open("http://" + get_ip() + ":8027", new=2)
+    except Exception as e:
+        logger.exception(e)
 
 
 @eel.expose
@@ -468,7 +499,13 @@ def add_sec():
 
 @eel.expose
 def get_ip():
-    return socket.gethostbyname(socket.gethostname())
+    try:
+        ip = socket.gethostbyname(socket.gethostname())
+        logger.debug("Sending IP: " + ip)
+        return ip
+    except Exception as e:
+        logger.exception(e)
+        return "0.0.0.0"
 
 
 def start_ui():
@@ -526,6 +563,7 @@ def main():
     global logger
     pyautogui.FAILSAFE = False
     logger = customlogger.create_logger("autobet", mode=customlogger.FILE)
+    logger.debug("Started new session --------------------------------------------------------------------------------")
 
     try:
         if update_available():
@@ -535,7 +573,8 @@ def main():
             webserver.set_functions(start_function=wuy_start_script, stop_function=wuy_stop_script,
                                     get_all_money_function=get_all_winnings, get_money_function=get_current_winnings,
                                     get_races_won_function=get_races_won, get_races_lost_function=get_races_lost,
-                                    get_time_function=get_time, get_running_function=get_running)
+                                    get_time_function=get_time, get_running_function=get_running,
+                                    get_gta_v_running_function=gta_v_running)
 
             threading.Thread(target=start_ui, args=()).start()
             start_web_server()

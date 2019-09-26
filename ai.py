@@ -3,6 +3,8 @@ import os
 import tensorflow as tf
 import tensorflow.python.util.deprecation as deprecation
 
+import customlogger
+
 deprecation._PRINT_DEPRECATION_WARNINGS = False
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -111,6 +113,7 @@ x2w = 1590
 
 class Betting:
     def __init__(self):
+        self.logger = customlogger.create_logger("betting")
         self.prediction = CustomImagePrediction()
         self.prediction.setModelTypeAsResNet()
         self.prediction.setModelPath("models/betting.h5")
@@ -123,13 +126,13 @@ class Betting:
         x1 = round(x1b * multiplier_w)
         x2 = round(x2b * multiplier_w)
         crop_img = img[y1:y2, x1:x2]
-        print(multiplier_h)
-        print(multiplier_w)
+        self.logger.debug("multiplier_h: " + multiplier_h)
+        self.logger.debug("multiplier_w: " + multiplier_w)
         return self.prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
 
     def usable(self, img, multiplier_w, multiplier_h):
         predict, probability = self.predict_betting(img, multiplier_w, multiplier_h)
-        print(predict)
+        self.logger.debug(predict + ", " + probability)
         if predict[0] == "usable":
             return True
         else:
@@ -138,6 +141,7 @@ class Betting:
 
 class Winnings:
     def __init__(self):
+        self.logger = customlogger.create_logger("winnings")
         self.prediction = CustomImagePrediction()
         self.prediction.setModelTypeAsResNet()
         self.prediction.setModelPath("models/winnings.h5")
@@ -151,4 +155,5 @@ class Winnings:
         x2 = round(x2w * multiplier_w)
         crop_img = img[y1:y2, x1:x2]
         predict, prob = self.prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
+        self.logger.debug(predict + ", " + prob)
         return predict[0]
