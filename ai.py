@@ -108,6 +108,7 @@ x2b = 644
 y1w = 1060
 y2w = 1146
 x1w = 1286
+x1w_test = 1406
 x2w = 1590
 
 
@@ -126,13 +127,13 @@ class Betting:
         x1 = round(x1b * multiplier_w)
         x2 = round(x2b * multiplier_w)
         crop_img = img[y1:y2, x1:x2]
-        self.logger.debug("multiplier_h: " + multiplier_h)
-        self.logger.debug("multiplier_w: " + multiplier_w)
+        self.logger.debug("multiplier_h: " + str(multiplier_h))
+        self.logger.debug("multiplier_w: " + str(multiplier_w))
         return self.prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
 
     def usable(self, img, multiplier_w, multiplier_h):
         predict, probability = self.predict_betting(img, multiplier_w, multiplier_h)
-        self.logger.debug(predict + ", " + probability)
+        self.logger.debug(str(predict) + ", " + str(probability))
         if predict[0] == "usable":
             return True
         else:
@@ -146,7 +147,7 @@ class Winnings:
         self.prediction.setModelTypeAsResNet()
         self.prediction.setModelPath("models/winnings.h5")
         self.prediction.setJsonPath("models/winnings.json")
-        self.prediction.loadModel(num_objects=5)
+        self.prediction.loadModel(num_objects=4)
 
     def predict_winnings(self, img, multiplier_w, multiplier_h):
         y1 = round(y1w * multiplier_h)
@@ -154,6 +155,6 @@ class Winnings:
         x1 = round(x1w * multiplier_w)
         x2 = round(x2w * multiplier_w)
         crop_img = img[y1:y2, x1:x2]
-        predict, prob = self.prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
-        self.logger.debug(predict + ", " + prob)
+        predict, prob = self.prediction.predictImage(image_input=crop_img, result_count=4, input_type="array")
+        self.logger.debug(str(predict) + ", " + str(prob))
         return predict[0]

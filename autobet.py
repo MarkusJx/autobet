@@ -130,6 +130,13 @@ def reset():
 
 
 # main ----------------------------------------------------------------------------------------------------------------
+def start_main_f():
+    try:
+        main_f()
+    except Exception as e:
+        logger.exception(e)
+
+
 def main_f():
     global betting_ai, initializing, stopping, running
     logging.debug("Started main thread")
@@ -138,17 +145,21 @@ def main_f():
     initializing = False
     while run_main:
         if window_open("Grand Theft Auto V"):
+            logger.debug("GTA V running")
             set_positions()
             if winnings_ai_con is not None:
                 set_winnings_positions()
         else:
+            logger.debug("GTA V not running")
             if running and stopping:
                 stopping = False
                 running = False
-            eel.sleep(0.5)
+            eel.sleep(10)
             set_gta_v_running(False)
             continue  # TODO add error
 
+        if running:
+            logger.debug("Starting main loop")
         refreshes = 0
         while running:
             screen = ImageGrab.grab(bbox=(xPos, yPos, width, height))
@@ -179,6 +190,7 @@ def start_script():
     global running
     logger.debug("Starting script")
     if not running and not stopping:
+        logger.debug("Set running to true")
         running = True
 
 
@@ -249,32 +261,27 @@ def get_winnings_py():
     res = winnings_ai_con.recv(1)
     res = int.from_bytes(res, "big")
 
-    print("Results:")
-    print(res)
+    logger.debug("Results: " + str(res))
     if res == 3:
-        print("30k")
+        logger.debug("30k")
         update_winnings(30000)
         return
     elif res == 4:
-        print("40k")
+        logger.debug("40k")
         update_winnings(40000)
         return
     elif res == 5:
-        print("50k")
+        logger.debug("50k")
         update_winnings(50000)
         return
     elif res == 0:
-        print("zero")
+        logger.debug("zero")
         update_winnings(0)
         return
-    elif res == 1:
-        print("running")
-        eel.sleep(1)
-        get_winnings_py()
 
 
 def update_winnings(to_add):
-    logger.debug("Updating winnings by " + to_add)
+    logger.debug("Updating winnings by " + str(to_add))
     if to_add != 0:
         global winnings_all, winnings
         winnings += to_add
@@ -420,7 +427,7 @@ def init_ai():
         global initializing, thread
         logger.debug("Initializing AIs")
         initializing = True
-        thread = threading.Thread(target=main_f, args=())
+        thread = threading.Thread(target=start_main_f, args=())
         thread.start()
         while initializing:
             eel.sleep(1)
@@ -511,7 +518,10 @@ def get_ip():
 def start_ui():
     global eel_running
     logger.debug("Starting UI...")
-    eel.init('ui', allowed_extensions=['.js', '.html', '.css'])
+    try:
+        eel.init('ui', allowed_extensions=['.js', '.html', '.css'])
+    except Exception as e:
+        logger.exception(e)
 
     if debug:
         options = {'mode': 'chrome-app', 'host': 'localhost', 'port': 8025}
