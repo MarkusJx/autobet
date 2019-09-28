@@ -81,9 +81,7 @@ def get_winnings():
     res = winnings_ai.predict_winnings(np.array(screen), multiplierW, multiplierH)
     logger.debug("Got result from AI: " + str(res))
 
-    if res == "running":
-        return 1
-    elif res == "zero":
+    if res == "zero":
         return 0
     elif res == "30k":
         return 3
