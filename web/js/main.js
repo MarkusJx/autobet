@@ -21,6 +21,18 @@ notconnectedmessage.timeoutMs = 10000;
 
 var notconnectedlabel = document.getElementById("notconnectedlabel");
 
+var settingsdonebutton = document.getElementById("settingsdonebutton");
+var timeinput = document.getElementById("timeinput");
+var moneyinput = document.getElementById("moneyinput");
+
+var autostopenabled = document.getElementById("autostopenabled");
+
+var autostopstatusmessage = document.getElementById("autostopstatusmessage");
+autostopstatusmessage = new mdc.snackbar.MDCSnackbar(autostopstatusmessage);
+autostopstatusmessage.timeoutMs = 5000;
+
+autostopstatuslabel = document.getElementById("autostopstatuslabel");
+
 var moneyall = document.getElementById("moneyall");
 var timeDisp = document.getElementById("time");
 var winprobability = document.getElementById("winprobability");
@@ -35,9 +47,15 @@ var start = true;
 var initialized = false;
 var scriptRunning = -1;
 
+var autostopTime = -1;
+var autostopMoney = -1;
+
 startstop.addEventListener('click', () => {
     wuy.get_gta_v_running().then(running => {
-        if (!running) {
+        if(;
+!running;
+)
+{
             gtanotrunningmessage.open();
             startstop.disabled = true;
         } else {
@@ -50,25 +68,85 @@ startstop.addEventListener('click', () => {
                 }
             }
         }
-    });
-});
-
+})
+})
 configurebutton.addEventListener('click', function () {
+    if (autostopMoney != -1) {
+        moneyinput.value = autostopMoney;
+    } else {
+        moneyinput.value = "";
+    }
+
+    if (autostopTime != -1) {
+        timeinput.value = Math.floor(autostopTime / 3600) + ":" + Math.floor((autostopTime % 3600) / 60);
+    } else {
+        timeinput.value = "";
+    }
+
     settingsdialog.open();
 });
 
 gtanotrunningmessage.listen('MDCSnackbar:closing', () => {
-    if (scriptRunning != 0 || scriptRunning != 2) {
+    if(scriptRunning != 0 || scriptRunning != 2;
+)
+{
         startstop.disabled = false;
     }
-});
-
+})
 notconnectedmessage.listen('MDCSnackbar:closing', () => {
     let lastMessage = notconnectedlabel.innerHTML;
     notconnectedlabel.innerHTML = "";
     notconnectedmessage.open();
     notconnectedlabel.innerHTML = lastMessage;
+})
+settingsdonebutton.addEventListener('click', function () {
+    if (moneyinput.value < 10000 || moneyinput.value == "") {
+        moneyinput.value = "";
+        autostopMoney = -1;
+        wuy.set_autostop_money(-1);
+    } else {
+        autostopMoney = moneyinput.value;
+        wuy.set_autostop_money(moneyinput.value);
+    }
+
+    let timeval = timeinput.value.split(":");
+    timeval = timeval[0] * 3600 + timeval[1] * 60;
+
+    if (Number.isNaN(timeval)) {
+        timeinput.value = "";
+        autostopTime = -1;
+        wuy.set_autostop_time(-1);
+    } else {
+        autostopTime = timeval;
+        wuy.set_autostop_time(timeval);
+    }
+
+    showAutostopMessages();
 });
+
+function showAutostopMessages() {
+    if (autostopMoney != -1 && autostopTime != -1) {
+        autostopenabled.classList = "text maintext status_running";
+        autostopenabled.innerHTML = "Enabled";
+        autostopstatuslabel.innerHTML = "Autostop money value set to: " + autostopMoney + " and time set to: " + timeinput.value;
+        autostopstatusmessage.open();
+    } else if (autostopTime != -1 || autostopMoney != -1) {
+        if (autostopTime != -1) {
+            autostopstatuslabel.innerHTML = "Autostop time set to: " + timeinput.value;
+            autostopstatusmessage.open();
+        } else {
+            autostopstatuslabel.innerHTML = "Autostop money value set to: " + autostopMoney;
+            autostopstatusmessage.open();
+        }
+        autostopenabled.classList = "text maintext status_running";
+        autostopenabled.innerHTML = "Enabled";
+    } else {
+        autostopenabled.classList = "text maintext status_stopped";
+        autostopenabled.innerHTML = "Disabled";
+        autostopstatuslabel.innerHTML = "Autostop is now disabled";
+        autostopstatusmessage.open();
+    }
+}
 
 var x = setInterval(function () {
     try {
@@ -82,7 +160,7 @@ var x = setInterval(function () {
                     } else {
                         document.location.href = "index.html";
                     }
-                });
+            })
             }
         })
     } catch (error) {
@@ -126,7 +204,9 @@ function main() {
         console.log("Running on a mobile device");
 
         datasaverdialog.listen('MDCDialog:closing', ev => {
-            if (ev.detail.action == "yes") {
+            if(ev.detail.action == "yes";
+    )
+        {
                 console.log("Enabling Data Saver");
                 if (!initialized) init(true);
                 initialized = true;
@@ -135,8 +215,7 @@ function main() {
                 if (!initialized) init(false);
                 initialized = true;
             }
-        });
-
+    })
         datasaverdialog.open();
     } else {
         console.log("Running on a desktop device");
@@ -153,19 +232,25 @@ function init(datasaver) {
     wuy.js_get_all_money().then((val) => {
         console.log("Money earned all time: " + val);
         moneyall.innerHTML = makeSumsDisplayable(val) + " $";
-    });
-
+})
     let waitTime = 500;
     if (datasaver) waitTime = 5000;
 
-    mainInterval = setInterval(async function () {
+    mainInterval = setInterval(async;
+
+    function () {
         try {
-            await asyncMain();
+            await;
+            asyncMain();
         } catch (error) {
             clearInterval(mainInterval);
             disconnected();
         }
-    }, waitTime);
+    }
+
+,
+    waitTime;
+)
 }
 
 function disconnected() {
@@ -174,12 +259,15 @@ function disconnected() {
     notconnectedlabel.innerHTML = "Connection lost.";
     notconnectedmessage.open();
     let x = setInterval(async () => {
-        if (timeUntilRetry < 1) {
+        if(timeUntilRetry < 1;
+)
+    {
             notconnectedlabel.innerHTML = "Trying to reconnect...";
             timeUntilRetry = 10;
             let connected = false;
             try {
-                connected = await wuy.connected();
+                connected = await;
+                wuy.connected();
             } catch (error) {
                 connected = false;
             }
@@ -189,37 +277,46 @@ function disconnected() {
                 notconnectedlabel.innerHTML = "Reconnected. Reloading page in 3 seconds";
                 setTimeout(() => {
                     location.reload();
-                }, 3000);
+            },
+                3000;
+            )
             }
         } else {
             notconnectedlabel.innerHTML = "Connection lost. Retrying in " + timeUntilRetry + " seconds.";
             startstop.disabled = true;
             timeUntilRetry--;
         }
-    }, 1000)
+},
+    1000;
+)
 }
 
-async function asyncMain() {
-    let time = await wuy.js_get_time();
+async;
+
+function asyncMain() {
+    let time = await;
+    wuy.js_get_time();
     if (time != lastTime) {
         timeDisp.innerHTML = convertToTime(time);
         lastTime = time;
     }
 
-    let won = await wuy.get_races_won();
+    let won = await;
+    wuy.get_races_won();
     raceswon.innerHTML = won;
 
-    let lost = await wuy.get_races_lost();
+    let lost = await;
+    wuy.get_races_lost();
     if ((won + lost) > 0) winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
 
     wuy.js_get_money().then(moneyMade => {
-        if (time > 0) moneythishour.innerHTML = makeSumsDisplayable(moneyMade * (3600 / time), true) + " $/hr";
-    });
-
+        if(time > 0;
+)
+    moneythishour.innerHTML = makeSumsDisplayable(moneyMade * (3600 / time), true) + " $/hr";
+})
     wuy.js_get_all_money().then(allMoney => {
         moneyall.innerHTML = makeSumsDisplayable(allMoney) + " $";
-    });
-
+})
     wuy.js_get_running().then(running => {
         let statusChanged = scriptRunning != running;
         scriptRunning = running;
@@ -246,7 +343,27 @@ async function asyncMain() {
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
         }
-    });
+})
+    await;
+    getAutostopSettings();
+}
+
+async;
+
+function getAutostopSettings() {
+    let nTime = await;
+    wuy.get_autostop_time();
+    let nMoney = await;
+    wuy.get_autostop_money();
+
+    if (nTime != autostopTime || nMoney != autostopMoney) {
+        autostopTime = nTime;
+        autostopMoney = nMoney;
+        showAutostopMessages();
+    } else {
+        autostopTime = nTime;
+        autostopMoney = nMoney;
+    }
 }
 
 function convertToTime(secs) {

@@ -66,7 +66,7 @@
         <div class="subcontainer" id="autostopcontainer">
             <div class="textalign">
                 <h1 class="text subheading">Autostop</h1>
-                <h1 class="text maintext maintext-maincolor" id="stopenabled">Enabled</h1>
+                <h1 class="text maintext status_stopped" id="autostopenabled">Disabled</h1>
                 <button class="mdc-button" id="configurebutton">Configure</button>
             </div>
         </div>
@@ -76,30 +76,92 @@
 </div>
 
 <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true"
-     class="mdc-dialog noselect"
-     id="settingsdialog" role="alertdialog">
+     class="mdc-dialog noselect" id="settingsdialog" role="alertdialog">
     <div class="mdc-dialog__container">
         <div class="mdc-dialog__surface">
             <h2 class="mdc-dialog__title" id="my-dialog-title">
                 Autostop settings
             </h2>
             <div class="mdc-dialog__content" id="my-dialog-content">
+                <div id="autostopcontainer-grid">
+                    <!--<div class="item" id="prio">
+                        <div class="autostoptext-container">
+                            <b class="text autostoptext">Priority</b>
+                        </div>
+                    </div>-->
 
+                    <div class="item" id="desc">
+                        <div class="autostoptext-container">
+                            <b class="text autostoptext">Description</b>
+                        </div>
+                    </div>
+
+                    <div class="item" id="val">
+                        <div class="autostoptext-container">
+                            <b class="text autostoptext">Value</b>
+                        </div>
+                    </div>
+
+                    <!--
+                    <div class="item" style="grid-row: 2; grid-column: 1">
+                        <p class="radio-container">
+                            <label>
+                                <input name="group1" class="with-gap" type="radio" value="money" checked/>
+                                <span></span>
+                            </label>
+                        </p>
+                    </div>
+
+                    <div class="item" style="grid-row: 3; grid-column: 1">
+                        <p class="radio-container">
+                            <label>
+                                <input name="group1" class="with-gap" type="radio" value="time"/>
+                                <span></span>
+                            </label>
+                        </p>
+                    </div>-->
+
+                    <div class="item" style="grid-row: 2; grid-column: 1">
+                        <div class="autostoptext-container">
+                            <b class="text autostoptext">Stop after a given amount of money has been made</b>
+                        </div>
+                    </div>
+
+                    <div class="item" style="grid-row: 3; grid-column: 1">
+                        <div class="autostoptext-container">
+                            <b class="text autostoptext">Stop after a given amount of time has passed</b>
+                        </div>
+                    </div>
+
+                    <div class="item" style="padding-left: 5px; padding-right: 5px; grid-row: 2; grid-column: 2;">
+                        <input id="moneyinput" max="10000000" min="10000" type="number">
+                    </div>
+
+                    <div class="item" style="padding-left: 5px; padding-right: 5px; grid-row: 3; grid-column: 2;">
+                        <input id="timeinput" max="24:00" min="00:10" type="time">
+                    </div>
+                </div>
             </div>
+
             <footer class="mdc-dialog__actions">
                 <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="settingsdonebutton"
                         type="button">
                     <span class="mdc-button__label">Done</span>
                 </button>
+
+                <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel" id="settingscancelbutton"
+                        type="button">
+                    <span class="mdc-button__label">Cancel</span>
+                </button>
             </footer>
         </div>
+
     </div>
     <div class="mdc-dialog__scrim"></div>
 </div>
 
 <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true"
-     class="mdc-dialog noselect"
-     id="datasaverdialog" role="alertdialog">
+     class="mdc-dialog noselect" id="datasaverdialog" role="alertdialog">
     <div class="mdc-dialog__container">
         <div class="mdc-dialog__surface">
             <h2 class="mdc-dialog__title" id="my-dialog-title">
@@ -138,6 +200,13 @@
 <div class="mdc-snackbar noselect" id="notconnectedmessage">
     <div class="mdc-snackbar__surface">
         <div aria-live="polite" class="mdc-snackbar__label" id="notconnectedlabel" role="status">
+        </div>
+    </div>
+</div>
+
+<div class="mdc-snackbar noselect" id="autostopstatusmessage">
+    <div class="mdc-snackbar__surface">
+        <div aria-live="polite" class="mdc-snackbar__label" id="autostopstatuslabel" role="status">
         </div>
     </div>
 </div>

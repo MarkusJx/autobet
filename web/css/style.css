@@ -127,5 +127,51 @@
 
 #settingsdonebutton {
     --mdc-theme-primary: rgb(0, 0, 0, .95);
-    margin: 0 auto;
+}
+
+#settingscancelbutton {
+    --mdc-theme-primary: rgb(0, 0, 0, .95);
+}
+
+#autostopcontainer-grid {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    grid-template-columns: auto auto;
+    grid-gap: 1px;
+    background: #D7D7D7;
+}
+
+.autostoptext-container {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.autostoptext {
+    font-weight: normal;
+    font-size: 1em;
+}
+
+/*#prio {
+    grid-row: 1;
+    grid-column: 1;
+}*/
+
+#desc {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+#val {
+    grid-row: 1;
+    grid-column: 2;
+}
+
+.radio-container {
+    margin-left: 10px;
+}
+
+.item {
+    background: white;
 }
