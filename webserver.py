@@ -15,11 +15,40 @@ _initialized = False
 
 logger = customlogger.create_logger("webserver", mode=customlogger.FILE)
 
+autostop_money = -1
+autostop_time = -1
+
 
 def initialized():
     global _initialized
     logger.debug("Initialized set to true")
     _initialized = True
+
+
+def check_stop_conditions():
+    global autostop_time, autostop_money
+    if not callable(_get_time_function):
+        logger.error("get_time_function not defined")
+        return
+
+    if not callable(_get_money_function):
+        logger.error("get_money_function not defined")
+        return
+
+    if autostop_time != -1 and autostop_time > _get_time_function():
+        if callable(_stop_function):
+            autostop_money = -1
+            autostop_time = -1
+            _stop_function()
+        else:
+            logger.error("stop_function not defined")
+    elif autostop_money != -1 and _get_money_function() > autostop_money:
+        if callable(_stop_function):
+            autostop_money = -1
+            autostop_time = -1
+            _stop_function()
+        else:
+            logger.error("stop_function not defined")
 
 
 def start():
@@ -125,6 +154,25 @@ class main(wuy.Server):
         else:
             self._pass()
             logger.error("get_gta_v_running_function not defined")
+
+    def set_autostop_money(self, val):
+        global autostop_money
+        autostop_money = val
+        self._pass()
+
+    def get_autostop_money(self):
+        self._pass()
+        return autostop_money
+
+    def set_autostop_time(self, val):
+        global autostop_time
+        autostop_time = val
+        self._pass()
+
+    def get_autostop_time(self):
+        self._pass()
+        check_stop_conditions()
+        return autostop_time
 
     def connected(self):
         self._pass()
