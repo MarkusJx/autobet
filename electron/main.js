@@ -11,7 +11,7 @@ function execute(command, callback) {
     console.log(error);
     console.log(stderr);
     callback(stdout);
-})
+  })
 }
 let mainWindow;
 
@@ -46,7 +46,7 @@ function createWindow() {
             updating = true;
             createWindows();
           } else {
-            console.log("Downloading...")
+            console.log("Downloading...");
             downloadUpdate();
             createWindows();
           }
@@ -55,7 +55,7 @@ function createWindow() {
     } else {
       createWindows();
     }
-  })
+})
 }
 
 function createWindows() {
@@ -84,13 +84,13 @@ function createWindows() {
       }
     });
     mainWindow.removeMenu();
-    mainWindow.loadURL('http://localhost:8025/main.html', {"extraHeaders" : "pragma: no-cache\n"});
+    mainWindow.loadURL('http://localhost:8025/main.html', { "extraHeaders": "pragma: no-cache\n" });
   }
 
 
   mainWindow.on('closed', function () {
     mainWindow = null
-  })
+  });
 }
 
 function updateAvailable(available) {
@@ -104,13 +104,13 @@ function canUpdate(updatable) {
   execute("jre\\bin\\java.exe -jar updater.jar --downloaded", (output) => {
     console.log("output: " + output);
     updatable(output.trim() == "true");
-  })
+})
 }
 
 function initUpdate() {
   execute("jre\\bin\\java.exe -jar updater.jar --initupdate", (output) => {
     app.quit();
-})
+  })
 }
 
 function downloadUpdate() {
@@ -132,7 +132,7 @@ function downloadUpdate() {
 function startUpdate() {
   execute("jre\\bin\\java.exe -jar updater.jar --runupdate", (output) => {
     app.quit();
-})
+  })
 }
 
 app.on('ready', createWindow);
