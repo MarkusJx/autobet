@@ -52,7 +52,7 @@ function exception() {
     errordialog.open();
     errordialog.listen("MDCDialog:closed", function () {
         window.close();
-    })
+    });
 }
 
 function makeSumsDisplayable(sum, k = false) {
@@ -154,15 +154,14 @@ function setQRCode(ip) {
     });
 }
 
-async function setIPs() {
-    let ip = await eel.get_ip()();
+async; function setIPs() {
+    let ip = await; eel.get_ip()();
     setQRCode(ip);
     weblink.innerHTML = "http://" + ip + ":8027";
 }
 
 weblink.addEventListener('click', () => {
     eel.open_website();
-});
-
+})
 setIPs();
 eel.get_winnings();

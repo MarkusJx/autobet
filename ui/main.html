@@ -2,6 +2,10 @@
 <html lang="en">
 
 <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <meta charset="UTF-8">
     <title>GTA Online Autobet</title>
     <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
@@ -13,133 +17,133 @@
 </head>
 
 <body>
-<div id="loadingcontainer">
-    <h1 id="loadingtext">Please wait while GTA Online Autobet initializes. Just play some Snake while waiting.</h1>
-    <canvas height="400" id="game" width="400"></canvas>
-    <button class="mdc-button mdc-button--raised" id="continue">Continue</button>
-</div>
+    <div id="loadingcontainer">
+        <h1 id="loadingtext">Please wait while GTA Online Autobet initializes. Just play some Snake while waiting.</h1>
+        <canvas height="400" id="game" width="400"></canvas>
+        <button class="mdc-button mdc-button--raised" id="continue">Continue</button>
+    </div>
 
-<div class="frosted-glass-blur invisible" id="frosted-glass">
-    <div id="Container">
-        <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
+    <div class="frosted-glass-blur invisible" id="frosted-glass">
+        <div id="Container">
+            <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
 
-        <div class="subcontainer right" id="status">
-            <div class="textalign">
-                <h1 class="text subheading">Status</h1>
-                <h1 class="text status_stopped maintext" id="statusinfo">Stopped</h1>
+            <div class="subcontainer right" id="status">
+                <div class="textalign">
+                    <h1 class="text subheading">Status</h1>
+                    <h1 class="text status_stopped maintext" id="statusinfo">Stopped</h1>
+                </div>
             </div>
-        </div>
 
-        <div class="subcontainer left" id="timecontainer">
-            <div class="textalign">
-                <h1 class="text subheading">Time running</h1>
-                <h1 class="text maintext maintext-maincolor" id="time">00:00:00</h1>
+            <div class="subcontainer left" id="timecontainer">
+                <div class="textalign">
+                    <h1 class="text subheading">Time running</h1>
+                    <h1 class="text maintext maintext-maincolor" id="time">00:00:00</h1>
+                </div>
             </div>
-        </div>
 
-        <div class="subcontainer right" id="moneythishourcontainer">
-            <div class="textalign">
-                <h1 class="text subheading">Money earned per hour</h1>
-                <h1 class="text maintext maintext-maincolor" id="moneythishour">0 $/hr</h1>
+            <div class="subcontainer right" id="moneythishourcontainer">
+                <div class="textalign">
+                    <h1 class="text subheading">Money earned per hour</h1>
+                    <h1 class="text maintext maintext-maincolor" id="moneythishour">0 $/hr</h1>
+                </div>
             </div>
-        </div>
 
-        <div class="subcontainer left" id="moneyallcontainer">
-            <div class="textalign">
-                <h1 class="text subheading">Money earned all time</h1>
-                <h1 class="text maintext maintext-maincolor" id="moneyall">0 $</h1>
+            <div class="subcontainer left" id="moneyallcontainer">
+                <div class="textalign">
+                    <h1 class="text subheading">Money earned all time</h1>
+                    <h1 class="text maintext maintext-maincolor" id="moneyall">0 $</h1>
+                </div>
             </div>
-        </div>
 
-        <div class="subcontainer right" id="raceswoncontainer">
-            <div class="textalign">
-                <h1 class="text subheading">Races won</h1>
-                <h1 class="text maintext maintext-maincolor" id="raceswon">0</h1>
+            <div class="subcontainer right" id="raceswoncontainer">
+                <div class="textalign">
+                    <h1 class="text subheading">Races won</h1>
+                    <h1 class="text maintext maintext-maincolor" id="raceswon">0</h1>
+                </div>
             </div>
-        </div>
 
-        <div class="subcontainer left" id="winprobabilitycontainer">
-            <div class="textalign">
-                <h1 class="text subheading">Probability of winning</h1>
-                <h1 class="text maintext maintext-maincolor" id="winprobability">0.0%</h1>
+            <div class="subcontainer left" id="winprobabilitycontainer">
+                <div class="textalign">
+                    <h1 class="text subheading">Probability of winning</h1>
+                    <h1 class="text maintext maintext-maincolor" id="winprobability">0.0%</h1>
+                </div>
             </div>
-        </div>
 
-        <div class="subcontainer" id="webservercontainer">
-            <div class="textalign-big">
-                <h1 class="text subheading">Webserver</h1>
-                <h1 class="text maintext-maincolor" id="webinfotext">Webserver running on:</h1>
-                <button class="mdc-button mdc-ripple-upgraded" id="weblink"
+            <div class="subcontainer" id="webservercontainer">
+                <div class="textalign-big">
+                    <h1 class="text subheading">Webserver</h1>
+                    <h1 class="text maintext-maincolor" id="webinfotext">Webserver running on:</h1>
+                    <button class="mdc-button mdc-ripple-upgraded" id="weblink"
                         style="--mdc-theme-primary: rgb(207, 207, 207)">http://localhost:8027
-                </button>
-            </div>
+                    </button>
+                </div>
 
-            <button class="mdc-button" id="showqrbutton">Show QR-Code</button>
+                <button class="mdc-button" id="showqrbutton">Show QR-Code</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog"
-     id="qrdialog" role="alertdialog">
-    <div class="mdc-dialog__container">
-        <div class="mdc-dialog__surface">
-            <h2 class="mdc-dialog__title" id="my-dialog-title">
-                Scan this QR-Code to access the Web interface
-            </h2>
-            <div class="mdc-dialog__content" id="my-dialog-content">
-                <div id="qrcode"></div>
-            </div>
-            <footer class="mdc-dialog__actions">
-                <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="qrdonebutton"
+    <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog"
+        id="qrdialog" role="alertdialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <h2 class="mdc-dialog__title" id="my-dialog-title">
+                    Scan this QR-Code to access the Web interface
+                </h2>
+                <div class="mdc-dialog__content" id="my-dialog-content">
+                    <div id="qrcode"></div>
+                </div>
+                <footer class="mdc-dialog__actions">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="qrdonebutton"
                         type="button">
-                    <span class="mdc-button__label">Done</span>
-                </button>
-            </footer>
-        </div>
-    </div>
-    <div class="mdc-dialog__scrim"></div>
-</div>
-
-<div class="invisible" id="messagecontainer">
-    <div class="mdc-linear-progress" id="progressbar" role="progressbar">
-        <div class="mdc-linear-progress__buffering-dots"></div>
-        <div class="mdc-linear-progress__buffer" id="progressbuffer"></div>
-        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
-            <span class="mdc-linear-progress__bar-inner"></span>
-        </div>
-        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
-            <span class="mdc-linear-progress__bar-inner"></span>
-        </div>
-    </div>
-
-    <h1 class="maintext-maincolor text" id="stoptext">Please wait while the program stops...</h1>
-    <h1 class="text" id="quitinfo">To quit the program press CTRL+SHIFT+F9</h1>
-</div>
-
-<div aria-describedby="error-dialog-content" aria-labelledby="error-dialog" aria-modal="true" class="mdc-dialog"
-     id="error-dialog-container" role="alertdialog">
-    <div class="mdc-dialog__container">
-        <div class="mdc-dialog__surface">
-            <h2 class="mdc-dialog__title" id="error-dialog">Error</h2>
-            <div class="mdc-dialog__content" id="error-dialog-content">
-                An Error occurred.
-                The Program will now exit.
+                        <span class="mdc-button__label">Done</span>
+                    </button>
+                </footer>
             </div>
-            <footer class="mdc-dialog__actions">
-                <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no" id="errordialogbutton"
-                        type="button">
-                    <span class="mdc-button__label">ok</span>
-                </button>
-            </footer>
         </div>
+        <div class="mdc-dialog__scrim"></div>
     </div>
-    <div class="mdc-dialog__scrim"></div>
-</div>
 
-<script src="qrcode.min.js" type="text/javascript"></script>
-<script src="main.js" type="text/javascript"></script>
-<script src="startstop.js" type="text/javascript"></script>
-<script src="snake.js" type="text/javascript"></script>
+    <div class="invisible" id="messagecontainer">
+        <div class="mdc-linear-progress" id="progressbar" role="progressbar">
+            <div class="mdc-linear-progress__buffering-dots"></div>
+            <div class="mdc-linear-progress__buffer" id="progressbuffer"></div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+        </div>
+
+        <h1 class="maintext-maincolor text" id="stoptext">Please wait while the program stops...</h1>
+        <h1 class="text" id="quitinfo">To quit the program press CTRL+SHIFT+F9</h1>
+    </div>
+
+    <div aria-describedby="error-dialog-content" aria-labelledby="error-dialog" aria-modal="true" class="mdc-dialog"
+        id="error-dialog-container" role="alertdialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <h2 class="mdc-dialog__title" id="error-dialog">Error</h2>
+                <div class="mdc-dialog__content" id="error-dialog-content">
+                    An Error occurred.
+                    The Program will now exit.
+                </div>
+                <footer class="mdc-dialog__actions">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no" id="errordialogbutton"
+                        type="button">
+                        <span class="mdc-button__label">ok</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <script src="qrcode.min.js" type="text/javascript"></script>
+    <script src="main.js" type="text/javascript"></script>
+    <script src="startstop.js" type="text/javascript"></script>
+    <script src="snake.js" type="text/javascript"></script>
 </body>
 
 </html>
