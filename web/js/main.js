@@ -39,6 +39,7 @@ var winprobability = document.getElementById("winprobability");
 var raceswon = document.getElementById("raceswon");
 var moneythishour = document.getElementById("moneythishour");
 var statusinfo = document.getElementById("statusinfo");
+var moneythissession = document.getElementById("moneythissession");
 
 var lastTime = 0;
 var mainInterval = null;
@@ -50,12 +51,10 @@ var scriptRunning = -1;
 var autostopTime = -1;
 var autostopMoney = -1;
 
+// Add event listener to start stop button
 startstop.addEventListener('click', () => {
     wuy.get_gta_v_running().then(running => {
-        if(;
-!running;
-)
-{
+        if (!running) {
             gtanotrunningmessage.open();
             startstop.disabled = true;
         } else {
@@ -68,8 +67,10 @@ startstop.addEventListener('click', () => {
                 }
             }
         }
-})
-})
+    })
+});
+
+// Add event listener to the autostop configure button
 configurebutton.addEventListener('click', function () {
     if (autostopMoney != -1) {
         moneyinput.value = autostopMoney;
@@ -86,21 +87,24 @@ configurebutton.addEventListener('click', function () {
     settingsdialog.open();
 });
 
+// Listen for the not running message to close to activate the start stop button again
 gtanotrunningmessage.listen('MDCSnackbar:closing', () => {
-    if(scriptRunning != 0 || scriptRunning != 2;
-)
-{
+    if (scriptRunning != 0 || scriptRunning != 2) {
         startstop.disabled = false;
     }
-})
+});
+
+// Listen for the not connected snackbar to close, just to open again to annoy the user
 notconnectedmessage.listen('MDCSnackbar:closing', () => {
     let lastMessage = notconnectedlabel.innerHTML;
     notconnectedlabel.innerHTML = "";
     notconnectedmessage.open();
     notconnectedlabel.innerHTML = lastMessage;
-})
+});
+
+// Add an event listener for the settings done button
 settingsdonebutton.addEventListener('click', function () {
-    if (moneyinput.value < 10000 || moneyinput.value == "") {
+    if (moneyinput.value < 10000 || moneyinput.value == "") { // Trash the values if they are trash
         moneyinput.value = "";
         autostopMoney = -1;
         wuy.set_autostop_money(-1);
@@ -112,7 +116,7 @@ settingsdonebutton.addEventListener('click', function () {
     let timeval = timeinput.value.split(":");
     timeval = timeval[0] * 3600 + timeval[1] * 60;
 
-    if (Number.isNaN(timeval)) {
+    if (Number.isNaN(timeval)) { // Trash the values if they are trash
         timeinput.value = "";
         autostopTime = -1;
         wuy.set_autostop_time(-1);
@@ -124,13 +128,16 @@ settingsdonebutton.addEventListener('click', function () {
     showAutostopMessages();
 });
 
+/**
+ * Display the coressponding messages for autostop
+ */
 function showAutostopMessages() {
-    if (autostopMoney != -1 && autostopTime != -1) {
+    if (autostopMoney != -1 && autostopTime != -1) { // If both are enabled
         autostopenabled.classList = "text maintext status_running";
         autostopenabled.innerHTML = "Enabled";
         autostopstatuslabel.innerHTML = "Autostop money value set to: " + autostopMoney + " and time set to: " + timeinput.value;
         autostopstatusmessage.open();
-    } else if (autostopTime != -1 || autostopMoney != -1) {
+    } else if (autostopTime != -1 || autostopMoney != -1) { // If only one is enabled
         if (autostopTime != -1) {
             autostopstatuslabel.innerHTML = "Autostop time set to: " + timeinput.value;
             autostopstatusmessage.open();
@@ -140,7 +147,7 @@ function showAutostopMessages() {
         }
         autostopenabled.classList = "text maintext status_running";
         autostopenabled.innerHTML = "Enabled";
-    } else {
+    } else { // If the feature is disabled
         autostopenabled.classList = "text maintext status_stopped";
         autostopenabled.innerHTML = "Disabled";
         autostopstatuslabel.innerHTML = "Autostop is now disabled";
@@ -148,6 +155,9 @@ function showAutostopMessages() {
     }
 }
 
+/**
+ * Set an Interval if the website is disconnected
+ */
 var x = setInterval(function () {
     try {
         wuy.connected().then(function (res) {
@@ -160,7 +170,7 @@ var x = setInterval(function () {
                     } else {
                         document.location.href = "index.html";
                     }
-            })
+                })
             }
         })
     } catch (error) {
@@ -168,8 +178,15 @@ var x = setInterval(function () {
     }
 }, 100);
 
+/**
+ * Make the sums nice and easy to read
+ * 
+ * @param {number} sum the sum to convert
+ * @param {boolean} k if thousands should be converted too
+ * @returns {string} the readable number, without an extra dollar
+ */
 function makeSumsDisplayable(sum, k = false) {
-    let negative = sum < 0;
+    let negative = sum < 0; // Check if the input is negative
     sum = Math.abs(sum);
 
     if (sum > 1000000000) {
@@ -199,14 +216,15 @@ function makeSumsDisplayable(sum, k = false) {
     }
 }
 
+/**
+ * The main function
+ */
 function main() {
     if (isMobile()) {
         console.log("Running on a mobile device");
 
         datasaverdialog.listen('MDCDialog:closing', ev => {
-            if(ev.detail.action == "yes";
-    )
-        {
+            if (ev.detail.action == "yes") {
                 console.log("Enabling Data Saver");
                 if (!initialized) init(true);
                 initialized = true;
@@ -215,7 +233,7 @@ function main() {
                 if (!initialized) init(false);
                 initialized = true;
             }
-    })
+        })
         datasaverdialog.open();
     } else {
         console.log("Running on a desktop device");
@@ -224,50 +242,54 @@ function main() {
     }
 }
 
+/**
+ * Initialize everything
+ * 
+ * @param {boolean} datasaver if datasaver should be enabled
+ */
 function init(datasaver) {
     wuy.js_get_money().then(function (val) {
-        console.log(val);
+        moneythissession.innerHTML = makeSumsDisplayable(val, false);
     });
 
     wuy.js_get_all_money().then((val) => {
         console.log("Money earned all time: " + val);
         moneyall.innerHTML = makeSumsDisplayable(val) + " $";
-})
+    });
+
     let waitTime = 500;
-    if (datasaver) waitTime = 5000;
+    if (datasaver) waitTime = 5000; // Set the wait time to 5 seconds if data saver is enabled
 
-    mainInterval = setInterval(async;
-
-    function () {
+    /**
+     * The main interval
+     */
+    mainInterval = setInterval(async function () {
         try {
-            await;
-            asyncMain();
-        } catch (error) {
-            clearInterval(mainInterval);
+            await asyncMain();
+        } catch (error) { // Go, play fetch!
+            clearInterval(mainInterval); // Clear this interval
             disconnected();
         }
-    }
-
-,
-    waitTime;
-)
+    }, waitTime);
 }
 
+/**
+ * A function to be called if this client is disconnected
+ */
 function disconnected() {
     console.log("Connection lost.");
-    let timeUntilRetry = 10;
+    let timeUntilRetry = 10; // Wait time until retry
     notconnectedlabel.innerHTML = "Connection lost.";
-    notconnectedmessage.open();
-    let x = setInterval(async () => {
-        if(timeUntilRetry < 1;
-)
-    {
+    notconnectedmessage.open(); // Notify the user about this disconnect
+
+    let x = setInterval(async () => { // Start an Interval to time the retries
+        if (timeUntilRetry < 1) {
             notconnectedlabel.innerHTML = "Trying to reconnect...";
             timeUntilRetry = 10;
             let connected = false;
+
             try {
-                connected = await;
-                wuy.connected();
+                connected = await wuy.connected();
             } catch (error) {
                 connected = false;
             }
@@ -277,84 +299,89 @@ function disconnected() {
                 notconnectedlabel.innerHTML = "Reconnected. Reloading page in 3 seconds";
                 setTimeout(() => {
                     location.reload();
-            },
-                3000;
-            )
+                }, 3000)
             }
         } else {
             notconnectedlabel.innerHTML = "Connection lost. Retrying in " + timeUntilRetry + " seconds.";
             startstop.disabled = true;
             timeUntilRetry--;
         }
-},
-    1000;
-)
+    }, 1000);
 }
 
-async;
-
-function asyncMain() {
-    let time = await;
-    wuy.js_get_time();
+/**
+ * The async main function
+ */
+async function asyncMain() {
+    // Get the time running
+    let time = await wuy.js_get_time();
     if (time != lastTime) {
         timeDisp.innerHTML = convertToTime(time);
         lastTime = time;
     }
 
-    let won = await;
-    wuy.get_races_won();
+    // Get the races won
+    let won = await wuy.get_races_won();
     raceswon.innerHTML = won;
 
-    let lost = await;
-    wuy.get_races_lost();
+    // get the races lost
+    let lost = await wuy.get_races_lost();
+    // Do some heavy mathematics to calculate a winprobability
     if ((won + lost) > 0) winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
 
+    // Set the money made
     wuy.js_get_money().then(moneyMade => {
-        if(time > 0;
-)
-    moneythishour.innerHTML = makeSumsDisplayable(moneyMade * (3600 / time), true) + " $/hr";
-})
+        moneythissession.innerHTML = makeSumsDisplayable(moneyMade, false) + " $";
+        if (time > 0)
+            moneythishour.innerHTML = makeSumsDisplayable(moneyMade * (3600 / time), true) + " $/hr";
+    });
+
+    // Set the overall money made values
     wuy.js_get_all_money().then(allMoney => {
         moneyall.innerHTML = makeSumsDisplayable(allMoney) + " $";
-})
+    });
+
+    // Check if the script is already running
     wuy.js_get_running().then(running => {
         let statusChanged = scriptRunning != running;
         scriptRunning = running;
-        if (!statusChanged) return;
+
+        if (!statusChanged) return; // If the status has not changed, do nothing
+
         gtanotrunningmessage.close();
 
-        if (running == 1) {
+        if (running == 1) { // Running
             statusinfo.innerHTML = "Running";
             statusinfo.className = "text status_running maintext";
             startstop.innerHTML = "stop";
             start = false;
             startstop.disabled = false;
-        } else if (running == -1) {
+        } else if (running == -1) { // Stopped
             statusinfo.innerHTML = "Stopped";
             statusinfo.className = "text status_stopped maintext";
             startstop.innerHTML = "start";
             startstop.disabled = false;
-        } else if (running == 0) {
+        } else if (running == 0) { // Stopping
             statusinfo.innerHTML = "Stopping";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
-        } else if (running == 2) {
+        } else if (running == 2) { // Starting
             statusinfo.innerHTML = "Starting";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
         }
-})
-    await;
-    getAutostopSettings();
+    });
+
+    // Get the autostop settings
+    await getAutostopSettings();
 }
 
-async;
-
-function getAutostopSettings() {
-    let nTime = await;
-    wuy.get_autostop_time();
-    let nMoney = await;
-    wuy.get_autostop_money();
+/**
+ * Get new autostop settings, if available
+ */
+async function getAutostopSettings() {
+    let nTime = await wuy.get_autostop_time();
+    let nMoney = await wuy.get_autostop_money();
 
     if (nTime != autostopTime || nMoney != autostopMoney) {
         autostopTime = nTime;
@@ -366,6 +393,12 @@ function getAutostopSettings() {
     }
 }
 
+/**
+ * Convert a number to a readable time
+ * 
+ * @param {number} secs the number to convert
+ * @returns {string} the readable time
+ */
 function convertToTime(secs) {
     var hours = Math.floor((secs % 86400) / 3600);
     var minutes = Math.floor((secs % 3600) / 60);
@@ -376,6 +409,11 @@ function convertToTime(secs) {
     return hours + ':' + minutes + ':' + seconds;
 }
 
+/**
+ * Check if the client is a mobile device
+ * 
+ * @returns {boolean} true if the client is indeed a mobile device
+ */
 function isMobile() {
     try {
         if (/Android|webOS|iPhone|iPad|iPod|pocket|psp|kindle|avantgo|blazer|midori|Tablet|Palm|maemo|plucker|phone|BlackBerry|symbian|IEMobile|mobile|ZuneWP7|Windows Phone|Opera Mini/i.test(navigator.userAgent)) {

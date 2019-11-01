@@ -143,12 +143,18 @@ def main_f():
     betting_ai = ai.Betting()
     logging.debug("Betting AI initialized")
     initializing = False
+    counter = 0
     while run_main:
         if window_open("Grand Theft Auto V"):
             logger.debug("GTA V running")
-            set_positions()
-            if winnings_ai_con is not None:
-                set_winnings_positions()
+            set_gta_v_running(True)
+            if (counter % 40) == 0:  # Set only every 20 seconds
+                set_positions()
+                if winnings_ai_con is not None:
+                    set_winnings_positions()
+                counter = 0
+            else:
+                counter += 1
         else:
             logger.debug("GTA V not running")
             if running and stopping:
@@ -215,7 +221,7 @@ def set_gta_v_running(val):
 def start_winnings_ai():
     global winnings_ai, winnings_ai_con
     logger.debug("Starting winnings ai")
-    if True:  # TODO set back to 'debug'
+    if True:
         logger.warning("Winnings_ai is starting in debug mode")
         winnings_ai = Popen(["python", "winnings.py"])  # used for testing
     else:
@@ -436,6 +442,8 @@ def init_ai():
         webserver.initialized()
         logger.debug("All AIs successfully initialized")
     except Exception as e:
+        if eel_running:
+            eel.exception()
         logger.exception(e)
 
 
@@ -522,13 +530,16 @@ def start_ui():
         eel.init('ui', allowed_extensions=['.js', '.html', '.css'])
     except Exception as e:
         logger.exception(e)
+        return
 
     if debug:
         options = {'mode': 'chrome-app', 'host': 'localhost', 'port': 8025}
         try:
-            eel.start('main.html', size=(700, 810), options=options, callback=eel_kill, block=True)
+            eel.start('main.html', size=(700, 810), options=options, block=True)
+            eel_running = True
         except Exception as e:
             logger.exception(e)
+            return
     else:
         options = {
             'mode': 'custom',
@@ -539,8 +550,10 @@ def start_ui():
 
         try:
             eel.start('main.html', size=(700, 810), options=options, callback=eel_kill)
+            eel_running = True
         except Exception as e:
             logger.exception(e)
+            return
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -572,6 +585,7 @@ def start_web_server():
 def main():
     global logger
     pyautogui.FAILSAFE = False
+    customlogger.delete_old_log()
     logger = customlogger.create_logger("autobet", mode=customlogger.FILE)
     logger.debug("Started new session --------------------------------------------------------------------------------")
 
@@ -584,11 +598,13 @@ def main():
                                     get_all_money_function=get_all_winnings, get_money_function=get_current_winnings,
                                     get_races_won_function=get_races_won, get_races_lost_function=get_races_lost,
                                     get_time_function=get_time, get_running_function=get_running,
-                                    get_gta_v_running_function=gta_v_running)
+                                    get_gta_v_running_function=get_gta_running)
 
             threading.Thread(target=start_ui, args=()).start()
             start_web_server()
     except Exception as e:
+        if eel_running:
+            eel.exception()
         logger.exception(e)
     finally:
         kill()

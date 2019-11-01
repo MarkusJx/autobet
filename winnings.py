@@ -7,11 +7,14 @@ import customlogger
 
 import ai
 
-"""
-import numpy.random.common
+
+"""import numpy.random.common
 import numpy.random.bounded_integers
 import numpy.random.entropy
+import tensorflow_core.python.pywrap_tensorflow
+import tensorflow.python.platform
 """
+
 
 winnings_ai = None
 

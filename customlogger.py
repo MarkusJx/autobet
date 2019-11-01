@@ -37,3 +37,7 @@ def create_logger(name, mode=CONSOLE, level=logging.DEBUG):
     logger.info("Logger initialized.")
 
     return logger
+
+
+def delete_old_log():
+    open('output.log', 'w').close()
