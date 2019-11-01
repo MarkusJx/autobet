@@ -40,6 +40,7 @@ def check_stop_conditions():
             autostop_money = -1
             autostop_time = -1
             _stop_function()
+            logger.debug("Stopped because an autostop condition was reached: Time")
         else:
             logger.error("stop_function not defined")
     elif autostop_money != -1 and _get_money_function() > autostop_money:
@@ -47,6 +48,7 @@ def check_stop_conditions():
             autostop_money = -1
             autostop_time = -1
             _stop_function()
+            logger.debug("Stopped because an autostop condition was reached: Money")
         else:
             logger.error("stop_function not defined")
 
@@ -157,7 +159,7 @@ class main(wuy.Server):
 
     def set_autostop_money(self, val):
         global autostop_money
-        autostop_money = val
+        autostop_money = int(val)
         self._pass()
 
     def get_autostop_money(self):
@@ -166,7 +168,7 @@ class main(wuy.Server):
 
     def set_autostop_time(self, val):
         global autostop_time
-        autostop_time = val
+        autostop_time = int(val)
         self._pass()
 
     def get_autostop_time(self):
