@@ -1,22 +1,29 @@
-import os
-import threading
-from subprocess import Popen, PIPE
-
-import eel
-import numpy as np
-import pyautogui
-import win32api
-import win32con
-from PIL import ImageGrab
-from system_hotkey import SystemHotkey
-from win32process import DETACHED_PROCESS
-import webserver
-import logging
-import socket
-
-import ai
 import customlogger
-from utils import get_window_size, window_open
+customlogger.delete_old_log()
+logger = customlogger.create_logger("autobet", mode=customlogger.FILE)
+
+try:
+    import os
+    import threading
+    from subprocess import Popen, PIPE
+
+    import eel
+    import numpy as np
+    import pyautogui
+    import win32api
+    import win32con
+    from PIL import ImageGrab
+    from system_hotkey import SystemHotkey
+    from win32process import DETACHED_PROCESS
+    import webserver
+    import logging
+    import socket
+
+    import ai
+    from utils import get_window_size, window_open
+except Exception as ex:
+    logger.exception(ex)
+    os._exit(1)
 
 """
 import numpy.random.common
@@ -162,7 +169,7 @@ def main_f():
                 running = False
             eel.sleep(10)
             set_gta_v_running(False)
-            continue  # TODO add error
+            continue
 
         if running:
             logger.debug("Starting main loop")
@@ -221,7 +228,7 @@ def set_gta_v_running(val):
 def start_winnings_ai():
     global winnings_ai, winnings_ai_con
     logger.debug("Starting winnings ai")
-    if True:
+    if debug:
         logger.warning("Winnings_ai is starting in debug mode")
         winnings_ai = Popen(["python", "winnings.py"])  # used for testing
     else:
@@ -345,6 +352,7 @@ def get_time():
     return time_running
 
 
+@eel.expose
 def get_gta_running():
     return gta_v_running
 
@@ -533,23 +541,27 @@ def start_ui():
         return
 
     if debug:
-        options = {'mode': 'chrome-app', 'host': 'localhost', 'port': 8025}
+        # options = {'mode': 'chrome-app', 'host': 'localhost', 'port': 8025}
         try:
-            eel.start('main.html', size=(700, 810), options=options, block=True)
+            eel.start('main.html', size=(700, 810), mode='chrome-app', host='localhost', port=8025,
+                      block=True, close_callback=eel_kill)
             eel_running = True
         except Exception as e:
             logger.exception(e)
             return
     else:
+        """
         options = {
             'mode': 'custom',
             'host': 'localhost',
             'port': 8025,
-            'args': ['electron-win32-x64/electron.exe', '.']
+            'cmdline_args': ['electron-win32-x64/electron.exe', '.']
         }
+        """
 
         try:
-            eel.start('main.html', size=(700, 810), options=options, callback=eel_kill)
+            eel.start('main.html', size=(700, 810), mode='custom', host='localhost', port=8025,
+                      cmdline_args=['electron-win32-x64/electron.exe', '.'], close_callback=eel_kill)
             eel_running = True
         except Exception as e:
             logger.exception(e)
@@ -585,8 +597,9 @@ def start_web_server():
 def main():
     global logger
     pyautogui.FAILSAFE = False
-    customlogger.delete_old_log()
-    logger = customlogger.create_logger("autobet", mode=customlogger.FILE)
+    if logger is None:
+        print("Logger is not defined!")
+        logger = customlogger.create_logger("autobet", mode=customlogger.FILE)
     logger.debug("Started new session --------------------------------------------------------------------------------")
 
     try:
