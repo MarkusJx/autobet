@@ -4,6 +4,10 @@ var statusinfo = document.getElementById("statusinfo");
 var messagecontainer = document.getElementById("messagecontainer");
 var frosted_glass = document.getElementById("frosted-glass");
 
+var gtanotrunningmessage = document.getElementById("gta-not-running-message");
+gtanotrunningmessage = new mdc.snackbar.MDCSnackbar(gtanotrunningmessage);
+gtanotrunningmessage.timeoutMs = 10000;
+
 var paused = 0;
 var running = 0;
 var pausing = 0;
@@ -35,6 +39,10 @@ function keycomb_stop() {
 }
 
 function start() {
+  if (!gta_running) {
+    gtanotrunningmessage.open();
+    return;
+  }
   startstop.disabled = true;
   eel.set_starting(true);
   let time = 15;
@@ -93,7 +101,6 @@ function startTimer() {
     time += 1;
     eel.add_sec();
     timeDisp.innerHTML = convertToTime(time);
-    console.log(time)
   }, 1000);
 }
 

@@ -31,6 +31,7 @@ errordialog = new mdc.dialog.MDCDialog(errordialog);
 var moneyMade = 0;
 var won = 0;
 var lost = 0;
+var gta_running = false;
 
 function showQRCode() {
     qrdialog.open();
@@ -134,6 +135,7 @@ eel.expose(set_gta_running);
 
 function set_gta_running(val) {
     console.log("set gta v running to " + val);
+    gta_running = val;
 }
 
 // Exit the current window if the underlying python process is closing
@@ -154,8 +156,8 @@ function setQRCode(ip) {
     });
 }
 
-async; function setIPs() {
-    let ip = await; eel.get_ip()();
+async function setIPs() {
+    let ip = await eel.get_ip()();
     setQRCode(ip);
     weblink.innerHTML = "http://" + ip + ":8027";
 }
