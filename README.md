@@ -18,8 +18,8 @@ Press the 'start' button on the UI (a countdown will start, giving you time to h
 After starting, the script will automatically bet, refresh the screens and earn about 300k - 500k per hour. Fully AFK. Please don't move your mouse. Be aware that Rockstar Games might ban you and will ban you after making a lot of money (about 10 - 20 mil) for a week from betting.
 
 BTW, this script does **not** use any glitches or inject code into the game. Just plain taking-over-your-mouse-action.
-
-**Keep in mind that there's no guarantee that Rockstar will not ban you for using this script**
+**Keep in mind that there's no guarantee that Rockstar will not ban you for using this script**.
+It is pretty unlikely for them to do so but it might happen
 
 ## Download
 
