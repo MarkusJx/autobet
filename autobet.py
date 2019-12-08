@@ -18,6 +18,7 @@ try:
     import webserver
     import logging
     import socket
+    import shutil
 
     import ai
     from utils import get_window_size, window_open
@@ -61,7 +62,6 @@ time_running = 0
 
 dummy = False
 debug = False
-logger = None
 
 
 def set_positions():
@@ -590,8 +590,19 @@ def start_electron():
 # ---------------------------------------------------------------------------------------------------------------------
 
 def start_web_server():
-    logging.debug("Starting web server...")
+    logger.debug("Starting web server...")
     webserver.start()
+
+
+def delete_electron_cache():
+    if not os.path.exists(os.getenv('APPDATA') + "\\Electron\\Cache"):
+        logger.debug("Not deleting electron cache because the file does not exist")
+        return
+    logger.debug("Deleting electron cache...")
+    try:
+        shutil.rmtree(os.getenv('APPDATA') + "\\Electron\\Cache")
+    except Exception as e:
+        logger.exception(e)
 
 
 def main():
@@ -601,9 +612,18 @@ def main():
         print("Logger is not defined!")
         logger = customlogger.create_logger("autobet", mode=customlogger.FILE)
     logger.debug("Started new session --------------------------------------------------------------------------------")
+    delete_electron_cache()
 
     try:
-        if update_available():
+        logger.log("Checking for updates...")
+        update_avail = update_available()
+    except Exception as e:
+        logging.debug("Update check failed, skipping this step. Stack trace:")
+        logging.error(e)
+        update_avail = False
+
+    try:
+        if update_avail:
             logger.debug("Update available, just starting electron")
             start_electron()
         else:
