@@ -1,5 +1,8 @@
 # GTA-Online-Autobet
 
+![Version](https://img.shields.io/badge/Version-0.4-green)
+![Latest release](https://img.shields.io/badge/Latest_release-stable-green)
+
 A simple GTA Online horseracing-autobetting-bot
 
 ## Usage
