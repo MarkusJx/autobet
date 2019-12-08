@@ -19,7 +19,7 @@ After starting, the script will automatically bet, refresh the screens and earn 
 
 BTW, this script does **not** use any glitches or inject code into the game. Just plain taking-over-your-mouse-action.
 **Keep in mind that there's no guarantee that Rockstar will not ban you for using this script**.
-It is pretty unlikely for them to do so but it might happen
+It is pretty unlikely for them to do so but it might happen.
 
 ## Download
 
