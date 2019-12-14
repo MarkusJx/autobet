@@ -28,25 +28,33 @@ running = 52
 
 # Functions used for training ---------------------------------------------------------------------------------
 
+# img size: 110 x 46
+
+xLoc = 240
+Loc = 464, 628, 790, 952, 1114, 1276
+
 
 def resize():
-   path = "train_data_winnings/train/zero"
-   for f in os.listdir(path):
+    path = "images"
+    n = 0
+    for f in os.listdir(path):
         img = cv2.imread(os.path.join(path, f))
         height, width, channels = img.shape
-        y1 = 1060
-        y2 = 1146
-        x1 = 1286
-        x2 = 1590
-        if height == 1080:
-            multiplierW = 1920 / 2560
-            multiplierH = 1080 / 1440
-            y1 = round(y1 * multiplierH)
-            y2 = round(y2 * multiplierH)
-            x1 = round(x1 * multiplierW)
-            x2 = round(x2 * multiplierW)
-        crop_img = img[y1:y2, x1:x2]
-        cv2.imwrite(os.path.join(path, f), crop_img)
+        for i in range(0, 5):
+            x1 = xLoc
+            y1 = Loc[i]
+            y2 = y1 + 46
+            x2 = x1 + 110
+            if height == 1080:
+                multiplierW = 1920 / 2560
+                multiplierH = 1080 / 1440
+                y1 = round(y1 * multiplierH)
+                y2 = round(y2 * multiplierH)
+                x1 = round(x1 * multiplierW)
+                x2 = round(x2 * multiplierW)
+            crop_img = img[y1:y2, x1:x2]
+            cv2.imwrite(os.path.join("new_img", str(n) + ".jpg"), crop_img)
+            n += 1
 
 
 def save_running(img):
@@ -90,6 +98,7 @@ def train_winnings():
     model_trainer.trainModel(num_objects=5, num_experiments=300, enhance_data=True, batch_size=32,
                              show_network_summary=True)
 
+
 def train_betting():
     model_trainer = ModelTraining()
     model_trainer.setModelTypeAsResNet()
@@ -121,23 +130,20 @@ class Betting:
         self.prediction.setJsonPath("models/betting.json")
         self.prediction.loadModel(num_objects=2)
 
-    def predict_betting(self, img, multiplier_w, multiplier_h):
-        y1 = round(y1b * multiplier_h)
-        y2 = round(y2b * multiplier_h)
-        x1 = round(x1b * multiplier_w)
-        x2 = round(x2b * multiplier_w)
-        crop_img = img[y1:y2, x1:x2]
-        self.logger.debug("multiplier_h: " + str(multiplier_h))
-        self.logger.debug("multiplier_w: " + str(multiplier_w))
-        return self.prediction.predictImage(image_input=crop_img, result_count=1, input_type="array")
+    def predict_betting(self, img):
+        # y1 = round(y1b * multiplier_h)
+        # y2 = round(y2b * multiplier_h)
+        # x1 = round(x1b * multiplier_w)
+        # x2 = round(x2b * multiplier_w)
+        # crop_img = img[y1:y2, x1:x2]
+        # self.logger.debug("multiplier_h: " + str(multiplier_h))
+        # self.logger.debug("multiplier_w: " + str(multiplier_w))
+        return self.prediction.predictImage(image_input=img, result_count=1, input_type="array")
 
-    def usable(self, img, multiplier_w, multiplier_h):
-        predict, probability = self.predict_betting(img, multiplier_w, multiplier_h)
+    def usable(self, img):
+        predict, probability = self.predict_betting(img)
         self.logger.debug(str(predict) + ", " + str(probability))
-        if predict[0] == "usable":
-            return True
-        else:
-            return False
+        return int(predict[0])
 
 
 class Winnings:
