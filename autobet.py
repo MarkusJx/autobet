@@ -63,6 +63,8 @@ time_running = 0
 dummy = False
 debug = False
 
+yLocations = 464, 628, 790, 952, 1114, 1276
+
 
 def set_positions():
     logging.debug("Getting positions of GTA V window")
@@ -116,9 +118,9 @@ def refresh_odds():
     click(1906, 1186)
 
 
-def place_bet():
+def place_bet(y):
     logging.debug("Placing bet")
-    click(634, 448)
+    click(634, y)
 
     click(2028, 680)
     for x in range(32):
@@ -142,6 +144,31 @@ def start_main_f():
         main_f()
     except Exception as e:
         logger.exception(e)
+
+# img size: 110 x 46
+
+
+# GTA Online version 1.49 fix
+def get_pos(_betting_ai, img):
+    res = []
+    for i in range(0, 5):
+        y1 = round(yLocations[i] * multiplierH)
+        y2 = round((yLocations[i] + 46) * multiplierH)
+        x1 = round(240 * multiplierW)
+        x2 = round(350 * multiplierW)
+        crop_img = img[y1:y2, x1:x2]
+        b_res = _betting_ai.usable(crop_img)
+        if (b_res != 10 and b_res in res) or b_res == 1:
+            return -1
+
+        res[i] = b_res
+
+    lowest = None
+    for i in range(0, 5):
+        if lowest is None or lowest[0] > res[i]:
+            lowest = [res[i], i]
+
+    return yLocations[lowest[1]]
 
 
 def main_f():
@@ -173,27 +200,21 @@ def main_f():
 
         if running:
             logger.debug("Starting main loop")
-        refreshes = 0
         while running:
             screen = ImageGrab.grab(bbox=(xPos, yPos, width, height))
-            if betting_ai.usable(np.array(screen), multiplierW, multiplierH):
-                refreshes = 0
-                place_bet()
+            pos = get_pos(betting_ai, np.array(screen))
+            if pos != -1:
+                place_bet(pos)
                 update_winnings(-10000)
                 logger.debug("Sleeping for 34 seconds")
                 eel.sleep(34)
                 get_winnings_py()
                 reset()
             else:
-                if refreshes > 3:
-                    refreshes = 0
-                    avoid_kick()
-                    logger.debug("Sleeping for 34 seconds")
-                    eel.sleep(34)
-                    reset()
-                else:
-                    refresh_odds()
-                    refreshes = refreshes + 1
+                avoid_kick()
+                logger.debug("Sleeping for 34 seconds")
+                eel.sleep(34)
+                reset()
         stopping = False
         eel.sleep(0.5)
     logger.debug("Stopped main thread")
