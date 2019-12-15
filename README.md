@@ -5,8 +5,6 @@
 
 A simple GTA Online horseracing-autobetting-bot
 
-### **The betting has been fixed since Patch 1.49, an update will follow**
-
 ## Usage
 
 For this to work, you need at least **100.000** chips in-Game.
