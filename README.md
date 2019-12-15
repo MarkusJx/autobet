@@ -1,6 +1,6 @@
 # GTA-Online-Autobet
 
-![Version](https://img.shields.io/badge/Version-0.4-green)
+![Version](https://img.shields.io/badge/Version-0.5-green)
 ![Latest release](https://img.shields.io/badge/Latest_release-stable-green)
 
 A simple GTA Online horseracing-autobetting-bot
@@ -25,6 +25,6 @@ It is pretty unlikely for them to do so but it might happen.
 
 ## Download
 
-Pick the newest version under the [Releases](https://github.com/MarkusJx/GTA-Online-Autobet/releases) section.
+Pick the newest version under the [Releases](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest) section.
 
 Installing the program may also be a great Idea.
