@@ -108,16 +108,6 @@ def right_click(x, y, move=True):
     click(x, y, move, right=True)
 
 
-def refresh_odds():
-    logging.debug("Refreshing odds")
-    click(1670, 1312)
-
-    right_click(1670, 1312, move=False)
-    click(1670, 1312, move=False)
-
-    click(1906, 1186)
-
-
 def place_bet(y):
     logging.debug("Placing bet")
     click(634, y)
@@ -150,7 +140,7 @@ def start_main_f():
 
 # GTA Online version 1.49 fix
 def get_pos(_betting_ai, img):
-    res = []
+    res = [-1, -1, -1, -1, -1, -1]
     for i in range(0, 5):
         y1 = round(yLocations[i] * multiplierH)
         y2 = round((yLocations[i] + 46) * multiplierH)
@@ -394,7 +384,7 @@ def get_running():
 
 # miscellaneous -------------------------------------------------------------------------------------------------------
 def avoid_kick():
-    logger.debug("Avoiding being banned from gambling for 3 minutes")
+    logger.debug("Should not bet on this one, skipping...")
     click(633, 448)
     click(1720, 1036)
 
