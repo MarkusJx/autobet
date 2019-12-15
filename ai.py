@@ -128,7 +128,7 @@ class Betting:
         self.prediction.setModelTypeAsResNet()
         self.prediction.setModelPath("models/betting.h5")
         self.prediction.setJsonPath("models/betting.json")
-        self.prediction.loadModel(num_objects=2)
+        self.prediction.loadModel(num_objects=10)
 
     def predict_betting(self, img):
         # y1 = round(y1b * multiplier_h)
