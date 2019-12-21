@@ -52,6 +52,7 @@ eel.expose(exception);
 function exception() {
     errordialog.open();
     errordialog.listen("MDCDialog:closed", function () {
+        eel.kill();
         window.close();
     });
 }

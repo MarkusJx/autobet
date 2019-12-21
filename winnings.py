@@ -1,16 +1,6 @@
 import socket
 import sys
 
-"""
-import numpy.random.common
-import numpy.random.bounded_integers
-# import numpy.random.entropy
-# import tensorflow_core.python.pywrap_tensorflow
-import tensorflow
-#import tensorflow_core.python
-import tensorflow.python.platform
-"""
-
 import numpy as np
 from PIL import ImageGrab
 import customlogger
