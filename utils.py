@@ -2,7 +2,6 @@ import ctypes
 
 import win32gui
 
-
 def get_window_title(w_name):
     enum_windows = ctypes.windll.user32.EnumWindows
     enum_windows_process = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))

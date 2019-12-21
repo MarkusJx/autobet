@@ -1,3 +1,5 @@
+import win32gui
+
 import customlogger
 customlogger.delete_old_log()
 logger = customlogger.create_logger("autobet", mode=customlogger.FILE)
@@ -19,18 +21,13 @@ try:
     import logging
     import socket
     import shutil
+    import ctypes
 
     import ai
     from utils import get_window_size, window_open
 except Exception as ex:
     logger.exception(ex)
     os._exit(1)
-
-"""
-import numpy.random.common
-import numpy.random.bounded_integers
-import numpy.random.entropy
-"""
 
 winnings = 0
 winnings_all = 0
@@ -90,6 +87,11 @@ def click(x, y, move=True, right=False):
 
         if move:
             pyautogui.moveTo(x, y, duration=0.25)
+            ctypes.windll.user32.SetCursorPos(x, y)
+            x1, y1 = win32gui.GetCursorPos()
+            if x1 != x or y1 != y:
+                logger.critical("Mouse did not move! Exiting.")
+                eel.exception()
 
         if right:
             win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, x, y, 0, 0)
@@ -397,6 +399,7 @@ def eel_kill(page, sockets):
     kill()
 
 
+@eel.expose
 def kill():
     global run_main
     logger.debug("Killing program")

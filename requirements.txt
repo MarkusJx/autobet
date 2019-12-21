@@ -33,7 +33,6 @@ matplotlib==3.1.2
 mccabe==0.6.1
 mkl-service==2.3.0
 multidict==4.5.2
-nuitka==0.6.6rc7
 numpy==1.17.3
 olefile==0.46
 pefile==2019.4.18
