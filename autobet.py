@@ -190,23 +190,36 @@ def main_f():
             set_gta_v_running(False)
             continue
 
+        def _run_main():
+            while running:
+                screen = ImageGrab.grab(bbox=(xPos, yPos, width, height))
+                pos = get_pos(betting_ai, np.array(screen))
+                if pos != -1:
+                    if not running:
+                        return
+                    place_bet(pos)
+                    update_winnings(-10000)
+                    if not running:
+                        return
+                    logger.debug("Sleeping for 34 seconds")
+                    eel.sleep(17)
+                    if not running:
+                        logger.debug("The script has been stopped, skipping after 17 seconds...")
+                        return
+                    eel.sleep(17)
+                    if not running:
+                        return
+                    get_winnings_py()
+                    reset()
+                else:
+                    avoid_kick()
+                    logger.debug("Sleeping for 34 seconds")
+                    eel.sleep(34)
+                    reset()
+
         if running:
             logger.debug("Starting main loop")
-        while running:
-            screen = ImageGrab.grab(bbox=(xPos, yPos, width, height))
-            pos = get_pos(betting_ai, np.array(screen))
-            if pos != -1:
-                place_bet(pos)
-                update_winnings(-10000)
-                logger.debug("Sleeping for 34 seconds")
-                eel.sleep(34)
-                get_winnings_py()
-                reset()
-            else:
-                avoid_kick()
-                logger.debug("Sleeping for 34 seconds")
-                eel.sleep(34)
-                reset()
+            _run_main()
         stopping = False
         eel.sleep(0.5)
     logger.debug("Stopped main thread")
@@ -254,6 +267,7 @@ def start_winnings_ai():
     sock.listen(1)
     winnings_ai_con, client_address = sock.accept()
     winnings_ai_con.setblocking(True)
+    winnings_ai_con.settimeout(7)
     if client_address[0] != "127.0.0.1":
         logger.critical("A non-local client tried to connect to the server. Closing connection.")
         winnings_ai_con.close()
@@ -284,7 +298,11 @@ def set_winnings_positions():
 
 def get_winnings_py():
     winnings_ai_con.sendall(int.to_bytes(1, 1, "big"))
-    res = winnings_ai_con.recv(1)
+    try:
+        res = winnings_ai_con.recv(1)
+    except Exception:
+        logger.error("Could not receive winnings prediction, these won't be accurate from now on")
+        return
     res = int.from_bytes(res, "big")
 
     logger.debug("Results: " + str(res))
@@ -428,6 +446,9 @@ def kill():
 def start_stop():
     if not starting:
         if not running and not stopping:
+            if not gta_v_running:
+                logger.debug("Tried to start the script while the game was not running, skipping this request")
+                return
             eel.keycomb_start()
             start_script()
         else:
