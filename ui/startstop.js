@@ -17,7 +17,7 @@ var time = 0;
 startstop.addEventListener('click', function () {
   if (!running) {
     start();
-  } else if (!paused & !pausing) {
+  } else if (!paused && !pausing) {
     pause();
   }
 });
