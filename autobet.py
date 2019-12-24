@@ -172,13 +172,16 @@ def main_f():
     counter = 0
     while run_main:
         if window_open("Grand Theft Auto V"):
-            logger.debug("GTA V running")
-            set_gta_v_running(True)
-            if (counter % 40) == 0:  # Set only every 20 seconds
+            if (counter % 20) == 0:  # Set only every 10 seconds
+                logger.debug("GTA V running")
+                set_gta_v_running(True)
                 set_positions()
                 if winnings_ai_con is not None:
-                    set_winnings_positions()
-                counter = 0
+                    try:
+                        set_winnings_positions()
+                    except Exception:
+                        logger.warn("Could not send positions to winnings, this might not be an error")
+                counter = 1
             else:
                 counter += 1
         else:
