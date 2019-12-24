@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Log files**
-Add the output.log
+Add the output.log.
 It can be found at:
 ```C:\Users\{Username}\AppData\Local\Programs\GTA Online Autobet\output.log```
 
