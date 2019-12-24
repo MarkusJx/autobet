@@ -267,7 +267,6 @@ def start_winnings_ai():
     sock.listen(1)
     winnings_ai_con, client_address = sock.accept()
     winnings_ai_con.setblocking(True)
-    winnings_ai_con.settimeout(7)
     if client_address[0] != "127.0.0.1":
         logger.critical("A non-local client tried to connect to the server. Closing connection.")
         winnings_ai_con.close()
@@ -280,6 +279,7 @@ def start_winnings_ai():
         logger.debug("winnings_ai initialized successfully")
     else:
         logger.debug("winnings_ai returned abnormal signal")
+    winnings_ai_con.settimeout(7)
 
 
 def set_winnings_positions():
