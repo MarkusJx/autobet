@@ -159,8 +159,8 @@ function setQRCode(ip) {
 
 async function setIPs() {
     let ip = await eel.get_ip()();
-    setQRCode(ip);
     weblink.innerHTML = "http://" + ip + ":8027";
+    setQRCode(ip);
 }
 
 weblink.addEventListener('click', () => {
