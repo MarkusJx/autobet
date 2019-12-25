@@ -15,6 +15,7 @@ from imageai.Prediction.Custom import ModelTraining
 import cv2
 import numpy as np
 import os
+import random
 
 usableI = 197
 unusable = 215
@@ -23,6 +24,7 @@ p40 = 23
 p50 = 18
 lost = 129
 running = 52
+
 
 # Functions used for training ---------------------------------------------------------------------------------
 
@@ -33,25 +35,18 @@ Loc = 464, 628, 790, 952, 1114, 1276
 
 
 def resize():
-    path = "images"
-    n = 0
+    random.seed()
+    path = "1"
+    n = 2
     for f in os.listdir(path):
         img = cv2.imread(os.path.join(path, f))
-        height, width, channels = img.shape
-        for i in range(0, 5):
-            x1 = xLoc
-            y1 = Loc[i]
-            y2 = y1 + 46
-            x2 = x1 + 110
-            if height == 1080:
-                multiplierW = 1920 / 2560
-                multiplierH = 1080 / 1440
-                y1 = round(y1 * multiplierH)
-                y2 = round(y2 * multiplierH)
-                x1 = round(x1 * multiplierW)
-                x2 = round(x2 * multiplierW)
-            crop_img = img[y1:y2, x1:x2]
-            cv2.imwrite(os.path.join("new_img", str(n) + ".jpg"), crop_img)
+        #height, width, channels = img.shape
+        for i in range(0, 1000):
+            rand = random.random()
+            x = int(img.shape[1] * rand)
+            y = int(img.shape[0] * rand)
+            crop_img = img[0:y, 0:x]
+            cv2.imwrite(os.path.join("1", str(n) + ".jpg"), crop_img)
             n += 1
 
 

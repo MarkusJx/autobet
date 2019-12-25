@@ -143,7 +143,7 @@ def start_main_f():
 # GTA Online version 1.49 fix
 def get_pos(_betting_ai, img):
     res = [-1, -1, -1, -1, -1, -1]
-    for i in range(0, 5):
+    for i in range(0, 6):
         y1 = round(yLocations[i] * multiplierH)
         y2 = round((yLocations[i] + 46) * multiplierH)
         x1 = round(240 * multiplierW)
@@ -156,7 +156,7 @@ def get_pos(_betting_ai, img):
         res[i] = b_res
 
     lowest = None
-    for i in range(0, 5):
+    for i in range(0, 6):
         if lowest is None or lowest[0] > res[i]:
             lowest = [res[i], i]
 
