@@ -39,7 +39,7 @@ BTW, this script does **not** use any glitches or inject code into the game. Jus
 **Keep in mind that there's no guarantee that Rockstar will not ban you for using this script**.
 It is pretty unlikely for them to do so but it might happen.
 
-And nobody cares about your screen resolution or if you are playing in windowed or fullscreen mode, you just have to follow the steps described above
+And nobody cares about your screen resolution, you just have to follow the steps described above. But it will work best in full screen mode
 
 ## Compiling yourself
 
