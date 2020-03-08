@@ -48,11 +48,11 @@ showqrbutton.addEventListener('click', function () {
     showQRCode();
 });
 
-cppJsLib.expose(exception);
+eel.expose(exception);
 function exception() {
     errordialog.open();
     errordialog.listen("MDCDialog:closed", function () {
-        cppJsLib.kill();
+        eel.kill();
         window.close();
     });
 }
@@ -88,7 +88,7 @@ function makeSumsDisplayable(sum, k = false) {
     }
 }
 
-cppJsLib.expose(init_started);
+eel.expose(init_started);
 function init_started() {
     progressbar.className = "mdc-linear-progress mdc-linear-progress--indeterminate";
     messagecontainer.className = "";
@@ -97,7 +97,7 @@ function init_started() {
     startstop.disabled = true;
 }
 
-cppJsLib.expose(init_finished);
+eel.expose(init_finished);
 function init_finished() {
     progressbar.className = "mdc-linear-progress";
     frosted_glass.className = "frosted-glass-unblur";
@@ -106,7 +106,7 @@ function init_finished() {
     startstop.disabled = false;
 }
 
-cppJsLib.expose(addMoney);
+eel.expose(addMoney);
 function addMoney(value) {
     if (value != 0) {
         moneyMade += value;
@@ -117,7 +117,7 @@ function addMoney(value) {
     updateValues();
 }
 
-cppJsLib.expose(setAllMoneyMade);
+eel.expose(setAllMoneyMade);
 function setAllMoneyMade(value) {
     moneyall.innerHTML = makeSumsDisplayable(value) + " $";
 }
@@ -132,7 +132,7 @@ function getMoneyPerHour() {
     return moneyMade * (3600 / time);
 }
 
-cppJsLib.expose(set_gta_running);
+eel.expose(set_gta_running);
 
 function set_gta_running(val) {
     console.log("set gta v running to " + val);
@@ -140,7 +140,7 @@ function set_gta_running(val) {
 }
 
 // Exit the current window if the underlying python process is closing
-cppJsLib.expose(js_exit);
+eel.expose(js_exit);
 
 function js_exit() {
     window.close();
@@ -158,18 +158,13 @@ function setQRCode(ip) {
 }
 
 async function setIPs() {
-    cppJsLib.getIP().then((ip) => {
-        weblink.innerHTML = "http://" + ip + ":8027";
-        setQRCode(ip);
-    });
+    let ip = await eel.get_ip()();
+    weblink.innerHTML = "http://" + ip + ":8027";
+    setQRCode(ip);
 }
 
 weblink.addEventListener('click', () => {
-    cppJsLib.open_website();
+    eel.open_website();
 })
-
-cppJsLib.onLoad(() => {
-    setIPs();
-    cppJsLib.loadWinnings();
-});
-
+setIPs();
+eel.get_winnings();

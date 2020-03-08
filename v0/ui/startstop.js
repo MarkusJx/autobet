@@ -22,8 +22,9 @@ startstop.addEventListener('click', function () {
   }
 });
 
-cppJsLib.expose(ui_keycomb_start);
-function ui_keycomb_start() {
+eel.expose(keycomb_start);
+function keycomb_start() {
+  switchScreen();
   startstop.disabled = true;
   startTimer();
   startstop.disabled = false;
@@ -32,8 +33,8 @@ function ui_keycomb_start() {
   statusinfo.className = "text status_running maintext";
 }
 
-cppJsLib.expose(ui_keycomb_stop);
-function ui_keycomb_stop() {
+eel.expose(keycomb_stop);
+function keycomb_stop() {
   pause(true);
 }
 
@@ -43,7 +44,7 @@ function start() {
     return;
   }
   startstop.disabled = true;
-  cppJsLib.set_starting(true);
+  eel.set_starting(true);
   let time = 15;
   var x = setInterval(function () {
     startstop.innerHTML = "Starting in " + time + "s";
@@ -51,8 +52,8 @@ function start() {
     if (time < 0) {
       clearInterval(x);
       startTimer();
-      cppJsLib.set_starting(false);
-      cppJsLib.start_s_function();
+      eel.set_starting(false);
+      eel.start_s_function();
       startstop.disabled = false;
       startstop.innerHTML = "stop";
       statusinfo.innerHTML = "Running";
@@ -77,19 +78,18 @@ function is_paused() {
 
 function pause(nstoppy) {
   if (!nstoppy)
-    cppJsLib.stop_s_function();
+    eel.stop_s_function();
   pausing = 1;
   progressbar.className = "mdc-linear-progress mdc-linear-progress--indeterminate";
   messagecontainer.className = "";
   frosted_glass.className = "frosted-glass-blur";
   startstop.disabled = true;
   var x = setInterval(async function () {
-    cppJsLib.stopped().then((value) => {
-      if (value) {
-        clearInterval(x);
-        is_paused();
-      }
-    });
+    let value = await eel.stopped()();
+    if (value) {
+      clearInterval(x);
+      is_paused();
+    }
   }, 1000)
 }
 
@@ -99,7 +99,7 @@ function startTimer() {
 
   timer = setInterval(function () {
     time += 1;
-    cppJsLib.add_sec();
+    eel.add_sec();
     timeDisp.innerHTML = convertToTime(time);
   }, 1000);
 }

@@ -53,18 +53,17 @@ var autostopMoney = -1;
 
 // Add event listener to start stop button
 startstop.addEventListener('click', () => {
-    cppJsLib.get_gta_running().then(running => {
-        console.log("Running: " + running);
+    wuy.get_gta_v_running().then(running => {
         if (!running) {
             gtanotrunningmessage.open();
             startstop.disabled = true;
         } else {
             if (start != null) {
                 startstop.disabled = true;
-                if (start === true) {
-                    cppJsLib.js_start_script();
+                if (start == true) {
+                    wuy.js_start();
                 } else {
-                    cppJsLib.js_stop_script();
+                    wuy.js_stop();
                 }
             }
         }
@@ -73,13 +72,13 @@ startstop.addEventListener('click', () => {
 
 // Add event listener to the autostop configure button
 configurebutton.addEventListener('click', function () {
-    if (autostopMoney !== -1) {
+    if (autostopMoney != -1) {
         moneyinput.value = autostopMoney;
     } else {
         moneyinput.value = "";
     }
 
-    if (autostopTime !== -1) {
+    if (autostopTime != -1) {
         timeinput.value = Math.floor(autostopTime / 3600) + ":" + Math.floor((autostopTime % 3600) / 60);
     } else {
         timeinput.value = "";
@@ -90,7 +89,7 @@ configurebutton.addEventListener('click', function () {
 
 // Listen for the not running message to close to activate the start stop button again
 gtanotrunningmessage.listen('MDCSnackbar:closing', () => {
-    if (scriptRunning !== 0 || scriptRunning !== 2) {
+    if (scriptRunning != 0 || scriptRunning != 2) {
         startstop.disabled = false;
     }
 });
@@ -105,13 +104,13 @@ notconnectedmessage.listen('MDCSnackbar:closing', () => {
 
 // Add an event listener for the settings done button
 settingsdonebutton.addEventListener('click', function () {
-    if (moneyinput.value < 10000 || moneyinput.value === "") { // Trash the values if they are trash
+    if (moneyinput.value < 10000 || moneyinput.value == "") { // Trash the values if they are trash
         moneyinput.value = "";
         autostopMoney = -1;
-        cppJsLib.set_autostop_money(-1);
+        wuy.set_autostop_money(-1);
     } else {
         autostopMoney = moneyinput.value;
-        cppJsLib.set_autostop_money(parseInt(moneyinput.value, 10));
+        wuy.set_autostop_money(moneyinput.value);
     }
 
     let timeval = timeinput.value.split(":");
@@ -120,17 +119,17 @@ settingsdonebutton.addEventListener('click', function () {
     if (Number.isNaN(timeval)) { // Trash the values if they are trash
         timeinput.value = "";
         autostopTime = -1;
-        cppJsLib.set_autostop_time(-1);
+        wuy.set_autostop_time(-1);
     } else {
         autostopTime = timeval;
-        cppJsLib.set_autostop_time(timeval);
+        wuy.set_autostop_time(timeval);
     }
 
     showAutostopMessages();
 });
 
 /**
- * Display the corresponding messages for autostop
+ * Display the coressponding messages for autostop
  */
 function showAutostopMessages() {
     if (autostopMoney != -1 && autostopTime != -1) { // If both are enabled
@@ -156,23 +155,32 @@ function showAutostopMessages() {
     }
 }
 
-cppJsLib.onLoad(function (res) {
-    if (res) {
-        clearInterval(x);
-        console.log("Connected!");
-        cppJsLib.js_initialized().then(res => {
+/**
+ * Set an Interval if the website is disconnected
+ */
+var x = setInterval(function () {
+    try {
+        wuy.connected().then(function (res) {
             if (res) {
-                main();
-            } else {
-                document.location.href = "index.html";
+                clearInterval(x);
+                console.log("Connected!");
+                wuy.js_initialized().then(res => {
+                    if (res) {
+                        main();
+                    } else {
+                        document.location.href = "index.html";
+                    }
+                })
             }
         })
+    } catch (error) {
+        console.log("Still connecting...")
     }
-});
+}, 100);
 
 /**
  * Make the sums nice and easy to read
- *
+ * 
  * @param {number} sum the sum to convert
  * @param {boolean} k if thousands should be converted too
  * @returns {string} the readable number, without an extra dollar
@@ -209,19 +217,6 @@ function makeSumsDisplayable(sum, k = false) {
 }
 
 /**
- * Set an Interval if the website is disconnected
- */
-var x = setInterval(function () {
-    if (cppJsLib.connected) {
-        clearInterval(x);
-        console.log("Connected!");
-        main();
-    } else {
-        console.log("Still connecting...")
-    }
-}, 100);
-
-/**
  * The main function
  */
 function main() {
@@ -229,7 +224,7 @@ function main() {
         console.log("Running on a mobile device");
 
         datasaverdialog.listen('MDCDialog:closing', ev => {
-            if (ev.detail.action === "yes") {
+            if (ev.detail.action == "yes") {
                 console.log("Enabling Data Saver");
                 if (!initialized) init(true);
                 initialized = true;
@@ -238,7 +233,7 @@ function main() {
                 if (!initialized) init(false);
                 initialized = true;
             }
-        });
+        })
         datasaverdialog.open();
     } else {
         console.log("Running on a desktop device");
@@ -249,15 +244,15 @@ function main() {
 
 /**
  * Initialize everything
- *
+ * 
  * @param {boolean} datasaver if datasaver should be enabled
  */
 function init(datasaver) {
-    cppJsLib.get_current_winnings().then((val) => {
+    wuy.js_get_money().then(function (val) {
         moneythissession.innerHTML = makeSumsDisplayable(val, false);
     });
 
-    cppJsLib.get_all_winnings().then((val) => {
+    wuy.js_get_all_money().then((val) => {
         console.log("Money earned all time: " + val);
         moneyall.innerHTML = makeSumsDisplayable(val) + " $";
     });
@@ -269,9 +264,9 @@ function init(datasaver) {
      * The main interval
      */
     mainInterval = setInterval(async function () {
-        if (cppJsLib.connected) {
+        try {
             await asyncMain();
-        } else {
+        } catch (error) { // Go, play fetch!
             clearInterval(mainInterval); // Clear this interval
             disconnected();
         }
@@ -291,10 +286,15 @@ function disconnected() {
         if (timeUntilRetry < 1) {
             notconnectedlabel.innerHTML = "Trying to reconnect...";
             timeUntilRetry = 10;
+            let connected = false;
 
-            cppJsLib.init();
+            try {
+                connected = await wuy.connected();
+            } catch (error) {
+                connected = false;
+            }
 
-            if (cppJsLib.connected) {
+            if (connected) {
                 clearInterval(x);
                 notconnectedlabel.innerHTML = "Reconnected. Reloading page in 3 seconds";
                 setTimeout(() => {
@@ -314,64 +314,58 @@ function disconnected() {
  */
 async function asyncMain() {
     // Get the time running
-    cppJsLib.get_time().then((t) => {
-        if (t !== lastTime) {
-            timeDisp.innerHTML = convertToTime(t);
-            lastTime = t;
-        }
-    });
+    let time = await wuy.js_get_time();
+    if (time != lastTime) {
+        timeDisp.innerHTML = convertToTime(time);
+        lastTime = time;
+    }
 
-    let won;
     // Get the races won
-    cppJsLib.get_races_won().then((w) => {
-        won = w;
-        raceswon.innerHTML = w;
-    });
-
+    let won = await wuy.get_races_won();
+    raceswon.innerHTML = won;
 
     // get the races lost
-    cppJsLib.get_races_lost().then((lost) => {
-        // Do some heavy mathematics to calculate a win probability
-        if ((won + lost) > 0) winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
-    });
+    let lost = await wuy.get_races_lost();
+    // Do some heavy mathematics to calculate a winprobability
+    if ((won + lost) > 0) winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
 
     // Set the money made
-    cppJsLib.get_current_winnings().then(moneyMade => {
+    wuy.js_get_money().then(moneyMade => {
         moneythissession.innerHTML = makeSumsDisplayable(moneyMade, false) + " $";
         if (time > 0)
             moneythishour.innerHTML = makeSumsDisplayable(moneyMade * (3600 / time), true) + " $/hr";
     });
 
     // Set the overall money made values
-    cppJsLib.get_all_winnings().then(allMoney => {
+    wuy.js_get_all_money().then(allMoney => {
         moneyall.innerHTML = makeSumsDisplayable(allMoney) + " $";
     });
 
     // Check if the script is already running
-    cppJsLib.get_running().then(running => {
-        let statusChanged = scriptRunning !== running;
+    wuy.js_get_running().then(running => {
+        let statusChanged = scriptRunning != running;
         scriptRunning = running;
 
         if (!statusChanged) return; // If the status has not changed, do nothing
 
         gtanotrunningmessage.close();
 
-        if (running === 1) { // Running
+        if (running == 1) { // Running
             statusinfo.innerHTML = "Running";
             statusinfo.className = "text status_running maintext";
             startstop.innerHTML = "stop";
             start = false;
             startstop.disabled = false;
-        } else if (running === -1) { // Stopped
+        } else if (running == -1) { // Stopped
             statusinfo.innerHTML = "Stopped";
             statusinfo.className = "text status_stopped maintext";
             startstop.innerHTML = "start";
             startstop.disabled = false;
-        } else if (running === 0) { // Stopping
+        } else if (running == 0) { // Stopping
             statusinfo.innerHTML = "Stopping";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
-        } else if (running === 2) { // Starting
+        } else if (running == 2) { // Starting
             statusinfo.innerHTML = "Starting";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
@@ -386,23 +380,22 @@ async function asyncMain() {
  * Get new autostop settings, if available
  */
 async function getAutostopSettings() {
-    cppJsLib.get_autostop_time().then((nTime) => {
-        cppJsLib.get_autostop_money().then((nMoney) => {
-            if (nTime !== autostopTime || nMoney !== autostopMoney) {
-                autostopTime = nTime;
-                autostopMoney = nMoney;
-                showAutostopMessages();
-            } else {
-                autostopTime = nTime;
-                autostopMoney = nMoney;
-            }
-        });
-    });
+    let nTime = await wuy.get_autostop_time();
+    let nMoney = await wuy.get_autostop_money();
+
+    if (nTime != autostopTime || nMoney != autostopMoney) {
+        autostopTime = nTime;
+        autostopMoney = nMoney;
+        showAutostopMessages();
+    } else {
+        autostopTime = nTime;
+        autostopMoney = nMoney;
+    }
 }
 
 /**
  * Convert a number to a readable time
- *
+ * 
  * @param {number} secs the number to convert
  * @returns {string} the readable time
  */
@@ -418,7 +411,7 @@ function convertToTime(secs) {
 
 /**
  * Check if the client is a mobile device
- *
+ * 
  * @returns {boolean} true if the client is indeed a mobile device
  */
 function isMobile() {

@@ -1,18 +1,7 @@
 const { app, BrowserWindow } = require('electron');
 
-const { spawn } = require('child_process');
-var cmd = require('node-cmd');
-const fs = require('fs');
-
 var updating = false;
 
-function execute(command, callback) {
-  cmd.get(command, (error, stdout, stderr) => {
-    console.log(error);
-    console.log(stderr);
-    callback(stdout);
-  })
-}
 let mainWindow;
 
 var args = process.argv;
@@ -29,33 +18,11 @@ try {
 }
 
 function createWindow() {
-  updateAvailable((available) => {
-    if (available) {
-      console.log("Update available!");
-      console.log(args);
-      if (args[1] == "--runupdate" || fs.existsSync("RUNUPDATE")) {
-        console.log("Updating...");
-        updating = true;
-        startUpdate();
-        createWindows();
-      } else {
-        canUpdate((updatable) => {
-          if (updatable) {
-            console.log("Initializing update...");
-            initUpdate();
-            updating = true;
-            createWindows();
-          } else {
-            console.log("Downloading...");
-            downloadUpdate();
-            createWindows();
-          }
-        })
-      }
-    } else {
-      createWindows();
-    }
-})
+  if (args[1] == "--runupdate") {
+    updating = true;
+  }
+
+  createWindows();
 }
 
 function createWindows() {
@@ -73,10 +40,10 @@ function createWindows() {
     mainWindow.loadFile("update.html")
   } else {
     mainWindow = new BrowserWindow({
-      width: 670,
-      height: 700,
-      minHeight: 670,
-      minWidth: 700,
+      width: 705,
+      height: 830,
+      minHeight: 830,
+      minWidth: 705,
       frame: true,
       resizable: true,
       webPreferences: {
@@ -91,48 +58,6 @@ function createWindows() {
   mainWindow.on('closed', function () {
     mainWindow = null
   });
-}
-
-function updateAvailable(available) {
-  execute("jre\\bin\\java.exe -jar updater.jar --check", (output) => {
-      available(output.trim() == "true";
-)
-})
-}
-
-function canUpdate(updatable) {
-  execute("jre\\bin\\java.exe -jar updater.jar --downloaded", (output) => {
-    console.log("output: " + output);
-    updatable(output.trim() == "true");
-})
-}
-
-function initUpdate() {
-  execute("jre\\bin\\java.exe -jar updater.jar --initupdate", (output) => {
-    app.quit();
-  })
-}
-
-function downloadUpdate() {
-  var process = spawn("jre\\bin\\java.exe", ["-jar", "updater.jar", "--downloadupdate"]);
-
-  process.stdout.on("data", (data) => {
-    console.log(data);
-  })
-
-  process.stderr.on("data", (err) => {
-    console.log(err);
-  })
-
-  process.on("exit", (code) => {
-    console.log("Process finished with code " + code);
-  })
-}
-
-function startUpdate() {
-  execute("jre\\bin\\java.exe -jar updater.jar --runupdate", (output) => {
-    app.quit();
-  })
 }
 
 app.on('ready', createWindow);
