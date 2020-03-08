@@ -1,21 +1,16 @@
 # GTA-Online-Autobet
 
-[![Version](https://img.shields.io/badge/Version-0.5.4-green)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
-[![Latest release](https://img.shields.io/badge/Latest_release-stable-green)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
-
-A simple GTA Online horseracing-autobetting-bot
+This folder contains the old python versions <= 0.x[.x] of GTA-Online-Autobet, which are deprecated now. Following the old README.md for those versions
 
 Table of contents
 =================
 
 <!--ts-->
    * [Usage](#usage)
-   * [Compiling yourself](#Compiling-yourself)
+   * [Compiling yourself](#trust-issues)
      * [Prerequisites](#prerequisites)
      * [Electron installation](#electron-installation)
-     * [Compile](#Compile)
-        * [Compile AI](#Compile-AI)
-        * [Compile Autobet](#Compile-Autobet)
+     * [Python part](#python-part)
    * [Feedback](#feedback)
      * [Not what you expected?](#this-is-not-what-you-expected)
      * [Like it?](#like-it)
@@ -41,19 +36,14 @@ It is pretty unlikely for them to do so but it might happen.
 
 And nobody cares about your screen resolution or if you are playing in windowed or fullscreen mode, you just have to follow the steps described above
 
-## Compiling yourself
+## Trust issues
 
 Stranger Danger. You've heard this right? Yeah, No. Me neither. But if you don't trust your shady software dealer in the back corner of the github software party, that's totally fine. So here are the steps to compile this whole thing yourself:
 
 ### Prerequisites
 
-* [Tensorflow](https://www.tensorflow.org/install/source_windows?lang=python3) r2.1
-* CMake
-* MSVC
 * [Node.js](https://nodejs.org/en/) version 12.14.0 or later
-* [httplib](https://github.com/yhirose/cpp-httplib)
-* [json](https://github.com/nlohmann/json)
-* [OpenSSL](https://slproweb.com/products/Win32OpenSSL.html)
+* [Python](https://www.python.org/downloads/) version 3.7.0 or later (using [Anaconda](https://www.anaconda.com/distribution/) version   3.7 or later is actually recommended)
 
 *Perform the following steps in a command line with git and npm enabled*
 * Clone this repository ``git clone https://github.com/MarkusJx/GTA-Online-Autobet``
@@ -64,31 +54,17 @@ Stranger Danger. You've heard this right? Yeah, No. Me neither. But if you don't
 * Clone the electron-quick-start repo ``git clone https://github.com/electron/electron-quick-start``
 * Copy the contents of the electron folder into the electron-quick-start folder ``cp -R electron/. electron-quick-start``
 * Copy the contents of the electron-quick-start folder into the electron folder ``cp -R electron-quick-start/. electron``
-* cd into the electron folder ``cd electron``
+* Cd into the electron folder ``cd electron``
 * Install the electron prerequisites ``npm install``
 * Install electron packager ``npm install electron-packager``
 * Change directory back to the main directory ``cd ..``
 * Create the electron package ``electron-packager electron``
 
-#### Compile
-##### Compile AI
-* Follow the instructions [over here](https://www.tensorflow.org/install/source_windows?lang=python3)
-* copy the ``ai`` folder into ``<tensorflow-src>/tensorflow``
-* Make sure you've created the config file for tensorflow
-* Run ``bazel build --config=opt //tensorflow/ai:ai.dll`` in folder ``<tensorflow-src>``
-* The build will take about 1-2 hours
-* The resulting .dll and .lib will be stored in ``<tensorflow-src>/bazel-bin/tensorflow/ai``
-
-##### Compile Autobet
-* Create folder ``<autobet-src>/include``
-* Create folder ``<autobet-src>/lib``
-* Copy ``<autobet-src>/ai/ai.h`` into ``<autobet-src>/include``
-* Put ``httplib.h`` and ``json.hpp`` into ``<autobet-src>/include``
-* Copy ``<tensorflow-src>/bazel-bin/tensorflow/ai/ai.dll.if.lib`` into ``<autobet-src>/lib``
-* Create folder ``<autobet-src>/build`` and cd into it
-* Run ``cmake ..``
-* Run ``cmake --build . --config Release``
-* Copy ``<tensorflow-src>/bazel-bin/tensorflow/ai/ai.dll`` into ``<autobet-src>/build/src/Release``
+#### Python part
+* Install the python part requirements ``pip3 install -r requirements.txt``
+* Create the winnings exe ``pyinstaller -y -w  "winnings.py"`` (You can also use auto-py-to-exe, which is installed with installing the requirements)
+* Start the main file ``python autobet.py``
+* **OR** Compile the autobet exe ``pyinstaller -y -w --hidden-import bottle_websocket  "autobet.py"`` (Again, you could use auto-py-to-exe) and copy the following files and folders into the resulting folder: *models, winnings, ui, web, electron-win32-x64* and create a new folder named 'eel' in the autobet folder and copy the eel.js file from your python installation into it. You can now start the program by clicking on the autobet.exe file
 
 ## Feedback
 ### This is not what you expected?
