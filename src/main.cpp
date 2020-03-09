@@ -50,7 +50,7 @@ std::thread *bt = nullptr;
 std::thread *wt = nullptr;
 
 unsigned short int xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
-long winnings_all = 0L;
+__int64 winnings_all = 0L;
 int winnings = 0;
 unsigned int time_running = 0;
 bool gtaVRunning, running, stopping, starting, keyCombListen, runLoops, fullDebug;
@@ -63,6 +63,12 @@ std::function<void()> ui_keycomb_stop = {};
 
 std::function<void(int)> setAllMoneyMade;
 std::function<void(int)> addMoney;
+
+typedef struct winnings_buf_s {
+    __int64 buf1;
+    __int64 winnings;
+    __int64 buf2;
+} winnings_buf;
 
 /**
  * Kill the program and close all connections
@@ -113,7 +119,6 @@ void kill(bool _exit = true) {
         logger->Warning("Could not stop web ui web server");
     }
 
-#ifdef NDEBUG
     // Delete the AIs
     logger->Debug("Deleting Betting AI");
     tf::BettingAI::deleteAi();
@@ -122,9 +127,6 @@ void kill(bool _exit = true) {
     logger->Debug("Deleting Winnings AI");
     tf::WinningsAI::deleteAi();
     logger->Debug("Deleted Winnings AI");
-#else
-    logger->Warning("Not deleting AIs since Program was compiled in debug mode");
-#endif
 
     // Sleep
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -167,14 +169,31 @@ std::string getIP() {
  */
 void startWebServers() {
     logger->Debug("Starting ui web server");
-    ui->start(8025, 8026, "localhost", false);
-
-    if (webUi) {
-        logger->Debug("Starting web ui web server");
-        webUi->start(8027, 8028, getIP(), false);
+    ui->check_ports = false;
+    bool res = ui->start(8025, 8026, "localhost", false);
+    if (res) {
+        logger->Debug("Successfully started ui");
     } else {
-        logger->Warning("Not starting web ui web server since it does not exist");
+        logger->Error("Could not start ui");
+        utils::displayError("Could not start UI web server\nA log file may contain further information", [] {
+            exit(1);
+        });
     }
+
+    // Run webUi->start in a separate thread so it can check if its ports are occupied
+    std::thread([] {
+        if (webUi) {
+            logger->Debug("Starting web ui web server");
+            bool res = webUi->start(8027, 8028, getIP(), false);
+            if (res) {
+                logger->Debug("Successfully started webUi");
+            } else {
+                logger->Warning("Could not start webUi");
+            }
+        } else {
+            logger->Warning("Not starting web ui web server since it does not exist");
+        }
+    }).detach();
 }
 
 /**
@@ -187,7 +206,11 @@ void writeWinnings() {
         return;
     }
 
-    ofs.write((char *) &winnings_all, sizeof(int));
+    winnings_buf buf;
+    memset(&buf, 0, sizeof(winnings_buf));
+    buf.winnings = winnings_all;
+
+    ofs.write((char *) &buf, sizeof(winnings_buf));
     if (ofs.fail()) {
         logger->Warning("Winnings file stream fail bit was set, this is not good");
     }
@@ -218,7 +241,10 @@ void loadWinnings() {
         goto writeWinnings;
     }
 
-    ifs.read((char *) &winnings_all, sizeof(int));
+    winnings_buf buf;
+    memset(&buf, 0, sizeof(winnings_buf));
+
+    ifs.read((char *) &buf, sizeof(winnings_buf));
     if (ifs.fail()) {
         logger->Warning("File stream fail bit was set, rewriting file");
         goto writeWinnings;
@@ -228,6 +254,14 @@ void loadWinnings() {
         logger->Warning("Winnings file end has been reached, rewriting file");
         goto writeWinnings;
     }
+
+    if (buf.buf1 != 0 || buf.buf2 != 0) {
+        logger->Warning("Winnings buffer is not zero, rewriting file");
+        goto writeWinnings;
+    }
+
+    winnings_all = buf.winnings;
+
     ifs.close();
 
     if (ifs.is_open()) {
@@ -416,7 +450,7 @@ short get_pos(void *src) {
  *
  * @param amount the amount to add
  */
-void updateWinnings(short amount) {
+void updateWinnings(int amount) {
     logger->Debug("Updating winnings by " + std::to_string(amount));
 
     // If the amount to add is not zero add it to winnings and winnings_all
@@ -449,13 +483,21 @@ void getWinnings() {
 
     void *src = utils::TakeScreenShot(xPos, yPos, width, height);
     utils::bitmap *bmp = utils::crop(xCoord, yCoord, _width, _height, src);
+
+    if (fullDebug) {
+        utils::bitmap *b = utils::convertHBitmap(width, height, src);
+        debug::writeImage(b);
+        debug::writeImage(bmp);
+        delete b;
+    }
+
     short res = tf::WinningsAI::predict(bmp->data, bmp->size);
     logger->Debug("Winnings prediction: " + std::to_string(res));
     DeleteObject(src);
     delete bmp;
 
     // Update the winnings
-    updateWinnings((short) (1000 * res));
+    updateWinnings( 1000 * (int) res);
 }
 
 /**
@@ -463,9 +505,10 @@ void getWinnings() {
  */
 void skipBet() {
     logger->Debug("Should not bet on this one, skipping...");
-    utils::leftClick(633, 448);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    utils::leftClick(1720, 1036);
+    leftClick(633, 448);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    leftClick(1720, 1036);
 }
 
 /**
@@ -487,12 +530,14 @@ void mainLoop() {
             DeleteObject(src);
             if (pos != -1) {
                 if (!running) {
+                    stopping = false;
                     return;
                 }
                 place_bet(pos);
                 // Updating winnings by -10000 because betting costs 100000
                 updateWinnings(-10000);
                 if (!running) {
+                    stopping = false;
                     return;
                 }
                 logger->Debug("Sleeping for 34 seconds");
@@ -500,16 +545,19 @@ void mainLoop() {
                 if (!running) {
                     // Program is not running anymore, stop it
                     logger->Debug("The script has been stopped, skipping after 17 seconds...");
+                    stopping = false;
                     return;
                 }
                 std::this_thread::sleep_for(std::chrono::seconds(17));
                 if (!running) {
+                    stopping = false;
                     return;
                 }
                 // Update the winnings and return to the betting screen
                 getWinnings();
                 reset();
                 if (autostop::checkStopConditions()) {
+                    stopping = false;
                     return;
                 }
             } else {
@@ -608,7 +656,7 @@ int get_races_lost() {
 }
 
 int get_all_winnings() {
-    return winnings_all;
+    return (int) winnings_all;
 }
 
 int get_current_winnings() {
@@ -704,7 +752,8 @@ void selfTestAI() {
         }
     }
 
-    tf::WinningsAI::selfTest("data/30.png");
+    short res = tf::WinningsAI::selfTest("data/40.png");
+    logger->Debug("Winnings AI self-test result (40): " + std::to_string(res));
 }
 
 /**
@@ -714,7 +763,7 @@ void selfTestAI() {
  * @param argv command kine arguments
  * @return exit code
  */
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv<::>) <%
 #ifndef NDEBUG
     LoggerMode lMode = MODE_CONSOLE;
 #else
@@ -1030,4 +1079,4 @@ int main(int argc, char *argv[]) {
 
     kill(false);
     return 0;
-}
+%>
