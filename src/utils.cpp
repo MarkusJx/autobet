@@ -287,6 +287,14 @@ BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
 
             if (wcscmp(title.c_str(), GTA5_NAME) == 0) {
                 GetWindowRect(hwnd, &rect);
+                RECT r;
+                GetClientRect(hwnd, &r);
+
+                int h = r.bottom - r.top;
+                int w = r.right - r.left;
+
+                rect.top = rect.bottom - h;
+                rect.left = rect.right - w;
 
                 return TRUE;
             }

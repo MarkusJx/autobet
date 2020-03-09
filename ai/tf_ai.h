@@ -21,9 +21,9 @@ class tf_ai {
   std::unique_ptr<tensorflow::Session> session;
 };
 
-const unsigned short int betting_labels[10] = {1, 10, 2, 3, 4, 5, 6, 7, 8, 9};
+const short betting_labels[10] = {1, 10, 2, 3, 4, 5, 6, 7, 8, 9};
 
-const unsigned short int winnings_labels[4] = {0, 30, 40, 50};
+const short winnings_labels[4] = {30, 40, 50, 0};
 }  // namespace tf
 
 #endif
