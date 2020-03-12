@@ -1,6 +1,6 @@
 # GTA-Online-Autobet
 
-[![Version](https://img.shields.io/badge/Version-1.0-green)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
+[![Version](https://img.shields.io/badge/Version-1.0.2-green)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
 [![Latest release](https://img.shields.io/badge/Latest_release-experimental-orange)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
 
 A simple GTA Online horseracing-autobetting-bot
@@ -10,6 +10,7 @@ Table of contents
 
 <!--ts-->
    * [Usage](#usage)
+   * [Demonstration](#demonstration)
    * [Compiling yourself](#Compiling-yourself)
      * [Prerequisites](#prerequisites)
      * [Electron installation](#electron-installation)
@@ -33,13 +34,20 @@ Table of contents
 
 * Press the 'start' button on the UI (a countdown will start, giving you time to head back into the game) or use the Key combination ```CTRL+SHIFT+F10```. You can also use that combo to stop the program from doing its thing. Using the combo ```CTRL+SHIFT+F9``` you can always kill the program instantly. **Just make sure the game is your active (selected) window (you should basically be able to move the cursor in-Game on the betting screen)**
 
-* After starting, the script will automatically bet, refresh the screens and earn about 300k - 500k per hour. Fully AFK. **Please don't move your mouse after the script has started, otherwise it will stop working and you'd have to restart the script.** This is a fail safe mechanism so it won't do any damage if the mouse for some reason doesn't move as expected. Be aware that Rockstar Games might ban you and will ban you after making a lot of money (about 10 - 20 mil) for a week from betting.
+* After starting, the script will automatically bet, refresh the screens and earn about 300k - 500k per hour (more like ~250k after patch 1.50). Fully AFK. **Please don't move your mouse after the script has started, otherwise it will stop working and you'd have to restart the script.** This is a fail safe mechanism so it won't do any damage if the mouse for some reason doesn't move as expected. Be aware that Rockstar Games might ban you and will ban you after making a lot of money (about 10 - 20 mil) for a week from betting.
 
 BTW, this script does **not** use any glitches or inject code into the game. Just plain taking-over-your-mouse-action.
 **Keep in mind that there's no guarantee that Rockstar will not ban you for using this script**.
 It is pretty unlikely for them to do so but it might happen.
 
-And nobody cares about your screen resolution, you just have to follow the steps described above. But it will work best in full screen mode
+If this is not enough for you, there are methods to make more money and [videos explaining how to do so](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
+
+And nobody cares about your screen resolution, you just have to follow the steps described above. You can also use windowed mode. And the minimum (supported) resolution is 720p. Plus a 16:9 aspect ratio is required.
+If your screen does not support it, play the game in windowed mode rather than fullscreen mode
+
+### Demonstration
+
+**[Demonstration video](https://www.youtube.com/watch?v=dQw4w9WgXcQ)** if there is something not clear by now
 
 ## Compiling yourself
 
@@ -85,10 +93,19 @@ Stranger Danger. You've heard this right? Yeah, No. Me neither. But if you don't
 * Copy ``<autobet-src>/ai/ai.h`` into ``<autobet-src>/include``
 * Put ``httplib.h`` and ``json.hpp`` into ``<autobet-src>/include``
 * Copy ``<tensorflow-src>/bazel-bin/tensorflow/ai/ai.dll.if.lib`` into ``<autobet-src>/lib``
+* Download [zip](https://github.com/kuba--/zip) and unpack it
+* Create folder ``<autobet-src>/src/zip``
+* Copy all contents from ``<zip-src>/src`` into ``<autobet-src>/src/zip``
+* Download [CppJsLib](https://github.com/MarkusJx/CppJsLib) and unpack it
+* Create folder ``<autobet-src>/src/CppJsLib``
+* Copy all contents from ``<cppjslib-src>/src`` into ``<autobet-src>/src/CppJsLib``
 * Create folder ``<autobet-src>/build`` and cd into it
-* Run ``cmake ..``
+* Run ``cmake .. -DBUILD_CPPJSLIB=TRUE``
 * Run ``cmake --build . --config Release``
 * Copy ``<tensorflow-src>/bazel-bin/tensorflow/ai/ai.dll`` into ``<autobet-src>/build/src/Release``
+* Copy ``<autobet-src>/ui`` into ``<autobet-src>/build/src/Release``
+* Copy ``<autobet-src>/web`` into ``<autobet-src>/build/src/Release``
+* Copy ``<cppjslib-src>/CppJsLibJs`` into ``<autobet-src>/build/src/Release``
 
 ## Feedback
 ### This is not what you expected?

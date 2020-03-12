@@ -17,7 +17,6 @@
 #include <atlimage.h>
 #include <iostream>
 #include <shlobj.h>
-#include <fstream>
 
 RECT rect;
 //#define GTA5_EXE L"mspaint.exe"
@@ -27,9 +26,31 @@ RECT rect;
 #endif
 
 Logger *ulogger;
+std::function<void()> clbk = {};
 
 void utils::setLogger(Logger *_logger) {
     ulogger = _logger;
+}
+
+bool WINAPI CtrlHandler(unsigned long fdwCtrlType) {
+    if (fdwCtrlType == 0 || fdwCtrlType == 2) {
+        clbk();
+        return true;
+    } else if (fdwCtrlType == 1 || fdwCtrlType == 5 || fdwCtrlType == 6) {
+        clbk();
+        return false;
+    } else {
+        return false;
+    }
+}
+
+void utils::setCtrlCHandler(std::function<void()> callback) {
+    clbk = std::move(callback);
+    if(SetConsoleCtrlHandler(reinterpret_cast<PHANDLER_ROUTINE>(CtrlHandler), true)) {
+        ulogger->Debug("Successfully initiated Ctrl-C handler");
+    } else {
+        ulogger->Warning("Could not initiate Ctrl-C handler");
+    }
 }
 
 /**
@@ -597,4 +618,20 @@ void utils::splitString(std::string s, const std::string &delimiter, std::vector
 bool utils::fileExists(const std::string &name) {
     struct stat buffer{};
     return (stat(name.c_str(), &buffer) == 0);
+}
+
+void utils::getActiveScreen(unsigned int xPos, unsigned int yPos, utils::windowSize &ws) {
+    MONITORINFO target;
+    target.cbSize = sizeof(MONITORINFO);
+    POINT p;
+    p.x = xPos;
+    p.y = yPos;
+
+    HMONITOR hMon = MonitorFromPoint(p, MONITOR_DEFAULTTONEAREST);
+    GetMonitorInfo(hMon, &target);
+
+    ws.height = abs(target.rcMonitor.top - target.rcMonitor.bottom);
+    ws.width = abs(target.rcMonitor.right - target.rcMonitor.left);
+    ws.xPos = target.rcMonitor.left;
+    ws.yPos = target.rcMonitor.bottom;
 }

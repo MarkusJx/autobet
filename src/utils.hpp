@@ -140,6 +140,8 @@ namespace utils {
 
     typedef struct Array<char> bitmap;
 
+    void setCtrlCHandler(std::function<void()> callback);
+
     errno_t getDesktopDirectory(path &p);
 
     bool getOwnIP(IPv4 &ownIP);
@@ -173,6 +175,8 @@ namespace utils {
     //void saveHBitmap(std::string path, int width, int height, void *HBMP);
 
     bitmap *convertHBitmap(int width, int height, void *HBMP);
+
+    void getActiveScreen(unsigned int xPos, unsigned int yPos, windowSize &ws);
 
     inline std::string getLastStringPart(const std::string &str, char delimiter) {
         return str.substr(str.rfind(delimiter) + 1);
