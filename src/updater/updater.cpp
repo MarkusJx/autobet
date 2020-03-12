@@ -13,9 +13,6 @@
 #   include <fstream>
 #   include <filesystem>
 
-/*#   if defined(__GNUC__) || defined(__GNUG__) || defined(_MSC_VER) || (defined(__clang__) && __clang_major__ >= 2 && __clang_minor__ >= 8)
-#       pragma message("INFO: Building with updater enabled")
-#   endif*/
 #else
 #   define UPDATER_UNIMPLEMENTED() logger_u->Unimplemented("Application was built with updater disabled")
 #endif //AUTOBET_BUILD_UPDATER

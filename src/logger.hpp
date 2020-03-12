@@ -16,10 +16,10 @@
 std::string removeSlash(const std::string &str);
 
 enum LoggerMode {
-    MODE_FILE,
-    MODE_CONSOLE,
-    MODE_BOTH,
-    MODE_NONE
+    MODE_FILE = 0,
+    MODE_CONSOLE = 1,
+    MODE_BOTH = 2,
+    MODE_NONE = 3
 };
 
 class Logger {

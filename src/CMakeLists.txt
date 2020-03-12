@@ -49,7 +49,7 @@ file(GLOB updater
         "updater/*.cpp"
         )
 
-add_executable(Autobet "${src}" "${updater}" "${include}" "${zip}")
+add_executable(Autobet "${src}" "${updater}" "${include}" "${zip}" "${cef}")
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
     message(STATUS "Building with debug infos")
@@ -60,12 +60,10 @@ else ()
     target_link_libraries(Autobet ai-release.dll.if)
 endif ()
 
-if (WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
-    target_link_options(Autobet PRIVATE "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup")
-    target_compile_options(Autobet PRIVATE "/O2")
-endif ()
-
-target_link_libraries(Autobet ai.dll.if)
+#if (WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    #target_link_options(Autobet PRIVATE "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup")
+    #target_compile_options(Autobet PRIVATE "/O2")
+#endif ()
 
 if (BUILD_CPPJSLIB)
     include(CppJsLib/InitCppJsLib.cmake)

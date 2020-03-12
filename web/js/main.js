@@ -356,22 +356,22 @@ async function asyncMain() {
 
         gtanotrunningmessage.close();
 
-        if (running === 1) { // Running
+        if (running == 1) { // Running
             statusinfo.innerHTML = "Running";
             statusinfo.className = "text status_running maintext";
             startstop.innerHTML = "stop";
             start = false;
             startstop.disabled = false;
-        } else if (running === -1) { // Stopped
+        } else if (running == -1) { // Stopped
             statusinfo.innerHTML = "Stopped";
             statusinfo.className = "text status_stopped maintext";
             startstop.innerHTML = "start";
             startstop.disabled = false;
-        } else if (running === 0) { // Stopping
+        } else if (running == 0) { // Stopping
             statusinfo.innerHTML = "Stopping";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
-        } else if (running === 2) { // Starting
+        } else if (running == 2) { // Starting
             statusinfo.innerHTML = "Starting";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
