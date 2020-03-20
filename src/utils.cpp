@@ -46,7 +46,7 @@ bool WINAPI CtrlHandler(unsigned long fdwCtrlType) {
 
 void utils::setCtrlCHandler(std::function<void()> callback) {
     clbk = std::move(callback);
-    if(SetConsoleCtrlHandler(reinterpret_cast<PHANDLER_ROUTINE>(CtrlHandler), true)) {
+    if (SetConsoleCtrlHandler(reinterpret_cast<PHANDLER_ROUTINE>(CtrlHandler), true)) {
         ulogger->Debug("Successfully initiated Ctrl-C handler");
     } else {
         ulogger->Warning("Could not initiate Ctrl-C handler");
@@ -117,7 +117,7 @@ bool utils::Application::isRunning() {
  * @return if the operation was successful
  */
 bool utils::Application::kill() {
-    return TerminateProcess(static_cast<PROCESS_INFORMATION *>(pi)->hProcess, 1);
+    return TerminateProcess(static_cast<PROCESS_INFORMATION *>(pi)->hProcess, 0);
 }
 
 /**
@@ -191,6 +191,20 @@ bool utils::getOwnIP(utils::IPv4 &myIP) {
     return true;
 }
 
+errno_t utils::isForeground(bool& res) {
+    HWND h = GetForegroundWindow();
+    if (h != nullptr) {
+        std::wstring title(GetWindowTextLength(h) + 1, L'\0');
+        GetWindowTextW(h, &title[0], title.size()); //note: C++11 only
+        res = wcscmp(title.c_str(), L"Grand Theft Auto V") == 0;
+
+        return 0;
+    } else {
+        res = false;
+        return 1;
+    }
+}
+
 /**
  * Save a utils::bitmap to a image
  *
@@ -257,6 +271,25 @@ utils::bitmap *utils::crop(int x, int y, int width, int height, void *src) {
     auto tmp = new utils::bitmap(reinterpret_cast<char *>(&buf[0]), buf.size() * sizeof(BYTE));
     std::vector<BYTE>().swap(buf);
     return tmp;
+}
+
+int utils::findIncreaseBetButton(utils::windowSize ws, float multiplierH) {
+    const unsigned long white = 0xFFFFFF;
+    HDC hScreenDC = CreateDC("DISPLAY", nullptr, nullptr, nullptr);
+
+    utils::leftClick(ws.xPos + 5, ws.yPos + 5, true);
+
+    for (int i = (ws.xPos + ws.width); i > ws.xPos; i--) {
+        unsigned long px = GetPixel(hScreenDC, i, (int) (692.0 * multiplierH));
+        if (px != CLR_INVALID) {
+            if (px == white) {
+                return i - 5;
+            }
+        } else {
+            return -1;
+        }
+    }
+    return -1;
 }
 
 /**

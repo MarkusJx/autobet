@@ -1,6 +1,6 @@
 # GTA-Online-Autobet
 
-[![Version](https://img.shields.io/badge/Version-1.0.2-green)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
+[![Version](https://img.shields.io/badge/Version-1.0.3-green)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
 [![Latest release](https://img.shields.io/badge/Latest_release-experimental-orange)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
 
 A simple GTA Online horseracing-autobetting-bot
@@ -40,14 +40,14 @@ BTW, this script does **not** use any glitches or inject code into the game. Jus
 **Keep in mind that there's no guarantee that Rockstar will not ban you for using this script**.
 It is pretty unlikely for them to do so but it might happen.
 
-If this is not enough for you, there are methods to make more money and [videos explaining how to do so](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
+If this is not enough for you, there are methods to make more money and [videos explaining how to do so](https://youtu.be/dQw4w9WgXcQ?t=43).
 
 And nobody cares about your screen resolution, you just have to follow the steps described above. You can also use windowed mode. And the minimum (supported) resolution is 720p. Plus a 16:9 aspect ratio is required.
 If your screen does not support it, play the game in windowed mode rather than fullscreen mode
 
 ### Demonstration
 
-**[Demonstration video](https://www.youtube.com/watch?v=dQw4w9WgXcQ)** if there is something not clear by now
+**[Demonstration video](https://youtu.be/dQw4w9WgXcQ)** if there is something not clear by now
 
 ## Compiling yourself
 
@@ -118,7 +118,7 @@ You can also create a full debugging zip with the included debug.bat, which can 
 
 **Important notices on the debugging zip**
 * This will create a autobet_debug.zip file on your desktop
-* It will include screenshots, **make shure to hide any personal/sensitive data or to delete screenshots from the .zip showing these information**
+* It will include screenshots, **make sure to hide any personal/sensitive data or to delete screenshots from the .zip showing these information**
 * If no out.log is included, it will be located at the program's install location
 * You can send this .zip in
 
