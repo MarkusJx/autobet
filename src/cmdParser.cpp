@@ -19,7 +19,7 @@
 #   define strdup _strdup
 #endif
 
-//typedef std::string string;
+typedef cmdOption *cmdOptPtr;
 
 cmdParser::cmdParser(size_t numOptions) {
     oPos = 0;
@@ -32,6 +32,7 @@ cmdParser::cmdParser(size_t numOptions) {
     }
     argMarker = strdup("--");
     help = "--help";
+    indent = 27;
 }
 
 cmdParser::cmdParser(size_t numOptions, size_t numGroups) {
@@ -44,9 +45,10 @@ cmdParser::cmdParser(size_t numOptions, size_t numGroups) {
         options[i] = new cmdOption[numOptions];
     argMarker = strdup("--");
     help = "--help";
+    indent = 27;
 }
 
-void cmdParser::_addCommand(bool &val, const string &tooltip, string name) {
+cmdOptPtr cmdParser::_addCommand(bool &val, const string &tooltip, string name) {
     checkPosValid();
     val = false;
     options[gPos][oPos].b = &val;
@@ -57,9 +59,11 @@ void cmdParser::_addCommand(bool &val, const string &tooltip, string name) {
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommand(string &val, const string &tooltip, string name, string valDesc) {
+cmdOptPtr cmdParser::_addCommand(string &val, const string &tooltip, string name, const string& valDesc) {
     checkPosValid();
     val = "";
     options[gPos][oPos].s = &val;
@@ -70,9 +74,11 @@ void cmdParser::_addCommand(string &val, const string &tooltip, string name, str
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommand(int &val, const string &tooltip, string name, const string &valDesc) {
+cmdOptPtr cmdParser::_addCommand(int &val, const string &tooltip, string name, const string &valDesc) {
     checkPosValid();
     options[gPos][oPos].i = &val;
     options[gPos][oPos].tooltip = strdup(tooltip.c_str());
@@ -85,9 +91,11 @@ void cmdParser::_addCommand(int &val, const string &tooltip, string name, const 
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommand(unsigned int &val, const string &tooltip, string name, const string &valDesc) {
+cmdOptPtr cmdParser::_addCommand(unsigned int &val, const string &tooltip, string name, const string &valDesc) {
     checkPosValid();
     options[gPos][oPos].ui = &val;
     options[gPos][oPos].tooltip = strdup(tooltip.c_str());
@@ -100,9 +108,11 @@ void cmdParser::_addCommand(unsigned int &val, const string &tooltip, string nam
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommand(float &val, const string &tooltip, string name, const string &valDesc) {
+cmdOptPtr cmdParser::_addCommand(float &val, const string &tooltip, string name, const string &valDesc) {
     checkPosValid();
     options[gPos][oPos].f = &val;
     options[gPos][oPos].tooltip = strdup(tooltip.c_str());
@@ -115,9 +125,11 @@ void cmdParser::_addCommand(float &val, const string &tooltip, string name, cons
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommand(std::vector<string> &args, const string &tooltip, string name, const string &valDesc) {
+cmdOptPtr cmdParser::_addCommand(std::vector<string> &args, const string &tooltip, string name, const string &valDesc) {
     checkPosValid();
     options[gPos][oPos].sVal = &args;
     options[gPos][oPos].tooltip = strdup(tooltip.c_str());
@@ -130,9 +142,11 @@ void cmdParser::_addCommand(std::vector<string> &args, const string &tooltip, st
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommand(std::vector<int> &args, const string &tooltip, string name, const string &valDesc) {
+cmdOptPtr cmdParser::_addCommand(std::vector<int> &args, const string &tooltip, string name, const string &valDesc) {
     checkPosValid();
     options[gPos][oPos].iVal = &args;
     options[gPos][oPos].tooltip = strdup(tooltip.c_str());
@@ -145,9 +159,11 @@ void cmdParser::_addCommand(std::vector<int> &args, const string &tooltip, strin
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommand(std::vector<float> &args, const string &tooltip, string name, const string &valDesc) {
+cmdOptPtr cmdParser::_addCommand(std::vector<float> &args, const string &tooltip, string name, const string &valDesc) {
     checkPosValid();
     options[gPos][oPos].fVal = &args;
     options[gPos][oPos].tooltip = strdup(tooltip.c_str());
@@ -160,9 +176,11 @@ void cmdParser::_addCommand(std::vector<float> &args, const string &tooltip, str
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommandCheckSet(bool &val, std::vector<string> &args, const string &tooltip, string name,
+cmdOptPtr cmdParser::_addCommandCheckSet(bool &val, std::vector<string> &args, const string &tooltip, string name,
                                     const string &valDesc) {
     checkPosValid();
     val = false;
@@ -178,9 +196,11 @@ void cmdParser::_addCommandCheckSet(bool &val, std::vector<string> &args, const 
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommandCheckSet(bool &val, std::vector<int> &args, const string &tooltip, string name,
+cmdOptPtr cmdParser::_addCommandCheckSet(bool &val, std::vector<int> &args, const string &tooltip, string name,
                                     const string &valDesc) {
     checkPosValid();
     val = false;
@@ -196,9 +216,11 @@ void cmdParser::_addCommandCheckSet(bool &val, std::vector<int> &args, const str
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
-void cmdParser::_addCommandCheckSet(bool &val, std::vector<float> &args, const string &tooltip, string name,
+cmdOptPtr cmdParser::_addCommandCheckSet(bool &val, std::vector<float> &args, const string &tooltip, string name,
                                     const string &valDesc) {
     checkPosValid();
     val = false;
@@ -214,6 +236,8 @@ void cmdParser::_addCommandCheckSet(bool &val, std::vector<float> &args, const s
 
     options[gPos][oPos].name = strdup(name.c_str());
     oPos++;
+
+    return &options[gPos][oPos];
 }
 
 void cmdParser::_addGroup() {
@@ -238,6 +262,7 @@ void cmdParser::parse(int argc, char **argv, unsigned int start) {
                     if (strcmp(options[x][y].name, argv[i]) == 0) {
                         found = true;
                         gPos = x;
+                        optXY.required = false;
                         //x = nGroup;
                         if (!options[x][y].set || acceptsMultiple(options[x][y])) {
                             if (acceptsMultiple(options[x][y])) {
@@ -330,6 +355,14 @@ void cmdParser::parse(int argc, char **argv, unsigned int start) {
             exit(1);
         }
     }
+
+    for (int x = gPos; x < nGroup; x++) {
+        for (int y = 0; y < nOpt; y++) {
+            if (optXY.required) {
+                std::cerr << optXY.name << " must be set" << std::endl;
+            }
+        }
+    }
 }
 
 void cmdParser::addHeading(const std::string &heading) {
@@ -363,27 +396,38 @@ cmdParser::~cmdParser() {
     free(argMarker);
 }
 
+void cmdParser::addIndent(string &s, char *tooltip) {
+    if (s.length() + 3 > indent) {
+        s.append("\n").append(indent, ' ').append(tooltip);
+    } else {
+        int _indent = indent - (unsigned short) s.length();
+        s.append(_indent, ' ').append(tooltip);
+    }
+}
+
 void cmdParser::displayHelp() {
     std::cout << "------------------- Help -------------------" << std::endl;
     for (int x = 0; x < nGroup; x++) {
         for (int y = 0; y < nOpt; y++) {
             if (options[x][y].name != nullptr) {
                 if (options[x][y].tooltip) {
-                    std::cout << "  " << options[x][y].name;
+                    std::string s("  ");
+                    s.append(optXY.name);
                     if (optXY.valDesc) {
-                        std::cout << optXY.valDesc;
+                        s.append(optXY.valDesc);
                     } else {
                         if (acceptsMultiple(optXY)) {
                             if (acceptsSingle(optXY)) {
-                                std::cout << " [<args...>]";
+                                s.append(" [<args...>]");
                             } else {
-                                std::cout << " <args...>";
+                                s.append(" <args...>");
                             }
                         } else if (acceptsSingle(optXY) && optXY.b == nullptr) {
-                            std::cout << " <arg>";
+                            s.append(" <arg>");
                         }
                     }
-                    std::cout << ": " << options[x][y].tooltip;
+                    addIndent(s, optXY.tooltip);
+                    std::cout << s;
                 } else { // Heading
                     std::cout << " " << options[x][y].name;
                 }

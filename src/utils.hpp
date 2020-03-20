@@ -148,6 +148,8 @@ namespace utils {
 
     void setDpiAware();
 
+    int findIncreaseBetButton(windowSize ws, float multiplierH);
+
     void *TakeScreenShot(int x, int y, int width, int height);
 
     void getWindowSize(windowSize &ws);
@@ -177,6 +179,8 @@ namespace utils {
     bitmap *convertHBitmap(int width, int height, void *HBMP);
 
     void getActiveScreen(unsigned int xPos, unsigned int yPos, windowSize &ws);
+
+    errno_t isForeground(bool& res);
 
     inline std::string getLastStringPart(const std::string &str, char delimiter) {
         return str.substr(str.rfind(delimiter) + 1);

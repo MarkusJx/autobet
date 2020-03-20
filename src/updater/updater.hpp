@@ -5,7 +5,7 @@
 #ifndef GTA_ONLINE_AUTOBET_DEV_UPDATER_HPP
 #define GTA_ONLINE_AUTOBET_DEV_UPDATER_HPP
 
-#define AUTOBET_CURRENT_VERSION "1.0.2"
+#define AUTOBET_CURRENT_VERSION "1.0.3"
 
 #include "../logger.hpp"
 #include "../utils.hpp"
@@ -24,7 +24,7 @@ namespace updater {
             ver = (int *) malloc(length * sizeof(int));
 
             for (int i = 0; i < length; i++) {
-                ver[i] = std::atoi(v[i]);
+                ver[i] = (int) strtol(v[i], nullptr, 10);
                 free(v[i]); // Free the memory allocated by strdup()
             }
 

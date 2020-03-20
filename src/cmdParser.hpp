@@ -23,6 +23,7 @@ struct cmdOption {
     cmdParser *c = nullptr;
 
     bool set = false;
+    bool required = false;
 
     char *tooltip = nullptr;
     char *name = nullptr;
@@ -33,38 +34,40 @@ struct cmdOption {
     std::vector<float> *fVal = nullptr;
 };
 
+
 class cmdParser {
 private:
     typedef std::string string;
+    typedef cmdOption *cmdOptPtr;
 public:
     explicit cmdParser(size_t numOptions);
 
     cmdParser(size_t numOption, size_t numGroups);
 
-    void _addCommand(bool &val, const string &tooltip, string name);
+    cmdOptPtr _addCommand(bool &val, const string &tooltip, string name);
 
-    void _addCommand(string &val, const string &tooltip, string name, string valDesc = "");
+    cmdOptPtr _addCommand(string &val, const string &tooltip, string name, const string& valDesc = "");
 
-    void _addCommand(int &val, const string &tooltip, string name, const string& valDesc = "");
+    cmdOptPtr _addCommand(int &val, const string &tooltip, string name, const string &valDesc = "");
 
-    void _addCommand(unsigned int &val, const string &tooltip, string name, const string& valDesc = "");
+    cmdOptPtr _addCommand(unsigned int &val, const string &tooltip, string name, const string &valDesc = "");
 
-    void _addCommand(float &val, const std::string &tooltip, std::string name, const string &valDesc = "");
+    cmdOptPtr _addCommand(float &val, const std::string &tooltip, std::string name, const string &valDesc = "");
 
-    void _addCommand(std::vector<string> &args, const string &tooltip, string name, const string &valDesc = "");
+    cmdOptPtr _addCommand(std::vector<string> &args, const string &tooltip, string name, const string &valDesc = "");
 
-    void _addCommand(std::vector<int> &args, const string &tooltip, string name, const string &valDesc = "");
+    cmdOptPtr _addCommand(std::vector<int> &args, const string &tooltip, string name, const string &valDesc = "");
 
-    void _addCommand(std::vector<float> &args, const string &tooltip, string name, const string &valDesc = "");
+    cmdOptPtr _addCommand(std::vector<float> &args, const string &tooltip, string name, const string &valDesc = "");
 
-    void _addCommandCheckSet(bool &val, std::vector<string> &args, const string &tooltip, string name,
-                             const string &valDesc = "");
+    cmdOptPtr _addCommandCheckSet(bool &val, std::vector<string> &args, const string &tooltip, string name,
+                                  const string &valDesc = "");
 
-    void _addCommandCheckSet(bool &val, std::vector<int> &args, const string &tooltip, string name,
-                             const string &valDesc = "");
+    cmdOptPtr _addCommandCheckSet(bool &val, std::vector<int> &args, const string &tooltip, string name,
+                                  const string &valDesc = "");
 
-    void _addCommandCheckSet(bool &val, std::vector<float> &args, const string &tooltip, string name,
-                             const string &valDesc = "");
+    cmdOptPtr _addCommandCheckSet(bool &val, std::vector<float> &args, const string &tooltip, string name,
+                                  const string &valDesc = "");
 
     void _addGroup();
 
@@ -80,6 +83,7 @@ public:
 
     ~cmdParser();
 
+    unsigned short indent;
 private:
     size_t nOpt, nGroup, oPos, gPos;
     cmdOption **options;
@@ -90,6 +94,8 @@ private:
     void displayHelp();
 
     void replaceAll(string &name);
+
+    void addIndent(string &s, char *tooltip);
 };
 
 #endif //AUTOBET_CMDPARSER_HPP

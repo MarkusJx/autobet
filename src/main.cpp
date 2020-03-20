@@ -12,6 +12,14 @@
 #include "cmdParser.hpp"
 #include "settings.hpp"
 
+#undef Debug
+#undef Error
+#undef Warning
+
+#define Debug(message) if (logger) logger->_debug(removeSlash(__FILE__).c_str(), __LINE__, message)
+#define Error(message) if (logger) logger->_error(removeSlash(__FILE__).c_str(), __LINE__, message)
+#define Warning(message) if (logger) logger->_warning(removeSlash(__FILE__).c_str(), __LINE__, message)
+
 #include <chrono>
 #include <thread>
 #include <cmath>
@@ -61,6 +69,8 @@ std::thread *wt = nullptr;
 
 settings::posConfigArr *pArr = nullptr;
 
+utils::Application *electron = nullptr;
+
 unsigned short int xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
 __int64 winnings_all = 0L;
 int winnings = 0;
@@ -102,6 +112,16 @@ void kill(bool _exit = true) {
     // Detach the thread
     killThread.detach();
 
+    if (electron) {
+        Debug("Killing electron");
+        if (!electron->kill()) {
+            Warning("Could not kill electron");
+        } else {
+            Debug("Killed electron");
+        }
+        delete electron;
+    }
+
     // Abort any downloads
     updater::abortDownload();
 
@@ -121,35 +141,36 @@ void kill(bool _exit = true) {
     running = false;
 
     // Stop the web servers, so they don't occupy the ports they use
-    logger->Debug("Stopping web servers");
+    Debug("Stopping web servers");
     if (CppJsLib::stop(ui, true, 5)) {
-        logger->Debug("Stopped ui web server");
+        Debug("Stopped ui web server");
         delete ui;
     } else {
-        logger->Warning("Could not stop ui web server");
+        Warning("Could not stop ui web server");
     }
 
     if (webUi && CppJsLib::stop(webUi, true, 5)) {
-        logger->Debug("Stopped web ui web server");
+        Debug("Stopped web ui web server");
         delete webUi;
     } else {
-        logger->Warning("Could not stop web ui web server");
+        Warning("Could not stop web ui web server");
     }
 
     // Delete the AIs
-    logger->Debug("Deleting Betting AI");
+    Debug("Deleting Betting AI");
     tf::BettingAI::deleteAi();
-    logger->Debug("Deleted Betting AI");
+    Debug("Deleted Betting AI");
 
-    logger->Debug("Deleting Winnings AI");
+    Debug("Deleting Winnings AI");
     tf::WinningsAI::deleteAi();
-    logger->Debug("Deleted Winnings AI");
+    Debug("Deleted Winnings AI");
 
     // Sleep
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     // Delete the logger so it closes the file stream, if open
     delete logger;
+    logger = nullptr;
 
     if (debug_full) {
         logger = new Logger();
@@ -175,7 +196,7 @@ void kill(bool _exit = true) {
 std::string getIP() {
     utils::IPv4 iPv4;
     if (!utils::getOwnIP(iPv4)) {
-        logger->Error("Could not retrieve own IP!");
+        Error("Could not retrieve own IP!");
         return "";
     }
     return iPv4.to_string();
@@ -185,13 +206,13 @@ std::string getIP() {
  * Start the web servers
  */
 void startWebServers() {
-    logger->Debug("Starting ui web server");
+    Debug("Starting ui web server");
     ui->check_ports = false;
     bool res = ui->start(8025, 8026, "localhost", false);
     if (res) {
-        logger->Debug("Successfully started ui");
+        Debug("Successfully started ui");
     } else {
-        logger->Error("Could not start ui");
+        Error("Could not start ui");
         utils::displayError("Could not start UI web server\nA log file may contain further information", [] {
             exit(1);
         });
@@ -200,15 +221,15 @@ void startWebServers() {
     // Run webUi->start in a separate thread so it can check if its ports are occupied
     std::thread([] {
         if (webUi) {
-            logger->Debug("Starting web ui web server");
+            Debug("Starting web ui web server");
             bool res = webUi->start(8027, 8028, getIP(), false);
             if (res) {
-                logger->Debug("Successfully started webUi");
+                Debug("Successfully started webUi");
             } else {
-                logger->Warning("Could not start webUi");
+                Warning("Could not start webUi");
             }
         } else {
-            logger->Warning("Not starting web ui web server since it does not exist");
+            Warning("Not starting web ui web server since it does not exist");
         }
     }).detach();
 }
@@ -219,7 +240,7 @@ void startWebServers() {
 void writeWinnings() {
     std::ofstream ofs("winnings.dat", std::ios::out | std::ios::binary);
     if (!ofs.good()) {
-        logger->Error("Unable to open winnings file. Flags: " + std::to_string(ofs.flags()));
+        Error("Unable to open winnings file. Flags: " + std::to_string(ofs.flags()));
         return;
     }
 
@@ -229,12 +250,12 @@ void writeWinnings() {
 
     ofs.write((char *) &buf, sizeof(winnings_buf));
     if (ofs.fail()) {
-        logger->Warning("Winnings file stream fail bit was set, this is not good");
+        Warning("Winnings file stream fail bit was set, this is not good");
     }
 
     ofs.close();
     if (ofs.is_open()) {
-        logger->Error("Unable to close winnings file");
+        Error("Unable to close winnings file");
     }
 }
 
@@ -242,10 +263,10 @@ void writeWinnings() {
  * Load winnings_all from binary file winnings.dat
  */
 void loadWinnings() {
-    logger->Debug("Loading winnings from file");
+    Debug("Loading winnings from file");
 
     if (!utils::fileExists("winnings.dat")) {
-        logger->Debug("Winnings file does not exist, creating it");
+        Debug("Winnings file does not exist, creating it");
         writeWinnings:
         winnings_all = 0;
         writeWinnings();
@@ -254,7 +275,7 @@ void loadWinnings() {
 
     std::ifstream ifs("winnings.dat", std::ios::in | std::ios::binary);
     if (!ifs.good()) {
-        logger->Error("Unable to open winnings file. Flags: " + std::to_string(ifs.flags()));
+        Error("Unable to open winnings file. Flags: " + std::to_string(ifs.flags()));
         goto writeWinnings;
     }
 
@@ -263,17 +284,17 @@ void loadWinnings() {
 
     ifs.read((char *) &buf, sizeof(winnings_buf));
     if (ifs.fail()) {
-        logger->Warning("File stream fail bit was set, rewriting file");
+        Warning("File stream fail bit was set, rewriting file");
         goto writeWinnings;
     }
 
     if (ifs.eof()) {
-        logger->Warning("Winnings file end has been reached, rewriting file");
+        Warning("Winnings file end has been reached, rewriting file");
         goto writeWinnings;
     }
 
     if (buf.buf1 != 0 || buf.buf2 != 0) {
-        logger->Warning("Winnings buffer is not zero, rewriting file");
+        Warning("Winnings buffer is not zero, rewriting file");
         goto writeWinnings;
     }
 
@@ -282,17 +303,17 @@ void loadWinnings() {
     ifs.close();
 
     if (ifs.is_open()) {
-        logger->Error("Unable to close winnings file");
+        Error("Unable to close winnings file");
     }
 
-    logger->Debug("Read winnings: " + std::to_string(winnings_all));
+    Debug("Read winnings: " + std::to_string(winnings_all));
 }
 
 /**
  * Get GTA V window positions and size and write them to their variables
  */
 void set_positions() {
-    logger->Debug("Getting positions of GTA V window");
+    Debug("Getting positions of GTA V window");
     // Definition of width, height, x, y pos of window and multiplier of positions
     utils::windowSize ws;
     utils::getWindowSize(ws);
@@ -300,21 +321,21 @@ void set_positions() {
     yPos = ws.yPos;
     width = ws.width;
     height = ws.height;
-    logger->Debug("Got positions: x: " + std::to_string(xPos) + ", y: " + std::to_string(yPos) + ", w: " +
-                  std::to_string(width) + ", h: " + std::to_string(height));
+    Debug("Got positions: x: " + std::to_string(xPos) + ", y: " + std::to_string(yPos) + ", w: " +
+          std::to_string(width) + ", h: " + std::to_string(height));
 
     utils::windowSize screenSize;
     utils::getActiveScreen(xPos + (width / 2), yPos + (height / 2), screenSize);
 
-    logger->Debug("Got active screen width: " + std::to_string(screenSize.width) + " and height: " +
-                  std::to_string(screenSize.height));
+    Debug("Got active screen width: " + std::to_string(screenSize.width) + " and height: " +
+          std::to_string(screenSize.height));
 
     if (customBettingPos <= 0 && pArr->size <= 0) {
         double r = (double) width / screenSize.width;
-        logger->Debug("Ratio: " + std::to_string(r));
+        Debug("Ratio: " + std::to_string(r));
 
         if (r > 1.01) {
-            logger->Error("Ratio is bigger than 1.0, this should not happen");
+            Error("Ratio is bigger than 1.0, this should not happen");
         } else {
             if (r > 0.625) {
                 bettingPos = POS_1_1;
@@ -348,10 +369,10 @@ void leftClick(unsigned int x, unsigned int y, bool move = true) {
         x = (int) round((float) x * multiplierW) + xPos;
         y = (int) round((float) y * multiplierH) + yPos;
         if (!utils::leftClick((int) x, (int) y, move)) {
-            logger->Error("utils::leftClick returned abnormal signal");
+            Error("utils::leftClick returned abnormal signal");
         }
     } else {
-        logger->Debug("Should click now but the program is about to stop, doing nothing");
+        Debug("Should click now but the program is about to stop, doing nothing");
     }
 }
 
@@ -360,14 +381,34 @@ void leftClick(unsigned int x, unsigned int y, bool move = true) {
  *
  * @param y the y position where to click
  */
-void place_bet(int y) {
-    logger->Debug("Placing bet");
+void place_bet(int y, bool evalBettingPos) {
+    Debug("Placing bet");
     leftClick(634, y);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+    if (evalBettingPos) {
+        Debug("Searching for increase bet (>) position");
+        utils::windowSize ws;
+        utils::getWindowSize(ws);
+        int res = utils::findIncreaseBetButton(ws, multiplierH);
+        if (res > 0) {
+            Debug("Increase bet position found: " + std::to_string(res));
+            bettingPos = res;
+        }
+    }
+
     leftClick(bettingPos, 680);
+
+    // Calculate distance between betting pos and actual cursor pos since windows tends to not
+    // move the cursor the way it should
+    POINT p;
+    GetCursorPos(&p);
+
+    int dist = (int) (((float) bettingPos - (float) p.x) / multiplierW);
+    leftClick(bettingPos + dist, 680);
+
     for (int i = 0; i < clicks - 1; i++) {
-        leftClick(bettingPos, 680, false);
+        leftClick(bettingPos + dist, 680, false);
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -408,7 +449,7 @@ short get_pos(void *src) {
             auto future = std::async(std::launch::async, &std::thread::join, bt);
             if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
                 // bt is still alive, destroy everything
-                logger->Error("bt could not be closed");
+                Error("bt could not be closed");
                 utils::displayError("An error occurred while initializing the AIs", [] {
                     kill(true);
                 });
@@ -423,7 +464,7 @@ short get_pos(void *src) {
             auto future = std::async(std::launch::async, &std::thread::join, wt);
             if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
                 // wt is still alive, destroy everything
-                logger->Error("wt could not be closed");
+                Error("wt could not be closed");
                 utils::displayError("An error occurred while initializing the AIs", [] {
                     kill(true);
                 });
@@ -444,7 +485,7 @@ short get_pos(void *src) {
 
     short res[6] = {-1, -1, -1, -1, -1, -1};
     unsigned short yCoord, xCoord, _width, _height;
-    logger->Debug("AI results:");
+    Debug("AI results:");
     for (unsigned short i = 0; i < 6; i++) {
         yCoord = (int) round((float) yLocations[i] * multiplierH);
         _height = (int) round((float) 46 * multiplierH);
@@ -460,7 +501,7 @@ short get_pos(void *src) {
 
         // Predict it
         auto b_res = tf::BettingAI::predict(b->data, b->size);
-        logger->Debug(std::to_string(b_res));
+        Debug(std::to_string(b_res));
 
         // Delete the bitmap object
         delete b;
@@ -493,7 +534,7 @@ short get_pos(void *src) {
  * @param amount the amount to add
  */
 void updateWinnings(int amount) {
-    logger->Debug("Updating winnings by " + std::to_string(amount));
+    Debug("Updating winnings by " + std::to_string(amount));
 
     // If the amount to add is not zero add it to winnings and winnings_all
     if (amount != 0) {
@@ -534,7 +575,7 @@ void getWinnings() {
     }
 
     short res = tf::WinningsAI::predict(bmp->data, bmp->size);
-    logger->Debug("Winnings prediction: " + std::to_string(res));
+    Debug("Winnings prediction: " + std::to_string(res));
     DeleteObject(src);
     delete bmp;
 
@@ -545,10 +586,22 @@ void getWinnings() {
 /**
  * Skip this bet
  */
-void skipBet() {
-    logger->Debug("Should not bet on this one, skipping...");
+void skipBet(bool evalBettingPos) {
+    Debug("Should not bet on this one, skipping...");
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     leftClick(633, 448);
+
+    if (evalBettingPos) {
+        Debug("Searching for increase bet (>) position");
+        utils::windowSize ws;
+        utils::getWindowSize(ws);
+        int res = utils::findIncreaseBetButton(ws, multiplierH);
+        if (res > 0) {
+            Debug("Increase bet position found: " + std::to_string(res));
+            bettingPos = res;
+        }
+    }
+
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     leftClick(1720, 1036);
 }
@@ -559,10 +612,12 @@ void skipBet() {
 void mainLoop() {
     // Check if the game is running
     if (utils::isProcessRunning("GTA5.exe")) {
-        logger->Debug("GTA V running");
+        Debug("GTA V running");
         setGtaVRunning(true);
         // Set the game's positions
         set_positions();
+        utils::windowSize ws;
+        bool justStarted = true;
 
         while (running) {
             // Take a screen shot
@@ -574,18 +629,20 @@ void mainLoop() {
                 if (!running) {
                     break;
                 }
-                place_bet(pos);
+                place_bet(pos, justStarted && customBettingPos <= 1 && pArr->size <= 0);
+                if (justStarted)
+                    justStarted = false;
                 // Updating winnings by -10000 because betting costs 100000
                 updateWinnings(-10000);
                 if (!running) {
                     break;
                 }
-                logger->Debug("Sleeping for 36 seconds");
+                Debug("Sleeping for 36 seconds");
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep / 2));
                 if (!running) {
                     // Program is not running anymore, stop it
-                    logger->Debug("The script has been stopped, skipping after " + std::to_string(time_sleep / 2) +
-                                  " seconds...");
+                    Debug("The script has been stopped, skipping after " + std::to_string(time_sleep / 2) +
+                          " seconds...");
                     break;
                 }
                 std::this_thread::sleep_for(std::chrono::seconds((int) ceil((double) time_sleep / 2.0)));
@@ -599,17 +656,41 @@ void mainLoop() {
                     break;
                 }
             } else {
-                skipBet();
-                logger->Debug("Sleeping for " + std::to_string(time_sleep) + " seconds");
+                skipBet(justStarted && customBettingPos <= 1 && pArr->size <= 0);
+                if (justStarted)
+                    justStarted = false;
+                Debug("Sleeping for " + std::to_string(time_sleep) + " seconds");
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep));
                 reset();
             }
+
+            // Check if the game is in focus
+            bool foreground;
+            errno_t err = utils::isForeground(foreground);
+            if (err == 0) {
+                if (!foreground) {
+                    Debug("GTA V is not the currently focused window. Betting will be stopped");
+                    ui_keycomb_stop();
+                    running = false;
+                    break;
+                }
+            } else {
+                Warning("Could not get foreground window. Assuming GTA V is in foreground");
+            }
+
+            // Check if the game is still opened
+            utils::getWindowSize(ws);
+            if ((ws.width == 0 && ws.height == 0) || !utils::isProcessRunning("GTA5.exe")) {
+                Debug("The game seems to be closed, stopping betting");
+                ui_keycomb_stop();
+                running = false;
+            }
         }
         stopping = false;
-        logger->Debug("Betting is now paused");
+        Debug("Betting is now paused");
     } else {
         // The Game is not running, tell it everyone and sleep some time
-        logger->Debug("GTA V not running");
+        Debug("GTA V not running");
         if (running && stopping) {
             stopping = false;
             running = false;
@@ -623,10 +704,10 @@ void mainLoop() {
  * start the betting
  */
 void start_script() {
-    logger->Debug("Starting script");
+    Debug("Starting script");
     // Only start if it is not already running or stopping
     if (!running && !stopping) {
-        logger->Debug("Set running to true");
+        Debug("Set running to true");
         ui_keycomb_start();
         running = true;
     }
@@ -638,7 +719,7 @@ void start_script() {
 void stop_script() {
     // Only stop if it is running and not stopping
     if (running && !stopping) {
-        logger->Debug("Waiting for main thread to finish");
+        Debug("Waiting for main thread to finish");
         ui_keycomb_stop();
         running = false;
         stopping = true;
@@ -671,9 +752,9 @@ void open_website() {
     addr.append(getIP()).append(":8027");
     HINSTANCE hst = ShellExecuteA(nullptr, TEXT("open"), TEXT(addr.c_str()), nullptr, nullptr, 0);
     if (reinterpret_cast<intptr_t>(hst) <= 32) {
-        logger->Error("Unable to open Web page");
+        Error("Unable to open Web page");
     } else {
-        logger->Debug("Opened website");
+        Debug("Opened website");
     }
 }
 
@@ -731,7 +812,7 @@ void listenForKeycomb() {
         if (!starting) {
             if (!running && !stopping) {
                 if (!gtaVRunning) {
-                    logger->Debug("Tried to start the script while the game was not running, skipping this request");
+                    Debug("Tried to start the script while the game was not running, skipping this request");
                     return;
                 }
                 start_script();
@@ -739,7 +820,7 @@ void listenForKeycomb() {
                 stop_script();
             }
         } else {
-            logger->Debug(
+            Debug(
                     "Keycomb to start was triggered, but the 'start' button was already pressed at this time, ignoring the event");
         }
     };
@@ -773,13 +854,13 @@ void listenForKeycomb() {
  * Perform AI self test
  */
 void selfTestAI() {
-    logger->Debug("Performing AI self test");
+    Debug("Performing AI self test");
     if (!tf::BettingAI::initialized()) {
         if (!tf::BettingAI::initAi()) {
 #ifdef ASSERT_MEM_OK
             ASSERT_MEM_OK();
 #endif //ASSERT_MEM_OK
-            logger->Error("Unable to initialize Betting AI");
+            Error("Unable to initialize Betting AI");
             goto label1;
         }
     }
@@ -789,13 +870,13 @@ void selfTestAI() {
     label1:
     if (!tf::WinningsAI::initialized()) {
         if (!tf::WinningsAI::initAi()) {
-            logger->Error("Unable to initialize Winnings AI");
+            Error("Unable to initialize Winnings AI");
             return;
         }
     }
 
     short res = tf::WinningsAI::selfTest("data/40.png");
-    logger->Debug("Winnings AI self-test result (40): " + std::to_string(res));
+    Debug("Winnings AI self-test result (40): " + std::to_string(res));
 }
 
 /**
@@ -910,7 +991,7 @@ int main(int argc, char *argv<::>) <%
     if (!pArr)
         pArr = new settings::posConfigArr();
     if (utils::fileExists("autobet.conf")) {
-        logger->Debug("Settings file exists. Loading it");
+        Debug("Settings file exists. Loading it");
         unsigned int t, c;
         settings::load(t, c, pArr);
         if (time_sleep == 36)
@@ -920,36 +1001,36 @@ int main(int argc, char *argv<::>) <%
     }
 
     if (store_config_json) {
-        logger->Debug("Storing json to Desktop");
+        Debug("Storing json to Desktop");
         settings::storeConfig(time_sleep, clicks, pArr);
         return 0;
     }
 
     if (load_config_json) {
-        logger->Debug("Loading json from Desktop");
+        Debug("Loading json from Desktop");
         utils::path p;
         utils::getDesktopDirectory(p);
         if (utils::fileExists(p.toString() + "\\autobet_conf.json")) {
             settings::loadConfig(time_sleep, clicks, pArr);
             settings::save(time_sleep, clicks, pArr);
         } else {
-            logger->Error("JSON config file does not exist");
+            Error("JSON config file does not exist");
             kill(false);
             return 1;
         }
     }
 
     if (save_settings) {
-        logger->Debug("Saving settings");
+        Debug("Saving settings");
         settings::save(time_sleep, clicks, pArr);
     }
 
     if (headless) {
-        logger->Debug("running in headless mode");
+        Debug("running in headless mode");
     }
 
     if (customBettingPos > 0) {
-        logger->Debug("Custom betting pos set to " + std::to_string(customBettingPos));
+        Debug("Custom betting pos set to " + std::to_string(customBettingPos));
     }
 
     utils::setLogger(logger);
@@ -967,28 +1048,28 @@ int main(int argc, char *argv<::>) <%
 
     if (signInstaller) {
         if (utils::fileExists("autobet_installer.exe") && utils::fileExists("private.pem")) {
-            logger->Debug("Signing installer file");
+            Debug("Signing installer file");
             fileCrypt::signInstaller();
             return 0;
         } else {
-            logger->Error("'autobet_installer.exe' or 'private.pem' does not exist");
+            Error("'autobet_installer.exe' or 'private.pem' does not exist");
             return 1;
         }
     }
 
     if (checkSignature) {
         if (utils::fileExists("autobet_installer.exe") && utils::fileExists("autobet_installer.pem")) {
-            logger->Debug("Checking signature...");
+            Debug("Checking signature...");
             if (fileCrypt::verifySignature("autobet_installer.exe",
                                            fileCrypt::getFileContent("autobet_installer.pem"))) {
-                logger->Debug("Signature does match");
+                Debug("Signature does match");
                 return 0;
             } else {
-                logger->Warning("Signature does not match");
+                Warning("Signature does not match");
                 return 1;
             }
         } else {
-            logger->Error("'autobet_installer.exe' or 'private.pem' does not exist");
+            Error("'autobet_installer.exe' or 'private.pem' does not exist");
             return 1;
         }
     }
@@ -997,16 +1078,16 @@ int main(int argc, char *argv<::>) <%
         debug::setLogger(logger);
 
         if (!debug::init()) {
-            logger->Error("Could not create debug folder. Cannot collect debug information");
+            Error("Could not create debug folder. Cannot collect debug information");
         }
     }
 
-    logger->Debug("Logging enabled");
+    Debug("Logging enabled");
 
     updater::setLogger(logger);
     char *version = nullptr;
     if (!runUpdate && !afterUpdate && updater::check(&version)) {
-        logger->Debug(std::string("A new version is available: ").append(version));
+        Debug(std::string("A new version is available: ").append(version));
 
         if (updater::updateDownloaded()) {
             if (updater::checkSignature(version)) {
@@ -1038,16 +1119,16 @@ int main(int argc, char *argv<::>) <%
     }
 
     CppJsLib::setLogger([](const std::string &s) {
-        logger->Debug(s);
+        Debug(s);
     });
 
     CppJsLib::setError([](const std::string &s) {
-        logger->Error(s);
+        Error(s);
     });
 
     utils::printSystemInformation();
     utils::setCtrlCHandler([] {
-        logger->Debug("Shutdown event hit. Shutting down");
+        Debug("Shutdown event hit. Shutting down");
         kill();
     });
 
@@ -1056,7 +1137,7 @@ int main(int argc, char *argv<::>) <%
     autostop::init(logger, &winnings, &time_running);
 
 #ifdef AUTOBET_WINDOWS
-    logger->Debug("Running on Windows");
+    Debug("Running on Windows");
 #else
     logger->Debug("Running on linux/mac os");
 #endif //AUTOBET_WINDOWS
@@ -1066,23 +1147,23 @@ int main(int argc, char *argv<::>) <%
 #endif //NDEBUG
 
     if (!utils::fileExists("data/betting.pb")) {
-        logger->Error("Could not initialize Betting AI: betting.pb not found");
+        Error("Could not initialize Betting AI: betting.pb not found");
         utils::displayError("Could not initialize Betting AI\nBetting.pb not found."
                             "\nReinstalling the program might fix this error", [] {
             exit(1);
         });
     }
 #ifdef ASSERT_MEM_OK
-    ASSERT_MEM_OK();
+        ASSERT_MEM_OK();
 #endif //ASSERT_MEM_OK
 
-    logger->Debug("Initializing Betting AI");
+    Debug("Initializing Betting AI");
 
     if (!tf::BettingAI::initAi()) {
 #ifdef ASSERT_MEM_OK
         ASSERT_MEM_OK();
 #endif //ASSERT_MEM_OK
-        logger->Error("Could not initialize Betting AI: Unable to allocate memory");
+        Error("Could not initialize Betting AI: Unable to allocate memory");
         utils::displayError("Could not initialize Betting AI\nNot enough memory", [] {
             exit(1);
         });
@@ -1090,18 +1171,18 @@ int main(int argc, char *argv<::>) <%
 #ifdef ASSERT_MEM_OK
         ASSERT_MEM_OK();
 #endif //ASSERT_MEM_OK
-        logger->Debug("Successfully initialized Betting AI");
+        Debug("Successfully initialized Betting AI");
 
         // Run the first prediction as it is painfully slow
         bt = new std::thread([] {
-            logger->Debug("Running first Betting AI prediction");
+            Debug("Running first Betting AI prediction");
             void *src = utils::TakeScreenShot(0, 0, 100, 100);
             utils::bitmap *b = utils::crop(0, 0, 100, 100, src);
             DeleteObject(src);
             tf::BettingAI::predict(b->data, b->size);
 
             delete b;
-            logger->Debug("Done running first Betting AI prediction");
+            Debug("Done running first Betting AI prediction");
         });
     } else {
 #ifdef ASSERT_MEM_OK
@@ -1109,11 +1190,11 @@ int main(int argc, char *argv<::>) <%
 #endif //ASSERT_MEM_OK
         std::string msg("Failed to initialize Betting AI. Error: ");
         msg.append(tf::BettingAI::status::getLastStatus());
-        logger->Error(msg);
+        Error(msg);
 
-        logger->Debug("Deleting Betting AI");
+        Debug("Deleting Betting AI");
         tf::BettingAI::deleteAi();
-        logger->Debug("Deleted Betting AI");
+        Debug("Deleted Betting AI");
 
         utils::displayError("Could not initialize Betting AI\nCheck the log for further information", [] {
             exit(1);
@@ -1125,29 +1206,29 @@ int main(int argc, char *argv<::>) <%
     }
 
     if (utils::fileExists("data/winnings.pb")) {
-        logger->Debug("Initializing Winnings AI");
+        Debug("Initializing Winnings AI");
 
         if (!tf::WinningsAI::initAi()) {
 #ifdef ASSERT_MEM_OK
             ASSERT_MEM_OK();
 #endif //ASSERT_MEM_OK
-            logger->Error("Could not initialize Winnings AI: Unable to allocate memory");
+            Error("Could not initialize Winnings AI: Unable to allocate memory");
         } else if (tf::WinningsAI::status::ok()) {
 #ifdef ASSERT_MEM_OK
             ASSERT_MEM_OK();
 #endif //ASSERT_MEM_OK
-            logger->Debug("Successfully initialized Winnings AI");
+            Debug("Successfully initialized Winnings AI");
 
             // Run the first prediction as it is painfully slow
             wt = new std::thread([] {
-                logger->Debug("Running first Winnings AI prediction");
+                Debug("Running first Winnings AI prediction");
                 void *src = utils::TakeScreenShot(0, 0, 100, 100);
                 utils::bitmap *b = utils::crop(0, 0, 100, 100, src);
                 DeleteObject(src);
                 tf::WinningsAI::predict(b->data, b->size);
 
                 delete b;
-                logger->Debug("Done running first Winnings AI prediction");
+                Debug("Done running first Winnings AI prediction");
             });
         } else {
 #ifdef ASSERT_MEM_OK
@@ -1155,14 +1236,14 @@ int main(int argc, char *argv<::>) <%
 #endif //ASSERT_MEM_OK
             std::string msg("Failed to initialize Winnings AI. Error: ");
             msg.append(tf::WinningsAI::status::getLastStatus());
-            logger->Error(msg);
+            Error(msg);
 
-            logger->Debug("Deleting Winnings AI");
+            Debug("Deleting Winnings AI");
             tf::WinningsAI::deleteAi();
-            logger->Debug("Deleted Winnings AI");
+            Debug("Deleted Winnings AI");
         }
     } else {
-        logger->Error("Could not initialize Winnings AI: winnings.pb does not exist");
+        Error("Could not initialize Winnings AI: winnings.pb does not exist");
     }
     keyCombListen = true;
     std::thread keyCombThread(listenForKeycomb);
@@ -1179,7 +1260,7 @@ int main(int argc, char *argv<::>) <%
         ui = new CppJsLib::WebGUI("ui");
 #endif //BUILD_CPPJSLIB
     } catch (std::bad_alloc &e) {
-        logger->Error(std::string("Unable to create instance of ui web server. Error: ").append(e.what()));
+        Error(std::string("Unable to create instance of ui web server. Error: ").append(e.what()));
         utils::displayError("Could not initialize UI web server\n(Probably out of memory)", [] {
             exit(1);
         });
@@ -1193,11 +1274,11 @@ int main(int argc, char *argv<::>) <%
             webUi = new CppJsLib::WebGUI("web");
 #endif //BUILD_CPPJSLIB
         } catch (std::bad_alloc &e) {
-            logger->Error("Unable to create instance of web ui web server. Error: " + std::string(e.what()));
+            Error("Unable to create instance of web ui web server. Error: " + std::string(e.what()));
             webUi = nullptr;
         }
     } else {
-        logger->Debug("Web ui was disabled per command-line argument, no starting the web server");
+        Debug("Web ui was disabled per command-line argument, no starting the web server");
     }
 
 #ifdef ASSERT_MEM_OK
@@ -1228,7 +1309,7 @@ int main(int argc, char *argv<::>) <%
         webUi->expose(set_autostop_time);
         webUi->expose(set_autostop_money);
     } else {
-        logger->Warning("Not exposing any functions to web ui web server since it does not exist");
+        Warning("Not exposing any functions to web ui web server since it does not exist");
     }
 
     ui->importFunction(set_gta_running);
@@ -1246,7 +1327,7 @@ int main(int argc, char *argv<::>) <%
     runLoops = true;
 
     std::function < void() > close__ = []() {
-        logger->Debug("Electron was closed. Program should exit any minute");
+        Debug("Electron was closed. Program should exit any minute");
         runLoops = false;
         running = false;
         std::thread closeThread([]() {
@@ -1260,13 +1341,13 @@ int main(int argc, char *argv<::>) <%
 
     if (!headless) {
         // Start electron to display the UI
-        auto app = new utils::Application("electron-win32-x64/electron.exe");
-        utils::startup(app);
+        electron = new utils::Application("electron-win32-x64/electron.exe");
+        utils::startup(electron);
 
         // Add a check if electron runs to kill this program if electron is closed
-        std::thread electronRunCheck([app, close__]() {
+        std::thread electronRunCheck([close__]() {
             while (runLoops) {
-                if (!app->isRunning()) {
+                if (!electron->isRunning()) {
                     return close__();
                 }
                 std::this_thread::sleep_for(std::chrono::seconds(1));
