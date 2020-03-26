@@ -1,3 +1,12 @@
+/* Stylesheet
+Custom poperties:
+--main-background-color
+--container-background-color
+--desc-text-color
+--heading-color
+*/
+
+
 /* Hide scrollbar on Firefox */
 
 html {
@@ -5,12 +14,19 @@ html {
 }
 
 body {
-    background-color: #1a1a1a;
+    background-color: black;
     margin: 0;
     overflow-x: hidden;
     overflow-y: hidden;
     -ms-overflow-style: none;
     width: 100%;
+}
+
+body.darktheme {
+    --main-background-color: #141414;
+    --container-background-color: #212121;
+    --desc-text-color: lightgrey;
+    --heading-color: white;
 }
 
 body::-webkit-scrollbar {
@@ -26,10 +42,51 @@ body::-webkit-scrollbar {
     user-select: none;
 }
 
+#change-theme {
+    border-radius: 50%;
+    right: 15px;
+    bottom: -60px;
+    z-index: 999;
+    position: fixed;
+    background: linear-gradient(90deg, #257bf9, #00d0ff);
+    height: 50px;
+    width: 50px;
+    transition: all .3s ease-in-out;
+}
+
+#change-theme.shown {
+    bottom: 15px;
+    animation-name: show-change-theme;
+    animation-duration: .3s;
+}
+
+@keyframes show-change-theme {
+    0% {
+        bottom: -60px;
+    }
+    100% {
+        bottom: 15px;
+    }
+}
+
+#theme-change-icon {
+    font-size: 35px;
+    margin: 7.5;
+    transition: all .3s ease-in-out;
+}
+
+#theme-change-icon.darktheme {
+    color: white;
+}
+
+#change-theme.darktheme {
+    background: linear-gradient(90deg, #00a1ff, #002eff);
+}
+
 #main-heading {
     font-family: 'Open Sans', sans-serif;
     font-weight: 500;
-    color: rgb(138, 138, 138);
+    color: rgb(227, 227, 227);
     display: block;
     position: absolute;
     text-align: center;
@@ -151,9 +208,10 @@ body::-webkit-scrollbar {
 #desc-container {
     grid-row: 2;
     grid-column: 1;
-    background-color: rgb(238, 238, 238);
+    background-color: var(--main-background-color, rgb(238, 238, 238));
     width: 100%;
     z-index: 1;
+    transition: all .2s ease-in-out;
 }
 
 .container {
@@ -161,7 +219,7 @@ body::-webkit-scrollbar {
     max-width: 310px;
     min-width: 310px;
     height: auto;
-    background: white;
+    background: var(--container-background-color, white);
     border-radius: 5px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
@@ -185,9 +243,10 @@ body::-webkit-scrollbar {
     margin-left: 15px;
     margin-right: 15px;
     margin-top: 0px;
-    color: #747474;
+    color: var(--desc-text-color, #747474);
     padding-bottom: 8px;
     margin-top: 10px;
+    transition: all .3s ease-in-out;
 }
 
 li.desc-text {
@@ -259,16 +318,6 @@ li.desc-text {
     column-gap: 2%;
 }
 
-#how-it-works {
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    font-size: 23px;
-    color: black;
-    margin-top: 10px;
-    margin-bottom: 0px;
-}
-
 .heading-important {
     text-align: center;
     font-family: 'Open Sans', sans-serif;
@@ -284,7 +333,7 @@ li.desc-text {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 23px;
-    color: black;
+    color: var(--heading-color, black);
     margin-top: 10px;
     margin-bottom: 0px;
 }
@@ -372,7 +421,8 @@ li.desc-text {
 /* Download not supported */
 
 #download-container {
-    background-color: rgb(238, 238, 238);
+    background-color: var(--main-background-color, rgb(238, 238, 238));
+    transition: all .2s ease-in-out;
 }
 
 #main-download-container {
@@ -381,7 +431,6 @@ li.desc-text {
     margin-left: auto;
     margin-right: auto;
     float: none;
-    background: white;
     margin-bottom: 25px;
 }
 
@@ -468,10 +517,11 @@ li.desc-text {
     margin-bottom: auto;
     grid-column: 1;
     margin-right: 5px;
+    color: var(--heading-color, black);
 }
 
 #download-latest {
-    color: black;
+    color: var(--heading-color, black);
     text-align: center;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
@@ -482,6 +532,7 @@ li.desc-text {
 }
 
 #lv-paragraph {
+    color: var(--heading-color, black);
     text-align: center;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
@@ -517,7 +568,7 @@ li.desc-text {
 
 #show-tag {
     grid-column: 2;
-    --mdc-theme-primary: black;
+    --mdc-theme-primary: var(--heading-color, black);
     width: max-content;
     margin-right: auto;
     margin-left: 15px;
