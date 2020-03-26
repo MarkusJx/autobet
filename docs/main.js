@@ -4,9 +4,9 @@ const show_tag = document.getElementById("show-tag");
 
 setTimeout(() => {
     if (!isWindows()) {
-        document.getElementById("main-download-container-unupported").style.visibility = "visible";
-        document.getElementById("main-download-container-unupported").style.position = "unset";
-        document.getElementById("main-download-container-unupported").style.display = "block"
+        document.getElementById("main-download-container-unsupported").style.visibility = "visible";
+        document.getElementById("main-download-container-unsupported").style.position = "unset";
+        document.getElementById("main-download-container-unsupported").style.display = "block"
 
         document.getElementById("main-download-container").style.visibility = "hidden";
         document.getElementById("main-download-container").style.position = "absolute";
