@@ -21,6 +21,29 @@ new mdc.ripple.MDCRipple(document.getElementById("goto-gh-issues"));
 new mdc.ripple.MDCRipple(document.getElementById("goto-downloads-unsupported"));
 let license_dialog = new mdc.dialog.MDCDialog(document.getElementById("license-dialog"));
 
+let is_dark = false;
+let recentlyChanged = false;
+
+document.getElementById("change-theme").addEventListener('click', () => {
+    if (!recentlyChanged) {
+        if (is_dark) {
+            document.body.classList.remove("darktheme");
+            document.getElementById("theme-change-icon").classList.remove("darktheme");
+            document.getElementById("change-theme").classList.remove("darktheme");
+            is_dark = false;
+        } else {
+            document.body.classList.add("darktheme");
+            document.getElementById("theme-change-icon").classList.add("darktheme");
+            document.getElementById("change-theme").classList.add("darktheme");
+            is_dark = true;
+        }
+        recentlyChanged = true;
+        setTimeout(() => {
+            recentlyChanged = false;
+        }, 300);
+    }
+});
+
 document.getElementById("copyright-footer").addEventListener('click', () => {
     license_dialog.open();
     document.body.style.overflowY = 'hidden';
@@ -51,6 +74,16 @@ function showDownloadButton(e) {
         scrolled = true;
     }
 }
+
+document.addEventListener('scroll', () => {
+    if (window.scrollY != 0) {
+        if (!document.getElementById("change-theme").classList.contains("shown")) {
+            document.getElementById("change-theme").classList.add("shown");
+        }
+    } else {
+        document.getElementById("change-theme").classList.remove("shown");
+    }
+});
 
 $("body").on('mousewheel', showDownloadButton);
 
