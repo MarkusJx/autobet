@@ -5,6 +5,8 @@
 
 A simple GTA Online horseracing-autobetting-bot
 
+[Open project website](https://markusjx.github.io/GTA-Online-Autobet/)
+
 Table of contents
 =================
 
