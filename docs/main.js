@@ -24,19 +24,25 @@ let license_dialog = new mdc.dialog.MDCDialog(document.getElementById("license-d
 let is_dark = false;
 let recentlyChanged = false;
 
+function changeTheme(val) {
+    if (val) {
+        document.body.classList.remove("darktheme");
+        document.getElementById("theme-change-icon").classList.remove("darktheme");
+        document.getElementById("change-theme").classList.remove("darktheme");
+        is_dark = false;
+        window.localStorage.setItem("darktheme", "false");
+    } else {
+        document.body.classList.add("darktheme");
+        document.getElementById("theme-change-icon").classList.add("darktheme");
+        document.getElementById("change-theme").classList.add("darktheme");
+        is_dark = true;
+        window.localStorage.setItem("darktheme", "true");
+    }
+}
+
 document.getElementById("change-theme").addEventListener('click', () => {
     if (!recentlyChanged) {
-        if (is_dark) {
-            document.body.classList.remove("darktheme");
-            document.getElementById("theme-change-icon").classList.remove("darktheme");
-            document.getElementById("change-theme").classList.remove("darktheme");
-            is_dark = false;
-        } else {
-            document.body.classList.add("darktheme");
-            document.getElementById("theme-change-icon").classList.add("darktheme");
-            document.getElementById("change-theme").classList.add("darktheme");
-            is_dark = true;
-        }
+        changeTheme(is_dark);
         recentlyChanged = true;
         setTimeout(() => {
             recentlyChanged = false;
@@ -61,10 +67,8 @@ let scrolled = false;
 
 function showDownloadButton(e) {
     if ((e == null || e.originalEvent.deltaY > 0) && !scrolled) {
-        $("#main-heading").addClass("scrolled");
-        setTimeout(() => {
-            $("#heading-download-background").addClass("scrolled");
-        }, 150);
+        $("#heading-download-container").addClass("scrolled");
+        $("#heading-download-background").addClass("scrolled");
         setTimeout(() => {
             $("#download-button").addClass("scrolled");
             $("#download-button").prop('disabled', false);
@@ -128,6 +132,8 @@ setTimeout(() => {
             location.href = "https://github.com/MarkusJx/GTA-Online-Autobet/blob/master/LICENSE";
         });
     });
+
+    changeTheme(window.localStorage.getItem("darktheme") != "true");
 }, 100);
 
 function getOS() {
