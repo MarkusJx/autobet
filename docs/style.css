@@ -88,90 +88,68 @@ body::-webkit-scrollbar {
     font-weight: 500;
     color: rgb(227, 227, 227);
     display: block;
-    position: absolute;
     text-align: center;
     z-index: 4;
-    margin: 0 0 0 0;
-    margin-top: -22px;
-    margin-left: -148px;
-    top: 50%;
-    left: 50%;
-}
-
-#main-heading.scrolled {
-    margin-top: -58px;
-    animation-name: move-up;
-    animation-duration: .5s;
-}
-
-@keyframes move-up {
-    from {
-        margin-top: -22px;
-    }
-    to {
-        margin-top: -58px;
-    }
+    margin: auto;
+    height: min-content;
+    grid-row: 1;
+    grid-column: 1;
+    margin-top: 28px;
+    transition: all .5s ease-in-out;
 }
 
 #download-button {
     z-index: 4;
     --mdc-theme-primary: #fc3b3b;
-    top: 50%;
-    left: 50%;
     display: block;
-    position: absolute;
-    margin-left: -62px;
-    margin-top: -16px;
     opacity: 0;
+    grid-row: 2;
+    grid-column: 1;
+    width: min-content;
+    margin: auto;
+    margin-top: 0px;
+    transition: all .5s ease-in-out;
 }
 
 #download-button.scrolled {
     opacity: 1;
-    margin-top: 8px;
-    animation-name: move-download-down;
-    animation-duration: 1s;
+    margin-top: 16px;
 }
 
-@keyframes move-download-down {
-    from {
-        opacity: 0;
-        margin-top: -16px;
-    }
-    to {
-        opacity: 1;
-        margin-top: 8px;
-    }
+#heading-download-container {
+    width: 400px;
+    height: 100px;
+    z-index: 3;
+    position: absolute;
+    display: grid;
+    grid-template-rows: 75px 25px;
+    grid-template-columns: 100%;
+    left: 50%;
+    top: 50%;
+    margin-top: -50px;
+    margin-left: -200px;
+    transition: all .5s ease-in-out;
+}
+
+#heading-download-container.scrolled {
+    height: 150px;
+    margin-top: -75px;
+    grid-template-rows: 75px 75px;
 }
 
 #heading-download-background {
-    z-index: 3;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 400px;
+    grid-row: 1 / 3;
+    grid-column: 1;
+    width: 100%;
     height: 100px;
-    margin-left: -200px;
-    margin-top: -50px;
     background-color: #1a1a1a;
     opacity: .5;
     border-radius: 6px;
+    transition: all .5s ease-in-out;
 }
 
 #heading-download-background.scrolled {
     height: 150px;
-    margin-top: -75px;
-    animation: expand-heading-download-background .5s;
-}
-
-@keyframes expand-heading-download-background {
-    from {
-        height: 100px;
-        margin-top: -50px;
-    }
-    to {
-        height: 150px;
-        margin-top: -75px;
-    }
 }
 
 #main-grid {
@@ -454,6 +432,7 @@ li.desc-text {
     margin: 0 auto;
     padding-top: 5px;
     width: max-content;
+    max-width: 100%;
 }
 
 #warning-icon {
@@ -474,6 +453,7 @@ li.desc-text {
     margin-top: 15px;
     grid-column: 2;
     width: max-content;
+    max-width: 100%;
 }
 
 #unsupported-text {
@@ -576,12 +556,10 @@ li.desc-text {
 
 @media only screen and (max-width: 768px) {
     /* For mobile phones: */
-    #heading-download-background {
+    #heading-download-container {
         width: 90%;
-        position: relative;
-        margin-left: auto;
-        margin-right: auto;
-        left: unset;
+        left: 50%;
+        margin-left: calc(90% *0.5 * (-1));
     }
     #header-background {
         width: auto;
