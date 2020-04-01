@@ -11,6 +11,7 @@ Custom poperties:
 
 html {
     scrollbar-width: none;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -235,10 +236,14 @@ li.desc-text {
     margin-top: 0;
 }
 
-.keycomb-background {
+.code-background {
     border-radius: 3px;
     padding: 0 0.4em;
     background-color: rgba(27, 31, 35, 0.1);
+}
+
+.code-background.darktheme {
+    background-color: #4b4b4b;
 }
 
 #goto-issues {
