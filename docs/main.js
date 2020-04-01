@@ -29,12 +29,24 @@ function changeTheme(val) {
         document.body.classList.remove("darktheme");
         document.getElementById("theme-change-icon").classList.remove("darktheme");
         document.getElementById("change-theme").classList.remove("darktheme");
+
+        let elements = document.getElementsByClassName("code-background");
+        for (let i = 0; i < elements.length; i++) {
+            elements.item(i).classList.remove("darktheme");
+        }
+
         is_dark = false;
         window.localStorage.setItem("darktheme", "false");
     } else {
         document.body.classList.add("darktheme");
         document.getElementById("theme-change-icon").classList.add("darktheme");
         document.getElementById("change-theme").classList.add("darktheme");
+
+        let elements = document.getElementsByClassName("code-background");
+        for (let i = 0; i < elements.length; i++) {
+            elements.item(i).classList.add("darktheme");
+        }
+
         is_dark = true;
         window.localStorage.setItem("darktheme", "true");
     }
