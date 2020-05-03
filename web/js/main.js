@@ -290,9 +290,9 @@ function disconnected() {
     let x = setInterval(async () => { // Start an Interval to time the retries
         if (timeUntilRetry < 1) {
             notconnectedlabel.innerHTML = "Trying to reconnect...";
-            timeUntilRetry = 10;
+            timeUntilRetry = 5;
 
-            cppJsLib.init();
+            //cppJsLib.init();
 
             if (cppJsLib.connected) {
                 clearInterval(x);

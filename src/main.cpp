@@ -142,14 +142,14 @@ void kill(bool _exit = true) {
 
     // Stop the web servers, so they don't occupy the ports they use
     Debug("Stopping web servers");
-    if (CppJsLib::stop(ui, true, 5)) {
+    if (CppJsLib::util::stop(ui, true, 5)) {
         Debug("Stopped ui web server");
         delete ui;
     } else {
         Warning("Could not stop ui web server");
     }
 
-    if (webUi && CppJsLib::stop(webUi, true, 5)) {
+    if (webUi && CppJsLib::util::stop(webUi, true, 5)) {
         Debug("Stopped web ui web server");
         delete webUi;
     } else {
@@ -1143,7 +1143,7 @@ int main(int argc, char *argv<::>) <%
 #endif //AUTOBET_WINDOWS
 
 #ifndef NDEBUG
-    logger->Warning("Program was compiled in debug mode");
+    Warning("Program was compiled in debug mode");
 #endif //NDEBUG
 
     if (!utils::fileExists("data/betting.pb")) {
@@ -1312,11 +1312,11 @@ int main(int argc, char *argv<::>) <%
         Warning("Not exposing any functions to web ui web server since it does not exist");
     }
 
-    ui->importFunction(set_gta_running);
-    ui->importFunction(ui_keycomb_start);
-    ui->importFunction(ui_keycomb_stop);
-    ui->importFunction(setAllMoneyMade);
-    ui->importFunction(addMoney);
+    ui->import(set_gta_running);
+    ui->import(ui_keycomb_start);
+    ui->import(ui_keycomb_stop);
+    ui->import(setAllMoneyMade);
+    ui->import(addMoney);
 
     startWebServers();
 
