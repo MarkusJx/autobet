@@ -5,7 +5,7 @@
 #ifndef GTA_ONLINE_AUTOBET_DEV_UPDATER_HPP
 #define GTA_ONLINE_AUTOBET_DEV_UPDATER_HPP
 
-#define AUTOBET_CURRENT_VERSION "1.0.3"
+#define AUTOBET_CURRENT_VERSION "1.0.5"
 
 #include "../logger.hpp"
 #include "../utils.hpp"
