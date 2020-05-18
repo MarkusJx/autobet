@@ -1,6 +1,3 @@
-//
-// Created by markus on 16/01/2020.
-//
 #ifdef AUTOBET_BUILD_UPDATER
 #   define CPPHTTPLIB_OPENSSL_SUPPORT
 #   define CPPHTTPLIB_RECV_BUFSIZ size_t(131072u)

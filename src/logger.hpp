@@ -1,7 +1,3 @@
-//
-// Created by markus on 26/12/2019.
-//
-
 #ifndef GTA_ONLINE_AUTOBET_DEV_LOGGER_HPP
 #define GTA_ONLINE_AUTOBET_DEV_LOGGER_HPP
 
