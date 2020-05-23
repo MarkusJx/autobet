@@ -52,7 +52,7 @@ function start() {
       clearInterval(x);
       startTimer();
       cppJsLib.set_starting(false);
-      cppJsLib.start_s_function();
+      cppJsLib.js_start_script();
       startstop.disabled = false;
       startstop.innerHTML = "stop";
       statusinfo.innerHTML = "Running";
@@ -77,7 +77,7 @@ function is_paused() {
 
 function pause(nstoppy) {
   if (!nstoppy)
-    cppJsLib.stop_s_function();
+    cppJsLib.js_stop_script();
   pausing = 1;
   progressbar.className = "mdc-linear-progress mdc-linear-progress--indeterminate";
   messagecontainer.className = "";
@@ -97,9 +97,10 @@ function startTimer() {
   paused = 0;
   running = 1;
 
-  timer = setInterval(function () {
-    time += 1;
-    cppJsLib.add_sec();
+  timer = setInterval(async function () {
+    time = await cppJsLib.get_time();
+    //time += 1;
+    //cppJsLib.add_sec();
     timeDisp.innerHTML = convertToTime(time);
   }, 1000);
 }

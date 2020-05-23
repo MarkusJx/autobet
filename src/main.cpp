@@ -500,7 +500,7 @@ short get_pos(void *src) {
         }
 
         // Predict it
-        auto b_res = tf::BettingAI::predict(b->data, b->size);
+        short b_res = tf::BettingAI::predict(b->data, b->size);
         Debug(std::to_string(b_res));
 
         // Delete the bitmap object
@@ -509,11 +509,28 @@ short get_pos(void *src) {
         // Check if the current result already exist, so there are not multiple >10/1 odds ore there is a evens
         // if one of this occurs, bet not on this one
         short *s = std::find(std::begin(res), std::end(res), b_res);
-        if ((b_res != 10 && s != std::end(res)) || b_res == 1) {
+        if (b_res <= 5 && s != std::end(res)) { // If this is 5/1 or higher (%!) and exists multiple times, skip
             return -1;
         }
 
         res[i] = b_res;
+    }
+
+    // If evens exist, only bet if the second highest percentage is lower than 4/1 (basically only 4/1 or 5/1)
+    if (std::find(std::begin(res), std::end(res), 1) != std::end(res)) {
+        short lowest = -1;
+        for (short re : res) {
+            // Set lowest if res[s] is smaller than lowest and not equal to 1 (evens), since this will always be lower,
+            // but the second lowest percentage is to be searched for.
+            if ((lowest == -1 || re < lowest) && re != 1) {
+                lowest = re;
+            }
+        }
+
+        // If the second lowest percentage is lower than 4/1 (so 2/1 or 3/1), do not bet, it ain't worth it. Trust me.
+        if (lowest < 4) {
+            return -1;
+        }
     }
 
     // Return the y-position of the lowest chance to bet on
@@ -701,6 +718,15 @@ void mainLoop() {
 }
 
 /**
+ * Check if the betting has been stopped
+ *
+ * @return if the betting has been stopped
+ */
+bool stopped() {
+    return !running && !stopping;
+}
+
+/**
  * start the betting
  */
 void start_script() {
@@ -711,6 +737,13 @@ void start_script() {
         ui_keycomb_start();
         running = true;
     }
+
+    std::thread([] {
+        while (!stopped()) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            time_running++;
+        }
+    }).detach();
 }
 
 /**
@@ -729,19 +762,15 @@ void stop_script() {
 // ui functions ===========================================
 
 /**
- * Check if the betting has been stopped
- *
- * @return if the betting has been stopped
- */
-bool stopped() {
-    return !running && !stopping;
-}
-
-/**
  * Add a second to the time running
+ * @deprecated cpp now handles this in a thread
  */
-void add_sec() {
-    time_running++;
+//void add_sec() {
+    //time_running++;
+//}
+
+void set_starting(bool val) {
+    starting = val;
 }
 
 /**
@@ -1292,7 +1321,11 @@ int main(int argc, char *argv<::>) <%
     ui->expose(getIP);
     ui->expose(open_website);
     ui->expose(stopped);
-    ui->expose(add_sec);
+    ui->expose(get_time);
+    ui->expose(set_starting);
+    ui->expose(js_start_script);
+    ui->expose(js_stop_script);
+    //ui->expose(add_sec);
 
     if (webUi) {
         webUi->expose(js_start_script);
@@ -1326,7 +1359,7 @@ int main(int argc, char *argv<::>) <%
 
     runLoops = true;
 
-    std::function < void() > close__ = []() {
+    std::function < void() > close_electron_func = []() {
         Debug("Electron was closed. Program should exit any minute");
         runLoops = false;
         running = false;
@@ -1337,7 +1370,7 @@ int main(int argc, char *argv<::>) <%
         closeThread.detach();
     };
 
-    ui->setWebSocketCloseHandler(close__);
+    ui->setWebSocketCloseHandler(close_electron_func);
 
     if (!headless) {
         // Start electron to display the UI
@@ -1345,10 +1378,10 @@ int main(int argc, char *argv<::>) <%
         utils::startup(electron);
 
         // Add a check if electron runs to kill this program if electron is closed
-        std::thread electronRunCheck([close__]() {
+        std::thread electronRunCheck([close_electron_func]() {
             while (runLoops) {
                 if (!electron->isRunning()) {
-                    return close__();
+                    return close_electron_func();
                 }
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
