@@ -5,7 +5,7 @@
 #ifndef GTA_ONLINE_AUTOBET_DEV_UPDATER_HPP
 #define GTA_ONLINE_AUTOBET_DEV_UPDATER_HPP
 
-#define AUTOBET_CURRENT_VERSION "1.0.5"
+#define AUTOBET_CURRENT_VERSION "1.1.0"
 
 #include "../logger.hpp"
 #include "../utils.hpp"
@@ -31,7 +31,7 @@ namespace updater {
             std::vector<char *>().swap(v);
         }
 
-        bool operator>(const Version& other) {
+        bool operator>(const Version& other) const {
             int ml = std::min(length, other.length);
             for (int i = 0; i < ml; i++) {
                 if (this->ver[i] > other.ver[i]) {
@@ -46,7 +46,7 @@ namespace updater {
             return this->length > other.length;
         }
 
-        bool operator<(const Version& other) {
+        bool operator<(const Version& other) const {
             int ml = std::min(this->length, other.length);
             for (int i = 0; i < ml; i++) {
                 if (this->ver[i] < other.ver[i]) {
@@ -61,7 +61,7 @@ namespace updater {
             return this->length < other.length;
         }
 
-        bool operator==(const Version& other) {
+        bool operator==(const Version& other) const {
             if (this->length != other.length) {
                 return false;
             }
@@ -75,31 +75,31 @@ namespace updater {
             return true;
         }
 
-        bool operator>=(const Version& other) {
+        bool operator>=(const Version& other) const {
             return *this == other || *this > other;
         }
 
-        bool operator<=(const Version& other) {
+        bool operator<=(const Version& other) const {
             return *this == other || *this < other;
         }
 
-        bool operator>(Version *other) {
+        bool operator>(Version *other) const {
             return operator>(*other);
         }
 
-        bool operator<(Version *other) {
+        bool operator<(Version *other) const {
             return operator<(*other);
         }
 
-        bool operator==(Version *other) {
+        bool operator==(Version *other) const {
             return operator==(*other);
         }
 
-        bool operator>=(Version *other) {
+        bool operator>=(Version *other) const {
             return *this == other || *this > other;
         }
 
-        bool operator<=(Version *other) {
+        bool operator<=(Version *other) const {
             return *this == other || *this < other;
         }
 

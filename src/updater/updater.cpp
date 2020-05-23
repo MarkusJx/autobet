@@ -20,7 +20,7 @@
 #include "verifyFile.hpp"
 
 Logger *logger_u = nullptr;
-bool _download = true;
+bool download_b = true;
 
 void updater::setLogger(Logger *logger) {
     logger_u = logger;
@@ -209,10 +209,10 @@ void updater::cleanup() {
 
 void updater::abortDownload() {
 #ifdef AUTOBET_BUILD_UPDATER
-    _download = false;
-    if (std::filesystem::exists(AUTOBET_INSTALLER_NAME)) {
+    download_b = false;
+    /*if (std::filesystem::exists(AUTOBET_INSTALLER_NAME)) {
         std::filesystem::remove(AUTOBET_INSTALLER_NAME);
-    }
+    }*/
 #else
     UPDATER_UNIMPLEMENTED();
 #endif //AUTOBET_BUILD_UPDATER
@@ -301,7 +301,7 @@ bool updater::checkSignature(const std::string &version) {
                                    store = false;
                                }
                            } else {
-                               if (_download) {
+                               if (download_b) {
                                    stream.write(data, data_length);
                                } else {
                                    return false;
@@ -375,7 +375,7 @@ void updater::download(const std::string &version) {
                                    store = false;
                                }
                            } else {
-                               if (_download) {
+                               if (download_b) {
                                    stream.write(data, data_length);
                                } else {
                                    return false;
