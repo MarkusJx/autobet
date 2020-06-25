@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-control" content="public, max-age=31536000">
     <title>GTA Online Autobet</title>
 
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link href="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </head>
 
 <body class="noselect">
@@ -64,7 +59,7 @@
                             <li class="desc-text">First, you will need at least 100.000 chips in-Game</li>
                             <li class="desc-text">Navigate on one of the betting computers to the betting screen:</li>
                         </ul>
-                        <img src="betting.jpg" id="betting-img">
+                        <img src="betting.webp" id="betting-img">
                         <ul style="margin-top: 2px; padding-bottom: 10px;">
                             <li class="desc-text">
                                 Press the 'start' button on the UI (a countdown will start, giving you time to head back into the game) or use the Key combination
@@ -79,7 +74,7 @@
                     <div class="container smallcontainer" id="ui-container">
                         <h1 class="heading-important">User interface</h1>
                         <div id="ui-grid">
-                            <img src="ui.png" alt="The values displayed here are fictional" id="ui-png">
+                            <img src="ui.webp" alt="The values displayed here are fictional" id="ui-png">
                             <p class="desc-text">
                                 The program ships with a user interface displaying the current status and some stats.
                                 <br> It also comes with a web server displaying the same stats and a few more to be viewed from other devices.
@@ -204,15 +199,22 @@
             </a>
 
             <div class="footer-icon-grid" id="copyright-footer">
-                <!-- <span class="material-icons footer-icon" id="copyright-icon">
-                    copyright
-                </span> -->
                 <p id="copyright-icon">©</p>
                 <p class="footer-text">MarkusJx 2020</p>
             </div>
         </div>
     </div>
+
+    <!-- Load most stuff down here to improve load times -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.js"></script>
+
+    <link href="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.css" rel="stylesheet">
+
     <script src="main.js"></script>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
 </body>
 
 </html>
