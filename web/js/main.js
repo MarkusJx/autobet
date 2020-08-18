@@ -72,7 +72,7 @@ startstop.addEventListener('click', () => {
 });
 
 // Add event listener to the autostop configure button
-configurebutton.addEventListener('click', function () {
+configurebutton.addEventListener('click', function() {
     if (autostopMoney !== -1) {
         moneyinput.value = autostopMoney;
     } else {
@@ -104,7 +104,7 @@ notconnectedmessage.listen('MDCSnackbar:closing', () => {
 });
 
 // Add an event listener for the settings done button
-settingsdonebutton.addEventListener('click', function () {
+settingsdonebutton.addEventListener('click', function() {
     if (moneyinput.value < 10000 || moneyinput.value === "") { // Trash the values if they are trash
         moneyinput.value = "";
         autostopMoney = -1;
@@ -156,7 +156,7 @@ function showAutostopMessages() {
     }
 }
 
-cppJsLib.onLoad(function (res) {
+cppJsLib.onLoad(function(res) {
     if (res) {
         clearInterval(x);
         console.log("Connected!");
@@ -211,7 +211,7 @@ function makeSumsDisplayable(sum, k = false) {
 /**
  * Set an Interval if the website is disconnected
  */
-var x = setInterval(function () {
+var x = setInterval(function() {
     if (cppJsLib.connected) {
         clearInterval(x);
         console.log("Connected!");
@@ -268,7 +268,7 @@ function init(datasaver) {
     /**
      * The main interval
      */
-    mainInterval = setInterval(async function () {
+    mainInterval = setInterval(async function() {
         if (cppJsLib.connected) {
             await asyncMain();
         } else {
@@ -287,7 +287,7 @@ function disconnected() {
     notconnectedlabel.innerHTML = "Connection lost.";
     notconnectedmessage.open(); // Notify the user about this disconnect
 
-    let x = setInterval(async () => { // Start an Interval to time the retries
+    let x = setInterval(async() => { // Start an Interval to time the retries
         if (timeUntilRetry < 1) {
             notconnectedlabel.innerHTML = "Trying to reconnect...";
             timeUntilRetry = 5;
@@ -321,13 +321,9 @@ async function asyncMain() {
         }
     });
 
-    let won;
     // Get the races won
-    cppJsLib.get_races_won().then((w) => {
-        won = w;
-        raceswon.innerHTML = w;
-    });
-
+    let won = await cppJsLib.get_races_won();
+    raceswon.innerHTML = won;
 
     // get the races lost
     cppJsLib.get_races_lost().then((lost) => {
@@ -338,8 +334,8 @@ async function asyncMain() {
     // Set the money made
     cppJsLib.get_current_winnings().then(moneyMade => {
         moneythissession.innerHTML = makeSumsDisplayable(moneyMade, false) + " $";
-        if (time > 0)
-            moneythishour.innerHTML = makeSumsDisplayable(moneyMade * (3600 / time), true) + " $/hr";
+        if (lastTime > 0)
+            moneythishour.innerHTML = makeSumsDisplayable(moneyMade * (3600 / lastTime), true) + " $/hr";
     });
 
     // Set the overall money made values
@@ -407,9 +403,9 @@ async function getAutostopSettings() {
  * @returns {string} the readable time
  */
 function convertToTime(secs) {
-    var hours = Math.floor((secs % 86400) / 3600);
-    var minutes = Math.floor((secs % 3600) / 60);
-    var seconds = secs % 60;
+    let hours = Math.floor((secs % 86400) / 3600);
+    let minutes = Math.floor((secs % 3600) / 60);
+    let seconds = secs % 60;
     hours = (hours < 10) ? "0" + hours : hours;
     minutes = (minutes < 10) ? "0" + minutes : minutes;
     seconds = (seconds < 10) ? "0" + seconds : seconds;

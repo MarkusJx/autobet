@@ -51,6 +51,9 @@ file(GLOB updater
 
 add_executable(Autobet "${src}" "${updater}" "${include}" "${zip}" "${cef}")
 
+# Link against vXboxInterface for controller simulation
+target_link_libraries(Autobet vXboxInterface)
+
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
     message(STATUS "Building with debug infos")
     target_link_libraries(Autobet ai.dll.if)

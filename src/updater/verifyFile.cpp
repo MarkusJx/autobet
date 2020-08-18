@@ -14,9 +14,7 @@
 #include <openssl/bio.h>
 #include <fstream>
 
-Logger *logger_vf = nullptr;
-
-#define LOGGER_ERROR(msg) if (logger_vf) logger_vf->Error(msg)
+#include "../logger.hpp"
 
 const char *publicKey = "-----BEGIN PUBLIC KEY-----\n"
                         "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs1rhLJYbIeLXsRldMp1I\n"
@@ -142,12 +140,6 @@ void Base64Decode(const char *b64message, unsigned char **buffer, size_t *length
 }
 #endif
 
-void fileCrypt::setLogger(Logger *logger) {
-#ifdef AUTOBET_BUILD_UPDATER
-    logger_vf = logger;
-#endif
-}
-
 void fileCrypt::signInstaller() {
 #ifdef AUTOBET_BUILD_UPDATER
     const char *dig = fileCrypt::signMessage("private.pem", "autobet_installer.exe");
@@ -160,7 +152,7 @@ void fileCrypt::writeToFile(const std::string &path, const char *toWrite) {
 #ifdef AUTOBET_BUILD_UPDATER
     std::ofstream stream(path, std::ios::binary);
     if (!stream.is_open()) {
-        LOGGER_ERROR("Unable to write to file: " + path);
+        logger::StaticLogger::error("Unable to write to file: " + path);
         return;
     }
 
@@ -174,7 +166,7 @@ std::string fileCrypt::getFileContent(const std::string &path) {
 #ifdef AUTOBET_BUILD_UPDATER
     std::ifstream file(path);
     if (!file.is_open()) {
-        LOGGER_ERROR("Unable to read file: " + path);
+        logger::StaticLogger::error("Unable to read file: " + path);
         return "";
     }
 

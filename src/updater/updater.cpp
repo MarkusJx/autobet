@@ -19,12 +19,11 @@
 #include "updater.hpp"
 #include "verifyFile.hpp"
 
-Logger *logger_u = nullptr;
-bool download_b = true;
+#include "../logger.hpp"
 
-void updater::setLogger(Logger *logger) {
-    logger_u = logger;
-}
+using namespace logger;
+
+bool download_b = true;
 
 bool updater::updateDownloaded() {
 #ifdef AUTOBET_BUILD_UPDATER
@@ -48,27 +47,27 @@ void updater::deleteUpdate() {
 bool updater::prepareUpdate() {
 #ifdef AUTOBET_BUILD_UPDATER
     namespace fs = std::filesystem;
-    logger_u->Debug("Installing update");
+    StaticLogger::debug("Installing update");
 
     fs::path p = fs::temp_directory_path().append("autobet");
     if (fs::exists(p)) {
-        logger_u->Debug("Temporary folder already exists, deleting it");
+        StaticLogger::debug("Temporary folder already exists, deleting it");
         fs::remove_all(p);
     }
 
-    logger_u->Debug("Temporary folder does not exist, creating it");
+    StaticLogger::debug("Temporary folder does not exist, creating it");
     if (!fs::create_directory(p)) {
-        logger_u->Error("Could not create tmp folder");
+        StaticLogger::error("Could not create tmp folder");
     } else {
-        logger_u->Debug("Created tmp folder");
+        StaticLogger::debug("Created tmp folder");
     }
 
-    logger_u->Debug("Copying files to tmp folder");
+    StaticLogger::debug("Copying files to tmp folder");
 
     if (fs::exists("Autobet.exe")) {
         fs::copy_file("Autobet.exe", p.string() + std::string("\\Autobet.exe"));
     } else {
-        logger_u->Error("Autobet.exe does not exist. Cannot continue");
+        StaticLogger::error("Autobet.exe does not exist. Cannot continue");
         fs::remove_all(p);
         return false;
     }
@@ -78,7 +77,7 @@ bool updater::prepareUpdate() {
     } else if (fs::exists("ai.dll")) {
         fs::copy_file("ai.dll", p.string() + std::string("\\ai.dll"));
     } else {
-        logger_u->Error("ai.dll or ai-release.dll do not exist. This can only be achieved by a manual (bad) compile");
+        StaticLogger::error("ai.dll or ai-release.dll do not exist. This can only be achieved by a manual (bad) compile");
         fs::remove_all(p);
         return false;
     }
@@ -86,7 +85,7 @@ bool updater::prepareUpdate() {
     if (fs::exists("electron-win32-x64")) {
         fs::copy("electron-win32-x64", p.string() + std::string("\\electron-win32-x64"));
     } else {
-        logger_u->Error("electron-win32-x64 does not exist. Cannot continue");
+        StaticLogger::error("electron-win32-x64 does not exist. Cannot continue");
         fs::remove_all(p);
         return false;
     }
@@ -94,28 +93,28 @@ bool updater::prepareUpdate() {
     if (fs::exists("libcrypto-1_1-x64.dll")) {
         fs::copy("libcrypto-1_1-x64.dll", p.string() + std::string("\\libcrypto-1_1-x64.dll"));
     } else {
-        logger_u->Warning("libcrypto-1_1-x64.dll does not exist. The program may not start without it");
+        StaticLogger::warning("libcrypto-1_1-x64.dll does not exist. The program may not start without it");
     }
 
     if (fs::exists("libssl-1_1-x64.dll")) {
         fs::copy("libssl-1_1-x64.dll", p.string() + std::string("\\libssl-1_1-x64.dll"));
     } else {
-        logger_u->Warning("libssl-1_1-x64.dll does not exist. The program may not start without it");
+        StaticLogger::warning("libssl-1_1-x64.dll does not exist. The program may not start without it");
     }
 
     if (fs::exists(AUTOBET_INSTALLER_NAME)) {
         fs::copy(AUTOBET_INSTALLER_NAME, p.string() + std::string("\\").append(AUTOBET_INSTALLER_NAME));
     } else {
-        logger_u->Error(std::string(AUTOBET_INSTALLER_NAME).append(" does not exist. Cannot continue"));
+        StaticLogger::error(std::string(AUTOBET_INSTALLER_NAME).append(" does not exist. Cannot continue"));
         fs::remove_all(p);
         return false;
     }
 
-    logger_u->Debug("Done copying files to tmp folder");
+    StaticLogger::debug("Done copying files to tmp folder");
 
     utils::Application app(p.string() + std::string("\\Autobet.exe"));
     if (!app.start("--runUpdate")) {
-        logger_u->Error("Could not start Autobet.exe");
+        StaticLogger::error("Could not start Autobet.exe");
         fs::remove_all(p);
         return false;
     } else {
@@ -130,14 +129,14 @@ bool updater::prepareUpdate() {
 void updater::installUpdate(char *path) {
 #ifdef AUTOBET_BUILD_UPDATER
     if (path) {
-        logger_u->Debug("Deleting installer in install dir");
+        StaticLogger::debug("Deleting installer in install dir");
         std::string p(path);
         p.append("\\").append(AUTOBET_INSTALLER_NAME);
         if (std::filesystem::exists(p)) {
             std::filesystem::remove(path);
-            logger_u->Debug("Deleted installer");
+            StaticLogger::debug("Deleted installer");
         } else {
-            logger_u->Debug("Could not delete installer");
+            StaticLogger::debug("Could not delete installer");
         }
     }
 
@@ -145,7 +144,7 @@ void updater::installUpdate(char *path) {
     std::string cmd("/VERYSILENT /CURRENTUSER /SUPPRESSMSGBOXES /CLOSEAPPLICATIONS /LOG=\"");
     cmd.append(std::filesystem::current_path().string()).append("\\log.txt\"");
 
-    logger_u->Debug("Starting installer. Waiting for it to finish");
+    StaticLogger::debug("Starting installer. Waiting for it to finish");
 
     installer.start(cmd.c_str());
     unsigned short time = 0; // Max time running: 5 minutes
@@ -155,11 +154,11 @@ void updater::installUpdate(char *path) {
     }
 
     if (time >= 120) {
-        logger_u->Error("Installer did not finish in time. Killing it");
+        StaticLogger::error("Installer did not finish in time. Killing it");
         if (installer.kill()) {
-            logger_u->Debug("Successfully killed installer");
+            StaticLogger::debug("Successfully killed installer");
         } else {
-            logger_u->Error("Could not kill installer");
+            StaticLogger::error("Could not kill installer");
         }
         return;
     }
@@ -180,9 +179,9 @@ void updater::installUpdate(char *path) {
 
         utils::Application app(line.append("\\Autobet.exe"));
         if (app.start("--afterUpdate")) {
-            logger_u->Debug("Started new version");
+            StaticLogger::debug("Started new version");
         } else {
-            logger_u->Warning("Could not start new version");
+            StaticLogger::warning("Could not start new version");
         }
     }
 #else
@@ -194,13 +193,13 @@ void updater::cleanup() {
 #ifdef AUTOBET_BUILD_UPDATER
     namespace fs = std::filesystem;
 
-    logger_u->Debug("Performing after-update cleanup");
+    StaticLogger::debug("Performing after-update cleanup");
     fs::path p = fs::temp_directory_path().append("autobet");
     if (fs::exists(p)) {
         fs::remove_all(p);
-        logger_u->Debug("deleted tmp folder");
+        StaticLogger::debug("deleted tmp folder");
     } else {
-        logger_u->Warning("tmp folder does not exist");
+        StaticLogger::warning("tmp folder does not exist");
     }
 #else
     UPDATER_UNIMPLEMENTED();
@@ -220,16 +219,16 @@ void updater::abortDownload() {
 
 bool updater::check(char **version) {
 #ifdef AUTOBET_BUILD_UPDATER
-    logger_u->Debug("Checking for updates");
+    StaticLogger::debug("Checking for updates");
 
     httplib::SSLClient cl("api.github.com");
     cl.set_follow_location(true);
     auto res = cl.Get("/repos/markusjx/gta-online-autobet/tags");
     if (!res || res->status != 200) {
         if (res) {
-            logger_u->Error("Could not check for updates. Server responded with: " + std::to_string(res->status));
+            StaticLogger::error("Could not check for updates. Server responded with: " + std::to_string(res->status));
         } else {
-            logger_u->Error("Could not check for updates: Server response was empty");
+            StaticLogger::error("Could not check for updates: Server response was empty");
         }
         return false;
     }
@@ -237,22 +236,22 @@ bool updater::check(char **version) {
     using json = nlohmann::json;
     json j = json::parse(res->body);
     if (!(string_contains(j[0].dump(), "name"))) {
-        logger_u->Error("Could not check for updates: Server returned invalid response");
+        StaticLogger::error("Could not check for updates: Server returned invalid response");
         return false;
     }
 
     std::string verString = removeFirstLastChar(j[0]["name"].dump());
 
-    logger_u->Debug("Found version: " + verString);
+    StaticLogger::debug("Found version: " + verString);
 
     Version current_version(verString);
     Version this_version(AUTOBET_CURRENT_VERSION);
     if (current_version > this_version) {
-        logger_u->Debug("Found new Version!");
+        StaticLogger::debug("Found new Version!");
         if (version != nullptr) *version = strdup(verString.c_str());
         return true;
     } else {
-        logger_u->Debug("No new Version found");
+        StaticLogger::debug("No new Version found");
         if (version != nullptr) *version = strdup(verString.c_str());
         return false;
     }
@@ -264,21 +263,21 @@ bool updater::check(char **version) {
 
 bool updater::checkSignature(const std::string &version) {
 #ifdef AUTOBET_BUILD_UPDATER
-    logger_u->Debug("Downloading installer signature");
+    StaticLogger::debug("Downloading installer signature");
     std::ofstream stream(AUTOBET_SIGNATURE_NAME, std::ios::binary);
 
     if (!stream.is_open()) {
-        logger_u->Error("Unable to open file output stream");
+        StaticLogger::error("Unable to open file output stream");
         stream.close();
         return false;
     }
 
     auto deleteSig = [] {
-        logger_u->Debug("Deleting signature file");
+        StaticLogger::debug("Deleting signature file");
         if (remove(AUTOBET_SIGNATURE_NAME) != 0) {
-            logger_u->Error("Could not delete signature file");
+            StaticLogger::error("Could not delete signature file");
         } else {
-            logger_u->Debug("Signature file successfully deleted");
+            StaticLogger::debug("Signature file successfully deleted");
         }
     };
 
@@ -314,9 +313,9 @@ bool updater::checkSignature(const std::string &version) {
     stream.close();
 
     if (res && res->body.empty() && res->status == 200) {
-        logger_u->Debug("Signature downloaded successfully");
+        StaticLogger::debug("Signature downloaded successfully");
     } else {
-        logger_u->Error("Signature download did not complete successfully");
+        StaticLogger::error("Signature download did not complete successfully");
         if (utils::fileExists(AUTOBET_SIGNATURE_NAME)) {
             deleteSig();
         }
@@ -327,16 +326,16 @@ bool updater::checkSignature(const std::string &version) {
                                                 fileCrypt::getFileContent(AUTOBET_SIGNATURE_NAME));
 
     if (authentic) {
-        logger_u->Debug("File signature matched");
+        StaticLogger::debug("File signature matched");
         deleteSig();
         return true;
     } else {
-        logger_u->Error("File signature did not match");
-        logger_u->Debug("Deleting installer file");
+        StaticLogger::error("File signature did not match");
+        StaticLogger::debug("Deleting installer file");
         if (remove(AUTOBET_INSTALLER_NAME) != 0)
-            logger_u->Error("Could not delete installer file");
+            StaticLogger::error("Could not delete installer file");
         else
-            logger_u->Error("Installer file successfully deleted");
+            StaticLogger::error("Installer file successfully deleted");
 
         deleteSig();
         return false;
@@ -349,11 +348,11 @@ bool updater::checkSignature(const std::string &version) {
 
 void updater::download(const std::string &version) {
 #ifdef AUTOBET_BUILD_UPDATER
-    logger_u->Debug("Downloading new installer");
+    StaticLogger::debug("Downloading new installer");
     std::ofstream stream(AUTOBET_INSTALLER_NAME, std::ios::binary);
 
     if (!stream.is_open()) {
-        logger_u->Error("Unable to open file output stream");
+        StaticLogger::error("Unable to open file output stream");
     }
 
     std::string s;
@@ -386,16 +385,16 @@ void updater::download(const std::string &version) {
 
 
     if (res && res->body.empty()) {
-        logger_u->Debug("File downloaded successfully");
+        StaticLogger::debug("File downloaded successfully");
     } else {
-        logger_u->Error("File download did not complete successfully");
+        StaticLogger::error("File download did not complete successfully");
     }
 
     stream.flush();
     stream.close();
 
     if (stream.is_open()) {
-        logger_u->Error("Unable to close file output stream");
+        StaticLogger::error("Unable to close file output stream");
     }
 #else
     UPDATER_UNIMPLEMENTED();

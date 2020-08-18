@@ -1,19 +1,12 @@
-//
-// Created by markus on 05/03/2020.
-//
-
 #include "autostop.hpp"
-
-Logger *logger_a;
+#include "logger.hpp"
 
 int *money;
 unsigned int *cur_time;
 
 int autostop_time = -1, autostop_money = -1;
 
-void autostop::init(Logger *logger, int *winnings, unsigned int *time_running) {
-    logger_a = logger;
-
+void autostop::init(int *winnings, unsigned int *time_running) {
     money = winnings;
     cur_time = time_running;
 }
@@ -23,13 +16,13 @@ bool autostop::checkStopConditions() {
         autostop_money = -1;
         autostop_time = -1;
 
-        logger_a->Debug("Stopped because an autostop condition was reached: Time");
+        logger::StaticLogger::debug("Stopped because an autostop condition was reached: Time");
         return true;
     } else if (autostop_money != -1 && *money > autostop_money) {
         autostop_money = -1;
         autostop_time = -1;
 
-        logger_a->Debug("Stopped because an autostop condition was reached: Money");
+        logger::StaticLogger::debug("Stopped because an autostop condition was reached: Money");
         return true;
     } else {
         return false;
@@ -37,7 +30,7 @@ bool autostop::checkStopConditions() {
 }
 
 void set_autostop_money(int val) {
-    logger_a->Debug("Set autostop money to " + std::to_string(val));
+    logger::StaticLogger::debug("Set autostop money to " + std::to_string(val));
     autostop_money = val;
 }
 
@@ -46,7 +39,7 @@ int get_autostop_money() {
 }
 
 void set_autostop_time(int val) {
-    logger_a->Debug("Set autostop time to " + std::to_string(val));
+    logger::StaticLogger::debug("Set autostop time to " + std::to_string(val));
     autostop_time = val;
 }
 

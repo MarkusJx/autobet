@@ -6,7 +6,6 @@
 #define AUTOBET_VERIFYFILE_HPP
 
 #include <string>
-#include "../logger.hpp"
 
 namespace fileCrypt {
     std::string getFileContent(const std::string &path);
@@ -18,8 +17,6 @@ namespace fileCrypt {
     void writeToFile(const std::string &path, const char *toWrite);
 
     void signInstaller();
-
-    void setLogger(Logger *logger);
 }
 
 #endif //AUTOBET_VERIFYFILE_HPP

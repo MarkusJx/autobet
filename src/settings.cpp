@@ -12,9 +12,10 @@
 #include "settings.hpp"
 #include "utils.hpp"
 
-using namespace settings;
+#include "logger.hpp"
 
-Logger *logger_s;
+using namespace settings;
+using namespace logger;
 
 struct settins_s {
     __int64 buf1 = 0;
@@ -24,14 +25,10 @@ struct settins_s {
     __int64 buf2 = 0;
 };
 
-void settings::setLogger(Logger *logger) {
-    logger_s = logger;
-}
-
 void settings::save(unsigned int time_sleep, unsigned int clicks, posConfigArr *arr) {
     std::ofstream ofs("autobet.conf", std::ios::out | std::ios::binary);
     if (!ofs.good()) {
-        logger_s->Error("Unable to open settings file. Flags: " + std::to_string(ofs.flags()));
+        StaticLogger::error("Unable to open settings file. Flags: " + std::to_string(ofs.flags()));
         return;
     }
 
@@ -42,13 +39,13 @@ void settings::save(unsigned int time_sleep, unsigned int clicks, posConfigArr *
 
     ofs.write((char *) &buf, sizeof(settins_s));
     if (ofs.fail()) {
-        logger_s->Warning("Settings file stream fail bit was set, this is not good");
+        StaticLogger::warning("Settings file stream fail bit was set, this is not good");
     }
 
     for (size_t i = 0; i < arr->size; i++) {
         ofs.write((char *) &arr->arr[i], sizeof(posConfig));
         if (ofs.fail()) {
-            logger_s->Warning("Settings file stream fail bit was set, this is not good");
+            StaticLogger::warning("Settings file stream fail bit was set, this is not good");
             break;
         }
     }
@@ -57,38 +54,38 @@ void settings::save(unsigned int time_sleep, unsigned int clicks, posConfigArr *
 
     ofs.close();
     if (ofs.is_open()) {
-        logger_s->Error("Unable to close settings file");
+        StaticLogger::error("Unable to close settings file");
     }
 }
 
 void settings::load(unsigned int &time_sleep, unsigned int &clicks, posConfigArr *arr) {
-    logger_s->Debug("Loading winnings from file");
+    StaticLogger::debug("Loading winnings from file");
     settins_s buf;
 
     if (!utils::fileExists("autobet.conf")) {
-        logger_s->Debug("Settings file does not exist.");
+        StaticLogger::debug("Settings file does not exist.");
         return;
     }
 
     std::ifstream ifs("autobet.conf", std::ios::in | std::ios::binary);
     if (!ifs.good()) {
-        logger_s->Error("Unable to open settings file. Flags: " + std::to_string(ifs.flags()));
+        StaticLogger::error("Unable to open settings file. Flags: " + std::to_string(ifs.flags()));
         goto close;
     }
 
     ifs.read((char *) &buf, sizeof(settins_s));
     if (ifs.fail()) {
-        logger_s->Warning("File stream fail bit was set");
+        StaticLogger::warning("File stream fail bit was set");
         goto close;
     }
 
     if (ifs.eof()) {
-        logger_s->Warning("Settings file end has been reached");
+        StaticLogger::warning("Settings file end has been reached");
         goto close;
     }
 
     if (buf.buf1 != 0 || buf.buf2 != 0) {
-        logger_s->Warning("Settings buffer is not zero");
+        StaticLogger::warning("Settings buffer is not zero");
         goto close;
     }
 
@@ -102,7 +99,7 @@ void settings::load(unsigned int &time_sleep, unsigned int &clicks, posConfigArr
             }
         }
     } else {
-        logger_s->Warning("Settings file not read correctly, deleting it");
+        StaticLogger::warning("Settings file not read correctly, deleting it");
         remove("autobet.conf");
     }
 
@@ -110,7 +107,7 @@ void settings::load(unsigned int &time_sleep, unsigned int &clicks, posConfigArr
     ifs.close();
 
     if (ifs.is_open()) {
-        logger_s->Error("Unable to close settings file");
+        StaticLogger::error("Unable to close settings file");
     }
 }
 
@@ -154,27 +151,27 @@ void settings::loadConfig(unsigned int &time_sleep, unsigned int &clicks, posCon
     if (j.find("time_sleep") != j.end())
         time_sleep = j["time_sleep"];
     else
-        logger_s->Warning("JSON key 'time_sleep' does not exist");
+        StaticLogger::warning("JSON key 'time_sleep' does not exist");
 
     if (j.find("clicks") != j.end())
         clicks = j["clicks"];
     else
-        logger_s->Warning("JSON key 'clicks' does not exist");
+        StaticLogger::warning("JSON key 'clicks' does not exist");
 
-    logger_s->Debug("Loaded clicks: " + std::to_string(clicks));
-    logger_s->Debug("Loaded time_sleep: " + std::to_string(time_sleep));
+    StaticLogger::debug("Loaded clicks: " + std::to_string(clicks));
+    StaticLogger::debug("Loaded time_sleep: " + std::to_string(time_sleep));
 
     arr->generate(j["posConf"].size());
 
     for (int i = 0; i < j["posConf"].size(); i++) {
         if (j["posConf"][i].find("resolution") == j["posConf"][i].end() ||
             j["posConf"][i].find("value") == j["posConf"][i].end()) {
-            logger_s->Warning("JSON 'posConf' key 'resolution' or 'value' does not exist, skipping this set");
+            StaticLogger::warning("JSON 'posConf' key 'resolution' or 'value' does not exist, skipping this set");
             continue;
         }
         arr->arr[i].width = j["posConf"][i]["resolution"];
         arr->arr[i].x = j["posConf"][i]["value"];
-        logger_s->Debug("Loaded resolution " + std::to_string(arr->arr[i].width) + " and corresponding position " +
+        StaticLogger::debug("Loaded resolution " + std::to_string(arr->arr[i].width) + " and corresponding position " +
                         std::to_string(arr->arr[i].x));
     }
 

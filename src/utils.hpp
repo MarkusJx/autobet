@@ -1,11 +1,6 @@
-//
-// Created by markus on 27/12/2019.
-//
-
 #ifndef GTA_ONLINE_AUTOBET_DEV_UTILS_HPP
 #define GTA_ONLINE_AUTOBET_DEV_UTILS_HPP
 
-#include "logger.hpp"
 #include "main.hpp"
 
 #include <functional>
@@ -163,8 +158,6 @@ namespace utils {
     bool isProcessRunning(const char *processName);
 
     int displayError(const std::string &error, const std::function<void()> &callback = nullptr);
-
-    void setLogger(Logger *logger);
 
     void printSystemInformation();
 

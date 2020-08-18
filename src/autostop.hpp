@@ -1,14 +1,8 @@
-//
-// Created by markus on 05/03/2020.
-//
-
 #ifndef AUTOBET_AUTOSTOP_HPP
 #define AUTOBET_AUTOSTOP_HPP
 
-#include "logger.hpp"
-
 namespace autostop {
-    void init(Logger *logger, int *winnings, unsigned int *time_running);
+    void init(int *winnings, unsigned int *time_running);
 
     bool checkStopConditions();
 }
