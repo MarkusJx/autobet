@@ -1,7 +1,3 @@
-//
-// Created by markus on 26/12/2019.
-//
-
 #include "main.hpp"
 #include "utils.hpp"
 #include "updater/updater.hpp"
@@ -10,6 +6,7 @@
 #include "updater/verifyFile.hpp"
 #include "cmdParser.hpp"
 #include "settings.hpp"
+#include "controller.hpp"
 
 #include <chrono>
 #include <thread>
@@ -75,6 +72,9 @@ unsigned int bettingPos = POS_1_1;
 int customBettingPos = -1;
 unsigned int time_sleep = 36, clicks = 31;
 
+// A controller object to search the increase bet button
+controller::controller *controllerPtr = nullptr;
+
 // Functions from js =======================
 std::function<void(bool)> set_gta_running;
 std::function<void()> ui_keycomb_start = {};
@@ -83,11 +83,11 @@ std::function<void()> ui_keycomb_stop = {};
 std::function<void(int)> setAllMoneyMade;
 std::function<void(int)> addMoney;
 
-typedef struct winnings_buf_s {
+/*typedef struct winnings_buf_s {
     __int64 buf1;
     __int64 winnings;
     __int64 buf2;
-} winnings_buf;
+} winnings_buf;*/
 
 /**
  * Kill the program and close all connections
@@ -158,6 +158,10 @@ void kill(bool _exit = true) {
     StaticLogger::debug("Deleting Winnings AI");
     tf::WinningsAI::deleteAi();
     StaticLogger::debug("Deleted Winnings AI");
+
+    // Delete the controller object
+    StaticLogger::debug("Deleting controller object");
+    delete controllerPtr;
 
     // Sleep
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -379,18 +383,37 @@ void place_bet(int y, bool evalBettingPos) {
     leftClick(634, y);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    if (evalBettingPos) {
-        StaticLogger::debug("Searching for increase bet (>) position");
-        utils::windowSize ws;
-        utils::getWindowSize(ws);
-        int res = utils::findIncreaseBetButton(ws, multiplierH);
-        if (res > 0) {
-            StaticLogger::debug("Increase bet position found: " + std::to_string(res));
-            bettingPos = res;
+    if (controllerPtr == nullptr) {
+        clickUsingMouse:
+        if (evalBettingPos) {
+            StaticLogger::debug("Searching for increase bet (>) position");
+            utils::windowSize ws;
+            utils::getWindowSize(ws);
+            int res = utils::findIncreaseBetButton(ws, multiplierH);
+            if (res > 0) {
+                StaticLogger::debug("Increase bet position found: " + std::to_string(res));
+                bettingPos = res;
+            }
+        }
+
+        leftClick(bettingPos, 680);
+    } else {
+        // Press the D-Pad four times to the right, to move the cursor over the correct button
+        for (int i = 0; i < 4; i++) {
+            if (!controllerPtr->pressDPadRight()) {
+                // If the D-Pad press fails, fall back to using the mouse
+                StaticLogger::error("Could not press the D-Pad. Using mouse to click.");
+                goto clickUsingMouse;
+                break;
+            }
+        }
+
+        // Press the 'A' button on the controller, if it fails, fall back to using the mouse
+        if (!controllerPtr->pressA()) {
+            StaticLogger::error("Could not press the 'A' button on the controller. Using mouse to click.");
+            goto clickUsingMouse;
         }
     }
-
-    leftClick(bettingPos, 680);
 
     // Calculate distance between betting pos and actual cursor pos since windows tends to not
     // move the cursor the way it should
@@ -1102,7 +1125,7 @@ int main(int argc, char *argv<::>) <%
     }
 
     StaticLogger::debug("Logging enabled");
-    StaticLogger::debugStream() << "Autobet version: " << AUTOBET_CURRENT_VERSION;
+    StaticLogger::debug("Autobet version: " + std::string(AUTOBET_CURRENT_VERSION));
 
     char *version = nullptr;
     if (!runUpdate && !afterUpdate && updater::check(&version)) {
@@ -1296,6 +1319,17 @@ int main(int argc, char *argv<::>) <%
         }
     } else {
         StaticLogger::debug("Web ui was disabled per command-line argument, no starting the web server");
+    }
+
+    StaticLogger::debug("Trying to create a new controller object");
+    try {
+        controllerPtr = new controller::controller();
+    } catch (controller::controllerUnavailableException &e) {
+        StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
+        controllerPtr = nullptr;
+    } catch (std::bad_alloc &) {
+        StaticLogger::error("Could not create a controller object: Out of memory");
+        controllerPtr = nullptr;
     }
 
 #ifdef ASSERT_MEM_OK
