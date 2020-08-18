@@ -1,11 +1,5 @@
-//
-// Created by markus on 11/03/2020.
-//
-
 #ifndef AUTOBET_SETTINGS_HPP
 #define AUTOBET_SETTINGS_HPP
-
-#include "logger.hpp"
 
 namespace settings {
     typedef struct posConfig_s {
@@ -32,7 +26,7 @@ namespace settings {
             arr = nullptr;
         }
 
-        int getNext(int width) {
+        [[nodiscard]] int getNext(int width) const {
             posConfig closest;
 
             for (int i = 0; i < size; i++) {
@@ -91,8 +85,6 @@ namespace settings {
         size_t size;
         posConfig *arr;
     };
-
-    void setLogger(Logger *logger);
 
     void save(unsigned int time_sleep, unsigned int clicks, posConfigArr *arr);
 

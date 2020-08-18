@@ -1,7 +1,3 @@
-//
-// Created by markus on 27/12/2019.
-//
-
 #include <utility>
 #include <vector>
 #include <thread>
@@ -18,6 +14,8 @@
 #include <iostream>
 #include <shlobj.h>
 
+#include "logger.hpp"
+
 RECT rect;
 //#define GTA5_EXE L"mspaint.exe"
 //#define GTA5_NAME L"1.jpg - Paint"
@@ -25,12 +23,9 @@ RECT rect;
 #define GTA5_NAME L"Grand Theft Auto V"
 #endif
 
-Logger *ulogger;
 std::function<void()> clbk = {};
 
-void utils::setLogger(Logger *_logger) {
-    ulogger = _logger;
-}
+using namespace logger;
 
 bool WINAPI CtrlHandler(unsigned long fdwCtrlType) {
     if (fdwCtrlType == 0 || fdwCtrlType == 2) {
@@ -47,9 +42,9 @@ bool WINAPI CtrlHandler(unsigned long fdwCtrlType) {
 void utils::setCtrlCHandler(std::function<void()> callback) {
     clbk = std::move(callback);
     if (SetConsoleCtrlHandler(reinterpret_cast<PHANDLER_ROUTINE>(CtrlHandler), true)) {
-        ulogger->Debug("Successfully initiated Ctrl-C handler");
+        StaticLogger::debug("Successfully initiated Ctrl-C handler");
     } else {
-        ulogger->Warning("Could not initiate Ctrl-C handler");
+        StaticLogger::warning("Could not initiate Ctrl-C handler");
     }
 }
 
@@ -137,9 +132,9 @@ utils::Application::~Application() {
 void utils::setDpiAware() {
 #ifdef AUTOBET_WINDOWS
     if (SetProcessDPIAware()) {
-        ulogger->Debug("Made process DPI aware");
+        StaticLogger::debug("Made process DPI aware");
     } else {
-        ulogger->Warning("Could not make process DPI aware");
+        StaticLogger::warning("Could not make process DPI aware");
     }
 #else
     ulogger->Unimplemented();
@@ -574,12 +569,12 @@ void utils::printSystemInformation() {
 
     if (installedMemory != -1) {
         if (installedMemory <= 4.0f) {
-            ulogger->Warning("System has less than 4G of RAM installed.");
+            StaticLogger::warning("System has less than 4G of RAM installed.");
         }
         stream << "\t\tInstalled memory: ";
         stream << std::fixed << std::setprecision(2) << installedMemory << "G" << std::endl;
     } else {
-        ulogger->Warning("Could not retrieve installed memory");
+        StaticLogger::warning("Could not retrieve installed memory");
     }
 
     stream << "\t\tSystem is running on " << (int) (CHAR_BIT * sizeof(void *)) << " bit" << std::endl;
@@ -616,7 +611,7 @@ void utils::printSystemInformation() {
 #endif
 
     stream.flush();
-    ulogger->Debug(stream.str());
+    StaticLogger::debug(stream.str());
     stream.clear();
 }
 

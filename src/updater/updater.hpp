@@ -7,7 +7,6 @@
 
 #define AUTOBET_CURRENT_VERSION "1.1.0"
 
-#include "../logger.hpp"
 #include "../utils.hpp"
 
 #include <algorithm>
@@ -110,8 +109,6 @@ namespace updater {
         int *ver;
         int length;
     };
-
-    void setLogger(Logger *);
 
     /**
      * Check for updates
