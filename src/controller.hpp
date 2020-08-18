@@ -64,6 +64,14 @@ namespace controller {
          */
         unsigned int index;
     };
+
+    bool scpVBusInstalled();
+
+#if defined(AUTOBET_BUILD_UPDATER) && defined(AUTOBET_ENABLE_FULL_DEBUG)
+    bool downloadAndInstallScpVBus();
+
+    bool downloadAndUninstallScpVBus();
+#endif // AUTOBET_BUILD_UPDATER
 }
 
 #endif //AUTOBET_CONTROLLER_HPP
