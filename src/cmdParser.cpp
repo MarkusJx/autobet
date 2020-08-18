@@ -273,6 +273,7 @@ void cmdParser::parse(int argc, char **argv, unsigned int start) {
                                     for (int z = i + 1; z < argc; z++) {
                                         if (!std::string(argv[z]).starts_with(argMarker)) {
                                             options[x][y].sVal->push_back(argv[z]);
+                                            i++;
                                         } else {
                                             if (z > i)
                                                 i = z - 1;
@@ -286,6 +287,7 @@ void cmdParser::parse(int argc, char **argv, unsigned int start) {
                                     for (int z = i + 1; z < argc; z++) {
                                         if (!std::string(argv[z]).starts_with(argMarker)) {
                                             options[x][y].iVal->push_back(strtol(argv[z], nullptr, 10));
+                                            i++;
                                         } else {
                                             if (z > i)
                                                 i = z - 1;
@@ -299,6 +301,7 @@ void cmdParser::parse(int argc, char **argv, unsigned int start) {
                                     for (int z = i + 1; z < argc; z++) {
                                         if (!std::string(argv[z]).starts_with(argMarker)) {
                                             options[x][y].fVal->push_back(strtof(argv[z], nullptr));
+                                            i++;
                                         } else {
                                             if (z > i)
                                                 i = z - 1;
