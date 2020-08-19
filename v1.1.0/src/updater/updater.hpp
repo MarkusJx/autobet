@@ -7,7 +7,7 @@
 
 #define AUTOBET_CURRENT_VERSION "1.1.0"
 
-#include "../utils.hpp"
+#include "../../../src/utils.hpp"
 
 #include <algorithm>
 #include <iostream>

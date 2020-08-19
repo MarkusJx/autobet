@@ -52,8 +52,7 @@ void debug::finish() {
 
     if (fs::exists("out.log")) {
         mtx.lock();
-        int err = 0;
-        err = zip_entry_open(zip, "out.log");
+        int err = zip_entry_open(zip, "out.log");
         if (err) {
             StaticLogger::error("Unable to open debug zip file. Error: " + std::to_string(err));
             mtx.unlock();
@@ -90,8 +89,7 @@ void debug::writeImage(utils::bitmap *bmp) {
 
     StaticLogger::debug("Writing image to debug zip file");
     mtx.lock();
-    int err = 0;
-    err = zip_entry_open(zip, ("img-" + std::to_string(lastImg) + ".png").c_str());
+    int err = zip_entry_open(zip, ("img-" + std::to_string(lastImg) + ".png").c_str());
     if (err) {
         StaticLogger::error("Unable to open debug zip file. Error: " + std::to_string(err));
         mtx.unlock();

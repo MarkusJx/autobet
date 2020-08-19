@@ -19,7 +19,7 @@
 #include "updater.hpp"
 #include "verifyFile.hpp"
 
-#include "../logger.hpp"
+#include "../../../src/logger.hpp"
 
 using namespace logger;
 

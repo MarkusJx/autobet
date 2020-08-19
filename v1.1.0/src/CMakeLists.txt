@@ -13,7 +13,7 @@ if (NOT DISABLE_FULL_DEBUG)
     add_compile_definitions(AUTOBET_ENABLE_FULL_DEBUG)
     message(STATUS "Building with debug:full support")
 
-    file(GLOB zip
+    file(GLOB src/zip
             "zip/*.h"
             "zip/*.c"
             )
@@ -44,11 +44,6 @@ file(GLOB src
         "*.cpp"
         )
 
-file(GLOB updater
-        "updater/*.hpp"
-        "updater/*.cpp"
-        )
-
 add_executable(Autobet "${src}" "${updater}" "${include}" "${zip}" "${cef}")
 
 # Link against vXboxInterface for controller simulation
@@ -69,12 +64,12 @@ endif ()
 #endif ()
 
 if (BUILD_CPPJSLIB)
-    include(CppJsLib/InitCppJsLib.cmake)
-    initCppJsLib(Autobet "CppJsLib" "${CMAKE_SOURCE_DIR}/include" TRUE TRUE)
+    include(src/CppJsLib/InitCppJsLib.cmake)
+    initCppJsLib(Autobet "src/CppJsLib" "${CMAKE_SOURCE_DIR}/include" TRUE TRUE)
 
     add_compile_definitions(BUILD_CPPJSLIB)
 else ()
-    target_link_libraries(Autobet CppJsLib)
+    target_link_libraries(Autobet src/CppJsLib)
 endif ()
 
 
