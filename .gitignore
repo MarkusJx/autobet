@@ -210,10 +210,11 @@ extern/
 include/
 /.vs
 /src/CppJsLib
-/ui/favicon.ico
-/ui/qrcode.js
+/v1.1.0/ui/favicon.ico
+/v1.1.0/ui/qrcode.js
 /web/css/materialize.min.css
 /web/js/jquery.min.js
 /web/js/materialize.min.js
 /web/favicon.ico
 /CMakeSettings.json
+/build/

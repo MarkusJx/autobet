@@ -14,7 +14,7 @@
 #include <openssl/bio.h>
 #include <fstream>
 
-#include "../logger.hpp"
+#include "../../../src/logger.hpp"
 
 const char *publicKey = "-----BEGIN PUBLIC KEY-----\n"
                         "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs1rhLJYbIeLXsRldMp1I\n"

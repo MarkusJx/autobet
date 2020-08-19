@@ -1,7 +1,3 @@
-//
-// Created by markus on 15/01/2020.
-//
-
 #ifndef GTA_ONLINE_AUTOBET_DEV_MAIN_HPP
 #define GTA_ONLINE_AUTOBET_DEV_MAIN_HPP
 
