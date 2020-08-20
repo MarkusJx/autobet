@@ -24,43 +24,6 @@ namespace napi_tools {
         ARRAY
     };
 
-    class ThreadSafeFunction {
-    public:
-        inline ThreadSafeFunction(const Napi::ThreadSafeFunction &fn) : ts_fn(fn) {}
-
-        // This API may be called from any thread.
-        inline void blockingCall() const {
-            napi_status status = ts_fn.BlockingCall();
-
-            if (status != napi_ok) {
-                Napi::Error::Fatal("ThreadEntry", "Napi::ThreadSafeNapi::Function.BlockingCall() failed");
-            }
-        }
-
-        // This API may be called from any thread.
-        template<typename Callback>
-        inline void blockingCall(Callback callback) const {
-            napi_status status = ts_fn.BlockingCall(callback);
-
-            if (status != napi_ok) {
-                Napi::Error::Fatal("ThreadEntry", "Napi::ThreadSafeNapi::Function.BlockingCall() failed");
-            }
-        }
-
-        // This API may be called from any thread.
-        template<typename DataType, typename Callback>
-        inline void blockingCall(DataType *data, Callback callback) const {
-            napi_status status = ts_fn.BlockingCall(data, callback);
-
-            if (status != napi_ok) {
-                Napi::Error::Fatal("ThreadEntry", "Napi::ThreadSafeNapi::Function.BlockingCall() failed");
-            }
-        }
-
-    private:
-        const Napi::ThreadSafeFunction &ts_fn;
-    };
-
     /**
      * Utility namespace
      */
@@ -70,7 +33,7 @@ namespace napi_tools {
         }
 
         inline void
-        checkArgs(const Napi::CallbackInfo &info, const std::string &funcName, const std::vector <type> &types) {
+        checkArgs(const Napi::CallbackInfo &info, const std::string &funcName, const std::vector<type> &types) {
             Napi::Env env = info.Env();
             if (info.Length() < types.size()) {
                 throw Napi::TypeError::New(env, funcName + " requires " + std::to_string(types.size()) + " arguments");
