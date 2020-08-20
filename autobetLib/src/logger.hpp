@@ -425,6 +425,7 @@ namespace logger {
          * Create a new instance of the logger
          */
         LOGGER_MAYBE_UNUSED static void create() {
+            if (getLogger()) delete getLogger();
             setLogger(new Logger());
         }
 
@@ -443,6 +444,7 @@ namespace logger {
         LOGGER_MAYBE_UNUSED static void
         create(LoggerMode mode, LogLevel lvl = LogLevel::debug, const char *fileName = "",
                const char *fileMode = "at") {
+            if (getLogger()) delete getLogger();
             setLogger(new Logger(mode, lvl, fileName, fileMode));
         }
 
@@ -459,7 +461,8 @@ namespace logger {
          * @param message the message
          */
         LOGGER_MAYBE_UNUSED static void _debug(const char *_file, int line, const std::string &message) {
-            getLogger()->_debug(_file, line, message);
+            if (getLogger())
+                getLogger()->_debug(_file, line, message);
         }
 
         /**
@@ -475,7 +478,8 @@ namespace logger {
          * @param message the message
          */
         LOGGER_MAYBE_UNUSED static void _error(const char *_file, int line, const std::string &message) {
-            getLogger()->_error(_file, line, message);
+            if (getLogger())
+                getLogger()->_error(_file, line, message);
         }
 
         /**
@@ -491,7 +495,8 @@ namespace logger {
          * @param message the message
          */
         LOGGER_MAYBE_UNUSED static void _warning(const char *_file, int line, const std::string &message) {
-            getLogger()->_warning(_file, line, message);
+            if (getLogger())
+                getLogger()->_warning(_file, line, message);
         }
 
         /**
@@ -508,7 +513,8 @@ namespace logger {
          */
         LOGGER_MAYBE_UNUSED static void
         _unimplemented(const char *file, int line, const char *function, const std::string &message = "") {
-            getLogger()->_unimplemented(file, line, function, message);
+            if (getLogger())
+                getLogger()->_unimplemented(file, line, function, message);
         }
 
         /**
@@ -564,6 +570,7 @@ namespace logger {
          */
         LOGGER_MAYBE_UNUSED static void destroy() {
             delete getLogger();
+            setLogger(nullptr);
         }
 
     private:

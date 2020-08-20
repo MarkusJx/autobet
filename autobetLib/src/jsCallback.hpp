@@ -130,8 +130,8 @@ public:
 
 private:
     static void threadEntry(javascriptVoidCallback *jsCallback) {
-        auto callback = [](Napi::Env env, Napi::Function jsCallback, void *data) {
-            jsCallback.Call({});
+        auto callback = [jsCallback](Napi::Env env, Napi::Function jsFunc, void *data) {
+            jsFunc.Call({});
         };
 
         while (jsCallback->run) {

@@ -67,14 +67,16 @@ std::function<void(bool)> set_gta_running;
 std::function<void()> ui_keycomb_start = {};
 std::function<void()> ui_keycomb_stop = {};
 
-std::function<void(int)> setAllMoneyMade;
-std::function<void(int)> addMoney;
+std::function<void(int)> setAllMoneyMade = {};
+std::function<void(int)> addMoney = {};
+std::function<void()> exception = {};
 
 javascriptCallback<bool> *setGtaRunningCallback = nullptr;
 javascriptCallback<int> *setAllMoneyMadeCallback = nullptr;
 javascriptCallback<int> *addMoneyCallback = nullptr;
 javascriptVoidCallback *uiKeycombStartCallback = nullptr;
 javascriptVoidCallback *uiKeycombStopCallback = nullptr;
+javascriptVoidCallback *exceptionCallback = nullptr;
 
 /**
  * Kill the program and close all connections
@@ -82,19 +84,12 @@ javascriptVoidCallback *uiKeycombStopCallback = nullptr;
  * @param _exit if exit() shall be called
  */
 void kill(bool _exit = true) {
-    // Add a failsafe thread to kill the program if something in this function takes too long
-    std::thread killThread([]() {
-        std::this_thread::sleep_for(std::chrono::seconds(15));
-        exit(1);
-    });
-    // Detach the thread
-    killThread.detach();
-
     if (setGtaRunningCallback) setGtaRunningCallback->stop();
     if (setAllMoneyMadeCallback) setAllMoneyMadeCallback->stop();
     if (addMoneyCallback) addMoneyCallback->stop();
     if (uiKeycombStartCallback) uiKeycombStartCallback->stop();
     if (uiKeycombStopCallback) uiKeycombStopCallback->stop();
+    if (exceptionCallback) exceptionCallback->stop();
 
     delete pArr;
 
@@ -148,6 +143,8 @@ void kill(bool _exit = true) {
         exit(0);
     }
 }
+
+std::function<void()> quit = [] { kill(true); };
 
 /**
  * Write winnings_all to winnings.dat
@@ -608,7 +605,7 @@ bool stopped() {
 }
 
 /**
- * start the betting
+ * Start the betting
  */
 void start_script() {
     StaticLogger::debug("Starting script");
@@ -790,7 +787,7 @@ void startWebServer(const Napi::CallbackInfo &info) {
 /**
  * open the web ui
  */
-void open_website(const Napi::CallbackInfo &info) {
+void open_website(const Napi::CallbackInfo &) {
     std::string addr = "http://";
     addr.append(getIP()).append(":8027");
     HINSTANCE hst = ShellExecuteA(nullptr, TEXT("open"), TEXT(addr.c_str()), nullptr, nullptr, 0);
@@ -941,8 +938,9 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
         StaticLogger::create(lMode, LogLevel::debug, "out.log");
     } catch (std::bad_alloc &) {
         utils::displayError("Unable to create Logger", [] {
-            exit(1);
+            exception();
         });
+        return Napi::Boolean::New(env, false);
     }
 
     if (!pArr)
@@ -960,6 +958,7 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
     if (store_config_json) {
         StaticLogger::debug("Storing json to Desktop");
         settings::storeConfig(time_sleep, clicks, pArr);
+        quit();
         return Napi::Boolean::New(env, true);
     }
 
@@ -997,7 +996,8 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
         settings::configure(map);
         settings::posConfigArr arr(map);
         settings::save(time_sleep, clicks, &arr);
-        exit(0);
+        quit();
+        return Napi::Boolean::New(env, true);
     }
 
     if (debug_full) {
@@ -1017,7 +1017,7 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
     utils::printSystemInformation();
     utils::setCtrlCHandler([] {
         StaticLogger::debug("Shutdown event hit. Shutting down");
-        kill();
+        quit();
     });
 
     autostop::init(&winnings, &time_running);
@@ -1030,8 +1030,9 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
         StaticLogger::error("Could not initialize Betting AI: betting.pb not found");
         utils::displayError("Could not initialize Betting AI\nBetting.pb not found."
                             "\nReinstalling the program might fix this error", [] {
-            exit(1);
+            exception();
         });
+        return Napi::Boolean::New(env, false);
     }
 
     StaticLogger::debug("Initializing Betting AI");
@@ -1039,8 +1040,9 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
     if (!tf::BettingAI::initAi()) {
         StaticLogger::error("Could not initialize Betting AI: Unable to allocate memory");
         utils::displayError("Could not initialize Betting AI\nNot enough memory", [] {
-            exit(1);
+            exception();
         });
+        return Napi::Boolean::New(env, false);
     } else if (tf::BettingAI::status::ok()) {
         StaticLogger::debug("Successfully initialized Betting AI");
 
@@ -1065,8 +1067,9 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
         StaticLogger::debug("Deleted Betting AI");
 
         utils::displayError("Could not initialize Betting AI\nCheck the log for further information", [] {
-            exit(1);
+            quit();
         });
+        return Napi::Boolean::New(env, false);
     }
 
     if (utils::fileExists("data/winnings.pb")) {
@@ -1183,7 +1186,7 @@ Napi::Promise setSet_gta_running(const Napi::CallbackInfo &info) {
 Napi::Promise setAddMoneyCallback(const Napi::CallbackInfo &info) {
     if (addMoneyCallback) throw Napi::Error::New(info.Env(), "addMoneyCallback is already defined");
     addMoneyCallback = new javascriptCallback<int>(info);
-    setAllMoneyMade = [] (int value) {
+    setAllMoneyMade = [](int value) {
         addMoneyCallback->asyncCall(value);
     };
 
@@ -1193,7 +1196,7 @@ Napi::Promise setAddMoneyCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setSetAllMoneyMadeCallback(const Napi::CallbackInfo &info) {
     if (setAllMoneyMadeCallback) throw Napi::Error::New(info.Env(), "setAllMoneyMadeCallback is already defined");
     setAllMoneyMadeCallback = new javascriptCallback<int>(info);
-    setAllMoneyMade = [] (int value) {
+    setAllMoneyMade = [](int value) {
         setAllMoneyMadeCallback->asyncCall(value);
     };
 
@@ -1220,6 +1223,27 @@ Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
     return uiKeycombStopCallback->getPromise();
 }
 
+void setQuitCallback(const Napi::CallbackInfo &info) {
+    auto q = new javascriptVoidCallback(info);
+    quit = [q] {
+        kill(false);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        q->asyncCall();
+    };
+}
+
+void setExceptionCallback(const Napi::CallbackInfo &info) {
+    if (exceptionCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
+    exceptionCallback = new javascriptVoidCallback(info);
+    exception = [] {
+        exceptionCallback->asyncCall();
+    };
+}
+
+void napi_quit(const Napi::CallbackInfo &) {
+    quit();
+}
+
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
 
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
@@ -1243,6 +1267,10 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setSetAllMoneyMadeCallback);
     export(setUiKeycombStartCallback);
     export(setUiKeycombStopCallback);
+    export(setQuitCallback);
+    export(setExceptionCallback);
+
+    export(napi_quit);
 
     return exports;
 }

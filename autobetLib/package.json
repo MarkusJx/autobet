@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node test.js",
     "build": "cmake.js build --CDBUILD_CPPJSLIB=TRUE --CDBoost_INCLUDE_DIR=C:\\include\\boost_1_73_0",
+    "postbuild": "node prelaunch.js",
     "prestart": "node prelaunch.js"
   },
   "repository": {
@@ -21,6 +22,6 @@
   "cmake-js": {
     "runtime": "electron",
     "arch": "x64",
-    "runtimeVersion": "9.0.0"
+    "runtimeVersion": "9.2.1"
   }
 }
