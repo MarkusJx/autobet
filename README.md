@@ -1,7 +1,7 @@
 # GTA-Online-Autobet
 
 [![Version](https://img.shields.io/github/v/release/markusjx/autobet.svg)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
-[![Latest release](https://img.shields.io/badge/Latest_release-experimental-orange)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
+[![Latest release](https://img.shields.io/badge/Latest_release-stable-green)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest)
 
 A simple GTA Online horseracing-autobetting-bot
 
