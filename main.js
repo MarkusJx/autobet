@@ -10,6 +10,7 @@ function createWindow() {
         minWidth: 705,
         frame: true,
         resizable: true,
+        icon: "icon_dark.png",
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -21,8 +22,10 @@ function createWindow() {
         }
     });
 
+    mainWindow.webContents.openDevTools()
     //mainWindow.removeMenu();
 
+    // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     const tray = new Tray('icon.png');
     const contextMenu = Menu.buildFromTemplate([
         {label: 'Autobet', type: 'normal', enabled: false},

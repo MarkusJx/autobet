@@ -23,5 +23,8 @@
     "runtime": "electron",
     "arch": "x64",
     "runtimeVersion": "9.2.1"
+  },
+  "devDependencies": {
+    "cmake-js": "^6.1.0"
   }
 }

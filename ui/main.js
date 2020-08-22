@@ -35,10 +35,10 @@ async function setQuitCallback() {
 }
 setQuitCallback();
 
-var moneyMade = 0;
-var won = 0;
-var lost = 0;
-var gta_running = false;
+let moneyMade = 0;
+let won = 0;
+let lost = 0;
+let gta_running = false;
 
 function showQRCode() {
     qrdialog.open();
@@ -172,12 +172,16 @@ weblink.addEventListener('click', () => {
     autobetLib.openWebsite();
 });
 
-setIPs();
-autobetLib.loadWinnings();
+async function main() {
+    setIPs();
+    autobetLib.loadWinnings();
 
-autobetLib.parseCmdArgs(["--debug"]);
-autobetLib.init().then(() => {
-    console.log("Initialized.");
-}, () => {
-    autobetLib.quit();
-})
+    let initialized = await autobetLib.init();
+    if (initialized) {
+        console.log("Initialized.");
+    } else {
+        console.error("Could not initialize");
+    }
+}
+
+main();
