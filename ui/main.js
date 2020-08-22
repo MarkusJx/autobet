@@ -66,7 +66,7 @@ function exception() {
 }
 
 function makeSumsDisplayable(sum, k = false) {
-    var negative = sum < 0;
+    let negative = sum < 0;
     sum = Math.abs(sum);
 
     if (sum > 1000000000) {
@@ -174,7 +174,9 @@ weblink.addEventListener('click', () => {
 
 setIPs();
 autobetLib.loadWinnings();
-autobetLib.init(["--debug"]).then(() => {
+
+autobetLib.parseCmdArgs(["--debug"]);
+autobetLib.init().then(() => {
     console.log("Initialized.");
 }, () => {
     autobetLib.quit();

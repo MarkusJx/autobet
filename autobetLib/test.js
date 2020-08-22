@@ -1,6 +1,6 @@
 const autobetLib = require("./index.js");
 
-autobetLib.init(["--debug"]);
+autobetLib.init().then(() => {});
 
 setTimeout(() => {
     autobetLib.shutdown();

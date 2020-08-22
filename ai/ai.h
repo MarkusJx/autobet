@@ -13,40 +13,140 @@
 #endif
 #endif
 
+/**
+ * The tensorflow namespace
+ */
 namespace tf {
-  namespace BettingAI {
-    TF_AI_EXPORT bool initAi();
+    /**
+     * Set a file prefix for the ai models
+     *
+     * @param prefix the prefix
+     */
+    TF_AI_EXPORT void setPrefix(const char *prefix);
 
-    TF_AI_EXPORT bool initialized();
+    /**
+     * The betting ai
+     */
+    class BettingAI {
+    public:
+        /**
+         * Create an instance of the ai
+         *
+         * @return true, if the operation was successful, false if no memory is available
+         */
+        TF_AI_EXPORT static bool create();
 
-    TF_AI_EXPORT short predict(char *image, size_t size);
+        /**
+         * Check if the ai has been initialized
+         *
+         * @return true, if the ai has been initialized
+         */
+        TF_AI_EXPORT static bool initialized();
 
-    TF_AI_EXPORT short selfTest(const char* fileName);
+        /**
+         * Predict an image
+         *
+         * @param image the image data
+         * @param size the size of the data
+         * @return the prediction
+         */
+        TF_AI_EXPORT static short predict(char *image, size_t size);
 
-    TF_AI_EXPORT void deleteAi();
-    namespace status {
-      TF_AI_EXPORT bool ok();
+        /**
+         * Self-test the ai
+         *
+         * @param fileName the file to test with
+         * @return the prediction
+         */
+        TF_AI_EXPORT static short selfTest(const char *fileName);
 
-      TF_AI_EXPORT char* getLastStatus();
-    }
-  }
+        /**
+         * Destroy the instance of the ai
+         */
+        TF_AI_EXPORT static void destroy();
 
-  namespace WinningsAI {
-    TF_AI_EXPORT bool initAi();
+        /**
+         * The status of the ai
+         */
+        class status {
+        public:
+            /**
+             * Check if everything is ok
+             *
+             * @return true, if everything is ok
+             */
+            TF_AI_EXPORT static bool ok();
 
-    TF_AI_EXPORT bool initialized();
+            /**
+             * Get the last status
+             *
+             * @return the last status
+             */
+            TF_AI_EXPORT static const char *getLastStatus();
+        };
+    };
 
-    TF_AI_EXPORT short predict(char *image, size_t size);
+    /**
+     * The winnings ai
+     */
+    class WinningsAI {
+    public:
+        /**
+         * Create an instance of the ai
+         *
+         * @return true, if the operation was successful, false if no memory is available
+         */
+        TF_AI_EXPORT static bool create();
 
-    TF_AI_EXPORT short selfTest(const char* fileName);
+        /**
+         * Check if the ai has been initialized
+         *
+         * @return true, if the ai has been initialized
+         */
+        TF_AI_EXPORT static bool initialized();
 
-    TF_AI_EXPORT void deleteAi();
-    namespace status {
-      TF_AI_EXPORT bool ok();
+        /**
+         * Predict an image
+         *
+         * @param image the image data
+         * @param size the size of the data
+         * @return the prediction
+         */
+        TF_AI_EXPORT static short predict(char *image, size_t size);
 
-      TF_AI_EXPORT char* getLastStatus();
-    }
-  }
+        /**
+         * Self-test the ai
+         *
+         * @param fileName the file to test with
+         * @return the prediction
+         */
+        TF_AI_EXPORT static short selfTest(const char *fileName);
+
+        /**
+         * Destroy the instance of the ai
+         */
+        TF_AI_EXPORT static void destroy();
+
+        /**
+         * The status of the ai
+         */
+        class status {
+        public:
+            /**
+             * Check if everything is ok
+             *
+             * @return true, if everything is ok
+             */
+            TF_AI_EXPORT static bool ok();
+
+            /**
+             * Get the last status
+             *
+             * @return the last status
+             */
+            TF_AI_EXPORT static const char *getLastStatus();
+        };
+    };
 }  // namespace tf
 
 #endif
