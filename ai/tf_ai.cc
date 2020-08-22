@@ -31,354 +31,360 @@ limitations under the License.
 using namespace tf;
 using namespace tensorflow;
 
+std::string prefix;
+TF_AI_EXPORT void tf::setPrefix(const char *prfx) {
+    prefix = std::string(prfx);
+}
+
 // Class definitions ========================================
 class B_AI {
- public:
-  B_AI();
+public:
+    B_AI();
 
-  short int predict(char* image, size_t img_size);
+    short int predict(char* image, size_t img_size);
 
-  short int selfTest(const char* fileName);
+    short int selfTest(const char* fileName);
 
-  ~B_AI();
+    ~B_AI();
 
-  AiStatus* status;
- private:
-  tf_ai* ai;
+    AiStatus* status;
+
+private:
+    tf_ai* ai;
 };
 
 class W_AI {
- public:
-  W_AI();
+public:
+    W_AI();
 
-  short int predict(char* image, size_t img_size);
+    short int predict(char* image, size_t img_size);
 
-  short int selfTest(const char* fileName);
+    short int selfTest(const char* fileName);
 
-  ~W_AI();
+    ~W_AI();
 
-  AiStatus* status;
- private:
-  tf_ai* ai;
+    AiStatus* status;
+
+private:
+    tf_ai* ai;
 };
 
 // B_AI and W_AI objects
-B_AI *bettingAi = nullptr;
-W_AI *winningsAi = nullptr;
+B_AI* bettingAi = nullptr;
+W_AI* winningsAi = nullptr;
 
 // Betting AI =============================================
 
 B_AI::B_AI() {
-  status = new AiStatus();
-  ai = new tf_ai("data/betting.pb", status);
+    status = new AiStatus();
+    std::string path = prefix;
+    path.append("betting.pb");
+    ai = new tf_ai(path, status);
 }
 
 short int B_AI::predict(char* image, size_t img_size) {
-  if (image == nullptr) {
-    status->setError("image pointer was nullptr");
-    return -1;
-  }
+    if (image == nullptr) {
+        status->setError("image pointer was nullptr");
+        return -1;
+    }
 
-  if (img_size == 0) {
-    status->setError("image size was zero");
-    return -1;
-  }
-  int index = ai->process(image, img_size);
-  if (index != -1) {
-    return betting_labels[index];
-  } else {
-    return -1;
-  }
+    if (img_size == 0) {
+        status->setError("image size was zero");
+        return -1;
+    }
+    int index = ai->process(image, img_size);
+    if (index != -1) {
+        return betting_labels[index];
+    } else {
+        return -1;
+    }
 }
 
 short int B_AI::selfTest(const char* fileName) {
-  int index = ai->selfTest(fileName);
-  if (index != -1) {
-    return betting_labels[index];
-  } else {
-    return -1;
-  }
+    int index = ai->selfTest(fileName);
+    if (index != -1) {
+        return betting_labels[index];
+    } else {
+        return -1;
+    }
 }
 
 B_AI::~B_AI() {
-  delete static_cast<tf_ai*>(ai);
-  delete status;
+    delete static_cast<tf_ai*>(ai);
+    delete status;
 }
 
 // Winnings AI ============================================
 
 W_AI::W_AI() {
-  status = new AiStatus();
-  ai = new tf_ai("data/winnings.pb", status);
+    status = new AiStatus();
+    std::string path = prefix;
+    path.append("winnings.pb");
+    ai = new tf_ai(path, status);
 }
 
 short int W_AI::predict(char* image, size_t img_size) {
-  if (image == nullptr) {
-    status->setError("image pointer was nullptr");
-    return -1;
-  }
+    if (image == nullptr) {
+        status->setError("image pointer was nullptr");
+        return -1;
+    }
 
-  if (img_size == 0) {
-    status->setError("image size was zero");
-    return -1;
-  }
+    if (img_size == 0) {
+        status->setError("image size was zero");
+        return -1;
+    }
 
-  int index = ai->process(image, img_size);
-  if (index != -1) {
-    return winnings_labels[index];
-  } else {
-    return -1;
-  }
+    int index = ai->process(image, img_size);
+    if (index != -1) {
+        return winnings_labels[index];
+    } else {
+        return -1;
+    }
 }
 
 short int W_AI::selfTest(const char* fileName) {
-  int index = ai->selfTest(fileName);
-  if (index != -1) {
-    return winnings_labels[index];
-  } else {
-    return -1;
-  }
+    int index = ai->selfTest(fileName);
+    if (index != -1) {
+        return winnings_labels[index];
+    } else {
+        return -1;
+    }
 }
 
 W_AI::~W_AI() {
-  delete static_cast<tf_ai*>(ai);
-  delete status;
+    delete static_cast<tf_ai*>(ai);
+    delete status;
 }
 
 // Ai Status ==============================================
 AiStatus::AiStatus() {
-  lastStatus = nullptr;
-  _ok = true;
+    lastStatus = nullptr;
+    _ok = true;
 }
 
-bool AiStatus::ok() { return this->_ok; }
+bool AiStatus::ok() const { return this->_ok; }
 
-char* AiStatus::getLastStatus() {
-  if (this->lastStatus == nullptr) {
-    return "";
-  } else {
-    return this->lastStatus;
-  }
+const char* AiStatus::getLastStatus() const {
+    if (this->lastStatus == nullptr) {
+        return "";
+    } else {
+        return this->lastStatus;
+    }
 }
 
 void AiStatus::resetLastStatus() {
-  if (lastStatus != nullptr) {
-    free(lastStatus);
-  }
+    if (lastStatus != nullptr) {
+        free(lastStatus);
+    }
 
-  _ok = true;
-  lastStatus = nullptr;
+    _ok = true;
+    lastStatus = nullptr;
 }
 
 void AiStatus::setError(const char* status) {
-  lastStatus = strdup(status);
-  this->_ok = false;
+    resetLastStatus();
+    lastStatus = _strdup(status);
+    this->_ok = false;
 }
 
 AiStatus::~AiStatus() {
-  if (lastStatus != nullptr) {
-    free(lastStatus);
-  }
+    if (lastStatus != nullptr) {
+        free(lastStatus);
+    }
 }
 
 // Tensorflow basic ai ====================================
 tf_ai::tf_ai(string graph, AiStatus* status) {
-  _status = status;
-  Status load_graph_status = LoadGraph(graph, &session);
-  if (!load_graph_status.ok()) {
-    LOG(ERROR) << load_graph_status;
-    _status->setError(load_graph_status.ToString().c_str());
-  }
+    _status = status;
+    Status load_graph_status = LoadGraph(graph, &session);
+    if (!load_graph_status.ok()) {
+        LOG(ERROR) << load_graph_status;
+        _status->setError(load_graph_status.ToString().c_str());
+    }
 }
 
 int tf_ai::process(char* image, size_t img_size) {
-  std::vector<Tensor> resized_tensors;
-  Status read_tensor_status =
-      ReadTensorFromPng(image, img_size, input_height, input_width, input_mean,
-                        input_std, &resized_tensors);
-  if (!read_tensor_status.ok()) {
-    LOG(ERROR) << read_tensor_status;
-    _status->setError(read_tensor_status.ToString().c_str());
-    return -1;
-  }
-  const Tensor& resized_tensor = resized_tensors[0];
+    std::vector<Tensor> resized_tensors;
+    Status read_tensor_status =
+            ReadTensorFromPng(image, img_size, input_height, input_width, input_mean,
+                              input_std, &resized_tensors);
+    if (!read_tensor_status.ok()) {
+        LOG(ERROR) << read_tensor_status;
+        _status->setError(read_tensor_status.ToString().c_str());
+        return -1;
+    }
+    const Tensor& resized_tensor = resized_tensors[0];
 
-  // Actually run the image through the model.
-  std::vector<Tensor> outputs;
-  Status run_status = session->Run({{input_layer, resized_tensor}},
-                                   {output_layer}, {}, &outputs);
-  if (!run_status.ok()) {
-    LOG(ERROR) << "Running model failed: " << run_status;
-    _status->setError(run_status.ToString().c_str());
-    return -1;
-  }
+    // Actually run the image through the model.
+    std::vector<Tensor> outputs;
+    Status run_status = session->Run({{input_layer, resized_tensor}},
+                                     {output_layer}, {}, &outputs);
+    if (!run_status.ok()) {
+        LOG(ERROR) << "Running model failed: " << run_status;
+        _status->setError(run_status.ToString().c_str());
+        return -1;
+    }
 
-  return getTopLabel(outputs, _status);
+    return getTopLabel(outputs, _status);
 }
 
 int tf_ai::selfTest(const char* fileName) {
-  std::vector<Tensor> resized_tensors;
-  string image_path = tensorflow::io::JoinPath("", fileName);
+    std::vector<Tensor> resized_tensors;
+    string image_path = tensorflow::io::JoinPath("", fileName);
 
-  Status read_tensor_status =
-      ReadTensorFromImageFile(image_path, input_height, input_width, input_mean,
-                              input_std, &resized_tensors);
-  if (!read_tensor_status.ok()) {
-    LOG(ERROR) << read_tensor_status;
-    _status->setError(read_tensor_status.ToString().c_str());
-    return -1;
-  }
-  const Tensor& resized_tensor = resized_tensors[0];
+    Status read_tensor_status =
+            ReadTensorFromImageFile(image_path, input_height, input_width, input_mean,
+                                    input_std, &resized_tensors);
+    if (!read_tensor_status.ok()) {
+        LOG(ERROR) << read_tensor_status;
+        _status->setError(read_tensor_status.ToString().c_str());
+        return -1;
+    }
+    const Tensor& resized_tensor = resized_tensors[0];
 
-  // Actually run the image through the model.
-  std::vector<Tensor> outputs;
-  Status run_status = session->Run({{input_layer, resized_tensor}},
-                                   {output_layer}, {}, &outputs);
-  if (!run_status.ok()) {
-    LOG(ERROR) << "Running model failed: " << run_status;
-    _status->setError(run_status.ToString().c_str());
-    return -1;
-  }
+    // Actually run the image through the model.
+    std::vector<Tensor> outputs;
+    Status run_status = session->Run({{input_layer, resized_tensor}},
+                                     {output_layer}, {}, &outputs);
+    if (!run_status.ok()) {
+        LOG(ERROR) << "Running model failed: " << run_status;
+        _status->setError(run_status.ToString().c_str());
+        return -1;
+    }
 
-  return getTopLabel(outputs, _status);
+    return getTopLabel(outputs, _status);
 }
 
 tf_ai::~tf_ai() { session->Close(); }
 
 // Export stuff ==============================================
 #ifndef BUILD_TF_AI
-#   define TF_AI_EXPORT
+#define TF_AI_EXPORT
 #endif
 
 // Betting AI=================================================
-TF_AI_EXPORT bool tf::BettingAI::initAi() {
-  try {
-    bettingAi = new B_AI();
-  } catch (std::bad_alloc) {
-    bettingAi = nullptr;
-    return false;
-  }
-  return true;
+TF_AI_EXPORT bool tf::BettingAI::create() {
+    try {
+        bettingAi = new B_AI();
+    } catch (std::bad_alloc) {
+        bettingAi = nullptr;
+        return false;
+    }
+    return true;
 }
 
-TF_AI_EXPORT bool tf::BettingAI::initialized() {
-  return bettingAi != nullptr;
-}
+TF_AI_EXPORT bool tf::BettingAI::initialized() { return bettingAi != nullptr; }
 
-TF_AI_EXPORT short tf::BettingAI::predict(char *image, size_t size) {
-  if (bettingAi) {
-    return bettingAi->predict(image, size);
-  } else {
-    return -2;
-  }
+TF_AI_EXPORT short tf::BettingAI::predict(char* image, size_t size) {
+    if (bettingAi) {
+        return bettingAi->predict(image, size);
+    } else {
+        return -2;
+    }
 }
 
 TF_AI_EXPORT short tf::BettingAI::selfTest(const char* fileName) {
-  if (bettingAi) {
-    return bettingAi->selfTest(fileName);
-  } else {
-    return -2;
-  }
+    if (bettingAi) {
+        return bettingAi->selfTest(fileName);
+    } else {
+        return -2;
+    }
 }
 
-TF_AI_EXPORT void tf::BettingAI::deleteAi() {
-  delete bettingAi;
-}
+TF_AI_EXPORT void tf::BettingAI::destroy() { delete bettingAi; }
 
 TF_AI_EXPORT bool tf::BettingAI::status::ok() {
-  if (bettingAi) {
-    return bettingAi->status->ok();
-  } else {
-    return false;
-  }
+    if (bettingAi) {
+        return bettingAi->status->ok();
+    } else {
+        return false;
+    }
 }
 
-TF_AI_EXPORT char* tf::BettingAI::status::getLastStatus() {
-  if (bettingAi) {
-    return bettingAi->status->getLastStatus();
-  } else {
-    return "BettingAi is not initialized";
-  }
+TF_AI_EXPORT const char* tf::BettingAI::status::getLastStatus() {
+    if (bettingAi) {
+        return bettingAi->status->getLastStatus();
+    } else {
+        return "BettingAi is not initialized";
+    }
 }
 
 // Winnings AI ===============================================
-TF_AI_EXPORT bool tf::WinningsAI::initAi() {
-  try {
-    winningsAi = new W_AI();
-  } catch (std::bad_alloc) {
-    winningsAi = nullptr;
-    return false;
-  }
-  return true;
+TF_AI_EXPORT bool tf::WinningsAI::create() {
+    try {
+        winningsAi = new W_AI();
+    } catch (std::bad_alloc) {
+        winningsAi = nullptr;
+        return false;
+    }
+    return true;
 }
 
 TF_AI_EXPORT bool tf::WinningsAI::initialized() {
-  return winningsAi != nullptr;
+    return winningsAi != nullptr;
 }
 
-TF_AI_EXPORT short tf::WinningsAI::predict(char *image, size_t size) {
-  if (winningsAi) {
-    return winningsAi->predict(image, size);
-  } else {
-    return -2;
-  }
+TF_AI_EXPORT short tf::WinningsAI::predict(char* image, size_t size) {
+    if (winningsAi) {
+        return winningsAi->predict(image, size);
+    } else {
+        return -2;
+    }
 }
 
 TF_AI_EXPORT short tf::WinningsAI::selfTest(const char* fileName) {
-  if (winningsAi) {
-    return winningsAi->selfTest(fileName);
-  } else {
-    return -2;
-  }
+    if (winningsAi) {
+        return winningsAi->selfTest(fileName);
+    } else {
+        return -2;
+    }
 }
 
-TF_AI_EXPORT void tf::WinningsAI::deleteAi() {
-  delete winningsAi;
-}
+TF_AI_EXPORT void tf::WinningsAI::destroy() { delete winningsAi; }
 
 TF_AI_EXPORT bool tf::WinningsAI::status::ok() {
-  if (winningsAi) {
-    return winningsAi->status->ok();
-  } else {
-    return false;
-  }
+    if (winningsAi) {
+        return winningsAi->status->ok();
+    } else {
+        return false;
+    }
 }
 
-TF_AI_EXPORT char* tf::WinningsAI::status::getLastStatus() {
-  if (winningsAi) {
-    return winningsAi->status->getLastStatus();
-  } else {
-    return "WinningsAi is not initialized";
-  }
+TF_AI_EXPORT const char* tf::WinningsAI::status::getLastStatus() {
+    if (winningsAi) {
+        return winningsAi->status->getLastStatus();
+    } else {
+        return "WinningsAi is not initialized";
+    }
 }
 
 // Main ======================================================
 int main(int argc, char* argv[]) {
-  AiStatus* status = new AiStatus();
-  tf::tf_ai* ai = new tf::tf_ai("data/betting.pb", status);
+    AiStatus* status = new AiStatus();
+    tf::tf_ai* ai = new tf::tf_ai("data/betting.pb", status);
 
-  std::cout << "Performing self-Test..." << std::endl << std::endl;
+    std::cout << "Performing self-Test..." << std::endl << std::endl;
 
-  std::cout << "0: " << ai->selfTest("data/0.jpg") << std::endl;
-  std::cout << "1: " << ai->selfTest("data/1.jpg") << std::endl;
-  std::cout << "2: " << ai->selfTest("data/2.jpg") << std::endl;
-  std::cout << "3: " << ai->selfTest("data/3.jpg") << std::endl;
-  std::cout << "4: " << ai->selfTest("data/4.jpg") << std::endl;
-  std::cout << "5: " << ai->selfTest("data/5.jpg") << std::endl;
-  std::cout << "6: " << ai->selfTest("data/6.jpg") << std::endl;
-  std::cout << "7: " << ai->selfTest("data/7.jpg") << std::endl;
-  std::cout << "8: " << ai->selfTest("data/8.jpg") << std::endl;
-  std::cout << "9: " << ai->selfTest("data/9.jpg") << std::endl;
-  std::cout << "10: " << ai->selfTest("data/10.jpg") << std::endl;
+    std::cout << "0: " << ai->selfTest("data/0.jpg") << std::endl;
+    std::cout << "1: " << ai->selfTest("data/1.jpg") << std::endl;
+    std::cout << "2: " << ai->selfTest("data/2.jpg") << std::endl;
+    std::cout << "3: " << ai->selfTest("data/3.jpg") << std::endl;
+    std::cout << "4: " << ai->selfTest("data/4.jpg") << std::endl;
+    std::cout << "5: " << ai->selfTest("data/5.jpg") << std::endl;
+    std::cout << "6: " << ai->selfTest("data/6.jpg") << std::endl;
+    std::cout << "7: " << ai->selfTest("data/7.jpg") << std::endl;
+    std::cout << "8: " << ai->selfTest("data/8.jpg") << std::endl;
+    std::cout << "9: " << ai->selfTest("data/9.jpg") << std::endl;
+    std::cout << "10: " << ai->selfTest("data/10.jpg") << std::endl;
 
-  std::cout << std::endl << "AI exited with status: ";
-  if (status->ok()) {
-    std::cout << "ok" << std::endl;
-  } else {
-    std::cout << ai->_status->getLastStatus() << std::endl;
-  }
+    std::cout << std::endl << "AI exited with status: ";
+    if (status->ok()) {
+        std::cout << "ok" << std::endl;
+    } else {
+        std::cout << ai->_status->getLastStatus() << std::endl;
+    }
 
-  delete ai;
+    delete ai;
 
-  std::cout << "Self-Test finished" << std::endl;
+    std::cout << "Self-Test finished" << std::endl;
 }

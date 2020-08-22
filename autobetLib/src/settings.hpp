@@ -1,6 +1,8 @@
 #ifndef AUTOBET_SETTINGS_HPP
 #define AUTOBET_SETTINGS_HPP
 
+#include <map>
+
 namespace settings {
     typedef struct posConfig_s {
         unsigned int width = 0;
@@ -9,7 +11,7 @@ namespace settings {
 
     class posConfigArr {
     public:
-        explicit posConfigArr(const std::map<int, int>& m) {
+        explicit posConfigArr(const std::map<int, int> &m) {
             arr = (posConfig *) calloc(m.size(), sizeof(posConfig));
             size = m.size();
 
@@ -86,9 +88,11 @@ namespace settings {
         posConfig *arr;
     };
 
-    void save(unsigned int time_sleep, unsigned int clicks, posConfigArr *arr);
+    void save(bool debug, bool webServer, int customBettingPos, unsigned int time_sleep, unsigned int clicks,
+              bool controller, posConfigArr *arr);
 
-    void load(unsigned int &time_sleep, unsigned int &clicks, posConfigArr *arr);
+    void load(bool &debug, bool &webServer, int &customBettingPos, unsigned int &time_sleep, unsigned int &clicks,
+              bool &controller, posConfigArr *arr);
 
     void storeConfig(unsigned int time_sleep, unsigned int clicks, posConfigArr *arr);
 

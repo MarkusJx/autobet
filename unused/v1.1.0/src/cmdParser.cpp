@@ -1,12 +1,9 @@
-//
-// Created by markus on 11/03/2020.
-//
-
 #include <algorithm>
 #include <iostream>
 #include <utility>
 
 #include "cmdParser.hpp"
+#include "main.hpp"
 
 #define acceptsMultiple(opt) (opt.sVal || opt.iVal || opt.fVal)
 #define acceptsSingle(opt) (opt.b || opt.i || opt.s || opt.f || opt.ui)
@@ -440,7 +437,7 @@ void cmdParser::displayHelp() {
             }
         }
     }
-    exit(0);
+    node_quit();
 }
 
 void cmdParser::replaceAll(std::string &name) {

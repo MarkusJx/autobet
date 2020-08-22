@@ -8,4 +8,10 @@
 #   define AUTOBET_LINUX
 #endif
 
+#include <string>
+
+void node_quit();
+
+void node_log(const std::string &val);
+
 #endif //GTA_ONLINE_AUTOBET_DEV_MAIN_HPP

@@ -5,9 +5,9 @@ class AiStatus {
  public:
   AiStatus();
 
-  bool ok();
+  bool ok() const;
 
-  char* getLastStatus();
+  const char* getLastStatus() const;
 
   void resetLastStatus();
 

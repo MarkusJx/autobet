@@ -19,13 +19,18 @@ using namespace logger;
 
 struct settins_s {
     __int64 buf1 = 0;
+    bool debug = false;
+    bool webServer = true;
+    bool controller = false;
+    int customBettingPos = -1;
     unsigned int time_sleep = 0;
     unsigned int clicks = 0;
     size_t arrSize = 0;
     __int64 buf2 = 0;
 };
 
-void settings::save(unsigned int time_sleep, unsigned int clicks, posConfigArr *arr) {
+void settings::save(bool debug, bool webServer, int customBettingPos, unsigned int time_sleep, unsigned int clicks,
+                    bool controller, posConfigArr *arr) {
     std::ofstream ofs("autobet.conf", std::ios::out | std::ios::binary);
     if (!ofs.good()) {
         StaticLogger::error("Unable to open settings file. Flags: " + std::to_string(ofs.flags()));
@@ -33,6 +38,10 @@ void settings::save(unsigned int time_sleep, unsigned int clicks, posConfigArr *
     }
 
     settins_s buf;
+    buf.debug = debug;
+    buf.webServer = webServer;
+    buf.controller = controller;
+    buf.customBettingPos = customBettingPos;
     buf.time_sleep = time_sleep;
     buf.clicks = clicks;
     buf.arrSize = arr->size;
@@ -58,7 +67,8 @@ void settings::save(unsigned int time_sleep, unsigned int clicks, posConfigArr *
     }
 }
 
-void settings::load(unsigned int &time_sleep, unsigned int &clicks, posConfigArr *arr) {
+void settings::load(bool &debug, bool &webServer, int &customBettingPos, unsigned int &time_sleep, unsigned int &clicks,
+                    bool &controller, posConfigArr *arr) {
     StaticLogger::debug("Loading winnings from file");
     settins_s buf;
 
@@ -90,6 +100,10 @@ void settings::load(unsigned int &time_sleep, unsigned int &clicks, posConfigArr
     }
 
     if (buf.time_sleep != 0 && buf.clicks != 0 && buf.buf1 == 0 && buf.buf2 == 0) {
+        debug = buf.debug;
+        webServer = buf.webServer;
+        controller = buf.controller;
+        customBettingPos = buf.customBettingPos;
         time_sleep = buf.time_sleep;
         clicks = buf.clicks;
         if (buf.arrSize > 0) {
@@ -172,7 +186,7 @@ void settings::loadConfig(unsigned int &time_sleep, unsigned int &clicks, posCon
         arr->arr[i].width = j["posConf"][i]["resolution"];
         arr->arr[i].x = j["posConf"][i]["value"];
         StaticLogger::debug("Loaded resolution " + std::to_string(arr->arr[i].width) + " and corresponding position " +
-                        std::to_string(arr->arr[i].x));
+                            std::to_string(arr->arr[i].x));
     }
 
     arr->reGen();

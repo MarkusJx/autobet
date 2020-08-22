@@ -1,7 +1,3 @@
-//
-// Created by markus on 11/03/2020.
-//
-
 #ifndef AUTOBET_CMDPARSER_HPP
 #define AUTOBET_CMDPARSER_HPP
 

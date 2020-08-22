@@ -28,6 +28,7 @@
 #include <functional>
 #include <sstream>
 #include <ctime>
+#include "main.hpp"
 
 #define debug(message) _debug(::logger::LoggerUtils::removeSlash(__FILE__).c_str(), __LINE__, message)
 #define warning(message) _warning(::logger::LoggerUtils::removeSlash(__FILE__).c_str(), __LINE__, message)
@@ -157,22 +158,19 @@ namespace logger {
         };
     }
 
+    void setLogToFile(bool val);
+
+    bool logToFile();
+
+    void setLogToConsole(bool val);
+
+    bool logToConsole();
+
     /**
      * The main logger class
      */
     class Logger {
     public:
-        /**
-         * A logger constructor
-         */
-        Logger() {
-            _mode = MODE_CONSOLE;
-            level = LogLevel::debug;
-            file = nullptr;
-
-            init(nullptr, nullptr);
-        }
-
         /**
          * A logger constructor. Usage:
          *
@@ -185,7 +183,8 @@ namespace logger {
          * @param fileName the output file name
          * @param fileMode the logger file mode
          */
-        explicit Logger(LoggerMode mode, LogLevel lvl = LogLevel::debug, const char *fileName = "",
+        explicit Logger(LoggerMode mode = MODE_BOTH, LogLevel lvl = LogLevel::debug,
+                        const char *fileName = "autobet.log",
                         const char *fileMode = "at") {
             _mode = mode;
             level = lvl;
@@ -212,12 +211,17 @@ namespace logger {
                 _time = LoggerUtils::currentDateTime();
             }
 
-            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level == LogLevel::debug) {
+            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level == LogLevel::debug &&
+                logToFile()) {
                 fprintf(this->file, "[%s] [%s:%d] [DEBUG] %s\n", _time.c_str(), _file, line, message.c_str());
+                fflush(this->file);
             }
 
-            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level == LogLevel::debug) {
-                printf("[%s] [%s:%d] [DEBUG] %s\n", _time.c_str(), _file, line, message.c_str());
+            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level == LogLevel::debug && logToConsole()) {
+                std::string s = "[";
+                s.append(_time).append("] [").append(_file).append(":").append(std::to_string(line)).append(
+                        "] [DEBUG] ").append(message).append("\n");
+                node_log(s);
             }
         }
 
@@ -239,12 +243,17 @@ namespace logger {
                 _time = LoggerUtils::currentDateTime();
             }
 
-            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level != LogLevel::none) {
+            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level != LogLevel::none &&
+                logToFile()) {
                 fprintf(this->file, "[%s] [%s:%d] [ERROR] %s\n", _time.c_str(), _file, line, message.c_str());
+                fflush(this->file);
             }
 
-            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level != LogLevel::none) {
-                fprintf(stderr, "[%s] [%s:%d] [ERROR] %s\n", _time.c_str(), _file, line, message.c_str());
+            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level != LogLevel::none && logToConsole()) {
+                std::string s = "[";
+                s.append(_time).append("] [").append(_file).append(":").append(std::to_string(line)).append(
+                        "] [ERROR] ").append(message).append("\n");
+                node_log(s);
             }
         }
 
@@ -267,13 +276,17 @@ namespace logger {
             }
 
             if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) &&
-                (level == LogLevel::debug || level == LogLevel::warning)) {
+                (level == LogLevel::debug || level == LogLevel::warning) && logToFile()) {
                 fprintf(this->file, "[%s] [%s:%d] [WARN] %s\n", _time.c_str(), _file, line, message.c_str());
+                fflush(this->file);
             }
 
             if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) &&
-                (level == LogLevel::debug || level == LogLevel::warning)) {
-                fprintf(stderr, "[%s] [%s:%d] [WARN] %s\n", _time.c_str(), _file, line, message.c_str());
+                (level == LogLevel::debug || level == LogLevel::warning) && logToConsole()) {
+                std::string s = "[";
+                s.append(_time).append("] [").append(_file).append(":").append(std::to_string(line)).append(
+                        "] [WARN] ").append(message).append("\n");
+                node_log(s);
             }
         }
 
@@ -305,12 +318,13 @@ namespace logger {
 
 
             if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) &&
-                (level == LogLevel::debug || level == LogLevel::warning)) {
+                (level == LogLevel::debug || level == LogLevel::warning) && logToFile()) {
                 fprintf(this->file, pattern, _time.c_str(), _file, line, function, message.c_str());
+                fflush(this->file);
             }
 
             if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) &&
-                (level == LogLevel::debug || level == LogLevel::warning)) {
+                (level == LogLevel::debug || level == LogLevel::warning) && logToConsole()) {
                 fprintf(stderr, pattern, _time.c_str(), _file, line, function, message.c_str());
             }
         }
@@ -398,6 +412,8 @@ namespace logger {
                 if (err) {
                     perror("Could not open out.log file!");
                     file = nullptr;
+                } else {
+                    setvbuf(file, nullptr, _IONBF, 0);
                 }
 #else
                 file = fopen("out.log", fileMode);
@@ -422,14 +438,6 @@ namespace logger {
     class StaticLogger {
     public:
         /**
-         * Create a new instance of the logger
-         */
-        LOGGER_MAYBE_UNUSED static void create() {
-            if (getLogger()) delete getLogger();
-            setLogger(new Logger());
-        }
-
-        /**
          * Create a new instance of the logger. Usage:
          *
          * <code>
@@ -442,8 +450,8 @@ namespace logger {
          * @param fileMode the logger file mode
          */
         LOGGER_MAYBE_UNUSED static void
-        create(LoggerMode mode, LogLevel lvl = LogLevel::debug, const char *fileName = "",
-               const char *fileMode = "at") {
+        create(LoggerMode mode = LoggerMode::MODE_BOTH, LogLevel lvl = LogLevel::debug,
+               const char *fileName = "autobet.log", const char *fileMode = "at") {
             if (getLogger()) delete getLogger();
             setLogger(new Logger(mode, lvl, fileName, fileMode));
         }

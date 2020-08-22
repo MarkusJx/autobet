@@ -2,7 +2,6 @@
 #include "utils.hpp"
 #include "debug.hpp"
 #include "autostop.hpp"
-#include "cmdParser.hpp"
 #include "settings.hpp"
 #include "controller.hpp"
 
@@ -53,7 +52,8 @@ unsigned short int xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, race
 __int64 winnings_all = 0L;
 int winnings = 0;
 unsigned int time_running = 0;
-bool gtaVRunning, running, stopping, starting, keyCombListen, runLoops, debug_full;
+bool gtaVRunning, running, stopping, starting, keyCombListen, runLoops;
+bool debug_full = false, webServer = true, useController = false;
 float multiplierW, multiplierH;
 unsigned int bettingPos = POS_1_1;
 int customBettingPos = -1;
@@ -63,7 +63,7 @@ unsigned int time_sleep = 36, clicks = 31;
 controller::controller *controllerPtr = nullptr;
 
 // Functions from js =======================
-std::function<void(bool)> set_gta_running;
+std::function<void(bool)> set_gta_running = {};
 std::function<void()> ui_keycomb_start = {};
 std::function<void()> ui_keycomb_stop = {};
 
@@ -77,6 +77,7 @@ javascriptCallback<int> *addMoneyCallback = nullptr;
 javascriptVoidCallback *uiKeycombStartCallback = nullptr;
 javascriptVoidCallback *uiKeycombStopCallback = nullptr;
 javascriptVoidCallback *exceptionCallback = nullptr;
+javascriptCallback<std::string> *logCallback = nullptr;
 
 /**
  * Kill the program and close all connections
@@ -90,6 +91,7 @@ void kill(bool _exit = true) {
     if (uiKeycombStartCallback) uiKeycombStartCallback->stop();
     if (uiKeycombStopCallback) uiKeycombStopCallback->stop();
     if (exceptionCallback) exceptionCallback->stop();
+    if (logCallback) logCallback->stop();
 
     delete pArr;
 
@@ -97,9 +99,11 @@ void kill(bool _exit = true) {
     // so they don't throw an exception
     if (bt)
         bt->detach();
+    delete bt;
 
     if (wt)
         wt->detach();
+    delete wt;
 
     // Set every possible bool to false
     keyCombListen = false;
@@ -107,8 +111,13 @@ void kill(bool _exit = true) {
     running = false;
 
     // Stop the web servers, so they don't occupy the ports they use
-    if (webUi && CppJsLib::util::stop(webUi, true, 5)) {
-        StaticLogger::debug("Stopped web ui web server");
+    if (webUi) {
+        if (!CppJsLib::util::stop(webUi, true, 5)) {
+            StaticLogger::warning("Could not stop web ui web server");
+        } else {
+            StaticLogger::debug("Stopped web ui web server");
+        }
+
         delete webUi;
     } else {
         StaticLogger::warning("Could not stop web ui web server");
@@ -116,11 +125,11 @@ void kill(bool _exit = true) {
 
     // Delete the AIs
     StaticLogger::debug("Deleting Betting AI");
-    tf::BettingAI::deleteAi();
+    tf::BettingAI::destroy();
     StaticLogger::debug("Deleted Betting AI");
 
     StaticLogger::debug("Deleting Winnings AI");
-    tf::WinningsAI::deleteAi();
+    tf::WinningsAI::destroy();
     StaticLogger::debug("Deleted Winnings AI");
 
     // Delete the controller object
@@ -144,7 +153,7 @@ void kill(bool _exit = true) {
     }
 }
 
-std::function<void()> quit = [] { kill(true); };
+std::function<void()> quit = {};
 
 /**
  * Write winnings_all to winnings.dat
@@ -245,7 +254,7 @@ void place_bet(int y, bool evalBettingPos) {
     leftClick(634, y);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    if (controllerPtr == nullptr) {
+    if (!useController || controllerPtr == nullptr) {
         clickUsingMouse:
         if (evalBettingPos) {
             StaticLogger::debug("Searching for increase bet (>) position");
@@ -765,26 +774,6 @@ Napi::String node_getIP(const Napi::CallbackInfo &info) {
 }
 
 /**
- * Start the web servers
- */
-void startWebServer(const Napi::CallbackInfo &info) {
-    // Run webUi->start in a separate thread so it can check if its ports are occupied
-    std::thread([] {
-        if (webUi) {
-            StaticLogger::debug("Starting web ui web server");
-            bool res = webUi->start(8027, 8028, getIP(), false);
-            if (res) {
-                StaticLogger::debug("Successfully started webUi");
-            } else {
-                StaticLogger::warning("Could not start webUi");
-            }
-        } else {
-            StaticLogger::warning("Not starting web ui web server since it does not exist");
-        }
-    }).detach();
-}
-
-/**
  * open the web ui
  */
 void open_website(const Napi::CallbackInfo &) {
@@ -847,95 +836,57 @@ void listenForKeycomb() {
     // Kill the program if SHIFT+CTRL+F9 is pressed, this on activates if break on the loop is called
     // and keyCombListen is still true, if it is false, the program is about to stop already
     if (keyCombListen) {
-        kill();
+        quit();
+    }
+}
+
+bool startWebUi() {
+    try {
+#ifndef BUILD_CPPJSLIB
+        CppJsLib::createWebGUI(webUi, "web");
+#else
+        webUi = new CppJsLib::WebGUI("web");
+#endif //BUILD_CPPJSLIB
+    } catch (std::bad_alloc &e) {
+        StaticLogger::error(
+                "Unable to create instance of web ui web server. Error: " + std::string(e.what()));
+        webUi = nullptr;
+        return false;
+    }
+
+    StaticLogger::debug("Exposing functions to the webUi");
+
+    webUi->expose(js_start_script);
+    webUi->expose(js_stop_script);
+    webUi->expose(get_races_won);
+    webUi->expose(get_races_lost);
+    webUi->expose(get_all_winnings);
+    webUi->expose(get_current_winnings);
+    webUi->expose(get_time);
+    webUi->expose(get_gta_running);
+    webUi->expose(get_running);
+    webUi->expose(get_autostop_money);
+    webUi->expose(get_autostop_time);
+    webUi->expose(set_autostop_time);
+    webUi->expose(set_autostop_money);
+
+    StaticLogger::debug("Starting web ui web server");
+    bool res = webUi->start(8027, 8028, getIP(), false);
+    if (res) {
+        StaticLogger::debug("Successfully started webUi");
+        return true;
+    } else {
+        StaticLogger::warning("Could not start webUi");
+        delete webUi;
+        webUi = nullptr;
+        return false;
     }
 }
 
 Napi::Boolean init(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::ARRAY);
     Napi::Env env = info.Env();
-
-#ifndef NDEBUG
-    LoggerMode lMode = MODE_CONSOLE;
-#else
-    LoggerMode lMode = MODE_NONE;
-#endif //NDEBUG
-    bool debug, headless, no_web_server, show_cmd, save_settings, run_configurator;
-    bool store_config_json, load_config_json;
-    {
-        auto argArray = info[0].As<Napi::Array>();
-        int argc = argArray.Length();
-        char **argv = new char *[argc];
-
-        for (int i = 0; i < argc; i++) {
-            argv[i] = strdup(argArray.Get(i).ToString().Utf8Value().c_str());
-        }
-
-        bool delete_settings;
-        cmdParser p(16);
-
-        p.addHeading("General options");
-        p.addReplace('_', ':');
-        p.addCommand(debug, "Show log in cmd and save log file");
-        p.addCommand(debug_full, "Show log in cmd, save log file and some debugging images into a zip folder");
-        p.addCommand(headless, "Run the program in headless mode (without UI)");
-
-        p.addReplace('_', '-');
-        p.addCommand(no_web_server, "Start without web server");
-        p.addCommand(show_cmd, "Start and show the log (similar to --debug just without saving it)");
-
-        p.addHeading("\nSettings");
-        p._addCommand(customBettingPos,
-                      "Set a custom increase bet (>) position (one-time value). Overwrites any other option.",
-                      "set-custom-betting-pos");
-        std::vector<int> cb;
-        p._addCommand(cb, "Set increase bet (>) position templates for different game resolutions",
-                      "set-betting-pos-template", " <gameWidth, pos>...");
-        p.addCommand(time_sleep, "Set the sleep time during which the race is running");
-        p.addCommand(clicks, "Set the number of clicks to place a bet (if not 10000$ are placed)");
-        p.addCommand(run_configurator, "Run the configuration tool");
-        p.addCommand(store_config_json, "Store a config file as json on the users Desktop");
-        p.addCommand(load_config_json, "Load a json config file from the users Desktop");
-        p.addCommand(save_settings, "Save the current settings given by the command line");
-        p.addCommand(delete_settings, "Delete the settings file");
-
-        p.parse(argc, argv, 0);
-
-        for (int i = 0; i < argc; i++) {
-            free(argv[i]);
-        }
-        delete[] argv;
-
-        if (cb.size() > 1) {
-            if (cb.size() % 2 == 0) {
-                std::map<int, int> m;
-                for (int i = 0; i < cb.size(); i += 2) {
-                    auto it = m.find(cb[i]);
-                    if (it != m.end())
-                        it->second = cb[i + 1];
-                    else
-                        m.insert(std::make_pair(cb[i], cb[i + 1]));
-                    std::cout << "Added position conf width " << cb[i] << " and pos " << cb[i + 1] << std::endl;
-                }
-                pArr = new settings::posConfigArr(m);
-            } else {
-                std::cerr << "Cannot use values of set-betting-pos-template, number of args is not even" << std::endl;
-            }
-        }
-
-        if (delete_settings && utils::fileExists("autobet.conf")) {
-            remove("autobet.conf");
-        }
-    }
-
-    if (debug_full || debug) {
-        lMode = MODE_BOTH;
-    } else if (headless || run_configurator) {
-        lMode = MODE_CONSOLE;
-    }
-
     try {
-        StaticLogger::create(lMode, LogLevel::debug, "out.log");
+        StaticLogger::create();
     } catch (std::bad_alloc &) {
         utils::displayError("Unable to create Logger", [] {
             exception();
@@ -947,42 +898,9 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
         pArr = new settings::posConfigArr();
     if (utils::fileExists("autobet.conf")) {
         StaticLogger::debug("Settings file exists. Loading it");
-        unsigned int t, c;
-        settings::load(t, c, pArr);
-        if (time_sleep == 36)
-            time_sleep = t;
-        if (clicks == 31)
-            clicks = c;
-    }
-
-    if (store_config_json) {
-        StaticLogger::debug("Storing json to Desktop");
-        settings::storeConfig(time_sleep, clicks, pArr);
-        quit();
-        return Napi::Boolean::New(env, true);
-    }
-
-    if (load_config_json) {
-        StaticLogger::debug("Loading json from Desktop");
-        utils::path p;
-        utils::getDesktopDirectory(p);
-        if (utils::fileExists(p.toString() + "\\autobet_conf.json")) {
-            settings::loadConfig(time_sleep, clicks, pArr);
-            settings::save(time_sleep, clicks, pArr);
-        } else {
-            StaticLogger::error("JSON config file does not exist");
-            kill(false);
-            return Napi::Boolean::New(env, false);
-        }
-    }
-
-    if (save_settings) {
-        StaticLogger::debug("Saving settings");
-        settings::save(time_sleep, clicks, pArr);
-    }
-
-    if (headless) {
-        StaticLogger::debug("running in headless mode");
+        bool debug;
+        settings::load(debug, webServer, customBettingPos, time_sleep, clicks, useController, pArr);
+        logger::setLogToFile(debug);
     }
 
     if (customBettingPos > 0) {
@@ -990,21 +908,6 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
     }
 
     utils::setDpiAware();
-
-    if (run_configurator) {
-        std::map<int, int> map;
-        settings::configure(map);
-        settings::posConfigArr arr(map);
-        settings::save(time_sleep, clicks, &arr);
-        quit();
-        return Napi::Boolean::New(env, true);
-    }
-
-    if (debug_full) {
-        if (!debug::init()) {
-            StaticLogger::error("Could not create debug folder. Cannot collect debug information");
-        }
-    }
 
     CppJsLib::setLogger([](const std::string &s) {
         StaticLogger::debug(s);
@@ -1026,7 +929,9 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
     StaticLogger::warning("Program was compiled in debug mode");
 #endif //NDEBUG
 
-    if (!utils::fileExists("data/betting.pb")) {
+    tf::setPrefix("resources/data/");
+
+    if (!utils::fileExists("resources/data/betting.pb")) {
         StaticLogger::error("Could not initialize Betting AI: betting.pb not found");
         utils::displayError("Could not initialize Betting AI\nBetting.pb not found."
                             "\nReinstalling the program might fix this error", [] {
@@ -1037,7 +942,7 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
 
     StaticLogger::debug("Initializing Betting AI");
 
-    if (!tf::BettingAI::initAi()) {
+    if (!tf::BettingAI::create()) {
         StaticLogger::error("Could not initialize Betting AI: Unable to allocate memory");
         utils::displayError("Could not initialize Betting AI\nNot enough memory", [] {
             exception();
@@ -1063,7 +968,7 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
         StaticLogger::error(msg);
 
         StaticLogger::debug("Deleting Betting AI");
-        tf::BettingAI::deleteAi();
+        tf::BettingAI::destroy();
         StaticLogger::debug("Deleted Betting AI");
 
         utils::displayError("Could not initialize Betting AI\nCheck the log for further information", [] {
@@ -1072,10 +977,10 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
         return Napi::Boolean::New(env, false);
     }
 
-    if (utils::fileExists("data/winnings.pb")) {
+    if (utils::fileExists("resources/data/winnings.pb")) {
         StaticLogger::debug("Initializing Winnings AI");
 
-        if (!tf::WinningsAI::initAi()) {
+        if (!tf::WinningsAI::create()) {
             StaticLogger::error("Could not initialize Winnings AI: Unable to allocate memory");
         } else if (tf::WinningsAI::status::ok()) {
             StaticLogger::debug("Successfully initialized Winnings AI");
@@ -1097,7 +1002,7 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
             StaticLogger::error(msg);
 
             StaticLogger::debug("Deleting Winnings AI");
-            tf::WinningsAI::deleteAi();
+            tf::WinningsAI::destroy();
             StaticLogger::debug("Deleted Winnings AI");
         }
     } else {
@@ -1107,48 +1012,29 @@ Napi::Boolean init(const Napi::CallbackInfo &info) {
     std::thread keyCombThread(listenForKeycomb);
     keyCombThread.detach();
 
-    if (!no_web_server) {
-        try {
-#ifndef BUILD_CPPJSLIB
-            CppJsLib::createWebGUI(webUi, "web");
-#else
-            webUi = new CppJsLib::WebGUI("web");
-#endif //BUILD_CPPJSLIB
-        } catch (std::bad_alloc &e) {
-            StaticLogger::error("Unable to create instance of web ui web server. Error: " + std::string(e.what()));
-            webUi = nullptr;
+    if (webServer) {
+        if (startWebUi()) {
+            StaticLogger::debug("Web ui started");
+        } else {
+            StaticLogger::debug("Web ui could not be started");
         }
     } else {
         StaticLogger::debug("Web ui was disabled per command-line argument, no starting the web server");
     }
 
-    StaticLogger::debug("Trying to create a new controller object");
-    try {
-        controllerPtr = new controller::controller();
-    } catch (controller::controllerUnavailableException &e) {
-        StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
-        controllerPtr = nullptr;
-    } catch (std::bad_alloc &) {
-        StaticLogger::error("Could not create a controller object: Out of memory");
-        controllerPtr = nullptr;
-    }
-
-    if (webUi) {
-        webUi->expose(js_start_script);
-        webUi->expose(js_stop_script);
-        webUi->expose(get_races_won);
-        webUi->expose(get_races_lost);
-        webUi->expose(get_all_winnings);
-        webUi->expose(get_current_winnings);
-        webUi->expose(get_time);
-        webUi->expose(get_gta_running);
-        webUi->expose(get_running);
-        webUi->expose(get_autostop_money);
-        webUi->expose(get_autostop_time);
-        webUi->expose(set_autostop_time);
-        webUi->expose(set_autostop_money);
+    if (useController) {
+        StaticLogger::debug("Trying to create a new controller object");
+        try {
+            controllerPtr = new controller::controller();
+        } catch (controller::controllerUnavailableException &e) {
+            StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
+            controllerPtr = nullptr;
+        } catch (std::bad_alloc &) {
+            StaticLogger::error("Could not create a controller object: Out of memory");
+            controllerPtr = nullptr;
+        }
     } else {
-        StaticLogger::warning("Not exposing any functions to web ui web server since it does not exist");
+        StaticLogger::debug("Using the controller is disabled, so not creating a controller object");
     }
 
     return Napi::Boolean::New(env, true);
@@ -1169,79 +1055,332 @@ void start(const Napi::CallbackInfo &info) {
     }
 }
 
+void node_quit() {
+    quit();
+}
+
+void node_log(const std::string &val) {
+    if (logCallback) logCallback->asyncCall(val);
+}
+
 void stop(const Napi::CallbackInfo &info) {
     kill(false);
 }
 
 Napi::Promise setSet_gta_running(const Napi::CallbackInfo &info) {
     if (setGtaRunningCallback) throw Napi::Error::New(info.Env(), "setGtaRunningCallback is already defined");
-    setGtaRunningCallback = new javascriptCallback<bool>(info);
-    set_gta_running = [](bool val) {
-        setGtaRunningCallback->asyncCall(val);
-    };
+    TRY
+        setGtaRunningCallback = new javascriptCallback<bool>(info);
+        set_gta_running = [](bool val) {
+            setGtaRunningCallback->asyncCall(val);
+        };
 
-    return setGtaRunningCallback->getPromise();
+        return setGtaRunningCallback->getPromise();
+    CATCH_EXCEPTIONS
 }
 
 Napi::Promise setAddMoneyCallback(const Napi::CallbackInfo &info) {
     if (addMoneyCallback) throw Napi::Error::New(info.Env(), "addMoneyCallback is already defined");
-    addMoneyCallback = new javascriptCallback<int>(info);
-    setAllMoneyMade = [](int value) {
-        addMoneyCallback->asyncCall(value);
-    };
+    TRY
+        addMoneyCallback = new javascriptCallback<int>(info);
+        setAllMoneyMade = [](int value) {
+            addMoneyCallback->asyncCall(value);
+        };
 
-    return addMoneyCallback->getPromise();
+        return addMoneyCallback->getPromise();
+    CATCH_EXCEPTIONS
 }
 
 Napi::Promise setSetAllMoneyMadeCallback(const Napi::CallbackInfo &info) {
     if (setAllMoneyMadeCallback) throw Napi::Error::New(info.Env(), "setAllMoneyMadeCallback is already defined");
-    setAllMoneyMadeCallback = new javascriptCallback<int>(info);
-    setAllMoneyMade = [](int value) {
-        setAllMoneyMadeCallback->asyncCall(value);
-    };
+    TRY
+        setAllMoneyMadeCallback = new javascriptCallback<int>(info);
+        setAllMoneyMade = [](int value) {
+            setAllMoneyMadeCallback->asyncCall(value);
+        };
 
-    return setAllMoneyMadeCallback->getPromise();
+        return setAllMoneyMadeCallback->getPromise();
+    CATCH_EXCEPTIONS
 }
 
 Napi::Promise setUiKeycombStartCallback(const Napi::CallbackInfo &info) {
     if (uiKeycombStartCallback) throw Napi::Error::New(info.Env(), "uiKeycombStartCallback is already defined");
-    uiKeycombStartCallback = new javascriptVoidCallback(info);
-    ui_keycomb_start = [] {
-        uiKeycombStartCallback->asyncCall();
-    };
+    TRY
+        uiKeycombStartCallback = new javascriptVoidCallback(info);
+        ui_keycomb_start = [] {
+            uiKeycombStartCallback->asyncCall();
+        };
 
-    return uiKeycombStartCallback->getPromise();
+        return uiKeycombStartCallback->getPromise();
+    CATCH_EXCEPTIONS
 }
 
 Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
     if (uiKeycombStopCallback) throw Napi::Error::New(info.Env(), "uiKeycombStopCallback is already defined");
-    uiKeycombStopCallback = new javascriptVoidCallback(info);
-    ui_keycomb_stop = [] {
-        uiKeycombStopCallback->asyncCall();
-    };
+    TRY
+        uiKeycombStopCallback = new javascriptVoidCallback(info);
+        ui_keycomb_stop = [] {
+            uiKeycombStopCallback->asyncCall();
+        };
 
-    return uiKeycombStopCallback->getPromise();
+        return uiKeycombStopCallback->getPromise();
+    CATCH_EXCEPTIONS
 }
 
 void setQuitCallback(const Napi::CallbackInfo &info) {
-    auto q = new javascriptVoidCallback(info);
-    quit = [q] {
-        kill(false);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        q->asyncCall();
-    };
+    TRY
+        auto q = new javascriptVoidCallback(info);
+        quit = [q] {
+            kill(false);
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            q->asyncCall();
+        };
+    CATCH_EXCEPTIONS
 }
 
-void setExceptionCallback(const Napi::CallbackInfo &info) {
+Napi::Promise setExceptionCallback(const Napi::CallbackInfo &info) {
     if (exceptionCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
-    exceptionCallback = new javascriptVoidCallback(info);
-    exception = [] {
-        exceptionCallback->asyncCall();
-    };
+    TRY
+        exceptionCallback = new javascriptVoidCallback(info);
+        exception = [] {
+            exceptionCallback->asyncCall();
+        };
+
+        return exceptionCallback->getPromise();
+    CATCH_EXCEPTIONS
+}
+
+Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
+    if (logCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
+    TRY
+        logCallback = new javascriptCallback<std::string>(info);
+
+        return logCallback->getPromise();
+    CATCH_EXCEPTIONS
 }
 
 void napi_quit(const Napi::CallbackInfo &) {
     quit();
+}
+
+void node_setLogToFile(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    logger::setLogToFile(info[0].ToBoolean());
+}
+
+Napi::Boolean node_logToFile(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), logger::logToFile());
+}
+
+void node_setLogToConsole(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    logger::setLogToConsole(info[0].ToBoolean());
+}
+
+Napi::Boolean node_logToConsole(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), logger::logToConsole());
+}
+
+Napi::Boolean setDebugFull(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    if (info[0].ToBoolean()) {
+        if (!debug_full) {
+            if (!debug::init()) {
+                StaticLogger::error("Could not create debug folder. Cannot collect debug information");
+                return Napi::Boolean::New(info.Env(), false);
+            }
+            debug_full = true;
+        }
+        return Napi::Boolean::New(info.Env(), true);
+    } else {
+        if (debug_full) {
+            debug::finish();
+            debug_full = false;
+        }
+        return Napi::Boolean::New(info.Env(), true);
+    }
+}
+
+Napi::Boolean setWebServer(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    TRY
+        if (info[0].ToBoolean()) {
+            webServer = true;
+            if (!webUi) {
+                return Napi::Boolean::New(info.Env(), startWebUi());
+            } else {
+                StaticLogger::warning("Tried to start webUi server, but it already exists");
+                return Napi::Boolean::New(info.Env(), false);
+            }
+        } else {
+            webServer = false;
+            if (webUi) {
+                if (!CppJsLib::util::stop(webUi, true, 5)) {
+                    StaticLogger::warning("Could not stop web ui web server");
+                } else {
+                    StaticLogger::debug("Stopped web ui web server");
+                }
+
+                delete webUi;
+                webUi = nullptr;
+                return Napi::Boolean::New(info.Env(), true);
+            } else {
+                StaticLogger::warning("Tried to stop webUi server, but it does not exist");
+                return Napi::Boolean::New(info.Env(), false);
+            }
+        }
+    CATCH_EXCEPTIONS
+}
+
+Napi::Boolean node_getWebServer(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), webServer);
+}
+
+Napi::Boolean webServerRunning(const Napi::CallbackInfo &info) {
+    if (webUi) {
+        return Napi::Boolean::New(info.Env(), webUi->isRunning());
+    } else {
+        return Napi::Boolean::New(info.Env(), false);
+    }
+}
+
+void setCustomBettingPos(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::NUMBER);
+    customBettingPos = info[0].ToNumber();
+}
+
+Napi::Number getCustomBettingPos(const Napi::CallbackInfo &info) {
+    return Napi::Number::New(info.Env(), customBettingPos);
+}
+
+void setBettingPosTemplate(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::ARRAY);
+    auto arr = info[0].As<Napi::Array>();
+    std::map<int, int> m;
+    for (uint32_t i = 0; i < arr.Length(); i++) {
+        if (arr.Get(i).IsObject()) {
+            auto o = arr.Get(i).As<Napi::Object>();
+            if (o.Has("resolution") && o.Has("value")) {
+                if (o.Get("resolution").IsNumber() && o.Get("value").IsNumber()) {
+                    m.insert_or_assign(o.Get("resolution").ToNumber(), o.Get("value").ToNumber());
+                } else {
+                    throw Napi::Error::New(info.Env(), "Object values 'resolution' and 'value' must be of type number");
+                }
+            } else {
+                throw Napi::Error::New(info.Env(), "Object requires values 'resolution' and 'value'");
+            }
+        } else {
+            throw Napi::Error::New(info.Env(), "Required type object");
+        }
+    }
+
+    delete pArr;
+    pArr = new settings::posConfigArr(m);
+}
+
+Napi::Value getBettingPosTemplate(const Napi::CallbackInfo &info) {
+    if (pArr) {
+        Napi::Array arr = Napi::Array::New(info.Env());
+        for (size_t i = 0; i < pArr->size; i++) {
+            Napi::Object o = Napi::Object::New(info.Env());
+            o.Set("resolution", pArr->arr[i].width);
+            o.Set("value", pArr->arr[i].x);
+            arr.Set((uint32_t) i, o);
+        }
+
+        return arr;
+    } else {
+        return info.Env().Undefined();
+    }
+}
+
+void setTimeSleep(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::NUMBER);
+    time_sleep = info[0].ToNumber().operator unsigned int();
+}
+
+Napi::Number getTimeSleep(const Napi::CallbackInfo &info) {
+    return Napi::Number::New(info.Env(), time_sleep);
+}
+
+void setClicks(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::NUMBER);
+    clicks = info[0].ToNumber().operator unsigned int();
+}
+
+Napi::Number getClicks(const Napi::CallbackInfo &info) {
+    return Napi::Number::New(info.Env(), clicks);
+}
+
+void saveSettings(const Napi::CallbackInfo &info) {
+    TRY
+        settings::save(logger::logToFile(), webServer, customBettingPos, time_sleep, clicks, useController, pArr);
+    CATCH_EXCEPTIONS
+}
+
+Napi::Boolean loadSettings(const Napi::CallbackInfo &info) {
+    TRY
+        delete pArr;
+        pArr = new settings::posConfigArr();
+        bool debug, ws;
+        if (utils::fileExists("autobet.conf")) {
+            settings::load(debug, ws, customBettingPos, time_sleep, clicks, useController, pArr);
+            logger::setLogToFile(debug);
+            return Napi::Boolean::New(info.Env(), true);
+        } else {
+            return Napi::Boolean::New(info.Env(), false);
+        }
+    CATCH_EXCEPTIONS
+}
+
+Napi::Boolean setUseController(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    if (info[0].ToBoolean()) {
+        if (!useController) {
+            useController = true;
+            if (controllerPtr == nullptr) {
+                StaticLogger::debug("Trying to create a new controller object");
+                try {
+                    controllerPtr = new controller::controller();
+                } catch (controller::controllerUnavailableException &e) {
+                    StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
+                    controllerPtr = nullptr;
+                    return Napi::Boolean::New(info.Env(), false);
+                } catch (std::bad_alloc &) {
+                    StaticLogger::error("Could not create a controller object: Out of memory");
+                    controllerPtr = nullptr;
+                    return Napi::Boolean::New(info.Env(), false);
+                }
+            }
+        }
+    } else {
+        if (useController) {
+            useController = false;
+            delete controllerPtr;
+            controllerPtr = nullptr;
+        }
+    }
+    return Napi::Boolean::New(info.Env(), true);
+}
+
+Napi::Boolean getUseController(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), useController);
+}
+
+Napi::Boolean canUseController(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), controllerPtr == nullptr);
+}
+
+Napi::Boolean scpVBusInstalled(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), controller::scpVBusInstalled());
+}
+
+Napi::Boolean installScpVBus(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), controller::downloadAndInstallScpVBus());
+}
+
+Napi::Boolean uninstallScpVBus(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), controller::downloadAndUninstallScpVBus());
 }
 
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
@@ -1249,7 +1388,6 @@ void napi_quit(const Napi::CallbackInfo &) {
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(init);
     export(start);
-    export(startWebServer);
     export(stop);
 
     export(node_get_gta_running);
@@ -1269,8 +1407,46 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setUiKeycombStopCallback);
     export(setQuitCallback);
     export(setExceptionCallback);
+    export(setLogCallback);
 
     export(napi_quit);
+
+    export(node_logToFile);
+    export(node_setLogToFile);
+    export(node_logToConsole);
+    export(node_setLogToConsole);
+
+    export(setDebugFull);
+    export(setWebServer);
+    export(node_getWebServer);
+    export(webServerRunning);
+    export(setCustomBettingPos);
+    export(getCustomBettingPos);
+    export(setBettingPosTemplate);
+    export(getBettingPosTemplate);
+    export(setTimeSleep);
+    export(getTimeSleep);
+    export(setClicks);
+    export(getClicks);
+    export(saveSettings);
+    export(loadSettings);
+
+    export(setUseController);
+    export(getUseController);
+    export(canUseController);
+    export(scpVBusInstalled);
+    export(installScpVBus);
+    export(uninstallScpVBus);
+
+    try {
+        quit = [] {
+            kill(true);
+        };
+    } catch (std::exception &e) {
+        throw Napi::Error::New(env, e.what());
+    } catch (...) {
+        throw Napi::Error::New(env, "An unknown exception occurred");
+    }
 
     return exports;
 }

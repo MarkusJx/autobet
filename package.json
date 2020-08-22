@@ -1,0 +1,56 @@
+{
+  "name": "autobet",
+  "version": "1.2.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --help",
+    "test": "electron . --help",
+    "pack": "electron-builder"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarkusJx/GTA-Online-Autobet.git"
+  },
+  "author": "MarkusJx",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MarkusJx/GTA-Online-Autobet/issues"
+  },
+  "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
+  "devDependencies": {
+    "electron": "^9.2.1",
+    "electron-builder": "^22.8.0"
+  },
+  "build": {
+    "appId": "markusjx.autobet",
+    "nsis": {
+      "oneClick": false,
+      "artifactName": "${productName}.${ext}"
+    },
+    "files": [
+      "**/autobetLib/bin/*",
+      "**/autobetLib/index.js",
+      "**/autobetLib/package.json",
+      "**/ui/*",
+      "**/web/*",
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "!**/v1.1.0/*",
+      "!**/v0/*"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/data",
+        "to": "data",
+        "filter": ["**/*"]
+      }
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/autobetLib/bin/*",
+      "**/data/*"
+    ]
+  }
+}
