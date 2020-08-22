@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
   "devDependencies": {
-    "electron": "^9.2.1",
     "electron-builder": "^22.8.0"
   },
   "build": {
@@ -44,7 +43,9 @@
       {
         "from": "resources/data",
         "to": "data",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "asar": true,
@@ -52,5 +53,8 @@
       "**/autobetLib/bin/*",
       "**/data/*"
     ]
+  },
+  "dependencies": {
+    "electron": "^9.2.1"
   }
 }

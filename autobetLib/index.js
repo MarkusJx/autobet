@@ -4,16 +4,10 @@ module.exports = {
     /**
      * Initialize everything
      *
-     * @return {Promise<void>} true, if the startup was successful
+     * @return {Promise<Boolean>} true, if the startup was successful
      */
-    init: function () {
-        return new Promise((resolve, reject) => {
-            if (autobetLib_native.lib_init()) {
-                resolve();
-            } else {
-                reject();
-            }
-        });
+    init: async function () {
+        return await autobetLib_native.lib_init();
     },
     /**
      * Start the main loop
@@ -31,9 +25,11 @@ module.exports = {
     },
     /**
      * Load the winnings
+     *
+     * @return {Promise<void>}
      */
-    loadWinnings: function () {
-        autobetLib_native.lib_loadWinnings();
+    loadWinnings: async function () {
+        await autobetLib_native.lib_loadWinnings();
     },
     /**
      * Get this computer's IPv4 address
@@ -86,72 +82,77 @@ module.exports = {
         autobetLib_native.lib_node_js_stop_script();
     },
     /**
-     * Set the callback function to get if GTA is running
-     *
-     * @param callback {function(boolean): void} the callback function
+     * Callbacks to set
      */
-    setGtaRunningCallback: function (callback) {
-        autobetLib_native.lib_setSet_gta_running(callback).catch(() => {
-        });
-    },
-    /**
-     * Set the callback function to add money
-     *
-     * @param callback {function(Number): void} the callback function
-     * @return {void}
-     */
-    setAddMoneyCallback: function (callback) {
-        autobetLib_native.lib_setAddMoneyCallback(callback).catch(() => {
-        });
-    },
-    /**
-     * Set the callback function to set all money made
-     *
-     * @param callback {function(Number): void} the callback function
-     * @return {void}
-     */
-    setAllMoneyMadeCallback: function (callback) {
-        autobetLib_native.lib_setSetAllMoneyMadeCallback(callback).catch(() => {
-        });
-    },
-    /**
-     * Set the callback function to the script being started
-     *
-     * @param callback {function(): void} the callback function
-     * @return {void}
-     */
-    setUiKeycombStartCallback: function (callback) {
-        autobetLib_native.lib_setUiKeycombStartCallback(callback).catch(() => {
-        });
-    },
-    /**
-     * Set the callback function to the script being stopped
-     *
-     * @param callback {function(): void} the callback function
-     * @return {void}
-     */
-    setUiKeycombStopCallback: function (callback) {
-        autobetLib_native.lib_setUiKeycombStopCallback(callback).catch(() => {
-        });
-    },
-    /**
-     * Set the callback function to stop the program
-     *
-     * @param quit {function(): void} the callback function
-     * @return {void}
-     */
-    setQuitCallback: function (quit) {
-        autobetLib_native.lib_setQuitCallback(quit);
-    },
-    /**
-     * Set the callback function when an exception occurs
-     *
-     * @param exception {function(): void} the callback function
-     * @return {void}
-     */
-    setExceptionCallback: function (exception) {
-        autobetLib_native.lib_setExceptionCallback(exception).catch(() => {
-        });
+    callbacks: {
+        /**
+         * Set the callback function to get if GTA is running
+         *
+         * @param callback {function(boolean): void} the callback function
+         */
+        setGtaRunningCallback: function (callback) {
+            autobetLib_native.lib_setSet_gta_running(callback).catch(() => {
+            });
+        },
+        /**
+         * Set the callback function to add money
+         *
+         * @param callback {function(Number): void} the callback function
+         * @return {void}
+         */
+        setAddMoneyCallback: function (callback) {
+            autobetLib_native.lib_setAddMoneyCallback(callback).catch(() => {
+            });
+        },
+        /**
+         * Set the callback function to set all money made
+         *
+         * @param callback {function(Number): void} the callback function
+         * @return {void}
+         */
+        setAllMoneyMadeCallback: function (callback) {
+            autobetLib_native.lib_setSetAllMoneyMadeCallback(callback).catch(() => {
+            });
+        },
+        /**
+         * Set the callback function to the script being started
+         *
+         * @param callback {function(): void} the callback function
+         * @return {void}
+         */
+        setUiKeycombStartCallback: function (callback) {
+            autobetLib_native.lib_setUiKeycombStartCallback(callback).catch(() => {
+            });
+        },
+        /**
+         * Set the callback function to the script being stopped
+         *
+         * @param callback {function(): void} the callback function
+         * @return {void}
+         */
+        setUiKeycombStopCallback: function (callback) {
+            autobetLib_native.lib_setUiKeycombStopCallback(callback).catch(() => {
+            });
+        },
+        /**
+         * Set the callback function to stop the program
+         *
+         * @param quit {function(): void} the callback function
+         * @return {void}
+         */
+        setQuitCallback: function (quit) {
+            autobetLib_native.lib_setQuitCallback(quit);
+        },
+        /**
+         * Set the callback function when an exception occurs
+         *
+         * @param exception {function(): void} the callback function
+         * @return {void}
+         */
+        setExceptionCallback: function (exception) {
+            autobetLib_native.lib_setExceptionCallback(exception).catch(() => {
+            });
+        }
     },
     /**
      * A logging namespace
@@ -208,31 +209,19 @@ module.exports = {
          * Set if the program should collect full debugging info
          *
          * @param debugFull {Boolean} if the program should collect full debugging info
-         * @return {Promise<void>} resolves, if the operation was successful, rejects otherwise
+         * @return {Promise<Boolean>} true, if the operation was successful, false otherwise
          */
-        setDebugFull: function (debugFull) {
-            return new Promise((resolve, reject) => {
-                if (autobetLib_native.lib_setDebugFull(debugFull)) {
-                    resolve();
-                } else {
-                    reject();
-                }
-            });
+        setDebugFull: async function (debugFull) {
+            return await autobetLib_native.lib_setDebugFull(debugFull);
         },
         /**
          * Set if the web server should be used
          *
          * @param webServer {Boolean} true, if it should be used
-         * @return {Promise<void>} resolves, if the operation was successful, rejects otherwise
+         * @return {Promise<Boolean>} true, if the operation was successful, false otherwise
          */
-        setWebServer: function (webServer) {
-            return new Promise((resolve, reject) => {
-                if (autobetLib_native.lib_setWebServer(webServer)) {
-                    resolve();
-                } else {
-                    reject();
-                }
-            });
+        setWebServer: async function (webServer) {
+            return await autobetLib_native.lib_setWebServer(webServer);
         },
         /**
          * Get if the web server is activated in the settings
@@ -316,9 +305,11 @@ module.exports = {
         },
         /**
          * Save the settings
+         *
+         * @return {Promise<void>}
          */
-        saveSettings: function () {
-            autobetLib_native.lib_saveSettings();
+        saveSettings: async function () {
+            await autobetLib_native.lib_saveSettings();
         },
         /**
          * Load the settings
@@ -326,7 +317,7 @@ module.exports = {
          * @return {Promise<Boolean>} true, if the settings file exists
          */
         loadSettings: async function () {
-            return autobetLib_native.lib_loadSettings();
+            return await autobetLib_native.lib_loadSettings();
         }
     },
     /**
@@ -340,7 +331,7 @@ module.exports = {
          * @return {Promise<Boolean>} true, if the operation was successful
          */
         setUseController: async function (useController) {
-            return autobetLib_native.lib_setUseController(useController);
+            return await autobetLib_native.lib_setUseController(useController);
         },
         /**
          * Check if the program is using the controller
@@ -372,7 +363,7 @@ module.exports = {
          * @return {Promise<Boolean>} true, if the installation was successful
          */
         installScpVBus: async function () {
-            return autobetLib_native.lib_installScpVBus();
+            return await autobetLib_native.lib_installScpVBus();
         },
         /**
          * Uninstall scpVBus
@@ -380,7 +371,7 @@ module.exports = {
          * @return {Promise<Boolean>} true, if the removal was successful
          */
         uninstallScpVBus: async function () {
-            return autobetLib_native.lib_uninstallScpVBus();
+            return await autobetLib_native.lib_uninstallScpVBus();
         }
     },
     /**

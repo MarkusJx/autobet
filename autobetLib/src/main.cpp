@@ -29,9 +29,6 @@
 #include "logger.hpp"
 #include "jsCallback.hpp"
 
-// Macro for comparing a string to a command line argument
-#define CMP_ARGV(str) strcmp(argv[i], str) == 0
-
 // x-Pos for the increase bet button (>) since the scaling is not 100% accurate
 #define POS_1_1 2160
 #define POS_1_2 2240
@@ -718,41 +715,44 @@ void set_starting(const Napi::CallbackInfo &info) {
 /**
  * Load winnings_all from binary file winnings.dat
  */
-void loadWinnings(const Napi::CallbackInfo &) {
-    StaticLogger::debug("Loading winnings from file");
+Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
+    return VoidPromise::create(info.Env(), [] {
+        StaticLogger::debug("Loading winnings from file");
 
-    if (!utils::fileExists("winnings.dat")) {
-        StaticLogger::debug("Winnings file does not exist, creating it");
-        writeWinnings:
-        winnings_all = 0;
-        writeWinnings();
-        return;
-    }
+        if (!utils::fileExists("winnings.dat")) {
+            StaticLogger::debug("Winnings file does not exist, creating it");
+            writeWinnings:
+            winnings_all = 0;
+            writeWinnings();
+            return;
+        }
 
-    std::ifstream ifs("winnings.dat", std::ios::in | std::ios::binary);
-    if (!ifs.good()) {
-        StaticLogger::error("Unable to open winnings file. Flags: " + std::to_string(ifs.flags()));
-        goto writeWinnings;
-    }
+        std::ifstream ifs("winnings.dat", std::ios::in | std::ios::binary);
+        if (!ifs.good()) {
+            StaticLogger::error("Unable to open winnings file. Flags: " + std::to_string(ifs.flags()));
+            goto writeWinnings;
+        }
 
-    ifs.read((char *) &winnings_all, sizeof(__int64));
-    if (ifs.fail()) {
-        StaticLogger::warning("File stream fail bit was set, rewriting file");
-        goto writeWinnings;
-    }
+        ifs.read((char *) &winnings_all, sizeof(__int64));
+        if (ifs.fail()) {
+            StaticLogger::warning("File stream fail bit was set, rewriting file");
+            goto writeWinnings;
+        }
 
-    if (ifs.eof()) {
-        StaticLogger::warning("Winnings file end has been reached, rewriting file");
-        goto writeWinnings;
-    }
+        if (ifs.eof()) {
+            StaticLogger::warning("Winnings file end has been reached, rewriting file");
+            goto writeWinnings;
+        }
 
-    ifs.close();
+        ifs.close();
 
-    if (ifs.is_open()) {
-        StaticLogger::error("Unable to close winnings file");
-    }
+        if (ifs.is_open()) {
+            StaticLogger::error("Unable to close winnings file");
+        }
 
-    StaticLogger::debug("Read winnings: " + std::to_string(winnings_all));
+        StaticLogger::debug("Read winnings: " + std::to_string(winnings_all));
+    });
+
 }
 
 /**
@@ -883,161 +883,162 @@ bool startWebUi() {
     }
 }
 
-Napi::Boolean init(const Napi::CallbackInfo &info) {
-    Napi::Env env = info.Env();
-    try {
-        StaticLogger::create();
-    } catch (std::bad_alloc &) {
-        utils::displayError("Unable to create Logger", [] {
-            exception();
+Napi::Promise init(const Napi::CallbackInfo &info) {
+    return Promise<bool>::create(info.Env(), [] {
+        try {
+            StaticLogger::create();
+        } catch (std::bad_alloc &) {
+            utils::displayError("Unable to create Logger", [] {
+                exception();
+            });
+            return false;
+        }
+
+        if (!pArr)
+            pArr = new settings::posConfigArr();
+        if (utils::fileExists("autobet.conf")) {
+            StaticLogger::debug("Settings file exists. Loading it");
+            bool debug;
+            settings::load(debug, webServer, customBettingPos, time_sleep, clicks, useController, pArr);
+            logger::setLogToFile(debug);
+        }
+
+        if (customBettingPos > 0) {
+            StaticLogger::debug("Custom betting pos set to " + std::to_string(customBettingPos));
+        }
+
+        utils::setDpiAware();
+
+        CppJsLib::setLogger([](const std::string &s) {
+            StaticLogger::debug(s);
         });
-        return Napi::Boolean::New(env, false);
-    }
 
-    if (!pArr)
-        pArr = new settings::posConfigArr();
-    if (utils::fileExists("autobet.conf")) {
-        StaticLogger::debug("Settings file exists. Loading it");
-        bool debug;
-        settings::load(debug, webServer, customBettingPos, time_sleep, clicks, useController, pArr);
-        logger::setLogToFile(debug);
-    }
-
-    if (customBettingPos > 0) {
-        StaticLogger::debug("Custom betting pos set to " + std::to_string(customBettingPos));
-    }
-
-    utils::setDpiAware();
-
-    CppJsLib::setLogger([](const std::string &s) {
-        StaticLogger::debug(s);
-    });
-
-    CppJsLib::setError([](const std::string &s) {
-        StaticLogger::error(s);
-    });
-
-    utils::printSystemInformation();
-    utils::setCtrlCHandler([] {
-        StaticLogger::debug("Shutdown event hit. Shutting down");
-        quit();
-    });
-
-    autostop::init(&winnings, &time_running);
-
-#ifndef NDEBUG
-    StaticLogger::warning("Program was compiled in debug mode");
-#endif //NDEBUG
-
-    tf::setPrefix("resources/data/");
-
-    if (!utils::fileExists("resources/data/betting.pb")) {
-        StaticLogger::error("Could not initialize Betting AI: betting.pb not found");
-        utils::displayError("Could not initialize Betting AI\nBetting.pb not found."
-                            "\nReinstalling the program might fix this error", [] {
-            exception();
+        CppJsLib::setError([](const std::string &s) {
+            StaticLogger::error(s);
         });
-        return Napi::Boolean::New(env, false);
-    }
 
-    StaticLogger::debug("Initializing Betting AI");
-
-    if (!tf::BettingAI::create()) {
-        StaticLogger::error("Could not initialize Betting AI: Unable to allocate memory");
-        utils::displayError("Could not initialize Betting AI\nNot enough memory", [] {
-            exception();
-        });
-        return Napi::Boolean::New(env, false);
-    } else if (tf::BettingAI::status::ok()) {
-        StaticLogger::debug("Successfully initialized Betting AI");
-
-        // Run the first prediction as it is painfully slow
-        bt = new std::thread([] {
-            StaticLogger::debug("Running first Betting AI prediction");
-            void *src = utils::TakeScreenShot(0, 0, 100, 100);
-            utils::bitmap *b = utils::crop(0, 0, 100, 100, src);
-            DeleteObject(src);
-            tf::BettingAI::predict(b->data, b->size);
-
-            delete b;
-            StaticLogger::debug("Done running first Betting AI prediction");
-        });
-    } else {
-        std::string msg("Failed to initialize Betting AI. Error: ");
-        msg.append(tf::BettingAI::status::getLastStatus());
-        StaticLogger::error(msg);
-
-        StaticLogger::debug("Deleting Betting AI");
-        tf::BettingAI::destroy();
-        StaticLogger::debug("Deleted Betting AI");
-
-        utils::displayError("Could not initialize Betting AI\nCheck the log for further information", [] {
+        utils::printSystemInformation();
+        utils::setCtrlCHandler([] {
+            StaticLogger::debug("Shutdown event hit. Shutting down");
             quit();
         });
-        return Napi::Boolean::New(env, false);
-    }
 
-    if (utils::fileExists("resources/data/winnings.pb")) {
-        StaticLogger::debug("Initializing Winnings AI");
+        autostop::init(&winnings, &time_running);
 
-        if (!tf::WinningsAI::create()) {
-            StaticLogger::error("Could not initialize Winnings AI: Unable to allocate memory");
-        } else if (tf::WinningsAI::status::ok()) {
-            StaticLogger::debug("Successfully initialized Winnings AI");
+#ifndef NDEBUG
+        StaticLogger::warning("Program was compiled in debug mode");
+#endif //NDEBUG
+
+        tf::setPrefix("resources/data/");
+
+        if (!utils::fileExists("resources/data/betting.pb")) {
+            StaticLogger::error("Could not initialize Betting AI: betting.pb not found");
+            utils::displayError("Could not initialize Betting AI\nBetting.pb not found."
+                                "\nReinstalling the program might fix this error", [] {
+                exception();
+            });
+            return false;
+        }
+
+        StaticLogger::debug("Initializing Betting AI");
+
+        if (!tf::BettingAI::create()) {
+            StaticLogger::error("Could not initialize Betting AI: Unable to allocate memory");
+            utils::displayError("Could not initialize Betting AI\nNot enough memory", [] {
+                exception();
+            });
+            return false;
+        } else if (tf::BettingAI::status::ok()) {
+            StaticLogger::debug("Successfully initialized Betting AI");
 
             // Run the first prediction as it is painfully slow
-            wt = new std::thread([] {
-                StaticLogger::debug("Running first Winnings AI prediction");
+            bt = new std::thread([] {
+                StaticLogger::debug("Running first Betting AI prediction");
                 void *src = utils::TakeScreenShot(0, 0, 100, 100);
                 utils::bitmap *b = utils::crop(0, 0, 100, 100, src);
                 DeleteObject(src);
-                tf::WinningsAI::predict(b->data, b->size);
+                tf::BettingAI::predict(b->data, b->size);
 
                 delete b;
-                StaticLogger::debug("Done running first Winnings AI prediction");
+                StaticLogger::debug("Done running first Betting AI prediction");
             });
         } else {
-            std::string msg("Failed to initialize Winnings AI. Error: ");
-            msg.append(tf::WinningsAI::status::getLastStatus());
+            std::string msg("Failed to initialize Betting AI. Error: ");
+            msg.append(tf::BettingAI::status::getLastStatus());
             StaticLogger::error(msg);
 
-            StaticLogger::debug("Deleting Winnings AI");
-            tf::WinningsAI::destroy();
-            StaticLogger::debug("Deleted Winnings AI");
-        }
-    } else {
-        StaticLogger::error("Could not initialize Winnings AI: winnings.pb does not exist");
-    }
-    keyCombListen = true;
-    std::thread keyCombThread(listenForKeycomb);
-    keyCombThread.detach();
+            StaticLogger::debug("Deleting Betting AI");
+            tf::BettingAI::destroy();
+            StaticLogger::debug("Deleted Betting AI");
 
-    if (webServer) {
-        if (startWebUi()) {
-            StaticLogger::debug("Web ui started");
+            utils::displayError("Could not initialize Betting AI\nCheck the log for further information", [] {
+                quit();
+            });
+            return false;
+        }
+
+        if (utils::fileExists("resources/data/winnings.pb")) {
+            StaticLogger::debug("Initializing Winnings AI");
+
+            if (!tf::WinningsAI::create()) {
+                StaticLogger::error("Could not initialize Winnings AI: Unable to allocate memory");
+            } else if (tf::WinningsAI::status::ok()) {
+                StaticLogger::debug("Successfully initialized Winnings AI");
+
+                // Run the first prediction as it is painfully slow
+                wt = new std::thread([] {
+                    StaticLogger::debug("Running first Winnings AI prediction");
+                    void *src = utils::TakeScreenShot(0, 0, 100, 100);
+                    utils::bitmap *b = utils::crop(0, 0, 100, 100, src);
+                    DeleteObject(src);
+                    tf::WinningsAI::predict(b->data, b->size);
+
+                    delete b;
+                    StaticLogger::debug("Done running first Winnings AI prediction");
+                });
+            } else {
+                std::string msg("Failed to initialize Winnings AI. Error: ");
+                msg.append(tf::WinningsAI::status::getLastStatus());
+                StaticLogger::error(msg);
+
+                StaticLogger::debug("Deleting Winnings AI");
+                tf::WinningsAI::destroy();
+                StaticLogger::debug("Deleted Winnings AI");
+            }
         } else {
-            StaticLogger::debug("Web ui could not be started");
+            StaticLogger::error("Could not initialize Winnings AI: winnings.pb does not exist");
         }
-    } else {
-        StaticLogger::debug("Web ui was disabled per command-line argument, no starting the web server");
-    }
+        keyCombListen = true;
+        std::thread keyCombThread(listenForKeycomb);
+        keyCombThread.detach();
 
-    if (useController) {
-        StaticLogger::debug("Trying to create a new controller object");
-        try {
-            controllerPtr = new controller::controller();
-        } catch (controller::controllerUnavailableException &e) {
-            StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
-            controllerPtr = nullptr;
-        } catch (std::bad_alloc &) {
-            StaticLogger::error("Could not create a controller object: Out of memory");
-            controllerPtr = nullptr;
+        if (webServer) {
+            if (startWebUi()) {
+                StaticLogger::debug("Web ui started");
+            } else {
+                StaticLogger::debug("Web ui could not be started");
+            }
+        } else {
+            StaticLogger::debug("Web ui was disabled per command-line argument, no starting the web server");
         }
-    } else {
-        StaticLogger::debug("Using the controller is disabled, so not creating a controller object");
-    }
 
-    return Napi::Boolean::New(env, true);
+        if (useController) {
+            StaticLogger::debug("Trying to create a new controller object");
+            try {
+                controllerPtr = new controller::controller();
+            } catch (controller::controllerUnavailableException &e) {
+                StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
+                controllerPtr = nullptr;
+            } catch (std::bad_alloc &) {
+                StaticLogger::error("Could not create a controller object: Out of memory");
+                controllerPtr = nullptr;
+            }
+        } else {
+            StaticLogger::debug("Using the controller is disabled, so not creating a controller object");
+        }
+
+        return true;
+    });
 }
 
 void start(const Napi::CallbackInfo &info) {
@@ -1059,7 +1060,7 @@ void node_quit() {
     quit();
 }
 
-void node_log(const std::string &val) {
+[[maybe_unused]] void node_log(const std::string &val) {
     if (logCallback) logCallback->asyncCall(val);
 }
 
@@ -1181,40 +1182,45 @@ Napi::Boolean node_logToConsole(const Napi::CallbackInfo &info) {
     return Napi::Boolean::New(info.Env(), logger::logToConsole());
 }
 
-Napi::Boolean setDebugFull(const Napi::CallbackInfo &info) {
+Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::type::BOOLEAN);
-    if (info[0].ToBoolean()) {
-        if (!debug_full) {
-            if (!debug::init()) {
-                StaticLogger::error("Could not create debug folder. Cannot collect debug information");
-                return Napi::Boolean::New(info.Env(), false);
+    bool val = info[0].ToBoolean();
+    return Promise<bool>::create(info.Env(), [val] {
+        if (val) {
+            if (!debug_full) {
+                if (!debug::init()) {
+                    StaticLogger::error("Could not create debug folder. Cannot collect debug information");
+                    return false;
+                }
+                debug_full = true;
             }
-            debug_full = true;
+            return true;
+        } else {
+            if (debug_full) {
+                debug::finish();
+                debug_full = false;
+            }
+            return true;
         }
-        return Napi::Boolean::New(info.Env(), true);
-    } else {
-        if (debug_full) {
-            debug::finish();
-            debug_full = false;
-        }
-        return Napi::Boolean::New(info.Env(), true);
-    }
+    });
 }
 
-Napi::Boolean setWebServer(const Napi::CallbackInfo &info) {
+Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::type::BOOLEAN);
-    TRY
-        if (info[0].ToBoolean()) {
+    bool val = info[0].ToBoolean();
+    return Promise<bool>::create(info.Env(), [val] {
+        if (val) {
             webServer = true;
             if (!webUi) {
-                return Napi::Boolean::New(info.Env(), startWebUi());
+                return startWebUi();
             } else {
-                StaticLogger::warning("Tried to start webUi server, but it already exists");
-                return Napi::Boolean::New(info.Env(), false);
+                StaticLogger::warning("Tried to start webUi server, but it already is running");
+                return false;
             }
         } else {
             webServer = false;
             if (webUi) {
+                // Try to stop the web server
                 if (!CppJsLib::util::stop(webUi, true, 5)) {
                     StaticLogger::warning("Could not stop web ui web server");
                 } else {
@@ -1223,13 +1229,13 @@ Napi::Boolean setWebServer(const Napi::CallbackInfo &info) {
 
                 delete webUi;
                 webUi = nullptr;
-                return Napi::Boolean::New(info.Env(), true);
+                return true;
             } else {
                 StaticLogger::warning("Tried to stop webUi server, but it does not exist");
-                return Napi::Boolean::New(info.Env(), false);
+                return false;
             }
         }
-    CATCH_EXCEPTIONS
+    });
 }
 
 Napi::Boolean node_getWebServer(const Napi::CallbackInfo &info) {
@@ -1257,6 +1263,7 @@ void setBettingPosTemplate(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::type::ARRAY);
     auto arr = info[0].As<Napi::Array>();
     std::map<int, int> m;
+    // Iterate over the array
     for (uint32_t i = 0; i < arr.Length(); i++) {
         if (arr.Get(i).IsObject()) {
             auto o = arr.Get(i).As<Napi::Object>();
@@ -1279,6 +1286,7 @@ void setBettingPosTemplate(const Napi::CallbackInfo &info) {
 }
 
 Napi::Value getBettingPosTemplate(const Napi::CallbackInfo &info) {
+    // If pArr is not nullptr, create an object and return it
     if (pArr) {
         Napi::Array arr = Napi::Array::New(info.Env());
         for (size_t i = 0; i < pArr->size; i++) {
@@ -1312,55 +1320,65 @@ Napi::Number getClicks(const Napi::CallbackInfo &info) {
     return Napi::Number::New(info.Env(), clicks);
 }
 
-void saveSettings(const Napi::CallbackInfo &info) {
-    TRY
+Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
+    return VoidPromise::create(info.Env(), [] {
         settings::save(logger::logToFile(), webServer, customBettingPos, time_sleep, clicks, useController, pArr);
-    CATCH_EXCEPTIONS
+    });
 }
 
-Napi::Boolean loadSettings(const Napi::CallbackInfo &info) {
-    TRY
+Napi::Promise loadSettings(const Napi::CallbackInfo &info) {
+    return Promise<bool>::create(info.Env(), [] {
+        // Delete the posConfigArr and create a new one
         delete pArr;
         pArr = new settings::posConfigArr();
         bool debug, ws;
         if (utils::fileExists("autobet.conf")) {
             settings::load(debug, ws, customBettingPos, time_sleep, clicks, useController, pArr);
             logger::setLogToFile(debug);
-            return Napi::Boolean::New(info.Env(), true);
+            return true;
         } else {
-            return Napi::Boolean::New(info.Env(), false);
+            return false;
         }
-    CATCH_EXCEPTIONS
+    });
 }
 
-Napi::Boolean setUseController(const Napi::CallbackInfo &info) {
+Napi::Promise setUseController(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::type::BOOLEAN);
-    if (info[0].ToBoolean()) {
-        if (!useController) {
-            useController = true;
-            if (controllerPtr == nullptr) {
-                StaticLogger::debug("Trying to create a new controller object");
-                try {
-                    controllerPtr = new controller::controller();
-                } catch (controller::controllerUnavailableException &e) {
-                    StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
-                    controllerPtr = nullptr;
-                    return Napi::Boolean::New(info.Env(), false);
-                } catch (std::bad_alloc &) {
-                    StaticLogger::error("Could not create a controller object: Out of memory");
-                    controllerPtr = nullptr;
-                    return Napi::Boolean::New(info.Env(), false);
+    bool val = info[0].ToBoolean();
+    // Create a promise
+    return Promise<bool>::create(info.Env(), [val] {
+        if (val) {
+            // If useController == false, try to create a virtual controller
+            if (!useController) {
+                useController = true;
+                if (controllerPtr == nullptr) {
+                    StaticLogger::debug("Trying to create a new controller object");
+                    try {
+                        // Try to create a virtual controller
+                        controllerPtr = new controller::controller();
+                    } catch (controller::controllerUnavailableException &e) {
+                        // The controller creation failed, probably scpVBus is not installed
+                        StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
+                        controllerPtr = nullptr;
+                        return false;
+                    } catch (std::bad_alloc &) {
+                        // Out of memory
+                        StaticLogger::error("Could not create a controller object: Out of memory");
+                        controllerPtr = nullptr;
+                        return false;
+                    }
                 }
             }
+        } else {
+            if (useController) {
+                // Delete the controller
+                useController = false;
+                delete controllerPtr;
+                controllerPtr = nullptr;
+            }
         }
-    } else {
-        if (useController) {
-            useController = false;
-            delete controllerPtr;
-            controllerPtr = nullptr;
-        }
-    }
-    return Napi::Boolean::New(info.Env(), true);
+        return true;
+    });
 }
 
 Napi::Boolean getUseController(const Napi::CallbackInfo &info) {
@@ -1375,12 +1393,16 @@ Napi::Boolean scpVBusInstalled(const Napi::CallbackInfo &info) {
     return Napi::Boolean::New(info.Env(), controller::scpVBusInstalled());
 }
 
-Napi::Boolean installScpVBus(const Napi::CallbackInfo &info) {
-    return Napi::Boolean::New(info.Env(), controller::downloadAndInstallScpVBus());
+Napi::Promise installScpVBus(const Napi::CallbackInfo &info) {
+    return Promise<bool>::create(info.Env(), [] {
+        return controller::downloadAndInstallScpVBus();
+    });
 }
 
-Napi::Boolean uninstallScpVBus(const Napi::CallbackInfo &info) {
-    return Napi::Boolean::New(info.Env(), controller::downloadAndUninstallScpVBus());
+Napi::Promise uninstallScpVBus(const Napi::CallbackInfo &info) {
+    return Promise<bool>::create(info.Env(), [] {
+        return controller::downloadAndUninstallScpVBus();
+    });
 }
 
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
