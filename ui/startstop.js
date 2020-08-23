@@ -1,18 +1,17 @@
-var timeDisp = document.getElementById("time");
-var startstop = document.getElementById("startstop");
-var statusinfo = document.getElementById("statusinfo");
-var messagecontainer = document.getElementById("messagecontainer");
-var frosted_glass = document.getElementById("frosted-glass");
+let timeDisp = document.getElementById("time");
+let statusinfo = document.getElementById("statusinfo");
+let messagecontainer = document.getElementById("messagecontainer");
+let frosted_glass = document.getElementById("frosted-glass");
 
-var gtanotrunningmessage = document.getElementById("gta-not-running-message");
+let gtanotrunningmessage = document.getElementById("gta-not-running-message");
 gtanotrunningmessage = new mdc.snackbar.MDCSnackbar(gtanotrunningmessage);
 gtanotrunningmessage.timeoutMs = 10000;
 
-var paused = 0;
-var running = 0;
-var pausing = 0;
-var timer = null;
-var time = 0;
+let paused = 0;
+let running = 0;
+let pausing = 0;
+let timer = null;
+let time = 0;
 
 startstop.addEventListener('click', function() {
     if (!running) {
@@ -22,7 +21,7 @@ startstop.addEventListener('click', function() {
     }
 });
 
-autobetLib.setUiKeycombStartCallback(ui_keycomb_start);
+autobetLib.callbacks.setUiKeycombStartCallback(ui_keycomb_start);
 
 function ui_keycomb_start() {
     startstop.disabled = true;
@@ -33,7 +32,7 @@ function ui_keycomb_start() {
     statusinfo.className = "text status_running maintext";
 }
 
-autobetLib.setUiKeycombStopCallback(ui_keycomb_stop);
+autobetLib.callbacks.setUiKeycombStopCallback(ui_keycomb_stop);
 
 function ui_keycomb_stop() {
     pause(true);

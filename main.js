@@ -7,7 +7,7 @@ function createWindow() {
         width: 705,
         height: 830,
         minHeight: 830,
-        minWidth: 705,
+        minWidth: 530,
         frame: true,
         resizable: true,
         icon: "icon_dark.png",
@@ -75,6 +75,5 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', function () {
-    autobetLib.shutdown();
     if (process.platform !== 'darwin') app.quit();
 });

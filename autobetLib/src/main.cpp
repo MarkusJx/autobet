@@ -71,9 +71,9 @@ std::function<void()> exception = {};
 javascriptCallback<bool> *setGtaRunningCallback = nullptr;
 javascriptCallback<int> *setAllMoneyMadeCallback = nullptr;
 javascriptCallback<int> *addMoneyCallback = nullptr;
-javascriptVoidCallback *uiKeycombStartCallback = nullptr;
-javascriptVoidCallback *uiKeycombStopCallback = nullptr;
-javascriptVoidCallback *exceptionCallback = nullptr;
+javascriptCallback<void> *uiKeycombStartCallback = nullptr;
+javascriptCallback<void> *uiKeycombStopCallback = nullptr;
+javascriptCallback<void> *exceptionCallback = nullptr;
 javascriptCallback<std::string> *logCallback = nullptr;
 
 /**
@@ -716,7 +716,7 @@ void set_starting(const Napi::CallbackInfo &info) {
  * Load winnings_all from binary file winnings.dat
  */
 Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
-    return VoidPromise::create(info.Env(), [] {
+    return Promise<void>::create(info.Env(), [] {
         StaticLogger::debug("Loading winnings from file");
 
         if (!utils::fileExists("winnings.dat")) {
@@ -1012,16 +1012,6 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         std::thread keyCombThread(listenForKeycomb);
         keyCombThread.detach();
 
-        if (webServer) {
-            if (startWebUi()) {
-                StaticLogger::debug("Web ui started");
-            } else {
-                StaticLogger::debug("Web ui could not be started");
-            }
-        } else {
-            StaticLogger::debug("Web ui was disabled per command-line argument, no starting the web server");
-        }
-
         if (useController) {
             StaticLogger::debug("Trying to create a new controller object");
             try {
@@ -1041,19 +1031,20 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
     });
 }
 
-void start(const Napi::CallbackInfo &info) {
-    runLoops = true;
+Napi::Promise start(const Napi::CallbackInfo &info) {
+    return Promise<void>::create(info.Env(), [] {
+        runLoops = true;
 
-    while (runLoops) {
-        mainLoop();
-        for (int i = 0; i < 100; i++) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            if (running) {
-                break;
+        while (runLoops) {
+            mainLoop();
+            for (int i = 0; i < 100; i++) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                if (running) {
+                    break;
+                }
             }
         }
-
-    }
+    });
 }
 
 void node_quit() {
@@ -1107,7 +1098,7 @@ Napi::Promise setSetAllMoneyMadeCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setUiKeycombStartCallback(const Napi::CallbackInfo &info) {
     if (uiKeycombStartCallback) throw Napi::Error::New(info.Env(), "uiKeycombStartCallback is already defined");
     TRY
-        uiKeycombStartCallback = new javascriptVoidCallback(info);
+        uiKeycombStartCallback = new javascriptCallback<void>(info);
         ui_keycomb_start = [] {
             uiKeycombStartCallback->asyncCall();
         };
@@ -1119,7 +1110,7 @@ Napi::Promise setUiKeycombStartCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
     if (uiKeycombStopCallback) throw Napi::Error::New(info.Env(), "uiKeycombStopCallback is already defined");
     TRY
-        uiKeycombStopCallback = new javascriptVoidCallback(info);
+        uiKeycombStopCallback = new javascriptCallback<void>(info);
         ui_keycomb_stop = [] {
             uiKeycombStopCallback->asyncCall();
         };
@@ -1130,7 +1121,7 @@ Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
 
 void setQuitCallback(const Napi::CallbackInfo &info) {
     TRY
-        auto q = new javascriptVoidCallback(info);
+        auto q = new javascriptCallback<void>(info);
         quit = [q] {
             kill(false);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -1142,7 +1133,7 @@ void setQuitCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setExceptionCallback(const Napi::CallbackInfo &info) {
     if (exceptionCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
     TRY
-        exceptionCallback = new javascriptVoidCallback(info);
+        exceptionCallback = new javascriptCallback<void>(info);
         exception = [] {
             exceptionCallback->asyncCall();
         };
@@ -1238,6 +1229,24 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
     });
 }
 
+Napi::Promise startWebServer(const Napi::CallbackInfo &info) {
+    return Promise<bool>::create(info.Env(), [] {
+        if (webServer) {
+            StaticLogger::debug("Trying to start web ui");
+            if (startWebUi()) {
+                StaticLogger::debug("Web ui started");
+                return true;
+            } else {
+                StaticLogger::debug("Web ui could not be started");
+                return false;
+            }
+        } else {
+            StaticLogger::debug("Web ui was disabled, not starting the web server");
+            return false;
+        }
+    });
+}
+
 Napi::Boolean node_getWebServer(const Napi::CallbackInfo &info) {
     return Napi::Boolean::New(info.Env(), webServer);
 }
@@ -1321,7 +1330,7 @@ Napi::Number getClicks(const Napi::CallbackInfo &info) {
 }
 
 Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
-    return VoidPromise::create(info.Env(), [] {
+    return Promise<void>::create(info.Env(), [] {
         settings::save(logger::logToFile(), webServer, customBettingPos, time_sleep, clicks, useController, pArr);
     });
 }
@@ -1440,6 +1449,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 
     export(setDebugFull);
     export(setWebServer);
+    export(startWebServer);
     export(node_getWebServer);
     export(webServerRunning);
     export(setCustomBettingPos);
