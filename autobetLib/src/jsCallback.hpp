@@ -101,9 +101,10 @@ private:
     Napi::ThreadSafeFunction ts_fn;
 };
 
-class javascriptVoidCallback {
+template<>
+class javascriptCallback<void> {
 public:
-    explicit inline javascriptVoidCallback(const Napi::CallbackInfo &info) : deferred(
+    explicit inline javascriptCallback(const Napi::CallbackInfo &info) : deferred(
             Napi::Promise::Deferred::New(info.Env())), numCalls(0), run(true) {
         CHECK_ARGS(napi_tools::type::FUNCTION);
         Napi::Env env = info.Env();
@@ -129,7 +130,7 @@ public:
     }
 
 private:
-    static void threadEntry(javascriptVoidCallback *jsCallback) {
+    static void threadEntry(javascriptCallback<void> *jsCallback) {
         auto callback = [jsCallback](Napi::Env env, Napi::Function jsFunc, void *data) {
             jsFunc.Call({});
         };
@@ -151,14 +152,14 @@ private:
         jsCallback->ts_fn.Release();
     }
 
-    static void FinalizerCallback(Napi::Env env, void *, javascriptVoidCallback *jsCallback) {
+    static void FinalizerCallback(Napi::Env env, void *, javascriptCallback<void> *jsCallback) {
         jsCallback->nativeThread.join();
 
         jsCallback->deferred.Resolve(env.Null());
         delete jsCallback;
     }
 
-    inline ~javascriptVoidCallback() = default;
+    inline ~javascriptCallback() = default;
 
     bool run;
     int numCalls;
@@ -176,22 +177,7 @@ private:
  * Source: https://github.com/nodejs/node-addon-examples/issues/85#issuecomment-583887294
  * Also exists here: https://github.com/nodejs/node-addon-examples/blob/master/async_pi_estimate/node-addon-api/async.cc
  */
-class VoidPromise : public Napi::AsyncWorker {
-public:
-    /**
-     * Create a javascript promise
-     *
-     * @param env the environment of the promise
-     * @param fn the function to call. Must return T.
-     * @return a Napi::Promise
-     */
-    static Napi::Promise create(const Napi::Env &env, std::function<void()> fn) {
-        auto *promise = new VoidPromise(env, std::move(fn));
-        promise->Queue();
-
-        return promise->GetPromise();
-    }
-
+class AsyncWorker : public Napi::AsyncWorker {
 protected:
     /**
      * Construct a Promise
@@ -199,21 +185,23 @@ protected:
      * @param env the environment to work in
      * @param _fn the function to call
      */
-    inline VoidPromise(const Napi::Env &env, std::function<void()> _fn) : Napi::AsyncWorker(env),
-                                                                   deferred(Napi::Promise::Deferred::New(env)),
-                                                                   fn(std::move(_fn)) {}
+    inline explicit AsyncWorker(const Napi::Env &env) : Napi::AsyncWorker(env),
+                                                        deferred(Napi::Promise::Deferred::New(env)) {}
 
     /**
      * A default destructor
      */
-    inline ~VoidPromise() override = default;
+    inline ~AsyncWorker() override = default;
+
+    virtual void Run() = 0;
 
     /**
      * The execution thread
      */
     inline void Execute() override {
         try {
-            fn();
+            Run();
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         } catch (std::exception &e) {
             Napi::AsyncWorker::SetError(e.what());
         } catch (...) {
@@ -222,9 +210,9 @@ protected:
     }
 
     /**
-     * On ok
+     * Default on ok
      */
-    inline void OnOK() override {
+    inline virtual void OnOK() override {
         deferred.Resolve(Env().Undefined());
     }
 
@@ -246,23 +234,16 @@ protected:
         return deferred.Promise();
     }
 
-private:
-    std::function<void()> fn;
     Napi::Promise::Deferred deferred;
 };
 
 /**
- * A class for creating js promises. This class must exist since the original n-api is so bad and cannot provide
- * such a simple behaviour by default. Also, the docs on Promises are worth shit, just as a side note.
- * You will need to look at the examples to find this, why not?
- *
- * Source: https://github.com/nodejs/node-addon-examples/issues/85#issuecomment-583887294
- * Also exists here: https://github.com/nodejs/node-addon-examples/blob/master/async_pi_estimate/node-addon-api/async.cc
+ * A class for creating Promises with return types
  *
  * @tparam T the return type of the operation
  */
 template<typename T>
-class Promise : public Napi::AsyncWorker {
+class Promise : public AsyncWorker {
 public:
     /**
      * Create a javascript promise
@@ -271,8 +252,8 @@ public:
      * @param fn the function to call. Must return T.
      * @return a Napi::Promise
      */
-    static Napi::Promise create(const Napi::Env &env, std::function<T()> fn) {
-        auto *promise = new Promise<T>(env, std::move(fn));
+    static Napi::Promise create(const Napi::Env &env, const std::function<T()> &fn) {
+        auto *promise = new Promise<T>(env, fn);
         promise->Queue();
 
         return promise->GetPromise();
@@ -285,9 +266,7 @@ protected:
      * @param env the environment to work in
      * @param _fn the function to call
      */
-    inline Promise(const Napi::Env &env, std::function<T()> _fn) : Napi::AsyncWorker(env),
-                                                                   deferred(Napi::Promise::Deferred::New(env)),
-                                                                   fn(std::move(_fn)) {}
+    inline Promise(const Napi::Env &env, std::function<T()> _fn) : AsyncWorker(env), fn(std::move(_fn)) {}
 
     /**
      * A default destructor
@@ -297,14 +276,8 @@ protected:
     /**
      * The execution thread
      */
-    inline void Execute() override {
-        try {
-            val = fn();
-        } catch (std::exception &e) {
-            Napi::AsyncWorker::SetError(e.what());
-        } catch (...) {
-            Napi::AsyncWorker::SetError("An unknown error occurred");
-        }
+    inline void Run() override {
+        val = fn();
     }
 
     /**
@@ -312,30 +285,53 @@ protected:
      */
     inline void OnOK() override {
         deferred.Resolve(napi_type<T>::create(Env(), val));
-    }
-
-    /**
-     * On error
-     *
-     * @param error the error to throw
-     */
-    inline void OnError(const Napi::Error &error) override {
-        deferred.Reject(error.Value());
-    }
-
-    /**
-     * Get the promise
-     *
-     * @return a Napi::Promise
-     */
-    inline Napi::Promise GetPromise() {
-        return deferred.Promise();
-    }
+    };
 
 private:
     std::function<T()> fn;
     T val;
-    Napi::Promise::Deferred deferred;
+};
+
+/**
+ * A class for creating Promises with no return type
+ */
+template<>
+class Promise<void> : public AsyncWorker {
+public:
+    /**
+     * Create a javascript promise
+     *
+     * @param env the environment of the promise
+     * @param fn the function to call. Must return T.
+     * @return a Napi::Promise
+     */
+    static Napi::Promise create(const Napi::Env &env, const std::function<void()> &fn) {
+        auto *promise = new Promise(env, fn);
+        promise->Queue();
+
+        return promise->GetPromise();
+    }
+
+protected:
+    /**
+     * Construct a Promise
+     *
+     * @param env the environment to work in
+     * @param _fn the function to call
+     */
+    inline Promise(const Napi::Env &env, std::function<void()> _fn) : AsyncWorker(env), fn(std::move(_fn)) {}
+
+    /**
+     * A default destructor
+     */
+    inline ~Promise() override = default;
+
+    void Run() override {
+        fn();
+    }
+
+private:
+    std::function<void()> fn;
 };
 
 

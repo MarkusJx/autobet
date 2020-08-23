@@ -2,11 +2,11 @@
 <html lang="en">
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self'; script-src-elem https://unpkg.com 'self'; style-src 'unsafe-inline';
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src-elem https://unpkg.com 'self'; style-src 'unsafe-inline';
            style-src-elem https://unpkg.com https://fonts.googleapis.com 'self'; font-src https://fonts.gstatic.com;
             img-src 'self' data:">
 
@@ -21,46 +21,51 @@
 </head>
 
 <body>
-<div class="" id="frosted-glass">
-    <div id="Container">
-        <button class="mdc-button mdc-button--raised" id="startstop" nonce="r@nd0m">Start</button>
+    <div id="background-image"></div>
 
-        <div class="subcontainer right" id="status">
+    <div id="Container">
+        <div id="namecontainer" class="subcontainer">
+            <p id="autobet">Welcome to Autobet.</p>
+            <p id="name-desc">A GTA Online Horseracing betting bot.</p>
+            <p id="copyright">© MarkusJx 2020. Licensed under the MIT License.</p>
+        </div>
+
+        <div class="subcontainer" id="status">
             <div class="textalign">
                 <h1 class="text subheading">Status</h1>
-                <h1 class="text status_stopped maintext" id="statusinfo">Stopped</h1>
+                <h1 class="text status_init maintext" id="statusinfo">Initializing</h1>
             </div>
         </div>
 
-        <div class="subcontainer left" id="timecontainer">
+        <div class="subcontainer" id="timecontainer">
             <div class="textalign">
                 <h1 class="text subheading">Time running</h1>
                 <h1 class="text maintext maintext-maincolor" id="time">00:00:00</h1>
             </div>
         </div>
 
-        <div class="subcontainer right" id="moneythishourcontainer">
+        <div class="subcontainer" id="moneythishourcontainer">
             <div class="textalign">
                 <h1 class="text subheading">Money earned per hour</h1>
                 <h1 class="text maintext maintext-maincolor" id="moneythishour">0 $/hr</h1>
             </div>
         </div>
 
-        <div class="subcontainer left" id="moneyallcontainer">
+        <div class="subcontainer" id="moneyallcontainer">
             <div class="textalign">
                 <h1 class="text subheading">Money earned all time</h1>
                 <h1 class="text maintext maintext-maincolor" id="moneyall">0 $</h1>
             </div>
         </div>
 
-        <div class="subcontainer right" id="raceswoncontainer">
+        <div class="subcontainer" id="raceswoncontainer">
             <div class="textalign">
                 <h1 class="text subheading">Races won</h1>
                 <h1 class="text maintext maintext-maincolor" id="raceswon">0</h1>
             </div>
         </div>
 
-        <div class="subcontainer left" id="winprobabilitycontainer">
+        <div class="subcontainer" id="winprobabilitycontainer">
             <div class="textalign">
                 <h1 class="text subheading">Probability of winning</h1>
                 <h1 class="text maintext maintext-maincolor" id="winprobability">0.0%</h1>
@@ -68,87 +73,229 @@
         </div>
 
         <div class="subcontainer" id="webservercontainer">
-            <div class="textalign-big">
+            <div class="textalign">
                 <h1 class="text subheading">Webserver</h1>
                 <h1 class="text maintext-maincolor" id="webinfotext">Webserver running on:</h1>
                 <button class="mdc-button mdc-ripple-upgraded" id="weblink">http://localhost:8027</button>
             </div>
 
-            <button class="mdc-button" id="showqrbutton">Show QR-Code</button>
-        </div>
-    </div>
-</div>
-
-<div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog"
-     id="qrdialog" role="alertdialog">
-    <div class="mdc-dialog__container">
-        <div class="mdc-dialog__surface">
-            <h2 class="mdc-dialog__title" id="my-dialog-title">
-                Scan this QR-Code to access the Web interface
-            </h2>
-            <div class="mdc-dialog__content" id="my-dialog-content">
-                <div id="qrcode"></div>
+            <div class="textalign">
+                <h1 class="text maintext-maincolor" id="enable-disable">Enable/Disable</h1>
+                <div class="mdc-switch" id="enable-webserver-switch">
+                    <div class="mdc-switch__track"></div>
+                    <div class="mdc-switch__thumb-underlay">
+                        <div class="mdc-switch__thumb"></div>
+                        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                    </div>
+                </div>
+                <button class="mdc-button" id="showqrbutton">Show QR-Code</button>
             </div>
-            <footer class="mdc-dialog__actions">
-                <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="qrdonebutton"
-                        type="button">
-                    <span class="mdc-button__label">Done</span>
-                </button>
-            </footer>
         </div>
-    </div>
-    <div class="mdc-dialog__scrim"></div>
-</div>
 
-<div class="invisible" id="messagecontainer">
-    <div class="mdc-linear-progress" id="progressbar" role="progressbar">
-        <div class="mdc-linear-progress__buffering-dots"></div>
-        <div class="mdc-linear-progress__buffer" id="progressbuffer"></div>
-        <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
-            <span class="mdc-linear-progress__bar-inner"></span>
-        </div>
-        <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
-            <span class="mdc-linear-progress__bar-inner"></span>
-        </div>
-    </div>
-
-    <h1 class="maintext-maincolor text" id="stoptext">Please wait while the program stops...</h1>
-    <h1 class="text" id="quitinfo">To quit the program press CTRL+SHIFT+F9</h1>
-</div>
-
-<div aria-describedby="error-dialog-content" aria-labelledby="error-dialog" aria-modal="true" class="mdc-dialog"
-     id="error-dialog-container" role="alertdialog">
-    <div class="mdc-dialog__container">
-        <div class="mdc-dialog__surface">
-            <h2 class="mdc-dialog__title" id="error-dialog">Error</h2>
-            <div class="mdc-dialog__content" id="error-dialog-content">
-                An Error occurred.
-                The Program will now exit.
+        <div class="subcontainer">
+            <div class="textalign">
+                <h1 class="text subheading">Game running</h1>
+                <h1 class="text status_stopped maintext" id="game-running">No</h1>
             </div>
-            <footer class="mdc-dialog__actions">
-                <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no" id="errordialogbutton"
-                        type="button">
-                    <span class="mdc-button__label">ok</span>
-                </button>
-            </footer>
+        </div>
+
+        <div class="subcontainer" id="controlscontainer">
+            <div class="textalign">
+                <h1 class="text subheading">Controls</h1>
+                <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
+            </div>
+        </div>
+
+        <div class="subcontainer" id="settingsdivider">
+            <h1 class="text subheading" id="settingsdivider-text">Settings</h1>
+        </div>
+
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Custom-betting-pos</h1>
+                    <i class="material-icons infoicon" id="custom-betting-pos-info">info</i>
+                </div>
+
+                <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="custom-betting-pos-position">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input class="mdc-text-field__input" type="number" min="-1" aria-labelledby="custom-betting-pos-label-id">
+                    <span class="mdc-floating-label" id="custom-betting-pos-label-id">Positon</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Betting-pos-template</h1>
+                    <i class="material-icons infoicon" id="betting-pos-template-info">info</i>
+                </div>
+                <button class="mdc-button" id="set-betting-pos-template"><span class="mdc-button__ripple"></span>Set</button>
+            </div>
+        </div>
+
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Time-sleep</h1>
+                    <i class="material-icons infoicon" id="time-sleep-info">info</i>
+                </div>
+
+                <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="time-sleep-field">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input class="mdc-text-field__input" type="number" min="0" aria-labelledby="time-sleep-label-id">
+                    <span class="mdc-floating-label" id="time-sleep-label-id">Time</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Clicks</h1>
+                    <i class="material-icons infoicon" id="clicks-info">info</i>
+                </div>
+
+                <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="clicks-field">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input class="mdc-text-field__input" type="number" min="0" aria-labelledby="clicks-label-id">
+                    <span class="mdc-floating-label" id="clicks-label-id">Clicks</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Controller simulation</h1>
+                    <i class="material-icons infoicon" id="controller-info">info</i>
+                </div>
+
+                <div class="mdc-switch" id="use-controller-switch">
+                    <div class="mdc-switch__track"></div>
+                    <div class="mdc-switch__thumb-underlay">
+                        <div class="mdc-switch__thumb"></div>
+                        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">ScpVBus installed</h1>
+                    <i class="material-icons infoicon" id="scpvbus-info">info</i>
+                </div>
+
+                <h1 class="text status_stopped maintext" id="scpvbus-installed">No</h1>
+            </div>
         </div>
     </div>
-    <div class="mdc-dialog__scrim"></div>
-</div>
 
-<div class="mdc-snackbar noselect" id="gta-not-running-message">
-    <div class="mdc-snackbar__surface">
-        <div aria-live="polite" class="mdc-snackbar__label" role="status">
-            GTA V is not running on this machine. Please start GTA V and retry
+    <div class="mdc-dialog" id="description-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" aria-labelledby="description-dialog-title" aria-describedby="description-dialog-content">
+                <h2 class="mdc-dialog__title" id="description-dialog-title"></h2>
+                <div class="mdc-dialog__content" id="description-dialog-content"></div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="ok">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Ok</span>
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="mdc-snackbar__actions">
-            <button class="mdc-button mdc-snackbar__action" type="button">Ok</button>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog" id="qrdialog" role="alertdialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <h2 class="mdc-dialog__title" id="my-dialog-title">
+                    Scan this QR-Code to access the Web interface
+                </h2>
+                <div class="mdc-dialog__content" id="my-dialog-content">
+                    <div id="qrcode"></div>
+                </div>
+                <footer class="mdc-dialog__actions">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="qrdonebutton" type="button">
+                        <span class="mdc-button__label">Done</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <div class="invisible" id="messagecontainer">
+        <div class="mdc-linear-progress" id="progressbar" role="progressbar">
+            <div class="mdc-linear-progress__buffering-dots"></div>
+            <div class="mdc-linear-progress__buffer" id="progressbuffer"></div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
+                <span class="mdc-linear-progress__bar-inner"></span>
+            </div>
+        </div>
+
+        <h1 class="maintext-maincolor text" id="stoptext">Please wait while the program stops...</h1>
+        <h1 class="text" id="quitinfo">To quit the program press CTRL+SHIFT+F9</h1>
+    </div>
+
+    <div aria-describedby="error-dialog-content" aria-labelledby="error-dialog" aria-modal="true" class="mdc-dialog" id="error-dialog-container" role="alertdialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface">
+                <h2 class="mdc-dialog__title" id="error-dialog">Error</h2>
+                <div class="mdc-dialog__content" id="error-dialog-content">
+                    An Error occurred. The Program will now exit.
+                </div>
+                <footer class="mdc-dialog__actions">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no" id="errordialogbutton" type="button">
+                        <span class="mdc-button__label">ok</span>
+                    </button>
+                </footer>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <div class="mdc-snackbar" id="settings-saved-message">
+        <div class="mdc-snackbar__surface">
+            <div class="mdc-snackbar__label" role="status" aria-live="polite">
+                Settings saved.
+            </div>
         </div>
     </div>
-</div>
 
-<script src="main.js" type="text/javascript"></script>
-<script src="startstop.js" type="text/javascript"></script>
+    <div class="mdc-snackbar" id="controller-error-message">
+        <div class="mdc-snackbar__surface">
+            <div class="mdc-snackbar__label" role="status" aria-live="polite">
+                Controller support was enabled, but the virtual controller could not be connected.
+            </div>
+        </div>
+    </div>
+
+    <div class="mdc-snackbar noselect" id="gta-not-running-message">
+        <div class="mdc-snackbar__surface">
+            <div aria-live="polite" class="mdc-snackbar__label" role="status">
+                GTA V is not running on this machine. Please start GTA V and retry
+            </div>
+            <div class="mdc-snackbar__actions">
+                <button class="mdc-button mdc-snackbar__action" type="button">Ok</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js" type="text/javascript"></script>
+    <script src="startstop.js" type="text/javascript"></script>
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap" rel="stylesheet">
 </body>
 
 </html>

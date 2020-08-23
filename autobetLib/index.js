@@ -11,9 +11,19 @@ module.exports = {
     },
     /**
      * Start the main loop
+     *
+     * @return {Promise<void>}
      */
-    start: function () {
-        autobetLib_native.lib_start();
+    start: async function () {
+        await autobetLib_native.lib_start();
+    },
+    /**
+     * Start the web ui
+     *
+     * @return {Promise<Boolean>} true, if the web ui could be started
+     */
+    startWebServer: async function () {
+        return await autobetLib_native.lib_startWebServer();
     },
     /**
      * Check if GTA V is running
