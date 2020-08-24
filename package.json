@@ -55,6 +55,7 @@
     ]
   },
   "dependencies": {
+    "custom-electron-titlebar": "^3.2.4",
     "electron": "^9.2.1"
   }
 }

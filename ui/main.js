@@ -192,11 +192,14 @@ enable_webserver.listen('change', () => {
 });
 
 window.onbeforeunload = function() {
-    autobetLib.shutdown();
+    autobetLib.shutdown().then(() => {
+        //electron.quit();
+    });
 }
 
 async function main() {
     startstop.disabled = true;
+    titlebar.create();
 
     setIPs();
     enable_webserver.disabled = true;
@@ -218,6 +221,7 @@ async function main() {
     clicks_field.value = autobetLib.settings.getClicks();
     use_controller.checked = autobetLib.controller.getUseController();
     setScpVBusInstalled(autobetLib.controller.scpVBusInstalled());
+    log_to_file_switch.checked = autobetLib.logging.isLoggingToFile();
 
     enable_webserver.checked = autobetLib.settings.webServerActivated();
     if (autobetLib.settings.webServerActivated()) {
@@ -246,11 +250,19 @@ const time_sleep_field = new mdc.textField.MDCTextField(document.getElementById(
 const clicks_field = new mdc.textField.MDCTextField(document.getElementById("clicks-field"));
 const use_controller = new mdc.switchControl.MDCSwitch(document.getElementById("use-controller-switch"));
 const controller_error_msg = new mdc.snackbar.MDCSnackbar(document.getElementById("controller-error-message"));
+const full_debug = new mdc.switchControl.MDCSwitch(document.getElementById("full-debug-switch"));
+const scpvbus_installing_msg = new mdc.snackbar.MDCSnackbar(document.getElementById("scpvbus-installing-message"));
+const log_to_file_switch = new mdc.switchControl.MDCSwitch(document.getElementById("log-to-file-switch"));
+const log_to_console_switch = new mdc.switchControl.MDCSwitch(document.getElementById("log-to-console-switch"));
+const log_textfield = new mdc.textField.MDCTextField(document.getElementById("log-textfield"));
 
 const set_betting_pos_template = document.getElementById("set-betting-pos-template");
 const scpvbus_installed = document.getElementById("scpvbus-installed");
+const install_scpvbus = document.getElementById("install-scpvbus");
+const log_textfield_resizer = document.getElementById("log-textfield-resizer");
 
 mdc.ripple.MDCRipple.attachTo(set_betting_pos_template);
+mdc.ripple.MDCRipple.attachTo(install_scpvbus);
 
 /**
  * Set scpVBus installed
@@ -261,9 +273,11 @@ function setScpVBusInstalled(val) {
     if (val) {
         scpvbus_installed.innerHTML = "Yes";
         scpvbus_installed.className = "text status_running maintext";
+        install_scpvbus.innerText = "UNINSTALL";
     } else {
         scpvbus_installed.innerHTML = "No";
         scpvbus_installed.className = "text status_stopped maintext";
+        install_scpvbus.innerText = "INSTALL";
     }
 }
 
@@ -293,6 +307,10 @@ custom_betting_pos.input_.addEventListener('keyup', (event) => {
             });
         }
     }
+});
+
+set_betting_pos_template.addEventListener('click', () => {
+    // TODO: add this
 });
 
 time_sleep_field.input_.addEventListener('keyup', (event) => {
@@ -338,6 +356,97 @@ use_controller.listen('change', () => {
     });
 });
 
+function showScpVBusMessage(msg) {
+    scpvbus_installing_msg.close();
+    scpvbus_installing_msg.labelText = msg;
+    scpvbus_installing_msg.open();
+}
+
+install_scpvbus.addEventListener('click', () => {
+    install_scpvbus.disabled = true;
+    if (autobetLib.controller.scpVBusInstalled()) {
+        showScpVBusMessage("Uninstalling ScpVBus");
+        autobetLib.controller.uninstallScpVBus().then((res) => {
+            if (res) {
+                showScpVBusMessage("ScpVBus removed.");
+            } else {
+                showScpVBusMessage("ScpVBus removal failed.");
+            }
+
+            setScpVBusInstalled(!res);
+            install_scpvbus.disabled = false;
+        });
+    } else {
+        showScpVBusMessage("Installing ScpVBus");
+        autobetLib.controller.installScpVBus().then((res) => {
+            if (res) {
+                showScpVBusMessage("ScpVBus installed.");
+            } else {
+                showScpVBusMessage("ScpVBus installation failed.");
+            }
+
+            setScpVBusInstalled(res);
+            install_scpvbus.disabled = false;
+        });
+    }
+});
+
+full_debug.listen('change', () => {
+    full_debug.disabled = true;
+    if (full_debug.checked) {
+        log_to_file_switch.checked = true;
+        log_to_file_switch.disabled = true;
+        autobetLib.logging.setLogToFile(true);
+        autobetLib.settings.saveSettings().then(() => {
+            settings_saved_msg.close();
+            settings_saved_msg.open();
+        });
+    } else {
+        log_to_file_switch.disabled = false;
+    }
+
+    autobetLib.settings.setDebugFull(full_debug.checked).then((res) => {
+        if (!res) {
+            full_debug.checked = false;
+            console.warn("setDebugFull returned false");
+        }
+        full_debug.disabled = false;
+    });
+});
+
+log_to_file_switch.listen('change', () => {
+    log_to_file_switch.disabled = true;
+    autobetLib.logging.setLogToFile(log_to_file_switch.checked);
+    autobetLib.settings.saveSettings().then(() => {
+        log_to_file_switch.disabled = false;
+        settings_saved_msg.close();
+        settings_saved_msg.open();
+    });
+});
+
+log_to_console_switch.listen('change', () => {
+    autobetLib.logging.setLogToConsole(log_to_console_switch.checked);
+
+    if (!log_to_console_switch.checked) {
+        log_textfield.value = "";
+        log_textfield_resizer.style.height = "56px";
+    } else if (log_textfield_resizer.style.height === "56px") {
+        log_textfield_resizer.style.height = "178px";
+    }
+});
+
+autobetLib.logging.setLogCallback((msg) => {
+    if ((log_textfield.input_.scrollTop + log_textfield.input_.clientHeight) >= (log_textfield.input_.scrollHeight - 20)) {
+        log_textfield.value += msg;
+        log_textfield.input_.scroll({
+            top: log_textfield.input_.scrollHeight,
+            left: 0
+        });
+    } else {
+        log_textfield.value += msg;
+    }
+});
+
 document.getElementById("custom-betting-pos-info").addEventListener('click', () => {
     showDescription("Custom-betting-pos", "Set a custom position for the 'increase bet' button. Use this setting only, when the program is only placing $100," +
         " when a bet should be placed. Press enter to save, use the value '-1' to use the default values.");
@@ -365,4 +474,19 @@ document.getElementById("controller-info").addEventListener('click', () => {
 document.getElementById("scpvbus-info").addEventListener('click', () => {
     showDescription("ScpVBus installed", "This field shows if ScpVBus is installed. ScpVBus must be installed, when a virtual controller should be used to click " +
         "the 'increase bet' button. Use the 'Install ScpVBus' button to download and install ScpVBus.");
+});
+
+document.getElementById("install-scpvbus-info").addEventListener('click', () => {
+    showDescription("Install ScpVBus", "Click on 'install' to install ScpVBus. ScpVBus is required to use virtual controllers. NOTE: You will need administrator " +
+        "privileges to install ScpVBus.");
+});
+
+document.getElementById("full-debug-info").addEventListener('click', () => {
+    showDescription("Full Debug", "This option will create a zip file called 'autobet_debug.zip' on you Desktop. This File will contain a log and screenshots for " +
+        "debugging purposes. IMPORTANT: If you submit this file anywhere, make sure to delete any personal information from the zip file.");
+});
+
+document.getElementById("debug-info").addEventListener('click', () => {
+    showDescription("Debugging and logging", "Log to File: Set if the program should log to a file. This option will automatically activated, when the full debug " +
+        "option is activated. Log to Console: This option will display logging information in the 'View log' text field.");
 });

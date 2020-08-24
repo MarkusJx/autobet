@@ -140,8 +140,10 @@ void kill(bool _exit = true) {
     StaticLogger::destroy();
 
     if (debug_full) {
-        StaticLogger::create();
-        debug::finish();
+        StaticLogger::create(LoggerMode::MODE_FILE, LogLevel::debug, "autobet_debug.log", "wt");
+        if (!debug::finish()) {
+            StaticLogger::error("debug::finish returned false");
+        }
         StaticLogger::destroy();
     }
 
@@ -1055,8 +1057,10 @@ void node_quit() {
     if (logCallback) logCallback->asyncCall(val);
 }
 
-void stop(const Napi::CallbackInfo &info) {
-    kill(false);
+Napi::Promise stop(const Napi::CallbackInfo &info) {
+    return Promise<void>::create(info.Env(), [] {
+        kill(false);
+    });
 }
 
 Napi::Promise setSet_gta_running(const Napi::CallbackInfo &info) {
@@ -1188,10 +1192,17 @@ Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
             return true;
         } else {
             if (debug_full) {
-                debug::finish();
+                StaticLogger::debug("Destroying logger in order to write log to debug zip");
+                StaticLogger::destroy();
+                StaticLogger::create(LoggerMode::MODE_FILE, LogLevel::debug, "autobet_debug.log", "wt");
+                bool res = debug::finish();
+                StaticLogger::destroy();
+                StaticLogger::create();
                 debug_full = false;
+                return res;
+            } else {
+                return true;
             }
-            return true;
         }
     });
 }

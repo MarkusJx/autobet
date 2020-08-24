@@ -218,3 +218,4 @@ include/
 /web/favicon.ico
 /CMakeSettings.json
 /build/
+node_modules

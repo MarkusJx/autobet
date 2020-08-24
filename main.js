@@ -8,9 +8,9 @@ function createWindow() {
         height: 830,
         minHeight: 830,
         minWidth: 530,
-        frame: true,
+        frame: false,
         resizable: true,
-        icon: "icon_dark.png",
+        icon: "icon.png",
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -22,7 +22,6 @@ function createWindow() {
         }
     });
 
-    mainWindow.webContents.openDevTools()
     //mainWindow.removeMenu();
 
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon

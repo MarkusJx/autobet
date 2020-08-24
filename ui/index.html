@@ -7,15 +7,15 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src-elem https://unpkg.com 'self'; style-src 'unsafe-inline';
-           style-src-elem https://unpkg.com https://fonts.googleapis.com 'self'; font-src https://fonts.gstatic.com;
+           style-src-elem https://unpkg.com https://fonts.googleapis.com 'unsafe-inline' 'self'; font-src https://fonts.gstatic.com;
             img-src 'self' data:">
 
     <meta charset="UTF-8">
-    <title>GTA Online Autobet</title>
+    <title>Autobet</title>
     <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
     <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+    <link href="style.min.css" rel="stylesheet">
 
     <script src="qrcode.min.js" type="text/javascript"></script>
 </head>
@@ -119,7 +119,8 @@
 
                 <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="custom-betting-pos-position">
                     <span class="mdc-text-field__ripple"></span>
-                    <input class="mdc-text-field__input" type="number" min="-1" aria-labelledby="custom-betting-pos-label-id">
+                    <input class="mdc-text-field__input" type="number" min="-1"
+                        aria-labelledby="custom-betting-pos-label-id">
                     <span class="mdc-floating-label" id="custom-betting-pos-label-id">Positon</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
@@ -132,7 +133,8 @@
                     <h1 class="text subheading">Betting-pos-template</h1>
                     <i class="material-icons infoicon" id="betting-pos-template-info">info</i>
                 </div>
-                <button class="mdc-button" id="set-betting-pos-template"><span class="mdc-button__ripple"></span>Set</button>
+                <button class="mdc-button" id="set-betting-pos-template"><span
+                        class="mdc-button__ripple"></span>Set</button>
             </div>
         </div>
 
@@ -195,6 +197,78 @@
                 <h1 class="text status_stopped maintext" id="scpvbus-installed">No</h1>
             </div>
         </div>
+
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Install ScpVBus</h1>
+                    <i class="material-icons infoicon" id="install-scpvbus-info">info</i>
+                </div>
+                <button class="mdc-button" id="install-scpvbus"><span class="mdc-button__ripple"></span>Install</button>
+            </div>
+        </div>
+
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Full Debug</h1>
+                    <i class="material-icons infoicon" id="full-debug-info">info</i>
+                </div>
+
+                <div class="mdc-switch" id="full-debug-switch">
+                    <div class="mdc-switch__track"></div>
+                    <div class="mdc-switch__thumb-underlay">
+                        <div class="mdc-switch__thumb"></div>
+                        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="subcontainer setting-container" id="debug-container">
+            <div class="infoalign" id="debug-heading-container">
+                <h1 class="text subheading">Debugging and logging</h1>
+                <i class="material-icons infoicon" id="debug-info">info</i>
+            </div>
+
+            <div class="textalign" id="log-switches-container">
+                <div class="infoalign logging">
+                    <p class="text subheading"> Log to File</p>
+                    <div class="mdc-switch" id="log-to-file-switch">
+                        <div class="mdc-switch__track"></div>
+                        <div class="mdc-switch__thumb-underlay">
+                            <div class="mdc-switch__thumb"></div>
+                            <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="infoalign logging">
+                    <p class="text subheading"> Log to Console</p>
+                    <div class="mdc-switch" id="log-to-console-switch">
+                        <div class="mdc-switch__track"></div>
+                        <div class="mdc-switch__thumb-underlay">
+                            <div class="mdc-switch__thumb"></div>
+                            <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <label class="mdc-text-field mdc-text-field--outlined mdc-text-field--textarea mdc-text-field--fullwidth" id="log-textfield">
+                <span class="mdc-text-field__resizer" style="height: 56px;" id="log-textfield-resizer">
+                    <textarea class="mdc-text-field__input" rows="8" cols="40" aria-labelledby="view-log-label-id" id="log-textfield-input" disabled></textarea>
+                </span>
+                <span class="mdc-notched-outline">
+                    <span class="mdc-notched-outline__leading log-textfield-outline"></span>
+                    <span class="mdc-notched-outline__notch log-textfield-outline">
+                        <span class="mdc-floating-label log-textfield-label" id="view-log-label-id">View log</span>
+                    </span>
+                    <span class="mdc-notched-outline__trailing log-textfield-outline"></span>
+                </span>
+            </label>
+        </div>
+        <!-- Container end -->
     </div>
 
     <div class="mdc-dialog" id="description-dialog">
@@ -265,6 +339,16 @@
         <div class="mdc-dialog__scrim"></div>
     </div>
 
+    <!-- Snackbars -->
+
+    <div class="mdc-snackbar" id="scpvbus-installing-message">
+        <div class="mdc-snackbar__surface">
+            <div class="mdc-snackbar__label" role="status" aria-live="polite">
+                Installing ScpVBus...
+            </div>
+        </div>
+    </div>
+
     <div class="mdc-snackbar" id="settings-saved-message">
         <div class="mdc-snackbar__surface">
             <div class="mdc-snackbar__label" role="status" aria-live="polite">
@@ -292,8 +376,8 @@
         </div>
     </div>
 
-    <script src="main.js" type="text/javascript"></script>
-    <script src="startstop.js" type="text/javascript"></script>
+    <script src="main.min.js" type="text/javascript"></script>
+    <script src="startstop.min.js" type="text/javascript"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap" rel="stylesheet">
 </body>
