@@ -392,8 +392,10 @@ module.exports = {
     },
     /**
      * Start the shutdown hook
+     *
+     * @return {Promise<void>}
      */
-    shutdown: function () {
-        autobetLib_native.lib_stop();
+    shutdown: async function () {
+        await autobetLib_native.lib_stop();
     }
 };

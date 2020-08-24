@@ -10,7 +10,7 @@ namespace debug {
 
     void writeImage(utils::bitmap *bmp);
 
-    void finish();
+    bool finish();
 }
 
 #endif //AUTOBET_DEBUG_HPP

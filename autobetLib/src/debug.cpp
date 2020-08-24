@@ -44,37 +44,42 @@ bool debug::init() {
 #endif
 }
 
-void debug::finish() {
+bool debug::finish() {
 #ifdef AUTOBET_ENABLE_FULL_DEBUG
     if (!zip) {
-        return;
+        return false;
     }
 
-    if (fs::exists("out.log")) {
+    if (fs::exists("autobet.log")) {
         mtx.lock();
-        int err = zip_entry_open(zip, "out.log");
+        int err = zip_entry_open(zip, "autobet.log");
         if (err) {
             StaticLogger::error("Unable to open debug zip file. Error: " + std::to_string(err));
             mtx.unlock();
-            return;
+            return false;
         }
 
-        err = zip_entry_fwrite(zip, "out.log");
+        err = zip_entry_fwrite(zip, "autobet.log");
         if (err) {
             StaticLogger::error("Unable to write debug zip file. Error: " + std::to_string(err));
-            goto exit;
+            zip_close(zip);
+            return false;
         }
 
         err = zip_entry_close(zip);
         if (err) {
             StaticLogger::error("Unable to close debug zip file. Error: " + std::to_string(err));
+            zip_close(zip);
+            return false;
         }
 
-        exit:
         zip_close(zip);
         mtx.unlock();
+
+        return true;
     } else {
         StaticLogger::error("out.log does not exist");
+        return false;
     }
 #else
     DEBUG_UNIMPLEMENTED();

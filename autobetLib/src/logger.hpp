@@ -120,6 +120,7 @@ namespace logger {
 #endif
             strftime(buf.data(), LoggerOptions::time_fmt.sizeInBytes, LoggerOptions::time_fmt.format, &tm);
 
+            buf.resize(buf.size() - 1);
             return buf;
         }
 
