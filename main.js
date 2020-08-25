@@ -30,11 +30,11 @@ function createWindow() {
             nodeIntegration: false,
             webSecurity: true,
             enableRemoteModule: true,
-            devTools: false
+            //devTools: false
         }
     });
 
-    mainWindow.removeMenu();
+    //mainWindow.removeMenu();
 
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');

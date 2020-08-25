@@ -102,13 +102,12 @@ body {
 
 #Container {
     width: 100%;
-    height: 100%;
+    height: max-content;
     margin: 40px 0;
     display: grid;
     grid-template-columns: 100%;
     grid-auto-rows: min-content;
     grid-row-gap: 20px;
-    padding-bottom: 80px;
 }
 
 #statusinfo {
@@ -156,7 +155,7 @@ body {
 }
 
 #startstop {
-    --mdc-theme-primary: #e46e00;
+    --mdc-theme-primary: #00b8ff;
     --mdc-theme-on-primary: #191919;
     font-weight: 500;
     margin: auto
@@ -169,34 +168,6 @@ body {
 
 .maintext-maincolor {
     color: rgb(207, 207, 207)
-}
-
-#messagecontainer {
-    position: fixed;
-    z-index: 2;
-    width: 430px;
-    height: 100px;
-    background: #292929;
-    border-radius: 5px;
-    left: 50%;
-    top: 30%;
-    margin-left: -215px;
-    margin-top: -50px;
-    box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: min-content min-content;
-}
-
-#progressbar {
-    --mdc-theme-primary: #e46e00;
-    grid-row: 1;
-    grid-column: 1;
-    border-radius: 5px 5px 0px 0px;
-}
-
-#progressbuffer {
-    background-color: #4f4f4f;
 }
 
 #stoptext {
@@ -217,27 +188,6 @@ body {
     text-align: left;
     font-weight: normal;
     color: rgb(121, 121, 121)
-}
-
-.frosted-glass-blur {
-    animation: blur 1.0s forwards;
-}
-
-.frosted-glass-unblur {
-    animation: blur 1.0s backwards;
-}
-
-@keyframes blur {
-    from {
-        filter: blur(0px);
-    }
-    to {
-        filter: blur(7px);
-    }
-}
-
-.invisible {
-    visibility: hidden;
 }
 
 #webservercontainer {
@@ -362,22 +312,6 @@ body {
     --mdc-theme-primary: rgb(0, 60, 255);
 }
 
-#set-betting-pos-template {
-    margin: auto;
-}
-
-#use-controller-switch {
-    margin: auto;
-}
-
-#install-scpvbus {
-    margin: auto;
-}
-
-#install-scpvbus:disabled {
-    color: rgb(126 126 126 / 38%);
-}
-
 #full-debug-switch {
     margin: auto;
 }
@@ -471,45 +405,6 @@ body {
     transition: all .5s ease-in-out;
 }
 
-#betting-pos-template-dialog {
-    --mdc-theme-primary: rgb(0, 60, 255);
-    transition: all .5s ease-in-out;
-}
-
-#betting-pos-template-dialog-content {
-    width: 480px;
-    max-height: 60vh;
-}
-
-.betting-pos-template-el-container {
-    display: grid;
-    grid-template-columns: auto auto 64px;
-    grid-template-rows: auto;
-    border-top: .3px #292929 solid;
-}
-
-.remove-button {
-    --mdc-theme-primary: rgb(226, 0, 57);
-    margin: auto;
-}
-
-.betting-pos-template-text-field {
-    height: auto;
-    width: 144px;
-    margin: 12px 20px;
-}
-
-#betting-pos-actions {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    grid-template-rows: 100%;
-}
-
-#betting-pos-add-button {
-    width: min-content;
-    margin: auto auto auto 20px;
-}
-
 @media only screen and (min-width: 860px) {
     #Container {
         grid-template-columns: 50% 50%;
@@ -536,7 +431,7 @@ body {
     }
     #debug-container {
         grid-column: 1 / 3;
-        margin: 0 30px 30px 30px;
+        margin: 0 30px;
         width: calc(100% - 60px);
     }
 }

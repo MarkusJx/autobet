@@ -250,38 +250,6 @@ module.exports = {
             return autobetLib_native.lib_webServerRunning();
         },
         /**
-         * Set a position for the 'increase bet' button
-         *
-         * @param pos {Number} the position
-         */
-        setCustomBettingPos: function (pos) {
-            autobetLib_native.lib_setCustomBettingPos(pos);
-        },
-        /**
-         * Get the current position for the 'increase bet' button
-         *
-         * @return {Number} the position set by the user
-         */
-        getCustomBettingPos: function () {
-            return autobetLib_native.lib_getCustomBettingPos();
-        },
-        /**
-         * Set templates for the 'increase bet' button
-         *
-         * @param template {Array.<{resolution: Number, value: Number}>} the template array
-         */
-        setBettingPosTemplate: function (template) {
-            autobetLib_native.lib_setBettingPosTemplate(template);
-        },
-        /**
-         * Get the templates for the 'increase bet' button
-         *
-         * @return {Array.<{resolution: Number, value: Number}>} the template array
-         */
-        getBettingPosTemplate: function () {
-            return autobetLib_native.lib_getBettingPosTemplate();
-        },
-        /**
          * Set the time to sleep between bets
          *
          * @param timeSleep {Number} the time to sleep
@@ -298,82 +266,12 @@ module.exports = {
             return autobetLib_native.lib_getTimeSleep();
         },
         /**
-         * Set the clicks needed for a max bet
-         *
-         * @param clicks {Number} the number of clicks
-         */
-        setClicks: function (clicks) {
-            autobetLib_native.lib_setClicks(clicks);
-        },
-        /**
-         * Get the clicks needed for a max bet
-         *
-         * @return {Number} the number of clicks
-         */
-        getClicks: function () {
-            return autobetLib_native.lib_getClicks();
-        },
-        /**
          * Save the settings
          *
          * @return {Promise<void>}
          */
         saveSettings: async function () {
             await autobetLib_native.lib_saveSettings();
-        }
-    },
-    /**
-     * Controller simulation namespace
-     */
-    controller: {
-        /**
-         * Set whether to use the controller
-         *
-         * @param useController {Boolean} true, if the program should use it
-         * @return {Promise<Boolean>} true, if the operation was successful
-         */
-        setUseController: async function (useController) {
-            return await autobetLib_native.lib_setUseController(useController);
-        },
-        /**
-         * Check if the program is using the controller
-         *
-         * @return {Boolean} true, if it is using the controller
-         */
-        getUseController: function () {
-            return autobetLib_native.lib_getUseController();
-        },
-        /**
-         * Check if the program could use the controller
-         *
-         * @return {Boolean} true if a virtual controller is plugged in
-         */
-        canUseController: function () {
-            return autobetLib_native.lib_canUseController();
-        },
-        /**
-         * Check if scpVBus is installed
-         *
-         * @return {Boolean} true, if it is installed
-         */
-        scpVBusInstalled: function () {
-            return autobetLib_native.lib_scpVBusInstalled();
-        },
-        /**
-         * Install scpVBus
-         *
-         * @return {Promise<Boolean>} true, if the installation was successful
-         */
-        installScpVBus: async function () {
-            return await autobetLib_native.lib_installScpVBus();
-        },
-        /**
-         * Uninstall scpVBus
-         *
-         * @return {Promise<Boolean>} true, if the removal was successful
-         */
-        uninstallScpVBus: async function () {
-            return await autobetLib_native.lib_uninstallScpVBus();
         }
     },
     /**

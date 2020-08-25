@@ -110,34 +110,6 @@
         <div class="subcontainer setting-container">
             <div class="textalign">
                 <div class="infoalign">
-                    <h1 class="text subheading">Custom-betting-pos</h1>
-                    <i class="material-icons infoicon" id="custom-betting-pos-info">info</i>
-                </div>
-
-                <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="custom-betting-pos-position">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input class="mdc-text-field__input" type="number" min="-1"
-                        aria-labelledby="custom-betting-pos-label-id">
-                    <span class="mdc-floating-label" id="custom-betting-pos-label-id">Positon</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
-            </div>
-        </div>
-
-        <div class="subcontainer setting-container">
-            <div class="textalign">
-                <div class="infoalign">
-                    <h1 class="text subheading">Betting-pos-template</h1>
-                    <i class="material-icons infoicon" id="betting-pos-template-info">info</i>
-                </div>
-                <button class="mdc-button" id="set-betting-pos-template"><span
-                        class="mdc-button__ripple"></span>Set</button>
-            </div>
-        </div>
-
-        <div class="subcontainer setting-container">
-            <div class="textalign">
-                <div class="infoalign">
                     <h1 class="text subheading">Time-sleep</h1>
                     <i class="material-icons infoicon" id="time-sleep-info">info</i>
                 </div>
@@ -148,60 +120,6 @@
                     <span class="mdc-floating-label" id="time-sleep-label-id">Time</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
-            </div>
-        </div>
-
-        <div class="subcontainer setting-container">
-            <div class="textalign">
-                <div class="infoalign">
-                    <h1 class="text subheading">Clicks</h1>
-                    <i class="material-icons infoicon" id="clicks-info">info</i>
-                </div>
-
-                <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="clicks-field">
-                    <span class="mdc-text-field__ripple"></span>
-                    <input class="mdc-text-field__input" type="number" min="0" aria-labelledby="clicks-label-id">
-                    <span class="mdc-floating-label" id="clicks-label-id">Clicks</span>
-                    <span class="mdc-line-ripple"></span>
-                </label>
-            </div>
-        </div>
-
-        <div class="subcontainer setting-container">
-            <div class="textalign">
-                <div class="infoalign">
-                    <h1 class="text subheading">Controller simulation</h1>
-                    <i class="material-icons infoicon" id="controller-info">info</i>
-                </div>
-
-                <div class="mdc-switch" id="use-controller-switch">
-                    <div class="mdc-switch__track"></div>
-                    <div class="mdc-switch__thumb-underlay">
-                        <div class="mdc-switch__thumb"></div>
-                        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="subcontainer setting-container">
-            <div class="textalign">
-                <div class="infoalign">
-                    <h1 class="text subheading">ScpVBus installed</h1>
-                    <i class="material-icons infoicon" id="scpvbus-info">info</i>
-                </div>
-
-                <h1 class="text status_stopped maintext" id="scpvbus-installed">No</h1>
-            </div>
-        </div>
-
-        <div class="subcontainer setting-container">
-            <div class="textalign">
-                <div class="infoalign">
-                    <h1 class="text subheading">Install ScpVBus</h1>
-                    <i class="material-icons infoicon" id="install-scpvbus-info">info</i>
-                </div>
-                <button class="mdc-button" id="install-scpvbus"><span class="mdc-button__ripple"></span>Install</button>
             </div>
         </div>
 
@@ -304,22 +222,6 @@
         <div class="mdc-dialog__scrim"></div>
     </div>
 
-    <div class="invisible" id="messagecontainer">
-        <div class="mdc-linear-progress" id="progressbar" role="progressbar">
-            <div class="mdc-linear-progress__buffering-dots"></div>
-            <div class="mdc-linear-progress__buffer" id="progressbuffer"></div>
-            <div class="mdc-linear-progress__bar mdc-linear-progress__primary-bar">
-                <span class="mdc-linear-progress__bar-inner"></span>
-            </div>
-            <div class="mdc-linear-progress__bar mdc-linear-progress__secondary-bar">
-                <span class="mdc-linear-progress__bar-inner"></span>
-            </div>
-        </div>
-
-        <h1 class="maintext-maincolor text" id="stoptext">Please wait while the program stops...</h1>
-        <h1 class="text" id="quitinfo">To quit the program press CTRL+SHIFT+F9</h1>
-    </div>
-
     <div aria-describedby="error-dialog-content" aria-labelledby="error-dialog" aria-modal="true" class="mdc-dialog" id="error-dialog-container" role="alertdialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface">
@@ -337,59 +239,12 @@
         <div class="mdc-dialog__scrim"></div>
     </div>
 
-    <div class="mdc-dialog" id="betting-pos-template-dialog">
-        <div class="mdc-dialog__container">
-            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" aria-labelledby="betting-pos-template-dialog-title" aria-describedby="betting-pos-template-dialog-content">
-                <h2 class="mdc-dialog__title" id="betting-pos-template-dialog-title">Betting-pos-template</h2>
-                <div class="mdc-dialog__content" id="betting-pos-template-dialog-content">
-
-                </div>
-
-                <div id="betting-pos-actions">
-                    <button class="mdc-button" id="betting-pos-add-button">
-                        <div class="mdc-button__ripple"></div>
-                        <span class="mdc-button__label">Add</span>
-                    </button>
-
-                    <!-- Actions -->
-                    <div class="mdc-dialog__actions">
-                        <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close">
-                            <div class="mdc-button__ripple"></div>
-                            <span class="mdc-button__label">Cancel</span>
-                        </button>
-                        <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="accept">
-                            <div class="mdc-button__ripple"></div>
-                            <span class="mdc-button__label">OK</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="mdc-dialog__scrim"></div>
-    </div>
-
     <!-- Snackbars -->
-
-    <div class="mdc-snackbar" id="scpvbus-installing-message">
-        <div class="mdc-snackbar__surface">
-            <div class="mdc-snackbar__label" role="status" aria-live="polite">
-                Installing ScpVBus...
-            </div>
-        </div>
-    </div>
 
     <div class="mdc-snackbar" id="settings-saved-message">
         <div class="mdc-snackbar__surface">
             <div class="mdc-snackbar__label" role="status" aria-live="polite">
                 Settings saved.
-            </div>
-        </div>
-    </div>
-
-    <div class="mdc-snackbar" id="controller-error-message">
-        <div class="mdc-snackbar__surface">
-            <div class="mdc-snackbar__label" role="status" aria-live="polite">
-                Controller support was enabled, but the virtual controller could not be connected.
             </div>
         </div>
     </div>

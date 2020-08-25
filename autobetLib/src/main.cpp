@@ -3,7 +3,6 @@
 #include "debug.hpp"
 #include "autostop.hpp"
 #include "settings.hpp"
-#include "controller.hpp"
 
 #include <chrono>
 #include <thread>
@@ -29,10 +28,6 @@
 #include "logger.hpp"
 #include "jsCallback.hpp"
 
-// x-Pos for the increase bet button (>) since the scaling is not 100% accurate
-#define POS_1_1 2160
-#define POS_1_2 2240
-
 using namespace logger;
 
 // Every location to a horse to bet on
@@ -43,21 +38,14 @@ CppJsLib::WebGUI *webUi;
 std::thread *bt = nullptr;
 std::thread *wt = nullptr;
 
-settings::posConfigArr *pArr = nullptr;
-
 unsigned short int xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
 __int64 winnings_all = 0L;
 int winnings = 0;
 unsigned int time_running = 0;
 bool gtaVRunning, running, stopping, starting, keyCombListen, runLoops;
-bool debug_full = false, webServer = true, useController = false;
+bool debug_full = false, webServer = true;
 float multiplierW, multiplierH;
-unsigned int bettingPos = POS_1_1;
-int customBettingPos = -1;
-unsigned int time_sleep = 36, clicks = 31;
-
-// A controller object to search the increase bet button
-controller::controller *controllerPtr = nullptr;
+unsigned int time_sleep = 36;
 
 // Functions from js =======================
 std::function<void(bool)> set_gta_running = {};
@@ -89,8 +77,6 @@ void kill(bool _exit = true) {
     if (uiKeycombStopCallback) uiKeycombStopCallback->stop();
     if (exceptionCallback) exceptionCallback->stop();
     if (logCallback) logCallback->stop();
-
-    delete pArr;
 
     // If the threads for doing the first AI prediction did not finish, detach them
     // so they don't throw an exception
@@ -129,10 +115,6 @@ void kill(bool _exit = true) {
     tf::WinningsAI::destroy();
     StaticLogger::debug("Deleted Winnings AI");
 
-    // Delete the controller object
-    StaticLogger::debug("Deleting controller object");
-    delete controllerPtr;
-
     // Sleep
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
@@ -158,6 +140,7 @@ std::function<void()> quit = {};
  * Write winnings_all to winnings.dat
  */
 void writeWinnings() {
+    StaticLogger::debug("Writing winnings");
     std::ofstream ofs("winnings.dat", std::ios::out | std::ios::binary);
     if (!ofs.good()) {
         StaticLogger::error("Unable to open winnings file. Flags: " + std::to_string(ofs.flags()));
@@ -173,6 +156,8 @@ void writeWinnings() {
     ofs.close();
     if (ofs.is_open()) {
         StaticLogger::error("Unable to close winnings file");
+    } else {
+        StaticLogger::debug("Wrote winnings");
     }
 }
 
@@ -196,25 +181,6 @@ void set_positions() {
 
     StaticLogger::debug("Got active screen width: " + std::to_string(screenSize.width) + " and height: " +
                         std::to_string(screenSize.height));
-
-    if (customBettingPos <= 0 && pArr->size <= 0) {
-        double r = (double) width / screenSize.width;
-        StaticLogger::debug("Ratio: " + std::to_string(r));
-
-        if (r > 1.01) {
-            StaticLogger::error("Ratio is bigger than 1.0, this should not happen");
-        } else {
-            if (r > 0.625) {
-                bettingPos = POS_1_1;
-            } else {
-                bettingPos = POS_1_2;
-            }
-        }
-    } else if (customBettingPos > 0) {
-        bettingPos = customBettingPos;
-    } else {
-        bettingPos = pArr->getNext(width);
-    }
 
     multiplierW = (float) width / 2560.0f;
     multiplierH = (float) height / 1440.0f;
@@ -248,52 +214,19 @@ void leftClick(unsigned int x, unsigned int y, bool move = true) {
  *
  * @param y the y position where to click
  */
-void place_bet(int y, bool evalBettingPos) {
+void place_bet(int y) {
     StaticLogger::debug("Placing bet");
     leftClick(634, y);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    if (!useController || controllerPtr == nullptr) {
-        clickUsingMouse:
-        if (evalBettingPos) {
-            StaticLogger::debug("Searching for increase bet (>) position");
-            utils::windowSize ws;
-            utils::getWindowSize(ws);
-            int res = utils::findIncreaseBetButton(ws, multiplierH);
-            if (res > 0) {
-                StaticLogger::debug("Increase bet position found: " + std::to_string(res));
-                bettingPos = res;
-            }
-        }
-
-        leftClick(bettingPos, 680);
-    } else {
-        // Press the D-Pad four times to the right, to move the cursor over the correct button
-        for (int i = 0; i < 4; i++) {
-            if (!controllerPtr->pressDPadRight()) {
-                // If the D-Pad press fails, fall back to using the mouse
-                StaticLogger::error("Could not press the D-Pad. Using mouse to click.");
-                goto clickUsingMouse;
-            }
-        }
-
-        // Press the 'A' button on the controller, if it fails, fall back to using the mouse
-        if (!controllerPtr->pressA()) {
-            StaticLogger::error("Could not press the 'A' button on the controller. Using mouse to click.");
-            goto clickUsingMouse;
-        }
-    }
-
-    // Calculate distance between betting pos and actual cursor pos since windows tends to not
-    // move the cursor the way it should
-    POINT p;
-    GetCursorPos(&p);
-
-    int dist = (int) (((float) bettingPos - (float) p.x) / multiplierW);
-    leftClick(bettingPos + dist, 680);
-
-    for (int i = 0; i < clicks - 1; i++) {
-        leftClick(bettingPos + dist, 680, false);
+    // 25/08/2020: Today I found out, you could just press tab to place a max bet. Now, that I have invested
+    // many hours into setting positions for the 'increase bet' button, this is not very nice. I've even used
+    // vXbox to simulate a xBox controller, which is now completely useless. I will not include this fact in any
+    // changelog or commit message, this is the only place where anyone can find this shit. If you just found it:
+    // good for you, keep it a secret, I don't want anyone to know how dumb I really am. Have a nice day.
+    // I am definitely not having a nice day at this point. F*ck.
+    if (!utils::pressTab()) {
+        StaticLogger::error("Could not press the tab key");
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -436,7 +369,7 @@ short get_pos(void *src) {
  * @param amount the amount to add
  */
 void updateWinnings(int amount) {
-    StaticLogger::debug("Updating winnings by " + std::to_string(amount));
+    StaticLogger::debugStream() << "Updating winnings by " << amount;
 
     // If the amount to add is not zero add it to winnings and winnings_all
     if (amount != 0) {
@@ -444,6 +377,7 @@ void updateWinnings(int amount) {
         winnings_all += amount;
 
         setAllMoneyMade(winnings_all);
+        writeWinnings();
 
         // If the amount is not negative count it as a won race
         if (amount > 0) {
@@ -477,7 +411,7 @@ void getWinnings() {
     }
 
     short res = tf::WinningsAI::predict(bmp->data, bmp->size);
-    StaticLogger::debug("Winnings prediction: " + std::to_string(res));
+    StaticLogger::debugStream() << "Winnings prediction: " << res;
     DeleteObject(src);
     delete bmp;
 
@@ -488,21 +422,10 @@ void getWinnings() {
 /**
  * Skip this bet
  */
-void skipBet(bool evalBettingPos) {
+void skipBet() {
     StaticLogger::debug("Should not bet on this one, skipping...");
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     leftClick(633, 448);
-
-    if (evalBettingPos) {
-        StaticLogger::debug("Searching for increase bet (>) position");
-        utils::windowSize ws;
-        utils::getWindowSize(ws);
-        int res = utils::findIncreaseBetButton(ws, multiplierH);
-        if (res > 0) {
-            StaticLogger::debug("Increase bet position found: " + std::to_string(res));
-            bettingPos = res;
-        }
-    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     leftClick(1720, 1036);
@@ -519,7 +442,6 @@ void mainLoop() {
         // Set the game's positions
         set_positions();
         utils::windowSize ws;
-        bool justStarted = true;
 
         while (running) {
             // Take a screen shot
@@ -531,37 +453,39 @@ void mainLoop() {
                 if (!running) {
                     break;
                 }
-                place_bet(pos, justStarted && customBettingPos <= 1 && pArr->size <= 0);
-                if (justStarted)
-                    justStarted = false;
+                place_bet(pos);
+                StaticLogger::debugStream() << "Running: " << std::boolalpha << running;
+                if (!running) continue;
                 // Updating winnings by -10000 because betting costs 100000
                 updateWinnings(-10000);
                 if (!running) {
-                    break;
+                    continue;
                 }
-                StaticLogger::debug("Sleeping for 36 seconds");
+                StaticLogger::debugStream() << "Sleeping for " << time_sleep << " seconds";
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep / 2));
                 if (!running) {
                     // Program is not running anymore, stop it
                     StaticLogger::debug(
                             "The script has been stopped, skipping after " + std::to_string(time_sleep / 2) +
                             " seconds...");
-                    break;
+                    continue;
                 }
+
                 std::this_thread::sleep_for(std::chrono::seconds((int) ceil((double) time_sleep / 2.0)));
                 if (!running) {
-                    break;
+                    continue;
                 }
+
+                StaticLogger::debug("Getting winnings");
                 // Update the winnings and return to the betting screen
                 getWinnings();
                 reset();
                 if (autostop::checkStopConditions()) {
-                    break;
+                    running = false;
+                    continue;
                 }
             } else {
-                skipBet(justStarted && customBettingPos <= 1 && pArr->size <= 0);
-                if (justStarted)
-                    justStarted = false;
+                skipBet();
                 StaticLogger::debug("Sleeping for " + std::to_string(time_sleep) + " seconds");
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep));
                 reset();
@@ -752,9 +676,9 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
             StaticLogger::error("Unable to close winnings file");
         }
 
-        StaticLogger::debug("Read winnings: " + std::to_string(winnings_all));
+        StaticLogger::debugStream() << "Read winnings: " << winnings_all;
+        setAllMoneyMade(winnings_all);
     });
-
 }
 
 /**
@@ -897,12 +821,10 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             return false;
         }
 
-        if (!pArr)
-            pArr = new settings::posConfigArr();
         if (utils::fileExists("autobet.conf")) {
             StaticLogger::debug("Settings file exists. Loading it");
             bool debug, log;
-            settings::load(debug, log, webServer, customBettingPos, time_sleep, clicks, useController, pArr);
+            settings::load(debug, log, webServer, time_sleep);
             logger::setLogToFile(debug);
             logger::setLogToConsole(log);
         }
@@ -911,10 +833,6 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 
         if (log_deleted) {
             StaticLogger::debug("The last log file was deleted since it is older than 7 days");
-        }
-
-        if (customBettingPos > 0) {
-            StaticLogger::debugStream() << "Custom betting pos set to " << customBettingPos;
         }
 
         utils::setDpiAware();
@@ -1022,22 +940,6 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         std::thread keyCombThread(listenForKeycomb);
         keyCombThread.detach();
 
-        if (useController) {
-            StaticLogger::debug("Trying to create a new controller object");
-            try {
-                controllerPtr = new controller::controller();
-                StaticLogger::debug("Successfully created a virtual controller");
-            } catch (controller::controllerUnavailableException &e) {
-                StaticLogger::errorStream() << "Could not create a controller object: " << e.what();
-                controllerPtr = nullptr;
-            } catch (std::bad_alloc &) {
-                StaticLogger::error("Could not create a controller object: Out of memory");
-                controllerPtr = nullptr;
-            }
-        } else {
-            StaticLogger::debug("Using the controller is disabled, so not creating a controller object");
-        }
-
         return true;
     });
 }
@@ -1088,7 +990,7 @@ Napi::Promise setAddMoneyCallback(const Napi::CallbackInfo &info) {
     if (addMoneyCallback) throw Napi::Error::New(info.Env(), "addMoneyCallback is already defined");
     TRY
         addMoneyCallback = new javascriptCallback<int>(info);
-        setAllMoneyMade = [](int value) {
+        addMoney = [](int value) {
             addMoneyCallback->asyncCall(value);
         };
 
@@ -1282,58 +1184,6 @@ Napi::Boolean webServerRunning(const Napi::CallbackInfo &info) {
     }
 }
 
-void setCustomBettingPos(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::NUMBER);
-    customBettingPos = info[0].ToNumber();
-}
-
-Napi::Number getCustomBettingPos(const Napi::CallbackInfo &info) {
-    return Napi::Number::New(info.Env(), customBettingPos);
-}
-
-void setBettingPosTemplate(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::ARRAY);
-    auto arr = info[0].As<Napi::Array>();
-    std::map<int, int> m;
-    // Iterate over the array
-    for (uint32_t i = 0; i < arr.Length(); i++) {
-        if (arr.Get(i).IsObject()) {
-            auto o = arr.Get(i).As<Napi::Object>();
-            if (o.Has("resolution") && o.Has("value")) {
-                if (o.Get("resolution").IsNumber() && o.Get("value").IsNumber()) {
-                    m.insert_or_assign(o.Get("resolution").ToNumber(), o.Get("value").ToNumber());
-                } else {
-                    throw Napi::Error::New(info.Env(), "Object values 'resolution' and 'value' must be of type number");
-                }
-            } else {
-                throw Napi::Error::New(info.Env(), "Object requires values 'resolution' and 'value'");
-            }
-        } else {
-            throw Napi::Error::New(info.Env(), "Required type object");
-        }
-    }
-
-    delete pArr;
-    pArr = new settings::posConfigArr(m);
-}
-
-Napi::Value getBettingPosTemplate(const Napi::CallbackInfo &info) {
-    // If pArr is not nullptr, create an object and return it
-    if (pArr) {
-        Napi::Array arr = Napi::Array::New(info.Env());
-        for (size_t i = 0; i < pArr->size; i++) {
-            Napi::Object o = Napi::Object::New(info.Env());
-            o.Set("resolution", pArr->arr[i].width);
-            o.Set("value", pArr->arr[i].x);
-            arr.Set((uint32_t) i, o);
-        }
-
-        return arr;
-    } else {
-        return info.Env().Undefined();
-    }
-}
-
 void setTimeSleep(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::type::NUMBER);
     time_sleep = info[0].ToNumber().operator unsigned int();
@@ -1343,85 +1193,9 @@ Napi::Number getTimeSleep(const Napi::CallbackInfo &info) {
     return Napi::Number::New(info.Env(), time_sleep);
 }
 
-void setClicks(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::NUMBER);
-    clicks = info[0].ToNumber().operator unsigned int();
-}
-
-Napi::Number getClicks(const Napi::CallbackInfo &info) {
-    return Napi::Number::New(info.Env(), clicks);
-}
-
 Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
     return Promise<void>::create(info.Env(), [] {
-        settings::save(logger::logToFile(), logger::logToConsole(), webServer, customBettingPos, time_sleep, clicks,
-                       useController, pArr);
-    });
-}
-
-Napi::Promise setUseController(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::BOOLEAN);
-    bool val = info[0].ToBoolean();
-    // Create a promise
-    return Promise<bool>::create(info.Env(), [val] {
-        if (val) {
-            // If useController == false, try to create a virtual controller
-            if (!useController) {
-                useController = true;
-                if (controllerPtr == nullptr) {
-                    StaticLogger::debug("Trying to create a new controller object");
-                    try {
-                        // Try to create a virtual controller
-                        controllerPtr = new controller::controller();
-                        StaticLogger::debug("Successfully created a virtual controller");
-                    } catch (controller::controllerUnavailableException &e) {
-                        // The controller creation failed, probably scpVBus is not installed
-                        StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
-                        controllerPtr = nullptr;
-                        return false;
-                    } catch (std::bad_alloc &) {
-                        // Out of memory
-                        StaticLogger::error("Could not create a controller object: Out of memory");
-                        controllerPtr = nullptr;
-                        return false;
-                    }
-                }
-            }
-        } else {
-            if (useController) {
-                // Delete the controller
-                StaticLogger::debug("Disconnecting virtual controller...");
-                useController = false;
-                delete controllerPtr;
-                controllerPtr = nullptr;
-                StaticLogger::debug("Virtual controller disconnected.");
-            }
-        }
-        return true;
-    });
-}
-
-Napi::Boolean getUseController(const Napi::CallbackInfo &info) {
-    return Napi::Boolean::New(info.Env(), useController);
-}
-
-Napi::Boolean canUseController(const Napi::CallbackInfo &info) {
-    return Napi::Boolean::New(info.Env(), controllerPtr == nullptr);
-}
-
-Napi::Boolean scpVBusInstalled(const Napi::CallbackInfo &info) {
-    return Napi::Boolean::New(info.Env(), controller::scpVBusInstalled());
-}
-
-Napi::Promise installScpVBus(const Napi::CallbackInfo &info) {
-    return Promise<bool>::create(info.Env(), [] {
-        return controller::downloadAndInstallScpVBus();
-    });
-}
-
-Napi::Promise uninstallScpVBus(const Napi::CallbackInfo &info) {
-    return Promise<bool>::create(info.Env(), [] {
-        return controller::downloadAndUninstallScpVBus();
+        settings::save(logger::logToFile(), logger::logToConsole(), webServer, time_sleep);
     });
 }
 
@@ -1463,22 +1237,9 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(startWebServer);
     export(node_getWebServer);
     export(webServerRunning);
-    export(setCustomBettingPos);
-    export(getCustomBettingPos);
-    export(setBettingPosTemplate);
-    export(getBettingPosTemplate);
     export(setTimeSleep);
     export(getTimeSleep);
-    export(setClicks);
-    export(getClicks);
     export(saveSettings);
-
-    export(setUseController);
-    export(getUseController);
-    export(canUseController);
-    export(scpVBusInstalled);
-    export(installScpVBus);
-    export(uninstallScpVBus);
 
     try {
         quit = [] {

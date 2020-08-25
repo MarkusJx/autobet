@@ -4,6 +4,7 @@
 #include <iomanip>
 
 #include "utils.hpp"
+#include "main.hpp"
 
 #ifdef AUTOBET_WINDOWS
 
@@ -16,6 +17,8 @@
 #include "logger.hpp"
 
 RECT rect;
+//#define GTA5_EXE L"mspaint.exe"
+//#define GTA5_NAME L"1.jpg - Paint"
 #define GTA5_EXE L"GTA5.exe"
 #define GTA5_NAME L"Grand Theft Auto V"
 #endif
@@ -197,6 +200,26 @@ errno_t utils::isForeground(bool& res) {
     }
 }
 
+/**
+ * Save a utils::bitmap to a image
+ *
+ * @param path the path to store the image, without file ending
+ * @param bmp the bitmap object
+ */
+/*void utils::saveBmp(std::string path, bitmap *bmp) {
+    std::fstream fi;
+    path.append(".png");
+    fi.open(path, std::fstream::binary | std::fstream::out);
+    fi.write(bmp->data, bmp->size);
+    fi.close();
+}
+
+void utils::saveHBitmap(std::string path, int width, int height, void *HBMP) {
+    bitmap *b = crop(0, 0, width, height, HBMP);
+    saveBmp(std::move(path), b);
+    delete b;
+}*/
+
 utils::bitmap *utils::convertHBitmap(int width, int height, void *HBMP) {
     return crop(0, 0, width, height, HBMP);
 }
@@ -243,6 +266,25 @@ utils::bitmap *utils::crop(int x, int y, int width, int height, void *src) {
     auto tmp = new utils::bitmap(reinterpret_cast<char *>(&buf[0]), buf.size() * sizeof(BYTE));
     std::vector<BYTE>().swap(buf);
     return tmp;
+}
+
+int utils::findIncreaseBetButton(utils::windowSize ws, float multiplierH) {
+    const unsigned long white = 0xFFFFFF;
+    HDC hScreenDC = CreateDC("DISPLAY", nullptr, nullptr, nullptr);
+
+    utils::leftClick(ws.xPos + 5, ws.yPos + 5, true);
+
+    for (int i = (ws.xPos + ws.width); i > ws.xPos; i--) {
+        unsigned long px = GetPixel(hScreenDC, i, (int) (692.0 * multiplierH));
+        if (px != CLR_INVALID) {
+            if (px == white) {
+                return i - 5;
+            }
+        } else {
+            return -1;
+        }
+    }
+    return -1;
 }
 
 /**

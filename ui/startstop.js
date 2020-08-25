@@ -1,10 +1,7 @@
 let timeDisp = document.getElementById("time");
 let statusinfo = document.getElementById("statusinfo");
-let messagecontainer = document.getElementById("messagecontainer");
-let frosted_glass = document.getElementById("frosted-glass");
 
-let gtanotrunningmessage = document.getElementById("gta-not-running-message");
-gtanotrunningmessage = new mdc.snackbar.MDCSnackbar(gtanotrunningmessage);
+const gtanotrunningmessage = new mdc.snackbar.MDCSnackbar(document.getElementById("gta-not-running-message"));
 gtanotrunningmessage.timeoutMs = 10000;
 
 let paused = 0;
@@ -66,9 +63,6 @@ function is_paused() {
     if (pausing) {
         pausing = 0;
         startstop.disabled = false;
-        progressbar.className = "mdc-linear-progress";
-        frosted_glass.className = "frosted-glass-unblur";
-        messagecontainer.className = "invisible";
         pauseTimer();
         startstop.innerHTML = "start";
         statusinfo.innerHTML = "Stopped";
@@ -80,9 +74,8 @@ function pause(nstoppy) {
     if (!nstoppy)
         autobetLib.stopBetting();
     pausing = 1;
-    progressbar.className = "mdc-linear-progress mdc-linear-progress--indeterminate";
-    messagecontainer.className = "";
-    frosted_glass.className = "frosted-glass-blur";
+    statusinfo.innerHTML = "Stopping";
+    statusinfo.className = "text status_init maintext";
     startstop.disabled = true;
     var x = setInterval(() => {
         let value = autobetLib.stopped()
