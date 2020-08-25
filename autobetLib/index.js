@@ -320,14 +320,6 @@ module.exports = {
          */
         saveSettings: async function () {
             await autobetLib_native.lib_saveSettings();
-        },
-        /**
-         * Load the settings
-         *
-         * @return {Promise<Boolean>} true, if the settings file exists
-         */
-        loadSettings: async function () {
-            return await autobetLib_native.lib_loadSettings();
         }
     },
     /**

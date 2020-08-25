@@ -1,7 +1,7 @@
 {
   "name": "autobet",
   "version": "1.2.0",
-  "description": "",
+  "description": "A GTA Online horse racing betting bot",
   "main": "main.js",
   "scripts": {
     "start": "electron . --help",
@@ -19,23 +19,42 @@
   },
   "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
   "devDependencies": {
+    "electron": "^10.0.0",
     "electron-builder": "^22.8.0"
+  },
+  "dependencies": {
+    "custom-electron-titlebar": "^3.2.4",
+    "electron-updater": "^4.3.4",
+    "electron-window-state": "^5.0.3",
+    "material-components-web": "^7.0.0"
   },
   "build": {
     "appId": "markusjx.autobet",
+    "icon": "resources/icon.png",
     "nsis": {
       "oneClick": false,
-      "artifactName": "${productName}.${ext}"
+      "artifactName": "${productName}.${ext}",
+      "license": "pack/license.txt",
+      "installerLanguages": [
+        "en_US"
+      ],
+      "installerIcon": "pack/icon.ico"
     },
     "files": [
       "**/autobetLib/bin/*",
       "**/autobetLib/index.js",
       "**/autobetLib/package.json",
-      "**/ui/*",
+      "ui/index.html",
+      "ui/main.min.js",
+      "ui/mountains.svg",
+      "ui/qrcode.min.js",
+      "ui/startstop.min.js",
+      "ui/style.min.css",
       "**/web/*",
       "main.js",
       "preload.js",
       "renderer.js",
+      "icon.png",
       "!**/v1.1.0/*",
       "!**/v0/*"
     ],
@@ -46,16 +65,15 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "resources/icon.png",
+        "to": "icon.png"
       }
     ],
     "asar": true,
     "asarUnpack": [
-      "**/autobetLib/bin/*",
-      "**/data/*"
+      "**/autobetLib/bin/*"
     ]
-  },
-  "dependencies": {
-    "custom-electron-titlebar": "^3.2.4",
-    "electron": "^9.2.1"
   }
 }

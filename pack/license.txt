@@ -24,7 +24,7 @@ SOFTWARE.
 
 ========== json.hpp ==================================================
 
-MIT License 
+MIT License
 
 Copyright (c) 2013-2019 Niels Lohmann
 

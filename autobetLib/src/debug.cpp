@@ -4,6 +4,8 @@
 
 #include <mutex>
 #include <filesystem>
+#include <chrono>
+#include <ctime>
 
 #include "zip/zip.h"
 #include "logger.hpp"
@@ -116,4 +118,39 @@ void debug::writeImage(utils::bitmap *bmp) {
 #else
     DEBUG_UNIMPLEMENTED();
 #endif
+}
+
+bool debug::checkLogAge() {
+    namespace fs = std::filesystem;
+    using namespace std::chrono;
+    if (fs::exists("autobet.log")) {
+        fs::file_time_type last_write = fs::last_write_time("autobet.log");
+        auto sctp = time_point_cast<system_clock::duration>(
+                last_write - fs::file_time_type::clock::now() + system_clock::now());
+
+        std::time_t time_file = system_clock::to_time_t(sctp);
+        std::time_t time_now = time(nullptr);
+
+        struct tm tm_file{};
+        struct tm tm_now{};
+        errno_t err = localtime_s(&tm_file, &time_file);
+        err += localtime_s(&tm_now, &time_now);
+
+        if (err != 0) {
+            // Could not check log age: localtime_s returned a non-zero exit code
+            return false;
+        }
+
+        int days = tm_now.tm_yday - tm_file.tm_yday;
+        days += (tm_now.tm_year - tm_file.tm_year) * 365;
+
+        if (days >= 7) {
+            fs::remove("autobet.log");
+            if (fs::exists("autobet_debug.log")) fs::remove("autobet_debug.log");
+            // Log deleted
+            return true;
+        }
+    }
+
+    return false;
 }

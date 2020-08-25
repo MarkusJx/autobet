@@ -345,7 +345,7 @@ namespace logger {
         inline LoggerUtils::LoggerStream _debugStream(const char *_file, int line) {
             return LoggerUtils::LoggerStream([this, _file, line](const std::string &buf) {
                 this->_debug(_file, line, buf);
-            }, _mode, level == LogLevel::debug);
+            }, _mode, level != LogLevel::debug);
         }
 
         /**
@@ -363,7 +363,7 @@ namespace logger {
         inline LoggerUtils::LoggerStream _warningStream(const char *_file, int line) {
             return LoggerUtils::LoggerStream([this, _file, line](const std::string &buf) {
                 this->_warning(_file, line, buf);
-            }, _mode, level == LogLevel::debug || level == LogLevel::warning);
+            }, _mode, level != LogLevel::debug || level != LogLevel::warning);
         }
 
         /**
@@ -381,7 +381,7 @@ namespace logger {
         inline LoggerUtils::LoggerStream _errorStream(const char *_file, int line) {
             return LoggerUtils::LoggerStream([this, _file, line](const std::string &buf) {
                 this->_error(_file, line, buf);
-            }, _mode, level != LogLevel::none);
+            }, _mode, level == LogLevel::none);
         }
 
         /**

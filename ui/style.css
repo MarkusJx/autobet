@@ -427,6 +427,26 @@ body {
 
 #log-textfield-input {
     color: rgb(240, 240, 240);
+    transition: all .5s ease-in-out;
+}
+
+.mdc-text-field__resizer.increase-height {
+    height: 178px;
+    animation: increase-height .5s ease-in-out;
+}
+
+@keyframes increase-height {
+    from {
+        height: 56px
+    }
+    to {
+        height: 178px
+    }
+}
+
+.mdc-text-field__resizer.decrease-height {
+    height: 56px;
+    transition: height .5s ease-in-out;
 }
 
 #log-textfield-input::-webkit-scrollbar {
@@ -448,6 +468,46 @@ body {
 #debug-container {
     height: max-content;
     margin-bottom: 40px;
+    transition: all .5s ease-in-out;
+}
+
+#betting-pos-template-dialog {
+    --mdc-theme-primary: rgb(0, 60, 255);
+    transition: all .5s ease-in-out;
+}
+
+#betting-pos-template-dialog-content {
+    width: 480px;
+    max-height: 60vh;
+}
+
+.betting-pos-template-el-container {
+    display: grid;
+    grid-template-columns: auto auto 64px;
+    grid-template-rows: auto;
+    border-top: .3px #292929 solid;
+}
+
+.remove-button {
+    --mdc-theme-primary: rgb(226, 0, 57);
+    margin: auto;
+}
+
+.betting-pos-template-text-field {
+    height: auto;
+    width: 144px;
+    margin: 12px 20px;
+}
+
+#betting-pos-actions {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 100%;
+}
+
+#betting-pos-add-button {
+    width: min-content;
+    margin: auto auto auto 20px;
 }
 
 @media only screen and (min-width: 860px) {
@@ -476,7 +536,7 @@ body {
     }
     #debug-container {
         grid-column: 1 / 3;
-        margin: 0 30px;
+        margin: 0 30px 30px 30px;
         width: calc(100% - 60px);
     }
 }

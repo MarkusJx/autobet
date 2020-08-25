@@ -88,17 +88,11 @@ namespace settings {
         posConfig *arr;
     };
 
-    void save(bool debug, bool webServer, int customBettingPos, unsigned int time_sleep, unsigned int clicks,
+    void save(bool debug, bool log, bool webServer, int customBettingPos, unsigned int time_sleep, unsigned int clicks,
               bool controller, posConfigArr *arr);
 
-    void load(bool &debug, bool &webServer, int &customBettingPos, unsigned int &time_sleep, unsigned int &clicks,
+    void load(bool &debug, bool &log, bool &webServer, int &customBettingPos, unsigned int &time_sleep, unsigned int &clicks,
               bool &controller, posConfigArr *arr);
-
-    void storeConfig(unsigned int time_sleep, unsigned int clicks, posConfigArr *arr);
-
-    void loadConfig(unsigned int &time_sleep, unsigned int &clicks, posConfigArr *arr);
-
-    void configure(std::map<int, int> &map);
 }
 
 #endif //AUTOBET_SETTINGS_HPP

@@ -887,6 +887,7 @@ bool startWebUi() {
 
 Napi::Promise init(const Napi::CallbackInfo &info) {
     return Promise<bool>::create(info.Env(), [] {
+        bool log_deleted = debug::checkLogAge();
         try {
             StaticLogger::create();
         } catch (std::bad_alloc &) {
@@ -900,13 +901,20 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             pArr = new settings::posConfigArr();
         if (utils::fileExists("autobet.conf")) {
             StaticLogger::debug("Settings file exists. Loading it");
-            bool debug;
-            settings::load(debug, webServer, customBettingPos, time_sleep, clicks, useController, pArr);
+            bool debug, log;
+            settings::load(debug, log, webServer, customBettingPos, time_sleep, clicks, useController, pArr);
             logger::setLogToFile(debug);
+            logger::setLogToConsole(log);
+        }
+
+        StaticLogger::debugStream() << "Initializing Autobet version " << AUTOBET_VERSION;
+
+        if (log_deleted) {
+            StaticLogger::debug("The last log file was deleted since it is older than 7 days");
         }
 
         if (customBettingPos > 0) {
-            StaticLogger::debug("Custom betting pos set to " + std::to_string(customBettingPos));
+            StaticLogger::debugStream() << "Custom betting pos set to " << customBettingPos;
         }
 
         utils::setDpiAware();
@@ -1018,8 +1026,9 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             StaticLogger::debug("Trying to create a new controller object");
             try {
                 controllerPtr = new controller::controller();
+                StaticLogger::debug("Successfully created a virtual controller");
             } catch (controller::controllerUnavailableException &e) {
-                StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
+                StaticLogger::errorStream() << "Could not create a controller object: " << e.what();
                 controllerPtr = nullptr;
             } catch (std::bad_alloc &) {
                 StaticLogger::error("Could not create a controller object: Out of memory");
@@ -1212,8 +1221,10 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
     bool val = info[0].ToBoolean();
     return Promise<bool>::create(info.Env(), [val] {
         if (val) {
+            // Try to start the web ui
             webServer = true;
             if (!webUi) {
+                // If web ui isn't already started, start it
                 return startWebUi();
             } else {
                 StaticLogger::warning("Tried to start webUi server, but it already is running");
@@ -1229,6 +1240,7 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
                     StaticLogger::debug("Stopped web ui web server");
                 }
 
+                // Delete the instance from existence
                 delete webUi;
                 webUi = nullptr;
                 return true;
@@ -1342,23 +1354,8 @@ Napi::Number getClicks(const Napi::CallbackInfo &info) {
 
 Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
     return Promise<void>::create(info.Env(), [] {
-        settings::save(logger::logToFile(), webServer, customBettingPos, time_sleep, clicks, useController, pArr);
-    });
-}
-
-Napi::Promise loadSettings(const Napi::CallbackInfo &info) {
-    return Promise<bool>::create(info.Env(), [] {
-        // Delete the posConfigArr and create a new one
-        delete pArr;
-        pArr = new settings::posConfigArr();
-        bool debug, ws;
-        if (utils::fileExists("autobet.conf")) {
-            settings::load(debug, ws, customBettingPos, time_sleep, clicks, useController, pArr);
-            logger::setLogToFile(debug);
-            return true;
-        } else {
-            return false;
-        }
+        settings::save(logger::logToFile(), logger::logToConsole(), webServer, customBettingPos, time_sleep, clicks,
+                       useController, pArr);
     });
 }
 
@@ -1376,6 +1373,7 @@ Napi::Promise setUseController(const Napi::CallbackInfo &info) {
                     try {
                         // Try to create a virtual controller
                         controllerPtr = new controller::controller();
+                        StaticLogger::debug("Successfully created a virtual controller");
                     } catch (controller::controllerUnavailableException &e) {
                         // The controller creation failed, probably scpVBus is not installed
                         StaticLogger::error("Could not create a controller object: " + std::string(e.what()));
@@ -1392,9 +1390,11 @@ Napi::Promise setUseController(const Napi::CallbackInfo &info) {
         } else {
             if (useController) {
                 // Delete the controller
+                StaticLogger::debug("Disconnecting virtual controller...");
                 useController = false;
                 delete controllerPtr;
                 controllerPtr = nullptr;
+                StaticLogger::debug("Virtual controller disconnected.");
             }
         }
         return true;
@@ -1472,7 +1472,6 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setClicks);
     export(getClicks);
     export(saveSettings);
-    export(loadSettings);
 
     export(setUseController);
     export(getUseController);
