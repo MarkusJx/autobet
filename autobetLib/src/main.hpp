@@ -10,6 +10,8 @@
 
 #include <string>
 
+#define AUTOBET_VERSION "1.2.0"
+
 void node_quit();
 
 void node_log(const std::string &val);

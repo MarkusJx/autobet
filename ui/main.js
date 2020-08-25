@@ -199,29 +199,36 @@ window.onbeforeunload = function() {
 
 async function main() {
     startstop.disabled = true;
+    // Create the title bar
     titlebar.create();
 
     setIPs();
     enable_webserver.disabled = true;
     await autobetLib.loadWinnings();
 
+    // Initialize
     let initialized = await autobetLib.init();
     if (initialized) {
         statusinfo.classList.remove("status_init");
         statusinfo.classList.add("status_stopped");
         statusinfo.innerHTML = "Stopped";
         console.log("Initialized.");
-        startstop.disabled = true;
+        startstop.disabled = false;
     } else {
         console.error("Could not initialize");
     }
 
+    // Set swtches checkes
     custom_betting_pos.value = autobetLib.settings.getCustomBettingPos();
     time_sleep_field.value = autobetLib.settings.getTimeSleep();
     clicks_field.value = autobetLib.settings.getClicks();
     use_controller.checked = autobetLib.controller.getUseController();
     setScpVBusInstalled(autobetLib.controller.scpVBusInstalled());
     log_to_file_switch.checked = autobetLib.logging.isLoggingToFile();
+    log_to_console_switch.checked = autobetLib.logging.isLoggingToConsole();
+    if (autobetLib.logging.isLoggingToConsole()) {
+        log_textfield_resizer.style.height = "178px";
+    }
 
     enable_webserver.checked = autobetLib.settings.webServerActivated();
     if (autobetLib.settings.webServerActivated()) {
@@ -244,6 +251,7 @@ main().then(() => {
 
 // Settings ================================================
 
+// MDC init
 const description_dialog = new mdc.dialog.MDCDialog(document.getElementById("description-dialog"));
 const custom_betting_pos = new mdc.textField.MDCTextField(document.getElementById("custom-betting-pos-position"));
 const time_sleep_field = new mdc.textField.MDCTextField(document.getElementById("time-sleep-field"));
@@ -255,6 +263,7 @@ const scpvbus_installing_msg = new mdc.snackbar.MDCSnackbar(document.getElementB
 const log_to_file_switch = new mdc.switchControl.MDCSwitch(document.getElementById("log-to-file-switch"));
 const log_to_console_switch = new mdc.switchControl.MDCSwitch(document.getElementById("log-to-console-switch"));
 const log_textfield = new mdc.textField.MDCTextField(document.getElementById("log-textfield"));
+const betting_pos_template_dialog = new mdc.dialog.MDCDialog(document.getElementById("betting-pos-template-dialog"));
 
 const set_betting_pos_template = document.getElementById("set-betting-pos-template");
 const scpvbus_installed = document.getElementById("scpvbus-installed");
@@ -309,8 +318,115 @@ custom_betting_pos.input_.addEventListener('keyup', (event) => {
     }
 });
 
+const betting_pos_template = {
+    template: class {
+        constructor(container, width, value) {
+            this.container = container;
+            this.width = width;
+            this.value = value;
+        }
+    },
+    templates: [],
+    content: document.getElementById("betting-pos-template-dialog-content"),
+    addElement: function() {
+        let container = document.createElement("div");
+        container.className = "betting-pos-template-el-container";
+        let width = document.createElement("label");
+        width.className = "mdc-text-field mdc-text-field--filled betting-pos-template-text-field";
+        width.innerHTML = '<span class="mdc-text-field__ripple"></span>' +
+            '<input class="mdc-text-field__input" type="number" min="0">' +
+            '<span class="mdc-floating-label">Width</span>' +
+            '<span class="mdc-line-ripple"></span>';
+
+        let value = document.createElement("label");
+        value.className = "mdc-text-field mdc-text-field--filled betting-pos-template-text-field";
+        value.innerHTML = '<span class="mdc-text-field__ripple"></span>' +
+            '<input class="mdc-text-field__input" type="number" min="0">' +
+            '<span class="mdc-floating-label">Value</span>' +
+            '<span class="mdc-line-ripple"></span>';
+
+        container.appendChild(width);
+        container.appendChild(value);
+
+        let remove = document.createElement("button");
+        remove.innerHTML = '<span class="mdc-button__ripple"></span><span class="material-icons">delete</span>';
+        remove.className = "mdc-button remove-button";
+
+        mdc.ripple.MDCRipple.attachTo(remove);
+        remove.addEventListener('click', () => {
+            this.remove(container);
+            if (this.templates.length < 1) {
+                this.addElement();
+            }
+        });
+
+        container.appendChild(remove);
+
+        let tmp = new this.template(container, new mdc.textField.MDCTextField(width), new mdc.textField.MDCTextField(value));
+        this.templates.push(tmp);
+        this.content.appendChild(container);
+
+        return tmp;
+    },
+    remove: function(container) {
+        this.content.removeChild(container);
+        for (let i = 0; i < this.templates.length; i++) {
+            if (this.templates[i].container === container) {
+                this.templates.splice(i, 1);
+                break;
+            }
+        }
+    },
+    removeAll: function() {
+        this.content.innerHTML = "";
+        this.templates.length = 0;
+    }
+};
+
 set_betting_pos_template.addEventListener('click', () => {
-    // TODO: add this
+    let values = autobetLib.settings.getBettingPosTemplate();
+    for (let i = 0; i < values.length; i++) {
+        let el = values[i];
+        let tmp = betting_pos_template.addElement();
+        tmp.value.value = el.value;
+        tmp.width.value = el.resolution;
+    }
+
+    if (betting_pos_template.templates.length < 1) {
+        betting_pos_template.addElement();
+    }
+    betting_pos_template_dialog.open();
+});
+
+document.getElementById("betting-pos-add-button").addEventListener('click', () => betting_pos_template.addElement());
+
+betting_pos_template_dialog.listen('MDCDialog:closed', (ev) => {
+    if (ev.detail.action === "accept") {
+        /**
+         * @type {Array.<{resolution: Number, value: Number}>}
+         */
+        let values = [];
+        if (!(betting_pos_template.templates.length === 1 && betting_pos_template.templates[0].value.value.length === 0 && betting_pos_template.templates[0].width.value.length === 0)) {
+            set_betting_pos_template.disabled = true;
+            for (let i = 0; i < betting_pos_template.templates.length; i++) {
+                let el = betting_pos_template.templates[i];
+                if (el.value.value.length !== 0 && el.width.value.length !== 0) {
+                    values.push({
+                        resolution: Number(el.width.value),
+                        value: Number(el.value.value)
+                    });
+                }
+            }
+        }
+
+        autobetLib.settings.setBettingPosTemplate(values);
+        autobetLib.settings.saveSettings().then(() => {
+            set_betting_pos_template.disabled = false;
+            settings_saved_msg.close();
+            settings_saved_msg.open();
+        });
+    }
+    betting_pos_template.removeAll();
 });
 
 time_sleep_field.input_.addEventListener('keyup', (event) => {
@@ -365,24 +481,30 @@ function showScpVBusMessage(msg) {
 install_scpvbus.addEventListener('click', () => {
     install_scpvbus.disabled = true;
     if (autobetLib.controller.scpVBusInstalled()) {
-        showScpVBusMessage("Uninstalling ScpVBus");
+        showScpVBusMessage("Uninstalling ScpVBus...");
         autobetLib.controller.uninstallScpVBus().then((res) => {
             if (res) {
                 showScpVBusMessage("ScpVBus removed.");
             } else {
                 showScpVBusMessage("ScpVBus removal failed.");
+                setTimeout(() => {
+                    setScpVBusInstalled(autobetLib.controller.scpVBusInstalled());
+                }, 10000);
             }
 
             setScpVBusInstalled(!res);
             install_scpvbus.disabled = false;
         });
     } else {
-        showScpVBusMessage("Installing ScpVBus");
+        showScpVBusMessage("Installing ScpVBus...");
         autobetLib.controller.installScpVBus().then((res) => {
             if (res) {
                 showScpVBusMessage("ScpVBus installed.");
             } else {
                 showScpVBusMessage("ScpVBus installation failed.");
+                setTimeout(() => {
+                    setScpVBusInstalled(autobetLib.controller.scpVBusInstalled());
+                }, 10000);
             }
 
             setScpVBusInstalled(res);
@@ -396,11 +518,13 @@ full_debug.listen('change', () => {
     if (full_debug.checked) {
         log_to_file_switch.checked = true;
         log_to_file_switch.disabled = true;
-        autobetLib.logging.setLogToFile(true);
-        autobetLib.settings.saveSettings().then(() => {
-            settings_saved_msg.close();
-            settings_saved_msg.open();
-        });
+        if (!autobetLib.logging.isLoggingToFile()) {
+            autobetLib.logging.setLogToFile(true);
+            autobetLib.settings.saveSettings().then(() => {
+                settings_saved_msg.close();
+                settings_saved_msg.open();
+            });
+        }
     } else {
         log_to_file_switch.disabled = false;
     }
@@ -425,14 +549,30 @@ log_to_file_switch.listen('change', () => {
 });
 
 log_to_console_switch.listen('change', () => {
+    log_to_console_switch.disabled = true;
     autobetLib.logging.setLogToConsole(log_to_console_switch.checked);
 
     if (!log_to_console_switch.checked) {
         log_textfield.value = "";
         log_textfield_resizer.style.height = "56px";
+
+        // Animate the resize process
+        log_textfield_resizer.className = "mdc-text-field__resizer decrease-height";
+        setTimeout(() => {
+            log_textfield_resizer.className = "mdc-text-field__resizer";
+        }, 500);
     } else if (log_textfield_resizer.style.height === "56px") {
-        log_textfield_resizer.style.height = "178px";
+        // Animate the resize process
+        log_textfield_resizer.className = "mdc-text-field__resizer increase-height";
+        setTimeout(() => {
+            log_textfield_resizer.style.height = "178px";
+        }, 500);
     }
+    autobetLib.settings.saveSettings().then(() => {
+        log_to_console_switch.disabled = false;
+        settings_saved_msg.close();
+        settings_saved_msg.open();
+    });
 });
 
 autobetLib.logging.setLogCallback((msg) => {

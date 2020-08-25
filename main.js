@@ -1,12 +1,24 @@
 const {app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
+const windowStateKeeper = require('electron-window-state');
 const path = require('path');
 const autobetLib = require('./autobetLib');
+const {autoUpdater} = require("electron-updater");
+
+let tray = null;
 
 function createWindow() {
+    autoUpdater.checkForUpdatesAndNotify().then(r => console.log(r));
+    const mainWindowState = windowStateKeeper({
+        defaultWidth: 705,
+        defaultHeight: 830
+    });
+
     const mainWindow = new BrowserWindow({
-        width: 705,
-        height: 830,
-        minHeight: 830,
+        x: mainWindowState.x,
+        y: mainWindowState.y,
+        width: mainWindowState.width,
+        height: mainWindowState.height,
+        minHeight: 500,
         minWidth: 530,
         frame: false,
         resizable: true,
@@ -18,14 +30,14 @@ function createWindow() {
             nodeIntegration: false,
             webSecurity: true,
             enableRemoteModule: true,
-            //devTools: false
+            devTools: false
         }
     });
 
-    //mainWindow.removeMenu();
+    mainWindow.removeMenu();
 
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
-    const tray = new Tray('icon.png');
+    tray = new Tray('resources/icon.png');
     const contextMenu = Menu.buildFromTemplate([
         {label: 'Autobet', type: 'normal', enabled: false},
         {type: 'separator'},
@@ -63,6 +75,8 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, 'ui', 'index.html')).then(() => {
         console.log("Main window loaded");
     });
+
+    mainWindowState.manage(mainWindow);
 }
 
 app.whenReady().then(() => {
