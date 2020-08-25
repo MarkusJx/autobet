@@ -224,7 +224,7 @@ bool downloadScpVBus(std::filesystem::path &out_dir) {
     };
 
     out_dir = p;
-    out_dir.append("scvpbus");
+    out_dir.append("scpvbus");
     if (!fs::create_directories(out_dir)) {
         logger::StaticLogger::error("Could not create the zip output directory");
         return false;

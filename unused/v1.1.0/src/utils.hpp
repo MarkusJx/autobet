@@ -143,6 +143,8 @@ namespace utils {
 
     void setDpiAware();
 
+    int findIncreaseBetButton(windowSize ws, float multiplierH);
+
     void *TakeScreenShot(int x, int y, int width, int height);
 
     void getWindowSize(windowSize &ws);
@@ -162,6 +164,10 @@ namespace utils {
     void splitString(std::string s, const std::string &delimiter, std::vector<char *> *res);
 
     bool fileExists(const std::string &name);
+
+    //void saveBmp(std::string path, bitmap *bmp);
+
+    //void saveHBitmap(std::string path, int width, int height, void *HBMP);
 
     bitmap *convertHBitmap(int width, int height, void *HBMP);
 
