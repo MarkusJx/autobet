@@ -23,7 +23,7 @@ class tf_ai {
 
 const short betting_labels[10] = {1, 10, 2, 3, 4, 5, 6, 7, 8, 9};
 
-const short winnings_labels[4] = {30, 40, 50, 0};
+const short winnings_labels[5] = {20, 30, 40, 50, 0};
 }  // namespace tf
 
 #endif

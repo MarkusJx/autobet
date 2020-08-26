@@ -383,7 +383,7 @@ bool utils::pressTab() {
 
     input.ki.dwFlags = KEYEVENTF_KEYUP;
     err += SendInput(1, &input, sizeof(INPUT));
-    return err == 0;
+    return err == 2;
 }
 
 bool utils::leftClick(int x, int y, bool move) {
