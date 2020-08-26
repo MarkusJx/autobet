@@ -33,33 +33,33 @@ xLoc = 240
 Loc = 464, 628, 790, 952, 1114, 1276
 
 def resize():
-random.seed()
-path = "1"
-n = 2
-for f in os.listdir(path):
-img = cv2.imread(os.path.join(path, f))
-#height, width, channels = img.shape
-for i in range(0, 5000):
-rand = random.uniform(0.2, 1.0)
-width = int(img.shape[1] * rand)
-height = int(img.shape[0] * rand)
-dim = (width, height)
-resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-cv2.imwrite(os.path.join("1", str(n) + ".jpg"), resized)
-n += 1
+    random.seed()
+    path = "1"
+    n = 2
+    for f in os.listdir(path):
+        img = cv2.imread(os.path.join(path, f))
+        #height, width, channels = img.shape
+        for i in range(0, 5000):
+            rand = random.uniform(0.2, 1.0)
+            width = int(img.shape[1] * rand)
+            height = int(img.shape[0] * rand)
+            dim = (width, height)
+            resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+            cv2.imwrite(os.path.join("1", str(n) + ".jpg"), resized)
+            n += 1
 
 def train_winnings():
-model_trainer = ModelTraining()
-model_trainer.setModelTypeAsInceptionV3()
-model_trainer.setDataDirectory("train_winnings")
-model_trainer.trainModel(num_objects=5, num_experiments=2, enhance_data=True, batch_size=32,
+    model_trainer = ModelTraining()
+    model_trainer.setModelTypeAsInceptionV3()
+    model_trainer.setDataDirectory("train_winnings")
+    model_trainer.trainModel(num_objects=5, num_experiments=2, enhance_data=True, batch_size=32,
         show_network_summary=True, save_full_model=True)
 
 train_winnings()
 
 def train_betting():
-model_trainer = ModelTraining()
-model_trainer.setModelTypeAsInceptionV3()
-model_trainer.setDataDirectory("train_data_betting")
-model_trainer.trainModel(num_objects=2, num_experiments=300, enhance_data=True, batch_size=32,
+    model_trainer = ModelTraining()
+    model_trainer.setModelTypeAsInceptionV3()
+    model_trainer.setDataDirectory("train_data_betting")
+    model_trainer.trainModel(num_objects=2, num_experiments=300, enhance_data=True, batch_size=32,
         show_network_summary=True)

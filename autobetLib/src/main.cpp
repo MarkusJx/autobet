@@ -791,14 +791,22 @@ void listenForKeycomb() {
 
 bool startWebUi() {
     try {
+        std::string base_dir;
+        if (utils::fileExists("web")) {
+            base_dir = "web";
+        } else if (utils::fileExists("resources/web")) {
+            base_dir = "resources/web";
+        } else {
+            StaticLogger::error("No web folder was found. Unable to start web ui web server");
+            return false;
+        }
 #ifndef BUILD_CPPJSLIB
-        CppJsLib::createWebGUI(webUi, "web");
+        CppJsLib::createWebGUI(webUi, base_dir);
 #else
-        webUi = new CppJsLib::WebGUI("web");
+        webUi = new CppJsLib::WebGUI(base_dir);
 #endif //BUILD_CPPJSLIB
     } catch (std::bad_alloc &e) {
-        StaticLogger::error(
-                "Unable to create instance of web ui web server. Error: " + std::string(e.what()));
+        StaticLogger::errorStream() << "Unable to create instance of web ui web server. Error: " << e.what();
         webUi = nullptr;
         return false;
     }
