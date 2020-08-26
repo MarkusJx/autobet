@@ -83,6 +83,11 @@ namespace tf {
              * @return the last status
              */
             TF_AI_EXPORT static const char *getLastStatus();
+
+            /**
+             * Reset the status of the ai
+             */
+            TF_AI_EXPORT static void resetLastStatus();
         };
     };
 
@@ -145,6 +150,11 @@ namespace tf {
              * @return the last status
              */
             TF_AI_EXPORT static const char *getLastStatus();
+
+            /**
+             * Reset the status of the ai
+             */
+            TF_AI_EXPORT static void resetLastStatus();
         };
     };
 }  // namespace tf

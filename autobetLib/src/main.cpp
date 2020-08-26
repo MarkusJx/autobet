@@ -3,6 +3,7 @@
 #include "debug.hpp"
 #include "autostop.hpp"
 #include "settings.hpp"
+#include "autobetException.hpp"
 
 #include <chrono>
 #include <thread>
@@ -268,8 +269,9 @@ short get_pos(void *src) {
             if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
                 // bt is still alive, destroy everything
                 StaticLogger::error("bt could not be closed");
+                exception();
                 utils::displayError("An error occurred while initializing the AIs", [] {
-                    kill(true);
+                    quit();
                 });
             } else {
                 // bt is now d-e-a-d
@@ -283,9 +285,7 @@ short get_pos(void *src) {
             if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
                 // wt is still alive, destroy everything
                 StaticLogger::error("wt could not be closed");
-                utils::displayError("An error occurred while initializing the AIs", [] {
-                    kill(true);
-                });
+                throw autobetException("An error occurred while initializing the AIs");
             } else {
                 // wt is now d-e-a-d
                 delete wt;
@@ -301,6 +301,8 @@ short get_pos(void *src) {
         delete bmp;
     }
 
+    // Results to fill in, every number in the array can be between 1 and 10,
+    // 1 represents evens, 2 represents 2/1 etc. 10 represents 10/1 and lower
     short res[6] = {-1, -1, -1, -1, -1, -1};
     unsigned short yCoord, xCoord, _width, _height;
     StaticLogger::debug("AI results:");
@@ -332,6 +334,14 @@ short get_pos(void *src) {
         }
 
         res[i] = b_res;
+    }
+
+    // If not ok, exit
+    if (!tf::BettingAI::status::ok()) {
+        StaticLogger::errorStream() << "Betting ai threw an error. Last error: "
+                                    << tf::BettingAI::status::getLastStatus();
+        tf::BettingAI::status::resetLastStatus();
+        throw autobetException("Betting ai is not ok");
     }
 
     // If evens exist, only bet if the second highest percentage is lower than 4/1 (basically only 4/1 or 5/1)
@@ -410,13 +420,20 @@ void getWinnings() {
         delete b;
     }
 
-    short res = tf::WinningsAI::predict(bmp->data, bmp->size);
+    const short res = tf::WinningsAI::predict(bmp->data, bmp->size);
     StaticLogger::debugStream() << "Winnings prediction: " << res;
+
     DeleteObject(src);
     delete bmp;
 
     // Update the winnings
     updateWinnings(1000 * (int) res);
+
+    if (!tf::WinningsAI::status::ok()) {
+        StaticLogger::errorStream() << "Winnings ai threw an error. Last error: "
+                                    << tf::WinningsAI::status::getLastStatus();
+        tf::WinningsAI::status::resetLastStatus();
+    }
 }
 
 /**
@@ -486,7 +503,7 @@ void mainLoop() {
                 }
             } else {
                 skipBet();
-                StaticLogger::debug("Sleeping for " + std::to_string(time_sleep) + " seconds");
+                StaticLogger::debugStream() << "Sleeping for " << time_sleep << " seconds";
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep));
                 reset();
             }
@@ -548,6 +565,7 @@ void start_script() {
         running = true;
     }
 
+    // Count the time running
     std::thread([] {
         while (!stopped()) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -645,6 +663,7 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
     return Promise<void>::create(info.Env(), [] {
         StaticLogger::debug("Loading winnings from file");
 
+        // If the file does not exist, write a new one
         if (!utils::fileExists("winnings.dat")) {
             StaticLogger::debug("Winnings file does not exist, creating it");
             writeWinnings:
@@ -653,12 +672,14 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
             return;
         }
 
+        // Initialize the ifstream
         std::ifstream ifs("winnings.dat", std::ios::in | std::ios::binary);
         if (!ifs.good()) {
             StaticLogger::error("Unable to open winnings file. Flags: " + std::to_string(ifs.flags()));
             goto writeWinnings;
         }
 
+        // Read the file
         ifs.read((char *) &winnings_all, sizeof(__int64));
         if (ifs.fail()) {
             StaticLogger::warning("File stream fail bit was set, rewriting file");
@@ -670,6 +691,7 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
             goto writeWinnings;
         }
 
+        // Finish up
         ifs.close();
 
         if (ifs.is_open()) {
@@ -743,6 +765,7 @@ void listenForKeycomb() {
 
 #ifdef AUTOBET_WINDOWS
     while (keyCombListen) {
+        // If SHIFT+CTRL+F9 is pressed, start/stop, if SHIFT+CTRL+F10 is pressed, quit
         if (unsigned(GetKeyState(VK_SHIFT)) & unsigned(0x8000)) {
             if (unsigned(GetKeyState(VK_CONTROL)) & unsigned(0x8000)) {
                 if (unsigned(GetKeyState(VK_F10)) & unsigned(0x8000)) {
@@ -811,6 +834,7 @@ bool startWebUi() {
 
 Napi::Promise init(const Napi::CallbackInfo &info) {
     return Promise<bool>::create(info.Env(), [] {
+        // Delete the log if it is was last written more than 7 days ago
         bool log_deleted = debug::checkLogAge();
         try {
             StaticLogger::create();
@@ -821,6 +845,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             return false;
         }
 
+        // Read the config if it exists
         if (utils::fileExists("autobet.conf")) {
             StaticLogger::debug("Settings file exists. Loading it");
             bool debug, log;
@@ -829,6 +854,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             logger::setLogToConsole(log);
         }
 
+        // Log the current version
         StaticLogger::debugStream() << "Initializing Autobet version " << AUTOBET_VERSION;
 
         if (log_deleted) {
@@ -837,6 +863,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 
         utils::setDpiAware();
 
+        // Set CppJsLib loggers
         CppJsLib::setLogger([](const std::string &s) {
             StaticLogger::debug(s);
         });
@@ -845,20 +872,24 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             StaticLogger::error(s);
         });
 
+        // Print some system information
         utils::printSystemInformation();
         utils::setCtrlCHandler([] {
             StaticLogger::debug("Shutdown event hit. Shutting down");
             quit();
         });
 
+        // Init autostop
         autostop::init(&winnings, &time_running);
 
 #ifndef NDEBUG
         StaticLogger::warning("Program was compiled in debug mode");
 #endif //NDEBUG
 
+        // Set the directory for betting.pb and winnings.pb
         tf::setPrefix("resources/data/");
 
+        // Check if betting.pb exists
         if (!utils::fileExists("resources/data/betting.pb")) {
             StaticLogger::error("Could not initialize Betting AI: betting.pb not found");
             utils::displayError("Could not initialize Betting AI\nBetting.pb not found."
@@ -870,6 +901,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 
         StaticLogger::debug("Initializing Betting AI");
 
+        // Initialize betting ai
         if (!tf::BettingAI::create()) {
             StaticLogger::error("Could not initialize Betting AI: Unable to allocate memory");
             utils::displayError("Could not initialize Betting AI\nNot enough memory", [] {
@@ -905,6 +937,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             return false;
         }
 
+        // Initialize winnings ai if winnings.pb exists
         if (utils::fileExists("resources/data/winnings.pb")) {
             StaticLogger::debug("Initializing Winnings AI");
 
@@ -949,7 +982,14 @@ Napi::Promise start(const Napi::CallbackInfo &info) {
         runLoops = true;
 
         while (runLoops) {
-            mainLoop();
+            try {
+                mainLoop();
+            } catch (autobetException &e) {
+                exception();
+                utils::displayError(e.what(), [] {
+                    quit();
+                });
+            }
             for (int i = 0; i < 100; i++) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 if (running) {
