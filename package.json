@@ -50,7 +50,6 @@
       "ui/qrcode.min.js",
       "ui/startstop.min.js",
       "ui/style.min.css",
-      "**/web/*",
       "main.js",
       "preload.js",
       "renderer.js",
@@ -69,6 +68,13 @@
       {
         "from": "resources/icon.png",
         "to": "icon.png"
+      },
+      {
+        "from": "web",
+        "to": "web",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "asar": true,
