@@ -14,6 +14,6 @@ jobs:
         stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days'
         stale-issue-label: 'inactive'
         only-labels: 'awaiting response'
-        days-before-stale: 25
+        days-before-stale: 5
         days-before-close: 5
         debug-only: true
