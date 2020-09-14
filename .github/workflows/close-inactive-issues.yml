@@ -15,3 +15,4 @@ jobs:
         only-labels: 'awaiting response'
         days-before-stale: 25
         days-before-close: 5
+        close-issue-message: 'This issue is closed because it has been open 30 days with no activity'
