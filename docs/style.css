@@ -355,7 +355,7 @@ li.desc-text {
 
 #demo-video-container-container {
     width: 90%;
-    height: 90%;
+    /*height: 90%;*/
     margin: auto;
     padding: 20px 0;
 }
