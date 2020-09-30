@@ -78,7 +78,7 @@ download_button.addEventListener('click', () => {
 let scrolled = false;
 
 function showDownloadButton(e) {
-    if ((e == null || e.originalEvent.deltaY > 0) && !scrolled) {
+    if (/*(e == null || e.originalEvent.deltaY > 0) && */!scrolled) {
         $("#heading-download-container").addClass("scrolled");
         $("#heading-download-background").addClass("scrolled");
         setTimeout(() => {
