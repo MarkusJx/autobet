@@ -101,7 +101,7 @@ document.addEventListener('scroll', () => {
     }
 });
 
-$("body").on('mousewheel', showDownloadButton);
+$("body").on('mousewheel DOMMouseScroll MozMousePixelScroll', showDownloadButton);
 
 document.addEventListener('click', () => showDownloadButton(null));
 document.addEventListener('keypress', () => showDownloadButton(null));
