@@ -18,8 +18,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "tf_ai.h"
-#include "tf_utils.h"
+#include "tf_ai.hpp"
+#include "tf_utils.hpp"
 
 #define input_width 224
 #define input_height 224
@@ -28,133 +28,57 @@ limitations under the License.
 #define input_layer "input_1"
 #define output_layer "predictions/Softmax"
 
+#ifndef BUILD_TF_AI
+#   define TF_AI_EXPORT
+#endif
+
 using namespace tf;
 using namespace tensorflow;
 
-std::string prefix;
+// AI class definition ====================================
 
-TF_AI_EXPORT void tf::setPrefix(const char *prfx) {
-    prefix = std::string(prfx);
+TF_AI_EXPORT tf::AI *tf::AI::create(const char *modelPath, tf::labels l) {
+    return new tf::AI(modelPath, l);
 }
 
-// Class definitions ========================================
-class B_AI {
-public:
-    B_AI();
-
-    short int predict(char *image, size_t img_size);
-
-    short int selfTest(const char *fileName);
-
-    ~B_AI();
-
-    AiStatus *status;
-
-private:
-    tf_ai *ai;
-};
-
-class W_AI {
-public:
-    W_AI();
-
-    short int predict(char *image, size_t img_size);
-
-    short int selfTest(const char *fileName);
-
-    ~W_AI();
-
-    AiStatus *status;
-
-private:
-    tf_ai *ai;
-};
-
-// B_AI and W_AI objects
-B_AI *bettingAi = nullptr;
-W_AI *winningsAi = nullptr;
-
-// Betting AI =============================================
-
-B_AI::B_AI() {
-    status = new AiStatus();
-    std::string path = prefix;
-    path.append("betting.pb");
-    ai = new tf_ai(path, status);
+TF_AI_EXPORT void tf::AI::destroy(tf::AI *toDestroy) {
+    delete toDestroy;
 }
 
-short int B_AI::predict(char *image, size_t img_size) {
+TF_AI_EXPORT short tf::AI::predict(char *image, size_t size) {
     if (image == nullptr) {
         status->setError("image pointer was nullptr");
         return -1;
     }
 
-    if (img_size == 0) {
-        status->setError("image size was zero");
-        return -1;
-    }
-    int index = ai->process(image, img_size);
-    if (index != -1) {
-        return betting_labels[index];
-    } else {
-        return -1;
-    }
-}
-
-short int B_AI::selfTest(const char *fileName) {
-    int index = ai->selfTest(fileName);
-    if (index != -1) {
-        return betting_labels[index];
-    } else {
-        return -1;
-    }
-}
-
-B_AI::~B_AI() {
-    delete static_cast<tf_ai *>(ai);
-    delete status;
-}
-
-// Winnings AI ============================================
-
-W_AI::W_AI() {
-    status = new AiStatus();
-    std::string path = prefix;
-    path.append("winnings.pb");
-    ai = new tf_ai(path, status);
-}
-
-short int W_AI::predict(char *image, size_t img_size) {
-    if (image == nullptr) {
-        status->setError("image pointer was nullptr");
-        return -1;
-    }
-
-    if (img_size == 0) {
+    if (size == 0) {
         status->setError("image size was zero");
         return -1;
     }
 
-    int index = ai->process(image, img_size);
-    if (index != -1) {
-        return winnings_labels[index];
+    int index = static_cast<tf_ai *>(ai)->process(image, size);
+    if (index >= 0 || index < labels_size) {
+        return this->labels[index];
     } else {
         return -1;
     }
 }
 
-short int W_AI::selfTest(const char *fileName) {
-    int index = ai->selfTest(fileName);
-    if (index != -1) {
-        return winnings_labels[index];
-    } else {
-        return -1;
-    }
+TF_AI_EXPORT tf::AiStatus *tf::AI::getStatus() const noexcept {
+    return this->status;
 }
 
-W_AI::~W_AI() {
-    delete static_cast<tf_ai *>(ai);
+TF_AI_EXPORT tf::AI::AI(const char *modelPath, tf::labels l) {
+    this->labels = l.labels;
+    this->labels_size = l.labels_size;
+
+    status = new tf::AiStatus();
+    ai = static_cast<void *>(new tf_ai(modelPath, status));
+}
+
+TF_AI_EXPORT tf::AI::~AI() {
     delete status;
+    delete static_cast<tf_ai *>(ai);
 }
 
 // Ai Status ==============================================
@@ -163,9 +87,11 @@ AiStatus::AiStatus() {
     _ok = true;
 }
 
-bool AiStatus::ok() const { return this->_ok; }
+TF_AI_EXPORT bool AiStatus::ok() const noexcept {
+    return this->_ok;
+}
 
-const char *AiStatus::getLastStatus() const {
+TF_AI_EXPORT const char *AiStatus::getLastStatus() const noexcept {
     if (this->lastStatus == nullptr) {
         return "";
     } else {
@@ -173,7 +99,7 @@ const char *AiStatus::getLastStatus() const {
     }
 }
 
-void AiStatus::resetLastStatus() {
+TF_AI_EXPORT void AiStatus::resetLastStatus() {
     if (lastStatus != nullptr) {
         free(lastStatus);
     }
@@ -257,125 +183,6 @@ int tf_ai::selfTest(const char *fileName) {
 }
 
 tf_ai::~tf_ai() { session->Close(); }
-
-// Export stuff ==============================================
-#ifndef BUILD_TF_AI
-#define TF_AI_EXPORT
-#endif
-
-// Betting AI=================================================
-TF_AI_EXPORT bool tf::BettingAI::create() {
-    try {
-        bettingAi = new B_AI();
-    } catch (std::bad_alloc) {
-        bettingAi = nullptr;
-        return false;
-    }
-    return true;
-}
-
-TF_AI_EXPORT bool tf::BettingAI::initialized() { return bettingAi != nullptr; }
-
-TF_AI_EXPORT short tf::BettingAI::predict(char *image, size_t size) {
-    if (bettingAi) {
-        return bettingAi->predict(image, size);
-    } else {
-        return -2;
-    }
-}
-
-TF_AI_EXPORT short tf::BettingAI::selfTest(const char *fileName) {
-    if (bettingAi) {
-        return bettingAi->selfTest(fileName);
-    } else {
-        return -2;
-    }
-}
-
-TF_AI_EXPORT void tf::BettingAI::destroy() {
-    delete bettingAi;
-    bettingAi = nullptr;
-}
-
-TF_AI_EXPORT bool tf::BettingAI::status::ok() {
-    if (bettingAi) {
-        return bettingAi->status->ok();
-    } else {
-        return false;
-    }
-}
-
-TF_AI_EXPORT const char *tf::BettingAI::status::getLastStatus() {
-    if (bettingAi) {
-        return bettingAi->status->getLastStatus();
-    } else {
-        return "BettingAi is not initialized";
-    }
-}
-
-TF_AI_EXPORT void tf::BettingAI::status::resetLastStatus() {
-    if (bettingAi) {
-        return bettingAi->status->resetLastStatus();
-    }
-}
-
-// Winnings AI ===============================================
-TF_AI_EXPORT bool tf::WinningsAI::create() {
-    try {
-        winningsAi = new W_AI();
-    } catch (std::bad_alloc) {
-        winningsAi = nullptr;
-        return false;
-    }
-    return true;
-}
-
-TF_AI_EXPORT bool tf::WinningsAI::initialized() {
-    return winningsAi != nullptr;
-}
-
-TF_AI_EXPORT short tf::WinningsAI::predict(char *image, size_t size) {
-    if (winningsAi) {
-        return winningsAi->predict(image, size);
-    } else {
-        return -2;
-    }
-}
-
-TF_AI_EXPORT short tf::WinningsAI::selfTest(const char *fileName) {
-    if (winningsAi) {
-        return winningsAi->selfTest(fileName);
-    } else {
-        return -2;
-    }
-}
-
-TF_AI_EXPORT void tf::WinningsAI::destroy() {
-    delete winningsAi;
-    winningsAi = nullptr;
-}
-
-TF_AI_EXPORT bool tf::WinningsAI::status::ok() {
-    if (winningsAi) {
-        return winningsAi->status->ok();
-    } else {
-        return false;
-    }
-}
-
-TF_AI_EXPORT const char *tf::WinningsAI::status::getLastStatus() {
-    if (winningsAi) {
-        return winningsAi->status->getLastStatus();
-    } else {
-        return "WinningsAi is not initialized";
-    }
-}
-
-TF_AI_EXPORT void tf::WinningsAI::status::resetLastStatus() {
-    if (winningsAi) {
-        winningsAi->status->resetLastStatus();
-    }
-}
 
 // Main ======================================================
 int main(int argc, char *argv[]) {

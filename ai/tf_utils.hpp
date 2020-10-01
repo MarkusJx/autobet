@@ -41,8 +41,7 @@ limitations under the License.
 #include "tensorflow/core/public/session.h"
 #include "tensorflow/core/util/command_line_flags.h"
 
-#include "ai.h"
-#include "aiStatus.h"
+#include "ai.hpp"
 
 using tensorflow::Flag;
 using tensorflow::int32;

@@ -24,7 +24,7 @@
 #endif //BUILD_CPPJSLIB
 
 #include <CppJsLib.hpp>
-#include <ai.h>
+#include <ai.hpp>
 
 #include "logger.hpp"
 #include "jsCallback.hpp"
@@ -37,7 +37,8 @@ const unsigned short int yLocations[6] = {464, 628, 790, 952, 1114, 1276};
 CppJsLib::WebGUI *webUi;
 
 std::thread *bt = nullptr;
-std::thread *wt = nullptr;
+
+tf::AI *ai;
 
 unsigned short int xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
 __int64 winnings_all = 0L;
@@ -65,6 +66,9 @@ javascriptCallback<void> *uiKeycombStopCallback = nullptr;
 javascriptCallback<void> *exceptionCallback = nullptr;
 javascriptCallback<std::string> *logCallback = nullptr;
 
+// The labels for the ai. Contains labels for winnings and betting.
+const short labels[15] = {1, 10, 2, 20, 3, 30, 4, 40, 5, 50, 6, 7, 8, 9, 0};
+
 /**
  * Kill the program and close all connections
  *
@@ -85,10 +89,6 @@ void kill(bool _exit = true) {
         bt->detach();
     delete bt;
 
-    if (wt)
-        wt->detach();
-    delete wt;
-
     // Set every possible bool to false
     keyCombListen = false;
     runLoops = false;
@@ -108,13 +108,10 @@ void kill(bool _exit = true) {
     }
 
     // Delete the AIs
-    StaticLogger::debug("Deleting Betting AI");
-    tf::BettingAI::destroy();
-    StaticLogger::debug("Deleted Betting AI");
-
-    StaticLogger::debug("Deleting Winnings AI");
-    tf::WinningsAI::destroy();
-    StaticLogger::debug("Deleted Winnings AI");
+    StaticLogger::debug("Deleting ai");
+    tf::AI::destroy(ai);
+    ai = nullptr;
+    StaticLogger::debug("Deleted ai");
 
     // Sleep
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -262,7 +259,7 @@ void setGtaVRunning(bool val) {
  */
 short get_pos(void *src) {
     // Join both threads for predicting the first image
-    if (bt || wt) {
+    if (bt) {
         // Close the threads. Source: https://stackoverflow.com/a/33017819
         if (bt) {
             auto future = std::async(std::launch::async, &std::thread::join, bt);
@@ -277,19 +274,6 @@ short get_pos(void *src) {
                 // bt is now d-e-a-d
                 delete bt;
                 bt = nullptr;
-            }
-        }
-
-        if (wt) {
-            auto future = std::async(std::launch::async, &std::thread::join, wt);
-            if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
-                // wt is still alive, destroy everything
-                StaticLogger::error("wt could not be closed");
-                throw autobetException("An error occurred while initializing the AIs");
-            } else {
-                // wt is now d-e-a-d
-                delete wt;
-                wt = nullptr;
             }
         }
     }
@@ -320,7 +304,7 @@ short get_pos(void *src) {
         }
 
         // Predict it
-        short b_res = tf::BettingAI::predict(b->data, b->size);
+        short b_res = ai->predict(b->data, b->size);
         StaticLogger::debug(std::to_string(b_res));
 
         // Delete the bitmap object
@@ -337,10 +321,10 @@ short get_pos(void *src) {
     }
 
     // If not ok, exit
-    if (!tf::BettingAI::status::ok()) {
+    if (!ai->getStatus()->ok()) {
         StaticLogger::errorStream() << "Betting ai threw an error. Last error: "
-                                    << tf::BettingAI::status::getLastStatus();
-        tf::BettingAI::status::resetLastStatus();
+                                    << ai->getStatus()->getLastStatus();
+        ai->getStatus()->resetLastStatus();
         throw autobetException("Betting ai is not ok");
     }
 
@@ -420,7 +404,7 @@ void getWinnings() {
         delete b;
     }
 
-    const short res = tf::WinningsAI::predict(bmp->data, bmp->size);
+    const short res = ai->predict(bmp->data, bmp->size);
     StaticLogger::debugStream() << "Winnings prediction: " << res;
 
     DeleteObject(src);
@@ -429,10 +413,10 @@ void getWinnings() {
     // Update the winnings
     updateWinnings(1000 * (int) res);
 
-    if (!tf::WinningsAI::status::ok()) {
+    if (!ai->getStatus()->ok()) {
         StaticLogger::errorStream() << "Winnings ai threw an error. Last error: "
-                                    << tf::WinningsAI::status::getLastStatus();
-        tf::WinningsAI::status::resetLastStatus();
+                                    << ai->getStatus()->getLastStatus();
+        ai->getStatus()->resetLastStatus();
     }
 }
 
@@ -893,90 +877,61 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 #ifndef NDEBUG
         StaticLogger::warning("Program was compiled in debug mode");
 #endif //NDEBUG
-
-        // Set the directory for betting.pb and winnings.pb
-        tf::setPrefix("resources/data/");
-
         // Check if betting.pb exists
-        if (!utils::fileExists("resources/data/betting.pb")) {
-            StaticLogger::error("Could not initialize Betting AI: betting.pb not found");
-            utils::displayError("Could not initialize Betting AI\nBetting.pb not found."
+        if (!utils::fileExists("resources/data/model.pb")) {
+            StaticLogger::error("Could not initialize AI: model.pb not found");
+            utils::displayError("Could not initialize AI\nmodel.pb not found."
                                 "\nReinstalling the program might fix this error", [] {
                 exception();
             });
             return false;
         }
 
-        StaticLogger::debug("Initializing Betting AI");
+        StaticLogger::debug("Initializing AI");
 
-        // Initialize betting ai
-        if (!tf::BettingAI::create()) {
-            StaticLogger::error("Could not initialize Betting AI: Unable to allocate memory");
-            utils::displayError("Could not initialize Betting AI\nNot enough memory", [] {
+        try {
+            ai = tf::AI::create("resources/data/model.pb", {labels, sizeof(labels)});
+        } catch (std::bad_alloc &e) {
+            StaticLogger::error("Could not initialize AI: Unable to allocate memory");
+            utils::displayError("Could not initialize AI\nNot enough memory", [] {
                 exception();
             });
             return false;
-        } else if (tf::BettingAI::status::ok()) {
-            StaticLogger::debug("Successfully initialized Betting AI");
+        } catch (...) {
+            StaticLogger::error("Could not initialize AI: Unknown error");
+            utils::displayError("Could not initialize AI\nUnknown error", [] {
+                exception();
+            });
+            return false;
+        }
+
+        if (ai->getStatus()->ok()) {
+            StaticLogger::debug("Successfully initialized AI");
 
             // Run the first prediction as it is painfully slow
             bt = new std::thread([] {
-                StaticLogger::debug("Running first Betting AI prediction");
+                StaticLogger::debug("Running first AI prediction");
                 void *src = utils::TakeScreenShot(0, 0, 100, 100);
                 utils::bitmap *b = utils::crop(0, 0, 100, 100, src);
                 DeleteObject(src);
-                tf::BettingAI::predict(b->data, b->size);
+                ai->predict(b->data, b->size);
 
                 delete b;
-                StaticLogger::debug("Done running first Betting AI prediction");
+                StaticLogger::debug("Done running first AI prediction");
             });
         } else {
-            std::string msg("Failed to initialize Betting AI. Error: ");
-            msg.append(tf::BettingAI::status::getLastStatus());
-            StaticLogger::error(msg);
+            StaticLogger::errorStream() << "Failed to initialize AI. Error: " << ai->getStatus()->getLastStatus();
 
-            StaticLogger::debug("Deleting Betting AI");
-            tf::BettingAI::destroy();
-            StaticLogger::debug("Deleted Betting AI");
+            StaticLogger::debug("Deleting AI");
+            tf::AI::destroy(ai);
+            StaticLogger::debug("Deleted AI");
 
-            utils::displayError("Could not initialize Betting AI\nCheck the log for further information", [] {
+            utils::displayError("Could not initialize AI\nCheck the log for further information", [] {
                 quit();
             });
             return false;
         }
 
-        // Initialize winnings ai if winnings.pb exists
-        if (utils::fileExists("resources/data/winnings.pb")) {
-            StaticLogger::debug("Initializing Winnings AI");
-
-            if (!tf::WinningsAI::create()) {
-                StaticLogger::error("Could not initialize Winnings AI: Unable to allocate memory");
-            } else if (tf::WinningsAI::status::ok()) {
-                StaticLogger::debug("Successfully initialized Winnings AI");
-
-                // Run the first prediction as it is painfully slow
-                wt = new std::thread([] {
-                    StaticLogger::debug("Running first Winnings AI prediction");
-                    void *src = utils::TakeScreenShot(0, 0, 100, 100);
-                    utils::bitmap *b = utils::crop(0, 0, 100, 100, src);
-                    DeleteObject(src);
-                    tf::WinningsAI::predict(b->data, b->size);
-
-                    delete b;
-                    StaticLogger::debug("Done running first Winnings AI prediction");
-                });
-            } else {
-                std::string msg("Failed to initialize Winnings AI. Error: ");
-                msg.append(tf::WinningsAI::status::getLastStatus());
-                StaticLogger::error(msg);
-
-                StaticLogger::debug("Deleting Winnings AI");
-                tf::WinningsAI::destroy();
-                StaticLogger::debug("Deleted Winnings AI");
-            }
-        } else {
-            StaticLogger::error("Could not initialize Winnings AI: winnings.pb does not exist");
-        }
         keyCombListen = true;
         std::thread keyCombThread(listenForKeycomb);
         keyCombThread.detach();
