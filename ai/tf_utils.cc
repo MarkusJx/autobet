@@ -17,7 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "tf_utils.h"
+#include "tf_utils.hpp"
 
 static Status ReadEntireFile(tensorflow::Env* env, const string& filename, Tensor* output) {
   tensorflow::uint64 file_size = 0;

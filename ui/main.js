@@ -181,6 +181,16 @@ enable_webserver.listen('change', () => {
             enable_webserver.checked = autobetLib.settings.webServerRunning();
         }
 
+        if (enable_webserver.checked) {
+            weblink.disabled = false;
+            showqrbutton.disabled = false;
+            setIPs();
+        } else {
+            weblink.disabled = true;
+            weblink.innerText = "not running";
+            showqrbutton.disabled = true;
+        }
+
         autobetLib.settings.saveSettings().then(() => {
             enable_webserver.disabled = false;
             settings_saved_msg.close();
@@ -200,7 +210,6 @@ async function main() {
     // Create the title bar
     titlebar.create();
 
-    setIPs();
     enable_webserver.disabled = true;
 
     // Initialize
@@ -231,9 +240,19 @@ async function main() {
         enable_webserver.checked = initialized;
         if (initialized) {
             console.log("Web server started.");
+            weblink.disabled = false;
+            showqrbutton.disabled = false;
+            setIPs();
         } else {
             console.error("Could not start web server");
+            weblink.disabled = true;
+            weblink.innerText = "not running";
+            showqrbutton.disabled = true;
         }
+    } else {
+        weblink.disabled = true;
+        weblink.innerText = "not running";
+        showqrbutton.disabled = true;
     }
     enable_webserver.disabled = false;
 
@@ -242,6 +261,12 @@ async function main() {
 
 main().then(() => {
     console.log("Main finished.");
+}, () => {
+    errordialog.open();
+    errordialog.listen("MDCDialog:closed", function() {
+        autobetLib.shutdown();
+        electron.quit();
+    });
 });
 
 // Settings ================================================
