@@ -122,7 +122,7 @@ setTimeout(() => {
                 document.getElementById("latest-version").innerHTML = res;
 
                 download_now.addEventListener('click', () => {
-                    location.href = "https://github.com/MarkusJx/GTA-Online-Autobet/releases/download/" + res + "/autobet_installer.exe";
+                    location.href = "https://github.com/MarkusJx/GTA-Online-Autobet/releases/download/" + res + "/autobet.exe";
                 });
 
                 show_tag.addEventListener('click', () => {
