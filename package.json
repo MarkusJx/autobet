@@ -4,9 +4,12 @@
   "description": "A GTA Online horse racing betting bot",
   "main": "main.js",
   "scripts": {
-    "start": "electron . --help",
-    "test": "electron . --help",
-    "pack": "electron-builder"
+    "start": "electron .",
+    "prestart": "cd autobetLib && npm run-script build",
+    "test": "electron .",
+    "pack": "electron-builder",
+    "prepack": "cd autobetLib && npm run-script build",
+    "postinstall": "cd autobetLib && npm install"
   },
   "repository": {
     "type": "git",
