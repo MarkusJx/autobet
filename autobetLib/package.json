@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node test.js",
-    "build": "cmake.js build --CDBUILD_CPPJSLIB=TRUE --CDBoost_INCLUDE_DIR=C:\\include\\boost_1_73_0",
+    "build": "cmake-js build --CDBUILD_CPPJSLIB=TRUE --CDBoost_INCLUDE_DIR=C:\\include\\boost_1_73_0",
     "postbuild": "node prelaunch.js",
     "prestart": "node prelaunch.js"
   },
