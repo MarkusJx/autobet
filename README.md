@@ -53,61 +53,7 @@ If your screen does not support it, play the game in windowed mode rather than f
 
 ## Compiling yourself
 
-Stranger Danger. You've heard this right? Yeah, No. Me neither. But if you don't trust your shady software dealer in the back corner of the github software party, that's totally fine. So here are the steps to compile this whole thing yourself:
-
-### Prerequisites
-
-* [Tensorflow](https://www.tensorflow.org/install/source_windows?lang=python3) r2.1
-* CMake
-* MSVC
-* [Node.js](https://nodejs.org/en/) version 12.14.0 or later
-* [httplib](https://github.com/yhirose/cpp-httplib)
-* [json](https://github.com/nlohmann/json)
-* [OpenSSL](https://slproweb.com/products/Win32OpenSSL.html)
-
-*Perform the following steps in a command line with git and npm enabled*
-* Clone this repository ``git clone https://github.com/MarkusJx/GTA-Online-Autobet``
-* Change directory to the just cloned one ``cd GTA-Online-Autobet``
-
-#### Electron installation
-* Install electron ``npm i -D electron@latest``
-* Clone the electron-quick-start repo ``git clone https://github.com/electron/electron-quick-start``
-* Copy the contents of the electron folder into the electron-quick-start folder ``cp -R electron/. electron-quick-start``
-* Copy the contents of the electron-quick-start folder into the electron folder ``cp -R electron-quick-start/. electron``
-* cd into the electron folder ``cd electron``
-* Install the electron prerequisites ``npm install``
-* Install electron packager ``npm install electron-packager``
-* Change directory back to the main directory ``cd ..``
-* Create the electron package ``electron-packager electron``
-
-#### Compile
-##### Compile AI
-* Follow the instructions [over here](https://www.tensorflow.org/install/source_windows?lang=python3)
-* copy the ``ai`` folder into ``<tensorflow-src>/tensorflow``
-* Make sure you've created the config file for tensorflow
-* Run ``bazel build --config=opt //tensorflow/ai:ai.dll`` in folder ``<tensorflow-src>``
-* The build will take about 1-2 hours
-* The resulting .dll and .lib will be stored in ``<tensorflow-src>/bazel-bin/tensorflow/ai``
-
-##### Compile Autobet
-* Create folder ``<autobet-src>/include``
-* Create folder ``<autobet-src>/lib``
-* Copy ``<autobet-src>/ai/ai.h`` into ``<autobet-src>/include``
-* Put ``httplib.h`` and ``json.hpp`` into ``<autobet-src>/include``
-* Copy ``<tensorflow-src>/bazel-bin/tensorflow/ai/ai.dll.if.lib`` into ``<autobet-src>/lib``
-* Download [zip](https://github.com/kuba--/zip) and unpack it
-* Create folder ``<autobet-src>/src/zip``
-* Copy all contents from ``<zip-src>/src`` into ``<autobet-src>/src/zip``
-* Download [CppJsLib](https://github.com/MarkusJx/CppJsLib) and unpack it
-* Create folder ``<autobet-src>/src/CppJsLib``
-* Copy all contents from ``<cppjslib-src>/src`` into ``<autobet-src>/src/CppJsLib``
-* Create folder ``<autobet-src>/build`` and cd into it
-* Run ``cmake .. -DBUILD_CPPJSLIB=TRUE``
-* Run ``cmake --build . --config Release``
-* Copy ``<tensorflow-src>/bazel-bin/tensorflow/ai/ai.dll`` into ``<autobet-src>/build/src/Release``
-* Copy ``<autobet-src>/ui`` into ``<autobet-src>/build/src/Release``
-* Copy ``<autobet-src>/web`` into ``<autobet-src>/build/src/Release``
-* Copy ``<cppjslib-src>/CppJsLibJs`` into ``<autobet-src>/build/src/Release``
+Stranger Danger. You've heard this right? Yeah, No. Me neither. But if you don't trust your shady software dealer in the back corner of the github software party, that's totally fine. To compile it yourself, take a look at the [wiki pages](https://github.com/MarkusJx/autobet/wiki/Compiling-(Pre-v1.2.0)).
 
 ## Feedback
 ### This is not what you expected?
