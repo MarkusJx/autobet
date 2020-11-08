@@ -1,0 +1,30 @@
+name: autobet-build
+
+on:
+  push:
+    paths-ignore: 
+      - "README.md"
+      - "LICENSE"
+      - ".gitignore"
+      - "docs/**"
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: npm install
+      run: npm install
+    - name: build
+      run: npm run-script build
+    - name: package
+      run: npm run-script pack
+    - name: Upload test
+      uses: actions/upload-artifact@v1
+      with:
+        name: autobet-dev
+        path: dist/autobet.exe
