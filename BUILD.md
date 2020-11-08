@@ -21,3 +21,7 @@ For newer versions of autobet, run these steps in a command line with
 ## Packaging
 To package autobet, run:<br>
 ``npm run-script pack``
+
+## Run it
+To test and run autobet, simply execute:<br>
+``npm start`` (This will also run the build step, sou you don't have to run it yourself)
