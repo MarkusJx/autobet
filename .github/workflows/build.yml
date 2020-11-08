@@ -17,12 +17,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install Boost
+      run: choco install -y boost-msvc-14.1
     - name: npm install
       run: npm install
     - name: build
       run: npm run-script build
+      env:
+        BOOST_ROOT: C:/local/boost_1_67_0
     - name: package
       run: npm run-script pack
+      env:
+        BOOST_ROOT: C:/local/boost_1_67_0
     - name: Upload test
       uses: actions/upload-artifact@v1
       with:
