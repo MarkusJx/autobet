@@ -11,6 +11,9 @@
 * [cmake-js](https://www.npmjs.com/package/cmake-js) installed globally
 (run ``npm install -g cmake-js``) version = 6.1.0
 (this one for sure works, any other versions may work as well)
+* [chocolatey](https://chocolatey.org/install) for installing boost
+* [Boost](https://chocolatey.org/packages/boost-msvc-14.1) installed using chocolatey
+(run ``choco install -y boost-msvc-14.1 --version 1.67.0`` in an elevated cmd) version >= 1.67.0
 
 ## Build steps
 For newer versions of autobet, run these steps in a command line with 
