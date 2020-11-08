@@ -1,30 +1,31 @@
 {
-  "name": "autobetlib",
-  "version": "1.2.1",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "node test.js",
-    "build": "cmake-js build --CDBUILD_CPPJSLIB=TRUE --CDBoost_INCLUDE_DIR=C:\\include\\boost_1_73_0",
-    "postbuild": "node prelaunch.js",
-    "prestart": "node prelaunch.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MarkusJx/GTA-Online-Autobet.git"
-  },
-  "author": "MarkusJx",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/MarkusJx/GTA-Online-Autobet/issues"
-  },
-  "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
-  "cmake-js": {
-    "runtime": "electron",
-    "arch": "x64",
-    "runtimeVersion": "9.2.1"
-  },
-  "devDependencies": {
-    "cmake-js": "^6.1.0"
-  }
+    "name": "autobetlib",
+    "version": "1.2.1",
+    "description": "The autobet native library module",
+    "main": "index.js",
+    "scripts": {
+        "test": "node test.js",
+        "build": "cmake-js build --CDBUILD_CPPJSLIB=TRUE --CDBoost_INCLUDE_DIR=C:\\include\\boost_1_73_0",
+        "postbuild": "node prelaunch.js",
+        "prestart": "node prelaunch.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MarkusJx/GTA-Online-Autobet.git"
+    },
+    "author": "MarkusJx",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/MarkusJx/GTA-Online-Autobet/issues"
+    },
+    "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
+    "cmake-js": {
+        "runtime": "electron",
+        "arch": "x64",
+        "runtimeVersion": "9.2.1"
+    },
+    "devDependencies": {
+        "cmake-js": "^6.1.0",
+        "node-addon-api": "^3.0.2"
+    }
 }

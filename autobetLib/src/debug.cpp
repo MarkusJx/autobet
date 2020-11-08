@@ -7,7 +7,7 @@
 #include <chrono>
 #include <ctime>
 
-#include "zip/zip.h"
+#include "zip/src/zip.h"
 #include "logger.hpp"
 
 using namespace logger;

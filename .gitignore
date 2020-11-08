@@ -219,3 +219,12 @@ include/
 /CMakeSettings.json
 /build/
 node_modules
+/winnings.dat
+/autobet.log
+/autobet.conf
+/resources/data/model.pb
+/dist
+/autobetLib/bin
+/autobetLib/build
+/autobetLib/external
+/autobetLib/lib
