@@ -11,12 +11,23 @@ option(BUILD_CPPJSLIB FALSE)
 add_compile_definitions(AUTOBET_ENABLE_FULL_DEBUG)
 message(STATUS "Building with debug:full support")
 
+include(autobetLib_func_def.cmake)
+
+# Download the zip repo
+downloadZip()
+set(ZIP_SOURCE_DIRECTORY ${CMAKE_SOURCE_DIR}/src/zip/src)
+
 file(GLOB zip
-        "zip/*.h"
-        "zip/*.c"
+        "${ZIP_SOURCE_DIRECTORY}/*.h"
+        "${ZIP_SOURCE_DIRECTORY}/*.c"
         )
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+set(AI_SRC_DIRECTORY ${CMAKE_SOURCE_DIR}/../ai)
+if (NOT EXISTS ${AI_SRC_DIRECTORY})
+    message(ERROR "${AI_SRC_DIRECTORY} does not exists, cannot continue")
+endif ()
+
+include_directories(${CMAKE_SOURCE_DIR}/include ${AI_SRC_DIRECTORY})
 link_directories(${CMAKE_SOURCE_DIR}/lib ${Boost_LIBRARY_DIRS} "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.27.29110\\atlmfc\\lib\\x64")
 
 file(GLOB src
@@ -51,11 +62,27 @@ else ()
     target_link_libraries(${PROJECT_NAME} ai-release.dll.if)
 endif ()
 
+# If BUILD_CPPJSLIB is set, download the CppJsLib repo and add the files to the library
 if (BUILD_CPPJSLIB)
-    include(CppJsLib/InitCppJsLib.cmake)
-    initCppJsLib(${PROJECT_NAME} "CppJsLib" "${CMAKE_SOURCE_DIR}/include" TRUE FALSE)
+    downloadCppJsLib()
+
+    include(CppJsLib/src/InitCppJsLib.cmake)
+    initCppJsLib(${PROJECT_NAME} "CppJsLib/src" "${CMAKE_SOURCE_DIR}/include" TRUE FALSE)
+
+    if (EXISTS ${CMAKE_SOURCE_DIR}/websocketpp)
+        message(STATUS "Deleting websocketpp folder")
+        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/websocketpp)
+    endif ()
 
     add_compile_definitions(BUILD_CPPJSLIB)
 else ()
     target_link_libraries(${PROJECT_NAME} CppJsLib)
 endif ()
+
+# Create 'external' and 'lib' directory
+createDirectory(${CMAKE_SOURCE_DIR}/external)
+createDirectory(${CMAKE_SOURCE_DIR}/lib)
+
+# Download ai dll files
+downloadAiDll()
+downloadAiLib()
