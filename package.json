@@ -1,88 +1,89 @@
 {
-  "name": "autobet",
-  "version": "1.2.1",
-  "description": "A GTA Online horse racing betting bot",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "prestart": "cd autobetLib && npm run-script build",
-    "test": "electron .",
-    "pack": "electron-builder",
-    "prepack": "cd autobetLib && npm run-script build",
-    "postinstall": "cd autobetLib && npm install"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MarkusJx/GTA-Online-Autobet.git"
-  },
-  "author": "MarkusJx",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/MarkusJx/GTA-Online-Autobet/issues"
-  },
-  "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
-  "devDependencies": {
-    "electron": "^10.1.2",
-    "electron-builder": "^22.8.0"
-  },
-  "dependencies": {
-    "custom-electron-titlebar": "^3.2.4",
-    "electron-updater": "^4.3.4",
-    "electron-window-state": "^5.0.3",
-    "material-components-web": "^7.0.0"
-  },
-  "build": {
-    "appId": "markusjx.autobet",
-    "icon": "resources/icon.png",
-    "nsis": {
-      "oneClick": false,
-      "artifactName": "${productName}.${ext}",
-      "license": "pack/license.txt",
-      "installerLanguages": [
-        "en_US"
-      ],
-      "installerIcon": "pack/icon.ico"
+    "name": "autobet",
+    "version": "1.2.1",
+    "description": "A GTA Online horse racing betting bot",
+    "main": "main.js",
+    "scripts": {
+        "build": "cd autobetLib && npm run-script build",
+        "start": "electron .",
+        "prestart": "npm run-script build",
+        "test": "electron .",
+        "pack": "electron-builder",
+        "prepack": "npm run-script build",
+        "postinstall": "node downloadModel.js && cd autobetLib && npm install"
     },
-    "files": [
-      "**/autobetLib/bin/*",
-      "**/autobetLib/index.js",
-      "**/autobetLib/package.json",
-      "ui/index.html",
-      "ui/main.min.js",
-      "ui/mountains.svg",
-      "ui/qrcode.min.js",
-      "ui/startstop.min.js",
-      "ui/style.min.css",
-      "main.js",
-      "preload.js",
-      "renderer.js",
-      "icon.png",
-      "!**/v1.1.0/*",
-      "!**/v0/*"
-    ],
-    "extraResources": [
-      {
-        "from": "resources/data",
-        "to": "data",
-        "filter": [
-          "**/*"
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MarkusJx/GTA-Online-Autobet.git"
+    },
+    "author": "MarkusJx",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/MarkusJx/GTA-Online-Autobet/issues"
+    },
+    "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
+    "devDependencies": {
+        "electron": "^10.1.2",
+        "electron-builder": "^22.8.0"
+    },
+    "dependencies": {
+        "custom-electron-titlebar": "^3.2.4",
+        "electron-updater": "^4.3.4",
+        "electron-window-state": "^5.0.3",
+        "material-components-web": "^7.0.0",
+        "request": "^2.88.2"
+    },
+    "build": {
+        "appId": "markusjx.autobet",
+        "icon": "resources/icon.png",
+        "nsis": {
+            "oneClick": false,
+            "artifactName": "${productName}.${ext}",
+            "license": "pack/license.txt",
+            "installerLanguages": [
+                "en_US"
+            ],
+            "installerIcon": "pack/icon.ico"
+        },
+        "files": [
+            "**/autobetLib/bin/*",
+            "**/autobetLib/index.js",
+            "**/autobetLib/package.json",
+            "ui/index.html",
+            "ui/main.min.js",
+            "ui/mountains.svg",
+            "ui/qrcode.min.js",
+            "ui/startstop.min.js",
+            "ui/style.min.css",
+            "main.js",
+            "preload.js",
+            "renderer.js",
+            "icon.png",
+            "!**/v1.1.0/*",
+            "!**/v0/*"
+        ],
+        "extraResources": [{
+                "from": "resources/data",
+                "to": "data",
+                "filter": [
+                    "**/*"
+                ]
+            },
+            {
+                "from": "resources/icon.png",
+                "to": "icon.png"
+            },
+            {
+                "from": "web",
+                "to": "web",
+                "filter": [
+                    "**/*"
+                ]
+            }
+        ],
+        "asar": true,
+        "asarUnpack": [
+            "**/autobetLib/bin/*"
         ]
-      },
-      {
-        "from": "resources/icon.png",
-        "to": "icon.png"
-      },
-      {
-        "from": "web",
-        "to": "web",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "asar": true,
-    "asarUnpack": [
-      "**/autobetLib/bin/*"
-    ]
-  }
+    }
 }
