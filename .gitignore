@@ -224,7 +224,7 @@ node_modules
 /autobet.conf
 /resources/data/model.pb
 /dist
-/autobetLib/bin
-/autobetLib/build
-/autobetLib/external
-/autobetLib/lib
+/autobetLib/bin/
+/autobetLib/build/
+/autobetLib/external/
+/autobetLib/lib/

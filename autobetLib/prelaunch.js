@@ -4,7 +4,7 @@ const Path = require('path');
 const bin_dir = "./bin";
 
 // Source: https://stackoverflow.com/a/32197381
-const deleteFolderRecursive = function (path) {
+const deleteFolderRecursive = function(path) {
     if (fs.existsSync(path)) {
         fs.readdirSync(path).forEach((file, index) => {
             const curPath = Path.join(path, file);
