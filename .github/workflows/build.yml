@@ -18,37 +18,46 @@ jobs:
     # Steps for getting the name for this artifact
     # The artifact name has the followig format:
     # autobet-${LATEST_RELEASE_TAG}-YYYYmmdd-HHMMSS
-    - name: get latest release tag
+    - name: Get latest release tag
       id: latest_release
       uses: pozetroninc/github-action-get-latest-release@master
       with:
         owner: MarkusJx
         repo: autobet
         excludes: prerelease, draft
-    - name: get current date
+    - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d.%H%M%S')"
       shell: bash
-    - name: set version name
+    - name: Set version name
       id: version_name
       run: echo "::set-output name=version::autobet-${{ steps.latest_release.outputs.release }}-${{ steps.date.outputs.date }}"
       shell: bash
-    - name: print version name
+    - name: Print version name
       run: echo ${{ steps.version_name.outputs.version }}
       shell: bash
+    
+    # Retrieve caches
+    - name: Cache npm
+      uses: actions/cache@v2
+      with:
+        path: ~\AppData\Roaming\npm-cache
+        key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
     
     # Build steps
     # Downloads boost, runs 'npm install' and 'npm run-script pack'
     # To install all dependencies and package the application
-    - name: install boost
+    - name: Install boost
       run: choco install -y boost-msvc-14.1
-    - name: run npm install
+    - name: Run npm install
       run: npm install
-    - name: build
+    - name: Build
       run: npm run-script build
       env:
         BOOST_ROOT: C:/local/boost_1_67_0
-    - name: package
+    - name: Package
       run: npm run-script pack
       env:
         BOOST_ROOT: C:/local/boost_1_67_0
