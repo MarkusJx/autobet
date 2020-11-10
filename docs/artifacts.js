@@ -30,18 +30,29 @@ const webRequest = {
      * @param {String} oauth_token the oauth token
      * @returns {Promise<String>} the result of the request
      */
-    "apiRequestNodeJs": function (request, request_base, api_port, user_agent, oauth_token) {
+    "apiRequestNodeJs": function (request, request_base, api_port, user_agent, oauth_token = undefined) {
+        let _headers;
+        // If an oauth token is provided, use it
+        if (oauth_token != undefined) {
+            _headers = {
+                'User-Agent': user_agent,
+                'Authorization': `token ${oauth_token}`,
+                'Accept': "application/vnd.github.v3+json"
+            };
+        } else {
+            _headers = {
+                'User-Agent': user_agent,
+                'Accept': "application/vnd.github.v3+json"
+            }
+        }
+
         // Set the request options
         const options = {
             hostname: request_base,
             port: api_port,
             path: request,
             method: 'GET',
-            headers: {
-                'User-Agent': user_agent,
-                'Authorization': `token ${oauth_token}`,
-                'Accept': "application/vnd.github.v3+json"
-            }
+            headers: _headers
         };
 
         return new Promise((resolve, reject) => {
@@ -97,7 +108,7 @@ const webRequest = {
      * @param {String} oauth_token the oauth token
      * @returns {Promise<String>} the result of the request
      */
-    "apiRequestWeb": function (request, request_base, user_agent, oauth_token) {
+    "apiRequestWeb": function (request, request_base, user_agent, oauth_token = undefined) {
         /**
          * @type {XMLHttpRequest}
          */
@@ -164,10 +175,10 @@ const webRequest = {
      * @param {String} request the request
      * @param {String} request_base the request base
      * @param {String} user_agent the user agent
-     * @param {String} oauth_token the oauth token
+     * @param {String | undefined} oauth_token the oauth token or undefined, if not required
      * @returns {Promise<String>} the result of the request
      */
-    "apiRequest": function (request, request_base, user_agent, oauth_token) {
+    "apiRequest": function (request, request_base, user_agent, oauth_token = undefined) {
         if (https != null) {
             return this.apiRequestNodeJs(request, request_base, 443, user_agent, oauth_token);
         } else {
@@ -284,9 +295,9 @@ class GithubApi {
      * 
      * @param {String} owner the repository owner
      * @param {String} repo the repository to work with
-     * @param {String} oauth_token the oauth token to use
+     * @param {String | undefined} oauth_token the oauth token to use or undefined, if not required
      */
-    constructor(owner, repo, oauth_token) {
+    constructor(owner, repo, oauth_token = undefined) {
         this.owner = owner;
         this.repo = repo;
         this.oath_token = oauth_token;
@@ -294,10 +305,20 @@ class GithubApi {
         this.USER_AGENT = "artifacts-api-app";
     }
 
+    /**
+     * Get all workflows
+     * 
+     * @returns {Promise<object>} the workflows object
+     */
     async getWorkflows() {
         return JSON.parse(await webRequest.apiRequest(`/repos/${this.owner}/${this.repo}/actions/runs`, this.REQUEST_BASE, this.USER_AGENT, this.oath_token));
     }
 
+    /**
+     * Get the artifacts produced by a workflow job
+     * 
+     * @param {String | Number} id the job id
+     */
     async getArtifactsForWorkflow(id) {
         return JSON.parse(await webRequest.apiRequest(`/repos/${this.owner}/${this.repo}/actions/runs/${id}/artifacts`, this.REQUEST_BASE, this.USER_AGENT, this.oath_token));
     }
@@ -305,7 +326,7 @@ class GithubApi {
     /**
      * Get a workflow from an id
      * 
-     * @param {Number | String} id thw workflow id
+     * @param {Promise<Number | String>} id thw workflow id
      */
     async getWorkflow(id) {
         return JSON.parse(await webRequest.apiRequest(`/repos/${this.owner}/${this.repo}/actions/workflows/${id}`, this.REQUEST_BASE, this.USER_AGENT, this.oath_token));

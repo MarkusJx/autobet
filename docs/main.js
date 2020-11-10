@@ -13,6 +13,11 @@ setTimeout(() => {
         document.getElementById("main-download-container").style.visibility = "hidden";
         document.getElementById("main-download-container").style.position = "absolute";
         document.getElementById("main-download-container").style.display = "none";
+    } else {
+        // Load the artifact only when os == 'windows'
+        tryLoadArtifact().then(() => {
+            console.log("tryLoadArtifact() finished")
+        });
     }
 }, 500);
 
@@ -39,6 +44,9 @@ show_artifact.addEventListener('click', () => {
     redirectToRun();
 });
 
+/**
+ * Set an artifact to not found
+ */
 function setArtifactNotfound() {
     download_dev.disabled = true;
     show_artifact.disabled = true;
@@ -47,6 +55,9 @@ function setArtifactNotfound() {
     redirectToRun = () => { };
 }
 
+/**
+ * Try loading in the latest artifact
+ */
 async function tryLoadArtifact() {
     try {
         const api = new GithubApi("MarkusJx", "autobet", undefined);
@@ -105,10 +116,6 @@ async function tryLoadArtifact() {
         console.error(`Exception thrown while trying to load the artifact information: ${e}`);
     }
 }
-
-tryLoadArtifact().then(() => {
-    console.log("tryLoadArtifact() finished")
-});
 
 function changeTheme(light) {
     if (light) {
