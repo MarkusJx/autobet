@@ -6,6 +6,7 @@
     <meta http-equiv="Cache-control" content="public, max-age=31536000">
     <title>GTA Online Autobet</title>
 
+    <link href="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -36,7 +37,10 @@
                     What it is
                 </h1>
                 <div id="main-desc-text">
-                    GTA Online Autobet was designed to earn GTA $ in Grand Theft Auto Online without using any glitches or mods. <br> This is accomplished through using the Horse racing mechanics implemented with the Casino DLC (Patch 1.47/1.48) <br>                    The program will bet on horses, depending if it is likely to win and earn about 270 thousand GTA dollars per hour
+                    GTA Online Autobet was designed to earn GTA $ in Grand Theft Auto Online without using any glitches
+                    or mods. <br> This is accomplished through using the Horse racing mechanics implemented with the
+                    Casino DLC (Patch 1.47/1.48) <br> The program will bet on horses, depending if it is likely to win
+                    and earn about 270 thousand GTA dollars per hour
                 </div>
             </div>
 
@@ -46,9 +50,14 @@
                     <div class="container smallcontainer" id="how-it-works-container">
                         <h1 id="how-it-works" class="heading">How it works</h1>
                         <p class="desc-text">
-                            To achieve its goal, the program will take over your mouse to place bets on a individual horse. For a horse to be betted on, there must be no horses with an even winning probability.
-                            <br> Furthermore, there should not be multiple horses with the same winning probability higher than 10/1. If these criteria are met, a bet of 10.000 Chips will be placed and the race will be started. Otherwise, 100 chips will
-                            be placed on the first horse, to reload the winning probabilities. This must be done due to changed rules in GTA Online Patch 1.50.
+                            To achieve its goal, the program will take over your mouse to place bets on a individual
+                            horse. For a horse to be betted on, there must be no horses with an even winning
+                            probability.
+                            <br> Furthermore, there should not be multiple horses with the same winning probability
+                            higher than 10/1. If these criteria are met, a bet of 10.000 Chips will be placed and the
+                            race will be started. Otherwise, 100 chips will
+                            be placed on the first horse, to reload the winning probabilities. This must be done due to
+                            changed rules in GTA Online Patch 1.50.
                             <br> <br> After ~34 seconds the race should be finished and the process starts again.
                         </p>
                     </div>
@@ -62,9 +71,13 @@
                         <img src="betting.webp" id="betting-img">
                         <ul style="margin-top: 2px; padding-bottom: 10px;">
                             <li class="desc-text">
-                                Press the 'start' button on the UI (a countdown will start, giving you time to head back into the game) or use the Key combination
-                                <font class="code-background">CTRL+SHIFT+F10</font>. You can also use that combo to stop the program from doing its thing. Using the combo
-                                <font class="code-background">CTRL+SHIFT+F9</font> you can always kill the program instantly. Just make sure the game is your active (selected) window (you should basically be able to move the cursor in-Game on the betting screen)</li>
+                                Press the 'start' button on the UI (a countdown will start, giving you time to head back
+                                into the game) or use the Key combination
+                                <font class="code-background">CTRL+SHIFT+F10</font>. You can also use that combo to stop
+                                the program from doing its thing. Using the combo
+                                <font class="code-background">CTRL+SHIFT+F9</font> you can always kill the program
+                                instantly. Just make sure the game is your active (selected) window (you should
+                                basically be able to move the cursor in-Game on the betting screen)</li>
                         </ul>
                     </div>
                 </div>
@@ -77,7 +90,8 @@
                             <img src="ui.webp" alt="The values displayed here are fictional" id="ui-png">
                             <p class="desc-text">
                                 The program ships with a user interface displaying the current status and some stats.
-                                <br> It also comes with a web server displaying the same stats and a few more to be viewed from other devices.
+                                <br> It also comes with a web server displaying the same stats and a few more to be
+                                viewed from other devices.
                             </p>
                         </div>
                     </div>
@@ -85,15 +99,19 @@
                     <div class="container smallcontainer" id="issue-container">
                         <h1 class="heading">Feedback</h1>
                         <p class="desc-text">
-                            If you encounter any issues using this program or have ideas how to improve it, you can always open a GitHub issue to report a bug or request a feature. To report a problem, use the
-                            <font class="code-background">--debug</font> or the
-                            <font class="code-background">--debug:full</font> flag. If --debug:full is used, a debugging zip on your desktop will be created.<br><b>It will include a log and some images,
+                            If you encounter any issues using this program or have ideas how to improve it, you can
+                            always open a GitHub issue to report a bug or request a feature. To report a problem, use
+                            the
+                            <font class="code-background">debug</font> or the
+                            <font class="code-background">debug:full</font> option in the ui. If debug:full is used, a
+                            debugging zip on your desktop will be created.<br><b>It will include a log and some images,
                                 which may contain personal information, so make sure to delete these images before
-                                putting it into your issue.</b><br><br>There are also plenty of other command line options, just use
-                            <font class="code-background">--help</font> on the Autobet.exe installed on your system.
+                                putting it into your issue.</b><br><br>There are also plenty of other options available,
+                            those are available for use in the ui.
                         </p>
 
-                        <button class="mdc-button mdc-button--outlined" id="goto-issues" onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/issues';">
+                        <button class="mdc-button mdc-button--outlined" id="goto-issues"
+                            onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/issues';">
                             <span class="mdc-button__ripple"></span>
                             <span class="material-icons">
                                 launch
@@ -106,7 +124,10 @@
                         <h1 class="heading-important">Demo</h1>
                         <div id="demo-video-container-container">
                             <div id="demo-video-container">
-                                <iframe id="demo-video" width="100%" height="100%" src="https://www.youtube.com/embed/SwZiqhdOwnQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                <iframe id="demo-video" width="100%" height="100%"
+                                    src="https://www.youtube.com/embed/SwZiqhdOwnQ" frameborder="0"
+                                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
                             </div>
                         </div>
                     </div>
@@ -116,55 +137,121 @@
 
         <div id="download-container">
             <div id="main-download-container" class="container">
-                <div id="unsupported-heading-grid">
+                <div class="unsupported-heading-grid" id="get-the-latest-version">
                     <span class="material-icons" id="download-icon">
                         save_alt
                     </span>
-                    <h1 id="download-latest">
-                        Download latest version
+                    <h1 class="heading">
+                        Get the latest version
                     </h1>
                 </div>
 
-                <p id="lv-paragraph">
-                    latest version:
-                    <font id="latest-version">latest version not found</font>
-                </p>
+                <!-- Release type selector tab bar -->
+                <div class="mdc-tab-bar" role="tablist" id="select-relese-tab-bar">
+                    <div class="mdc-tab-scroller">
+                        <div class="mdc-tab-scroller__scroll-area">
+                            <div class="mdc-tab-scroller__scroll-content">
+                                <!-- Stable tab -->
+                                <button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="0"
+                                    id="select-stable-button">
+                                    <span class="mdc-tab__content">
+                                        <span class="release-tab-text-label mdc-tab__text-label">Stable Release</span>
+                                        <span class="mdc-tab-indicator mdc-tab-indicator--active">
+                                            <span
+                                                class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                                        </span>
+                                    </span>
+                                    <span class="mdc-tab__ripple tab-ripple-rounded-corners"></span>
+                                </button>
 
-                <div id="download-actions-bar">
-                    <button class="mdc-button mdc-button--outlined" id="download-now">
-                        <span class="mdc-button__ripple"></span>
-                        Download
-                    </button>
-                    <button class="mdc-button mdc-button--outlined" id="show-tag">
-                        <span class="mdc-button__ripple"></span>
-                        <span class="material-icons">
-                            launch
-                        </span>
-                        View on GitHub
-                    </button>
+                                <!-- Development tab -->
+                                <button class="mdc-tab" role="tab" aria-selected="false" tabindex="1"
+                                    id="select-dev-button">
+                                    <span class="mdc-tab__content">
+                                        <span class="release-tab-text-label mdc-tab__text-label">Development
+                                            Release</span>
+                                        <span class="mdc-tab-indicator">
+                                            <span
+                                                class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
+                                        </span>
+                                    </span>
+                                    <span class="mdc-tab__ripple tab-ripple-rounded-corners"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="download-option-container visible" id="release-download-container">
+                    <h1 class="download-latest">
+                        Download stable version
+                    </h1>
+
+                    <p id="lv-paragraph">
+                        Latest version:
+                        <font id="latest-version">latest version not found</font>
+                    </p>
+
+                    <div id="download-actions-bar">
+                        <button class="mdc-button mdc-button--outlined" id="download-now">
+                            <span class="mdc-button__ripple"></span>
+                            Download
+                        </button>
+                        <button class="mdc-button mdc-button--outlined" id="show-tag">
+                            <span class="mdc-button__ripple"></span>
+                            <span class="material-icons">
+                                launch
+                            </span>
+                            View on GitHub
+                        </button>
+                    </div>
+                </div>
+
+                <div class="download-option-container" id="devel-download-container">
+                    <h1 class="download-latest">
+                        Download unstable version
+                    </h1>
+
+                    <p id="lv-paragraph">
+                        Latest version:
+                        <font id="latest-devel-version" class="notfound">not available</font>
+                    </p>
+
+                    <div id="download-actions-bar">
+                        <button class="mdc-button mdc-button--outlined" id="show-artifact" disabled>
+                            <span class="mdc-button__ripple"></span>
+                            <span class="material-icons">
+                                launch
+                            </span>
+                            View on GitHub
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div id="main-download-container-unsupported" class="container">
-                <div id="unsupported-heading-grid">
+                <div class="unsupported-heading-grid">
                     <span class="material-icons" id="warning-icon">
                         error_outline
                     </span>
                     <h1 id="not-available-heading">
-                        GTA Online Autobet is not available on this system
+                        Autobet is not available on this system
                     </h1>
                 </div>
 
                 <div id="unsupported-text">
-                    GTA Online Autobet is currently only supported on Windows, but you can create a GitHub issue to request it for your current operating system.
+                    Autobet is currently only supported on Windows, but you can create a GitHub issue to
+                    request it for your current operating system.
                 </div>
                 <div id="unsupported-actions-bar">
-                    <button class="mdc-button mdc-button--outlined" id="goto-gh-issues" onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/issues/new?assignees=&labels=&template=feature_request.md&title=';">
+                    <button class="mdc-button mdc-button--outlined" id="goto-gh-issues"
+                        onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/issues/new?assignees=&labels=&template=feature_request.md&title=';">
                         <span class="mdc-button__ripple"></span>
                         Create new issue
                     </button>
 
-                    <button class="mdc-button mdc-button--outlined" id="goto-downloads-unsupported" onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/releases';">
+                    <button class="mdc-button mdc-button--outlined" id="goto-downloads-unsupported"
+                        onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/releases';">
                         <span class="mdc-button__ripple"></span>
                         See downloads
                     </button>
@@ -174,7 +261,9 @@
 
         <div class="mdc-dialog" id="license-dialog">
             <div class="mdc-dialog__container" style="width: 90%;">
-                <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" aria-labelledby="license-dialog-title" aria-describedby="license-dialog-content" id="license-dialog-surface">
+                <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true"
+                    aria-labelledby="license-dialog-title" aria-describedby="license-dialog-content"
+                    id="license-dialog-surface">
                     <!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
                     <h2 class="mdc-dialog__title" id="license-dialog-title">
                         License
@@ -184,7 +273,8 @@
                     </div>
 
                     <footer class="mdc-dialog__actions">
-                        <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close" style="--mdc-theme-primary: black;">
+                        <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close"
+                            style="--mdc-theme-primary: black;">
                             <div class="mdc-button__ripple"></div>
                             <span class="mdc-button__label">Got it</span>
                         </button>
@@ -218,8 +308,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.js"></script>
 
-    <link href="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.css" rel="stylesheet">
-
+    <script src="artifacts.js"></script>
     <script src="main.js"></script>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">

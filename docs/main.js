@@ -1,6 +1,8 @@
 const download_button = document.getElementById("download-button");
 const download_now = document.getElementById("download-now");
 const show_tag = document.getElementById("show-tag");
+const show_artifact = document.getElementById("show-artifact");
+const latest_devel_version = document.getElementById("latest-devel-version");
 
 setTimeout(() => {
     if (!isWindows()) {
@@ -17,15 +19,99 @@ setTimeout(() => {
 new mdc.ripple.MDCRipple(download_button);
 new mdc.ripple.MDCRipple(download_now);
 new mdc.ripple.MDCRipple(show_tag);
+new mdc.ripple.MDCRipple(show_artifact);
 new mdc.ripple.MDCRipple(document.getElementById("goto-gh-issues"));
 new mdc.ripple.MDCRipple(document.getElementById("goto-downloads-unsupported"));
 let license_dialog = new mdc.dialog.MDCDialog(document.getElementById("license-dialog"));
+const release_selector = new mdc.tabBar.MDCTabBar(document.getElementById("select-relese-tab-bar"));
+
+const release_download_container = document.getElementById("release-download-container");
+const devel_download_container = document.getElementById("devel-download-container");
 
 let is_dark = false;
 let recentlyChanged = false;
 
-function changeTheme(val) {
-    if (val) {
+let latestArtifactId = null;
+
+let redirectToRun = () => { };
+
+show_artifact.addEventListener('click', () => {
+    redirectToRun();
+});
+
+function setArtifactNotfound() {
+    download_dev.disabled = true;
+    show_artifact.disabled = true;
+    latest_devel_version.innerHTML = "not available";
+    latest_devel_version.classList = "notfound";
+    redirectToRun = () => { };
+}
+
+async function tryLoadArtifact() {
+    try {
+        const api = new GithubApi("MarkusJx", "autobet", undefined);
+        const artifactPrefix = "autobet-";
+        const artifact = await api.getLatestArtifact(artifactPrefix);
+        if (artifact.hasOwnProperty("expired") && !artifact.expired && artifact.hasOwnProperty("id")) {
+            latestArtifactId = artifact.id;
+        } else {
+            throw new Error("The artifact is either expired or the response could not be parsed");
+        }
+
+        // artifact must have a name property, the name must be longer than "autobet-".length
+        if (artifact.hasOwnProperty("name") && artifact.name.length > artifactPrefix.length) {
+            const artifactVersion = artifact.name.replace(artifactPrefix, "");
+            latest_devel_version.innerHTML = artifactVersion;
+            latest_devel_version.classList = "";
+        } else {
+            throw new Error("The artifact object has no 'name' property");
+        }
+
+        // This should be fast enough as the latest runs have the lowest ids
+        const getRunByArtifactId = async (id) => {
+            const workflows = await api.getWorkflows();
+            const runs = workflows.workflow_runs;
+            for (let i = 0; i < runs.length; i++) {
+                try {
+                    // Only check successful runs
+                    if (runs[i].status == "completed" && runs[i].conclusion == "success") {
+                        let artifacts = await api.getArtifactsForWorkflow(runs[i].id);
+                        artifacts = artifacts.artifacts;
+                        for (let j = 0; j < artifacts.length; j++) {
+                            if (artifacts[i].id == id) {
+                                return runs[i];
+                            }
+                        }
+                    }
+                } catch (ignored) { }
+            }
+
+            return null;
+        };
+
+        const run = await getRunByArtifactId(latestArtifactId);
+        if (run != null && run.hasOwnProperty("html_url")) {
+            redirectToRun = () => {
+                window.location = run.html_url;
+            };
+        } else {
+            throw new Error("Could not get the workflow run associated with the artifact")
+        }
+
+        show_artifact.disabled = false;
+    } catch (e) {
+        // Some sh!t failed, disable everything
+        setArtifactNotfound();
+        console.error(`Exception thrown while trying to load the artifact information: ${e}`);
+    }
+}
+
+tryLoadArtifact().then(() => {
+    console.log("tryLoadArtifact() finished")
+});
+
+function changeTheme(light) {
+    if (light) {
         document.body.classList.remove("darktheme");
         document.getElementById("theme-change-icon").classList.remove("darktheme");
         document.getElementById("change-theme").classList.remove("darktheme");
@@ -51,6 +137,16 @@ function changeTheme(val) {
         window.localStorage.setItem("darktheme", "true");
     }
 }
+
+document.getElementById("select-stable-button").addEventListener('click', () => {
+    release_download_container.classList = "download-option-container visible";
+    devel_download_container.classList = "download-option-container";
+});
+
+document.getElementById("select-dev-button").addEventListener('click', () => {
+    release_download_container.classList = "download-option-container invisible";
+    devel_download_container.classList = "download-option-container visible";
+});
 
 document.getElementById("change-theme").addEventListener('click', () => {
     if (!recentlyChanged) {
