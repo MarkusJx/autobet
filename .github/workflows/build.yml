@@ -8,16 +8,39 @@ on:
       - ".gitignore"
       - "docs/**"
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install Boost
+    
+    # Steps for getting the name for this artifact
+    # The artifact name has the followig format:
+    # autobet-${LATEST_RELEASE_TAG}-YYYYmmdd-HHMMSS
+    - name: get latest release tag
+      id: latest_release
+      uses: pozetroninc/github-action-get-latest-release@master
+      with:
+        owner: MarkusJx
+        repo: autobet
+        excludes: prerelease, draft
+    - name: get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y%m%d.%H%M%S')"
+      shell: bash
+    - name: set version name
+      id: version_name
+      run: echo "::set-output name=version::autobet-${{ steps.latest_release.outputs.release }}-${{ steps.date.outputs.date }}"
+      shell: bash
+    - name: print version name
+      run: echo ${{ steps.version_name.outputs.version }}
+      shell: bash
+    
+    # Build steps
+    # Downloads boost, runs 'npm install' and 'npm run-script pack'
+    # To install all dependencies and package the application
+    - name: install boost
       run: choco install -y boost-msvc-14.1
     - name: run npm install
       run: npm install
@@ -30,8 +53,10 @@ jobs:
       env:
         BOOST_ROOT: C:/local/boost_1_67_0
         GH_TOKEN: ${{ secrets.github_token }}
+    
+    # Upload the artifact
     - name: Upload unstable build
       uses: actions/upload-artifact@v1
       with:
-        name: autobet-unstable
+        name: ${{ steps.version_name.outputs.version }}
         path: dist/autobet.exe
