@@ -29,6 +29,8 @@ jobs:
         languages: ${{ matrix.language }}
     - name: Build C++
       if: matrix.language == 'cpp'
+      env:
+        BOOST_ROOT: C:/local/boost_1_67_0
       run: |
         choco install -y boost-msvc-14.1
         npm install
