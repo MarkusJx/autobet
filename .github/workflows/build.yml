@@ -62,14 +62,14 @@ jobs:
     # Build steps
     # Downloads boost, runs 'npm install' and 'npm run-script pack'
     # To install all dependencies and package the application
-    - name: Install boost
-      run: choco install -y boost-msvc-14.1
+    #- name: Install boost
+    #  run: choco install -y boost-msvc-14.1
     - name: Run npm install
       run: npm install
     - name: Build
       run: npm run-script build
       env:
-        BOOST_ROOT: C:/local/boost_1_67_0
+        BOOST_ROOT: ${{ BOOST_ROOT_1_72_0 }}
     - name: Package
       run: npm run-script pack
       env:
