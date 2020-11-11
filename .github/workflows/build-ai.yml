@@ -9,6 +9,7 @@ on:
     branches: [ master ]
     paths: 
       - "ai/**"
+      - ".github/workflows/build-ai.yml"
   pull_request:
     branches: [ master ]
     paths: 
