@@ -1,0 +1,46 @@
+# This is a basic workflow to help you get started with Actions
+
+name: ai-build
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+    paths: 
+      - "ai/**"
+  pull_request:
+    branches: [ master ]
+    paths: 
+      - "ai/**"
+      - ".github/workflows/build-ai.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Bazel
+        uses: abhinavsingh/setup-bazel@v3
+        with:
+          version: 3.1.0
+      - name: Clone tensorflow
+        run: git clone https://github.com/tensorflow/tensorflow
+      - name: Checkout tensorflow version
+        run: git checkout r2.3
+        working-directory: tensorflow
+      - name: Configure tensorflow
+        run: python ./configure.py
+        working-directory: tensorflow
+      - name: Build tensorflow
+        run: bazel build --jobs 2 --config=opt //tensorflow/ai:ai-release.dll
+        working-directory: tensorflow
+      - name: Build result
+        uses: actions/upload-artifact@v2.2.0
+        with:
+          name: ai
+          retention-days: 90
+          path: |
+            "tensorflow/bazel-bin/tensorflow/ai/ai-release.dll.if.lib"
+            "tensorflow/bazel-bin/tensorflow/ai/ai-release.dll"
