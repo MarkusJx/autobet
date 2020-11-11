@@ -69,7 +69,7 @@ jobs:
     - name: Build
       run: npm run-script build
       env:
-        BOOST_ROOT: ${BOOST_ROOT_1_72_0}
+        BOOST_ROOT: BOOST_ROOT_1_72_0
     - name: Package
       run: npm run-script pack
       env:
