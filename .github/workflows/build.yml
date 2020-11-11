@@ -59,6 +59,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     
+    # Set the boost_root variable
+    - name: Set boost root
+      id: boost_root
+      run: echo "::set-output name=boost_root::$BOOST_ROOT_1_72_0"
+      shell: bash
+    
     # Build steps
     # Downloads boost, runs 'npm install' and 'npm run-script pack'
     # To install all dependencies and package the application
@@ -69,7 +75,7 @@ jobs:
     - name: Build
       run: npm run-script build
       env:
-        BOOST_ROOT: BOOST_ROOT_1_72_0
+        BOOST_ROOT: ${{ steps.boost_root.outputs.boost_root }}
     - name: Package
       run: npm run-script pack
       env:
