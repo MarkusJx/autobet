@@ -3,6 +3,7 @@ const download_now = document.getElementById("download-now");
 const show_tag = document.getElementById("show-tag");
 const show_artifact = document.getElementById("show-artifact");
 const latest_devel_version = document.getElementById("latest-devel-version");
+const change_theme = document.getElementById("change-theme");
 
 setTimeout(() => {
     if (!isWindows()) {
@@ -27,6 +28,7 @@ new mdc.ripple.MDCRipple(show_tag);
 new mdc.ripple.MDCRipple(show_artifact);
 new mdc.ripple.MDCRipple(document.getElementById("goto-gh-issues"));
 new mdc.ripple.MDCRipple(document.getElementById("goto-downloads-unsupported"));
+new mdc.ripple.MDCRipple(change_theme);
 let license_dialog = new mdc.dialog.MDCDialog(document.getElementById("license-dialog"));
 const release_selector = new mdc.tabBar.MDCTabBar(document.getElementById("select-relese-tab-bar"));
 
@@ -155,7 +157,7 @@ document.getElementById("select-dev-button").addEventListener('click', () => {
     devel_download_container.classList = "download-option-container visible";
 });
 
-document.getElementById("change-theme").addEventListener('click', () => {
+change_theme.addEventListener('click', () => {
     if (!recentlyChanged) {
         changeTheme(is_dark);
         recentlyChanged = true;
@@ -163,6 +165,20 @@ document.getElementById("change-theme").addEventListener('click', () => {
             recentlyChanged = false;
         }, 300);
     }
+});
+
+change_theme.addEventListener('mouseenter', () => {
+    if (!change_theme.classList.contains("hovered")) {
+        change_theme.classList.add("hovered");
+    }
+    document.getElementById("theme-change-icon").style = "";
+});
+
+change_theme.addEventListener('mouseleave', () => {
+    if (change_theme.classList.contains("hovered")) {
+        change_theme.classList.remove("hovered");
+    }
+    document.getElementById("theme-change-icon").style.margin = "7.5px";
 });
 
 document.getElementById("copyright-footer").addEventListener('click', () => {

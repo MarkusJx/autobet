@@ -45,13 +45,11 @@ body::-webkit-scrollbar {
 }
 
 #change-theme {
-    border-radius: 50%;
     right: 15px;
     bottom: -60px;
     z-index: 999;
     position: fixed;
     background: linear-gradient(90deg, #257bf9, #00d0ff);
-    height: 50px;
     width: 50px;
     transition: all .3s ease-in-out;
 }
@@ -60,6 +58,10 @@ body::-webkit-scrollbar {
     bottom: 15px;
     animation-name: show-change-theme;
     animation-duration: .3s;
+}
+
+#change-theme.hovered {
+    width: 210px;
 }
 
 @keyframes show-change-theme {
@@ -73,13 +75,14 @@ body::-webkit-scrollbar {
 
 #theme-change-icon {
     font-size: 35px;
-    margin: 7.5;
     transition: all .3s ease-in-out;
-}
-
-#theme-change-icon.darktheme {
+    /*color: black;*/
     color: white;
 }
+
+/*#theme-change-icon.darktheme {
+    color: white;
+}*/
 
 #change-theme.darktheme {
     background: linear-gradient(90deg, #00a1ff, #002eff);
