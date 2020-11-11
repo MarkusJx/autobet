@@ -59,17 +59,24 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     
-    # Set the boost_root variable
+    # Install boost and set the boost_root variable
+    - name: Install boost
+      run: |
+        $url = "https://github.com/actions/boost-versions/releases/download/1.69.0-20200608.1/boost-1.69.0-win32-msvc14.1-x86_64.tar.gz"
+        (New-Object System.Net.WebClient).DownloadFile($url, "$($env:TEMP)\boost.tar.gz")
+        7z.exe x "$($env:TEMP)\boost.tar.gz" -o"$($env:TEMP)" -y | Out-Null
+        $tarPath = Get-ChildItem -Path "$($env:TEMP)" -Filter "boost-*.tar" | Select-Object -First 1
+        7z.exe x $tarPath -o"$($env:TEMP)/boost" -y | Out-Null
+        Push-Location -Path "$($env:TEMP)\boost"
+        Invoke-Expression .\setup.ps1
     - name: Set boost root
       id: boost_root
       run: echo "::set-output name=boost_root::$BOOST_ROOT_1_69_0"
       shell: bash
     
     # Build steps
-    # Downloads boost, runs 'npm install' and 'npm run-script pack'
+    # Runs 'npm install' and 'npm run-script pack'
     # To install all dependencies and package the application
-    #- name: Install boost
-    #  run: choco install -y boost-msvc-14.1
     - name: Run npm install
       run: npm install
     - name: Build
