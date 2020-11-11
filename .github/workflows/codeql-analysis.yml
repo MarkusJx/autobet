@@ -12,6 +12,7 @@ on:
       - "pack/**"
       - "resources/**"
       - ".github/workflows/build.yml"
+      - ".github/workflows/build-ai.yml"
   pull_request:
     branches: [ master ]
     paths-ignore: 
@@ -23,6 +24,7 @@ on:
       - "pack/**"
       - "resources/**"
       - ".github/workflows/build.yml"
+      - ".github/workflows/build-ai.yml"
   schedule:
     - cron: '0 0 * * 0'
 
