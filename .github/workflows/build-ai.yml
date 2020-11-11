@@ -34,6 +34,9 @@ jobs:
       - name: Configure tensorflow
         run: python ./configure.py
         working-directory: tensorflow
+      - name: Copy ai folder
+        run: cp -r ai tensorflow/tensorflow
+        shell: bash
       - name: Build tensorflow
         run: bazel build --jobs 2 --config=opt //tensorflow/ai:ai-release.dll
         working-directory: tensorflow
