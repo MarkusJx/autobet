@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      # Setup bazel and python
+      # Setup Bazel, Python and CodeQL
       - name: Setup Bazel
         uses: abhinavsingh/setup-bazel@v3
         with:
@@ -32,6 +32,10 @@ jobs:
         uses: actions/setup-python@v2.1.4
         with:
           python-version: 3.8
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: 'cpp'
       
       # Clone tensorflow and checkout the appropriate version
       - name: Clone tensorflow
@@ -55,7 +59,7 @@ jobs:
         run: python ./configure.py
         working-directory: tensorflow
       - name: Build tensorflow
-        run: bazel build --jobs 2 --config=opt //tensorflow/ai:ai-release.dll
+        run: bazel build --config=opt //tensorflow/ai:ai-release.dll
         working-directory: tensorflow
       
       # Upload the result
@@ -64,6 +68,8 @@ jobs:
         with:
           name: ai
           retention-days: 90
-          path: |
-            "tensorflow/bazel-bin/tensorflow/ai/ai-release.dll.if.lib"
-            "tensorflow/bazel-bin/tensorflow/ai/ai-release.dll"
+          path: tensorflow/bazel-bin/tensorflow/ai
+
+      # Actually run CodeQl
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
