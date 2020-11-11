@@ -45,12 +45,16 @@ jobs:
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
+    - name: Set boost root
+      if: matrix.language == 'cpp'
+      id: boost_root
+      run: echo "::set-output name=boost_root::$BOOST_ROOT_1_69_0"
+      shell: bash
     - name: Build C++
       if: matrix.language == 'cpp'
       env:
-        BOOST_ROOT: C:/local/boost_1_67_0
+        BOOST_ROOT: ${{ steps.boost_root.outputs.boost_root }}
       run: |
-        choco install -y boost-msvc-14.1
         npm install
         npm run-script build
     - name: Perform CodeQL Analysis
