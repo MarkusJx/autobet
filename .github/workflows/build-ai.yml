@@ -32,10 +32,10 @@ jobs:
         uses: actions/setup-python@v2.1.4
         with:
           python-version: 3.8
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
-        with:
-          languages: 'cpp'
+      #- name: Initialize CodeQL
+      #  uses: github/codeql-action/init@v1
+      #  with:
+      #    languages: 'cpp'
       
       # Clone tensorflow and checkout the appropriate version
       - name: Clone tensorflow
@@ -71,5 +71,5 @@ jobs:
           path: tensorflow/bazel-bin/tensorflow/ai
 
       # Actually run CodeQl
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
+      #- name: Perform CodeQL Analysis
+      #  uses: github/codeql-action/analyze@v1
