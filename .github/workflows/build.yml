@@ -9,6 +9,7 @@ on:
       - "*.md"
       - "unused/**"
       - ".github/workflows/codeql-analysis.yml"
+      - ".github/workflows/build-ai.yml"
   pull_request:
     paths-ignore: 
       - "LICENSE"
@@ -17,6 +18,7 @@ on:
       - "*.md"
       - "unused/**"
       - ".github/workflows/codeql-analysis.yml"
+      - ".github/workflows/build-ai.yml"
 
 jobs:
   build:
