@@ -3,10 +3,20 @@ name: autobet-build
 on:
   push:
     paths-ignore: 
-      - "README.md"
       - "LICENSE"
       - ".gitignore"
       - "docs/**"
+      - "*.md"
+      - "unused/**"
+      - ".github/workflows/codeql-analysis.yml"
+  pull_request:
+    paths-ignore: 
+      - "LICENSE"
+      - ".gitignore"
+      - "docs/**"
+      - "*.md"
+      - "unused/**"
+      - ".github/workflows/codeql-analysis.yml"
 
 jobs:
   build:
@@ -41,7 +51,10 @@ jobs:
     - name: Cache npm
       uses: actions/cache@v2
       with:
-        path: ~\AppData\Roaming\npm-cache
+        path: |
+          ~\AppData\Roaming\npm-cache
+          **\node_modules
+          autobetLib\node_modules
         key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
