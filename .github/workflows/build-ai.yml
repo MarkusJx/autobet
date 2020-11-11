@@ -22,25 +22,44 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      
+      # Setup bazel and python
       - name: Setup Bazel
         uses: abhinavsingh/setup-bazel@v3
         with:
           version: 3.1.0
+      - name: Setup Python
+        uses: actions/setup-python@v2.1.4
+        with:
+          python-version: 3.8
+      
+      # Clone tensorflow and checkout the appropriate version
       - name: Clone tensorflow
         run: git clone https://github.com/tensorflow/tensorflow
       - name: Checkout tensorflow version
         run: git checkout r2.3
         working-directory: tensorflow
-      - name: Configure tensorflow
-        run: python ./configure.py
-        working-directory: tensorflow
       - name: Copy ai folder
         run: cp -r ai tensorflow/tensorflow
         shell: bash
+      
+      # Install tensorflow dependencies
+      - name: Install tensorflow dependencies
+        run: |
+          pip3 install six numpy wheel
+          pip3 install keras_applications==1.0.6 --no-deps
+          pip3 install keras_preprocessing==1.0.5 --no-deps
+      
+      # Configure and build tensorflow
+      - name: Configure tensorflow
+        run: python ./configure.py
+        working-directory: tensorflow
       - name: Build tensorflow
         run: bazel build --jobs 2 --config=opt //tensorflow/ai:ai-release.dll
         working-directory: tensorflow
-      - name: Build result
+      
+      # Upload the result
+      - name: Upload result
         uses: actions/upload-artifact@v2.2.0
         with:
           name: ai
