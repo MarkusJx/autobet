@@ -62,7 +62,7 @@ jobs:
     # Set the boost_root variable
     - name: Set boost root
       id: boost_root
-      run: echo "::set-output name=boost_root::$BOOST_ROOT_1_72_0"
+      run: echo "::set-output name=boost_root::$BOOST_ROOT_1_69_0"
       shell: bash
     
     # Build steps
@@ -79,7 +79,7 @@ jobs:
     - name: Package
       run: npm run-script pack
       env:
-        BOOST_ROOT: C:/local/boost_1_67_0
+        BOOST_ROOT: ${{ steps.boost_root.outputs.boost_root }}
         GH_TOKEN: ${{ secrets.github_token }}
     
     # Upload the artifact
