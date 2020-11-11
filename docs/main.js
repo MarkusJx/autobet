@@ -50,7 +50,7 @@ show_artifact.addEventListener('click', () => {
 function setArtifactNotfound() {
     download_dev.disabled = true;
     show_artifact.disabled = true;
-    latest_devel_version.innerHTML = "not available";
+    latest_devel_version.innerText = "not available";
     latest_devel_version.classList = "notfound";
     redirectToRun = () => { };
 }
@@ -72,7 +72,7 @@ async function tryLoadArtifact() {
         // artifact must have a name property, the name must be longer than "autobet-".length
         if (artifact.hasOwnProperty("name") && artifact.name.length > artifactPrefix.length) {
             const artifactVersion = artifact.name.replace(artifactPrefix, "");
-            latest_devel_version.innerHTML = artifactVersion;
+            latest_devel_version.innerText = artifactVersion;
             latest_devel_version.classList = "";
         } else {
             throw new Error("The artifact object has no 'name' property");
@@ -222,7 +222,7 @@ setTimeout(() => {
     try {
         getLatestVersion((res) => {
             if (res != null) {
-                document.getElementById("latest-version").innerHTML = res;
+                document.getElementById("latest-version").innerText = res;
 
                 download_now.addEventListener('click', () => {
                     location.href = "https://github.com/MarkusJx/GTA-Online-Autobet/releases/download/" + res + "/autobet.exe";
@@ -240,7 +240,13 @@ setTimeout(() => {
     }
 
     getLicense((res) => {
-        document.getElementById("license-dialog-content").innerHTML = res.split("\n").join("<br>");
+        // Replace HTML characters to prevent xss. Should not be able to occur here, but whatever.
+        let lt = /</g,
+            gt = />/g,
+            ap = /'/g,
+            ic = /"/g;
+        const license_text = res.replace(lt, "&lt;").replace(gt, "&gt;").replace(ap, "&#39;").replace(ic, "&#34;");
+        document.getElementById("license-dialog-content").innerHTML = license_text.split("\n").join("<br>");
     }, () => {
         console.error("Could not get license");
         document.getElementById("copyright-footer").addEventListener("click", () => {

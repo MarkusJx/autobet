@@ -27,8 +27,8 @@ function ui_keycomb_start() {
   startstop.disabled = true;
   startTimer();
   startstop.disabled = false;
-  startstop.innerHTML = "stop";
-  statusinfo.innerHTML = "Running";
+  startstop.innerText = "stop";
+  statusinfo.innerText = "Running";
   statusinfo.className = "text status_running maintext";
 }
 
@@ -46,7 +46,7 @@ function start() {
   cppJsLib.set_starting(true);
   let time = 15;
   var x = setInterval(function () {
-    startstop.innerHTML = "Starting in " + time + "s";
+    startstop.innerText = "Starting in " + time + "s";
     time--;
     if (time < 0) {
       clearInterval(x);
@@ -54,8 +54,8 @@ function start() {
       cppJsLib.set_starting(false);
       cppJsLib.js_start_script();
       startstop.disabled = false;
-      startstop.innerHTML = "stop";
-      statusinfo.innerHTML = "Running";
+      startstop.innerText = "stop";
+      statusinfo.innerText = "Running";
       statusinfo.className = "text status_running maintext";
     }
   }, 1000);
@@ -69,8 +69,8 @@ function is_paused() {
     frosted_glass.className = "frosted-glass-unblur";
     messagecontainer.className = "invisible";
     pauseTimer();
-    startstop.innerHTML = "start";
-    statusinfo.innerHTML = "Stopped";
+    startstop.innerText = "start";
+    statusinfo.innerText = "Stopped";
     statusinfo.className = "text status_stopped maintext";
   }
 }
@@ -101,7 +101,7 @@ function startTimer() {
     time = await cppJsLib.get_time();
     //time += 1;
     //cppJsLib.add_sec();
-    timeDisp.innerHTML = convertToTime(time);
+    timeDisp.innerText = convertToTime(time);
   }, 1000);
 }
 

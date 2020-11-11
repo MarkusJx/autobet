@@ -24,8 +24,8 @@ function ui_keycomb_start() {
     startstop.disabled = true;
     startTimer();
     startstop.disabled = false;
-    startstop.innerHTML = "stop";
-    statusinfo.innerHTML = "Running";
+    startstop.innerText = "stop";
+    statusinfo.innerText = "Running";
     statusinfo.className = "text status_running maintext";
 }
 
@@ -44,7 +44,7 @@ function start() {
     autobetLib.setStarting(true);
     let time = 15;
     var x = setInterval(function() {
-        startstop.innerHTML = "Starting in " + time + "s";
+        startstop.innerText = "Starting in " + time + "s";
         time--;
         if (time < 0) {
             clearInterval(x);
@@ -52,8 +52,8 @@ function start() {
             autobetLib.setStarting(false);
             autobetLib.startBetting();
             startstop.disabled = false;
-            startstop.innerHTML = "stop";
-            statusinfo.innerHTML = "Running";
+            startstop.innerText = "stop";
+            statusinfo.innerText = "Running";
             statusinfo.className = "text status_running maintext";
         }
     }, 1000);
@@ -64,8 +64,8 @@ function is_paused() {
         pausing = 0;
         startstop.disabled = false;
         pauseTimer();
-        startstop.innerHTML = "start";
-        statusinfo.innerHTML = "Stopped";
+        startstop.innerText = "start";
+        statusinfo.innerText = "Stopped";
         statusinfo.className = "text status_stopped maintext";
     }
 }
@@ -74,7 +74,7 @@ function pause(nstoppy) {
     if (!nstoppy)
         autobetLib.stopBetting();
     pausing = 1;
-    statusinfo.innerHTML = "Stopping";
+    statusinfo.innerText = "Stopping";
     statusinfo.className = "text status_init maintext";
     startstop.disabled = true;
     var x = setInterval(() => {
@@ -92,7 +92,7 @@ function startTimer() {
 
     timer = setInterval(() => {
         time = autobetLib.getTimeRunning();
-        timeDisp.innerHTML = convertToTime(time);
+        timeDisp.innerText = convertToTime(time);
     }, 1000);
 }
 

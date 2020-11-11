@@ -32,7 +32,7 @@ continue_button.addEventListener('click', function () {
 
 eel.expose(doneLoading);
 function doneLoading() {
-    loadingtext.innerHTML = "GTA Online Autobet has now finished initializing. To continue press the 'continue' button.";
+    loadingtext.innerText = "GTA Online Autobet has now finished initializing. To continue press the 'continue' button.";
     continue_button.disabled = false;
 }
 

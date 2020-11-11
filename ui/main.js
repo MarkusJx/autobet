@@ -126,13 +126,13 @@ function addMoney(value) {
 autobetLib.callbacks.setAllMoneyMadeCallback(setAllMoneyMade);
 
 function setAllMoneyMade(value) {
-    moneyall.innerHTML = "$" + makeSumsDisplayable(value);
+    moneyall.innerText = "$" + makeSumsDisplayable(value);
 }
 
 function updateValues() {
-    moneythishour.innerHTML = "$" + makeSumsDisplayable(getMoneyPerHour(), true) + "/hr";
-    raceswon.innerHTML = won;
-    winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
+    moneythishour.innerText = "$" + makeSumsDisplayable(getMoneyPerHour(), true) + "/hr";
+    raceswon.innerText = won;
+    winprobability.innerText = Math.round((won / (won + lost)) * 1000) / 10 + "%";
 }
 
 function getMoneyPerHour() {
@@ -145,10 +145,10 @@ function set_gta_running(val) {
     console.log("set gta v running to " + val);
     gta_running = val;
     if (gta_running) {
-        game_running.innerHTML = "Yes";
+        game_running.innerText = "Yes";
         game_running.className = "text status_running maintext";
     } else {
-        game_running.innerHTML = "No";
+        game_running.innerText = "No";
         game_running.className = "text status_stopped maintext";
     }
 }
@@ -167,7 +167,7 @@ function setQRCode(ip) {
 // set the ips
 function setIPs() {
     let ip = autobetLib.getIP();
-    weblink.innerHTML = "http://" + ip + ":8027";
+    weblink.innerText = "http://" + ip + ":8027";
     setQRCode(ip);
 }
 
@@ -223,7 +223,7 @@ async function main() {
     if (initialized) {
         statusinfo.classList.remove("status_init");
         statusinfo.classList.add("status_stopped");
-        statusinfo.innerHTML = "Stopped";
+        statusinfo.innerText = "Stopped";
         console.log("Initialized.");
         startstop.disabled = false;
     } else {
@@ -297,7 +297,7 @@ const log_textfield_resizer = document.getElementById("log-textfield-resizer");
  * @param {String} description the description
  */
 function showDescription(title, description) {
-    document.getElementById("description-dialog-title").innerHTML = title;
+    document.getElementById("description-dialog-title").innerText = title;
     description_dialog.content_.innerText = description;
 
     description_dialog.open();

@@ -97,10 +97,10 @@ gtanotrunningmessage.listen('MDCSnackbar:closing', () => {
 
 // Listen for the not connected snackbar to close, just to open again to annoy the user
 notconnectedmessage.listen('MDCSnackbar:closing', () => {
-    let lastMessage = notconnectedlabel.innerHTML;
-    notconnectedlabel.innerHTML = "";
+    let lastMessage = notconnectedlabel.innerText;
+    notconnectedlabel.innerText = "";
     notconnectedmessage.open();
-    notconnectedlabel.innerHTML = lastMessage;
+    notconnectedlabel.innerText = lastMessage;
 });
 
 // Add an event listener for the settings done button
@@ -135,23 +135,23 @@ settingsdonebutton.addEventListener('click', function() {
 function showAutostopMessages() {
     if (autostopMoney != -1 && autostopTime != -1) { // If both are enabled
         autostopenabled.classList = "text maintext status_running";
-        autostopenabled.innerHTML = "Enabled";
-        autostopstatuslabel.innerHTML = "Autostop money value set to: " + autostopMoney + " and time set to: " + timeinput.value;
+        autostopenabled.innerText = "Enabled";
+        autostopstatuslabel.innerText = "Autostop money value set to: " + autostopMoney + " and time set to: " + timeinput.value;
         autostopstatusmessage.open();
     } else if (autostopTime != -1 || autostopMoney != -1) { // If only one is enabled
         if (autostopTime != -1) {
-            autostopstatuslabel.innerHTML = "Autostop time set to: " + timeinput.value;
+            autostopstatuslabel.innerText = "Autostop time set to: " + timeinput.value;
             autostopstatusmessage.open();
         } else {
-            autostopstatuslabel.innerHTML = "Autostop money value set to: " + autostopMoney;
+            autostopstatuslabel.innerText = "Autostop money value set to: " + autostopMoney;
             autostopstatusmessage.open();
         }
         autostopenabled.classList = "text maintext status_running";
-        autostopenabled.innerHTML = "Enabled";
+        autostopenabled.innerText = "Enabled";
     } else { // If the feature is disabled
         autostopenabled.classList = "text maintext status_stopped";
-        autostopenabled.innerHTML = "Disabled";
-        autostopstatuslabel.innerHTML = "Autostop is now disabled";
+        autostopenabled.innerText = "Disabled";
+        autostopstatuslabel.innerText = "Autostop is now disabled";
         autostopstatusmessage.open();
     }
 }
@@ -254,12 +254,12 @@ function main() {
  */
 function init(datasaver) {
     cppJsLib.get_current_winnings().then((val) => {
-        moneythissession.innerHTML = makeSumsDisplayable(val, false);
+        moneythissession.innerText = makeSumsDisplayable(val, false);
     });
 
     cppJsLib.get_all_winnings().then((val) => {
         console.log("Money earned all time: " + val);
-        moneyall.innerHTML = makeSumsDisplayable(val) + " $";
+        moneyall.innerText = makeSumsDisplayable(val) + " $";
     });
 
     let waitTime = 500;
@@ -284,25 +284,25 @@ function init(datasaver) {
 function disconnected() {
     console.log("Connection lost.");
     let timeUntilRetry = 10; // Wait time until retry
-    notconnectedlabel.innerHTML = "Connection lost.";
+    notconnectedlabel.innerText = "Connection lost.";
     notconnectedmessage.open(); // Notify the user about this disconnect
 
     let x = setInterval(async() => { // Start an Interval to time the retries
         if (timeUntilRetry < 1) {
-            notconnectedlabel.innerHTML = "Trying to reconnect...";
+            notconnectedlabel.innerText = "Trying to reconnect...";
             timeUntilRetry = 5;
 
             //cppJsLib.init();
 
             if (cppJsLib.connected) {
                 clearInterval(x);
-                notconnectedlabel.innerHTML = "Reconnected. Reloading page in 3 seconds";
+                notconnectedlabel.innerText = "Reconnected. Reloading page in 3 seconds";
                 setTimeout(() => {
                     location.reload();
                 }, 3000)
             }
         } else {
-            notconnectedlabel.innerHTML = "Connection lost. Retrying in " + timeUntilRetry + " seconds.";
+            notconnectedlabel.innerText = "Connection lost. Retrying in " + timeUntilRetry + " seconds.";
             startstop.disabled = true;
             timeUntilRetry--;
         }
@@ -316,31 +316,31 @@ async function asyncMain() {
     // Get the time running
     cppJsLib.get_time().then((t) => {
         if (t !== lastTime) {
-            timeDisp.innerHTML = convertToTime(t);
+            timeDisp.innerText = convertToTime(t);
             lastTime = t;
         }
     });
 
     // Get the races won
     let won = await cppJsLib.get_races_won();
-    raceswon.innerHTML = won;
+    raceswon.innerText = won;
 
     // get the races lost
     cppJsLib.get_races_lost().then((lost) => {
         // Do some heavy mathematics to calculate a win probability
-        if ((won + lost) > 0) winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
+        if ((won + lost) > 0) winprobability.innerText = Math.round((won / (won + lost)) * 1000) / 10 + "%";
     });
 
     // Set the money made
     cppJsLib.get_current_winnings().then(moneyMade => {
-        moneythissession.innerHTML = makeSumsDisplayable(moneyMade, false) + " $";
+        moneythissession.innerText = makeSumsDisplayable(moneyMade, false) + " $";
         if (lastTime > 0)
-            moneythishour.innerHTML = makeSumsDisplayable(moneyMade * (3600 / lastTime), true) + " $/hr";
+            moneythishour.innerText = makeSumsDisplayable(moneyMade * (3600 / lastTime), true) + " $/hr";
     });
 
     // Set the overall money made values
     cppJsLib.get_all_winnings().then(allMoney => {
-        moneyall.innerHTML = makeSumsDisplayable(allMoney) + " $";
+        moneyall.innerText = makeSumsDisplayable(allMoney) + " $";
     });
 
     // Check if the script is already running
@@ -353,22 +353,22 @@ async function asyncMain() {
         gtanotrunningmessage.close();
 
         if (running == 1) { // Running
-            statusinfo.innerHTML = "Running";
+            statusinfo.innerText = "Running";
             statusinfo.className = "text status_running maintext";
-            startstop.innerHTML = "stop";
+            startstop.innerText = "stop";
             start = false;
             startstop.disabled = false;
         } else if (running == -1) { // Stopped
-            statusinfo.innerHTML = "Stopped";
+            statusinfo.innerText = "Stopped";
             statusinfo.className = "text status_stopped maintext";
-            startstop.innerHTML = "start";
+            startstop.innerText = "start";
             startstop.disabled = false;
         } else if (running == 0) { // Stopping
-            statusinfo.innerHTML = "Stopping";
+            statusinfo.innerText = "Stopping";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
         } else if (running == 2) { // Starting
-            statusinfo.innerHTML = "Starting";
+            statusinfo.innerText = "Starting";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
         }

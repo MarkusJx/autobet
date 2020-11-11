@@ -228,3 +228,4 @@ node_modules
 /autobetLib/build/
 /autobetLib/external/
 /autobetLib/lib/
+.DS_Store

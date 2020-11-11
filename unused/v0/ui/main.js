@@ -93,7 +93,7 @@ function init_started() {
     progressbar.className = "mdc-linear-progress mdc-linear-progress--indeterminate";
     messagecontainer.className = "";
     frosted_glass.className = "frosted-glass-blur";
-    stoptext.innerHTML = "Please wait while the program initializes...";
+    stoptext.innerText = "Please wait while the program initializes...";
     startstop.disabled = true;
 }
 
@@ -102,7 +102,7 @@ function init_finished() {
     progressbar.className = "mdc-linear-progress";
     frosted_glass.className = "frosted-glass-unblur";
     messagecontainer.className = "invisible";
-    stoptext.innerHTML = "Please wait while the program stops...";
+    stoptext.innerText = "Please wait while the program stops...";
     startstop.disabled = false;
 }
 
@@ -119,13 +119,13 @@ function addMoney(value) {
 
 eel.expose(setAllMoneyMade);
 function setAllMoneyMade(value) {
-    moneyall.innerHTML = makeSumsDisplayable(value) + " $";
+    moneyall.innerText = makeSumsDisplayable(value) + " $";
 }
 
 function updateValues() {
-    moneythishour.innerHTML = makeSumsDisplayable(getMoneyPerHour(), true) + " $/hr";
-    raceswon.innerHTML = won;
-    winprobability.innerHTML = Math.round((won / (won + lost)) * 1000) / 10 + "%";
+    moneythishour.innerText = makeSumsDisplayable(getMoneyPerHour(), true) + " $/hr";
+    raceswon.innerText = won;
+    winprobability.innerText = Math.round((won / (won + lost)) * 1000) / 10 + "%";
 }
 
 function getMoneyPerHour() {
@@ -159,7 +159,7 @@ function setQRCode(ip) {
 
 async function setIPs() {
     let ip = await eel.get_ip()();
-    weblink.innerHTML = "http://" + ip + ":8027";
+    weblink.innerText = "http://" + ip + ":8027";
     setQRCode(ip);
 }
 
