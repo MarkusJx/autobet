@@ -28,6 +28,7 @@ new mdc.ripple.MDCRipple(show_tag);
 new mdc.ripple.MDCRipple(show_artifact);
 new mdc.ripple.MDCRipple(document.getElementById("goto-gh-issues"));
 new mdc.ripple.MDCRipple(document.getElementById("goto-downloads-unsupported"));
+new mdc.ripple.MDCRipple(document.getElementById("goto-issues"));
 new mdc.ripple.MDCRipple(change_theme);
 let license_dialog = new mdc.dialog.MDCDialog(document.getElementById("license-dialog"));
 const release_selector = new mdc.tabBar.MDCTabBar(document.getElementById("select-relese-tab-bar"));
