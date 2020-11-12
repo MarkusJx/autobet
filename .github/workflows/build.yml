@@ -63,8 +63,8 @@ jobs:
     
     # Install boost and set the boost_root variable
     - name: Download boost
-      run: wget https://github.com/actions/boost-versions/releases/download/1.73.0-20200608.5/boost-1.73.0-win32-msvc14.2-x86_64.tar.gz -OutFile boost.tar.gz
-      shell: powershell
+      run: wget https://github.com/actions/boost-versions/releases/download/1.73.0-20200608.5/boost-1.73.0-win32-msvc14.2-x86_64.tar.gz -O boost.tar.gz
+      shell: bash
     - name: Unpack boost
       run: 7z x boost.tar.gz -r -y
     #- name: Install boost
