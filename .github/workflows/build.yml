@@ -62,6 +62,11 @@ jobs:
           ${{ runner.os }}-node-
     
     # Install boost and set the boost_root variable
+    - name: Download boost
+      run: wget https://github.com/actions/boost-versions/releases/download/1.73.0-20200608.5/boost-1.73.0-win32-msvc14.2-x86_64.tar.gz -OutFile boost.tar.gz
+      shell: powershell
+    - name: Unpack boost
+      run: 7z x boost.tar.gz -r -y
     #- name: Install boost
     #  run: |
     #    $url = "https://github.com/actions/boost-versions/releases/download/1.69.0-20200608.1/boost-1.69.0-win32-msvc14.1-x86_64.tar.gz"
@@ -71,10 +76,10 @@ jobs:
     #    7z.exe x $tarPath -o"$($env:TEMP)/boost" -y | Out-Null
     #    Push-Location -Path "$($env:TEMP)\boost"
     #    Invoke-Expression .\setup.ps1
-    - name: Set boost root
-      id: boost_root
-      run: echo "::set-output name=boost_root::$BOOST_ROOT_1_72_0"
-      shell: bash
+    #- name: Set boost root
+    #  id: boost_root
+    #  run: echo "::set-output name=boost_root::$BOOST_ROOT_1_72_0"
+    #  shell: bash
     
     # Build steps
     # Runs 'npm install' and 'npm run-script pack'
@@ -84,7 +89,7 @@ jobs:
     - name: Build
       run: npm run-script build
       env:
-        BOOST_ROOT: ${{ steps.boost_root.outputs.boost_root }}
+        BOOST_ROOT: boost #${{ steps.boost_root.outputs.boost_root }}
     - name: Package
       run: npm run-script pack
       env:
