@@ -66,7 +66,7 @@ jobs:
       uses: MarkusJx/install-boost@v1.0
       id: install-boost
       with:
-        boost_version: 1.69.0
+        boost_version: 1.71.0
         toolset: msvc14.2
     
     # Build steps
