@@ -47,15 +47,20 @@ jobs:
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
-    - name: Set boost root
+    
+    # Download and install boost
+    - name: Install boost
       if: matrix.language == 'cpp'
-      id: boost_root
-      run: echo "::set-output name=boost_root::$BOOST_ROOT_1_69_0"
-      shell: bash
+      uses: MarkusJx/install-boost@v1.0
+      id: install-boost
+      with:
+        boost_version: 1.69.0
+        toolset: msvc14.1
+    
     - name: Build C++
       if: matrix.language == 'cpp'
       env:
-        BOOST_ROOT: ${{ steps.boost_root.outputs.boost_root }}
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       run: |
         npm install
         npm run-script build
