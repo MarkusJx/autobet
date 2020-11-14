@@ -37,7 +37,7 @@ jobs:
       - name: Clone tensorflow
         run: git clone https://github.com/tensorflow/tensorflow
       - name: Checkout tensorflow version
-        run: git checkout r2.3
+        run: git checkout r2.4
         working-directory: tensorflow
       - name: Copy ai folder
         run: cp -r ai tensorflow/tensorflow
