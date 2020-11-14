@@ -83,6 +83,20 @@ endif ()
 createDirectory(${CMAKE_SOURCE_DIR}/external)
 createDirectory(${CMAKE_SOURCE_DIR}/lib)
 
-# Download ai dll files
-downloadAiDll()
-downloadAiLib()
+# If environment variables are set, copy ai.dll and ai.lib,
+# if not, download those files
+if (DEFINED ENV{AI_LIB_LOCATION} AND DEFINED ENV{AI_DLL_LOCATION})
+    message(STATUS "Both 'AI_LIB_LOCATION' and 'AI_DLL_LOCATION' are set, copying the files")
+    message(STATUS "'AI_LIB_LOCATION' set to: $ENV{AI_LIB_LOCATION}")
+    message(STATUS "'AI_DLL_LOCATION' set to: $ENV{AI_DLL_LOCATION}")
+
+    # Copy ai dll files
+    copyAiDll($ENV{AI_DLL_LOCATION})
+    copyAiLib($ENV{AI_LIB_LOCATION})
+else ()
+    message(STATUS "'AI_LIB_LOCATION' or 'AI_DLL_LOCATION' or both are not set, downloading both files")
+
+    # Download ai dll files
+    downloadAiDll()
+    downloadAiLib()
+endif ()
