@@ -1,14 +1,8 @@
-# This is a basic workflow to help you get started with Actions
-
 name: ai-build
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# Manually triggered workflow
 on:
-  push:
-    paths: 
-      - "ai/**"
-      - ".github/workflows/build-ai.yml"
+  workflow_dispatch
 
 jobs:
   build:
