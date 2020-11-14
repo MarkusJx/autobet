@@ -1,4 +1,4 @@
-name: Build ai and autobet on pull request
+name: Build ai and autobet
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
       - "ai/**"
   push:
     paths: 
-      - ".github/worflows/build-ai-pull-request.yml"
+      - ".github/workflows/build-ai-pull-request.yml"
 
 jobs:
   build-ai:
