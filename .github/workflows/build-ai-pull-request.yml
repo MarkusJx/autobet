@@ -1,0 +1,114 @@
+name: Build ai and autobet on pull request
+
+on:
+  pull_request:
+    branches: [master]
+    paths: 
+      - "ai/**"
+  push:
+    paths: 
+      - ".github/worflows/build-ai-pull-request.yml"
+
+jobs:
+  build-ai:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    # Setup Bazel and Python
+    - name: Setup Bazel
+      uses: abhinavsingh/setup-bazel@v3
+      with:
+        version: 3.1.0
+    - name: Setup Python
+      uses: actions/setup-python@v2.1.4
+      with:
+        python-version: 3.8
+      
+    # Clone tensorflow and checkout the appropriate version
+    - name: Clone tensorflow
+      run: git clone https://github.com/tensorflow/tensorflow
+    - name: Checkout tensorflow version        
+      run: git checkout r2.3
+      working-directory: tensorflow
+    - name: Copy ai folder
+      run: cp -r ai tensorflow/tensorflow
+      shell: bash
+      
+    # Install tensorflow dependencies
+    - name: Install tensorflow dependencies
+      run: |
+        pip3 install six numpy wheel
+        pip3 install keras_applications==1.0.6 --no-deps
+        pip3 install keras_preprocessing==1.0.5 --no-deps
+      
+    # Configure and build tensorflow
+    - name: Configure tensorflow
+      run: python ./configure.py
+      working-directory: tensorflow
+    - name: Build tensorflow
+      run: bazel build --config=opt //tensorflow/ai:ai-release.dll
+      working-directory: tensorflow
+      
+    # Upload the result
+    - name: Upload result
+      uses: actions/upload-artifact@v2.2.0
+      with:
+        name: ai
+        retention-days: 10
+        path: |
+          tensorflow/bazel-bin/tensorflow/ai/*.dll
+          tensorflow/bazel-bin/tensorflow/ai/*.lib
+  
+  build-autobet:
+    needs: [build-ai]
+    runs-on: windows-latest
+    env:
+      out_name: autobet-${{github.sha}}
+      ai_directory: ${{github.workspace}}/ai
+      ai_lib: ai-release.dll.if.lib
+      ai_dll: ai-release.dll
+      boost_version: 1.69.0
+      boost_toolset: msvc14.1
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download the ai artifact
+        uses: actions/download-artifact@v2.0.2
+        with:
+          name: ai
+          path: ${{env.ai_directory}}
+
+      # Download and install boost
+      - name: Install boost
+        uses: MarkusJx/install-boost@v1.0
+        id: install-boost
+        with:
+          boost_version: ${{env.boost_version}}
+          toolset: ${{env.boost_toolset}}
+    
+      # Build steps
+      # Runs 'npm install' and 'npm run-script pack'
+      # To install all dependencies and package the application
+      - name: Run npm install
+        run: npm install
+      - name: Build
+        run: npm run-script build
+        env:
+          BOOST_ROOT: ${{steps.install-boost.outputs.BOOST_ROOT}}
+          AI_LIB_LOCATION: ${{env.ai_directory}}/${{env.ai_lib}}
+          AI_DLL_LOCATION: ${{env.ai_directory}}/${{env.ai_dll}}
+      - name: Package
+        run: npm run-script pack
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+    
+      # Upload the artifact
+      - name: Upload unstable build
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{env.out_name}}
+          path: dist/autobet.exe
+          retention-days: 90
+      
