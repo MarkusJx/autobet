@@ -1,13 +1,12 @@
 name: Build ai and autobet
 
 on:
-  pull_request:
-    branches: [master]
-    paths: 
-      - "ai/**"
-  push:
-    paths: 
-      - ".github/workflows/build-ai-pull-request.yml"
+  workflow_dispatch:
+    inputs:
+      tf-release-ver:
+        description: 'Tensorflow release version'
+        default: 'r2.3'
+        required: true
 
 jobs:
   build-ai:
@@ -29,8 +28,8 @@ jobs:
     # Clone tensorflow and checkout the appropriate version
     - name: Clone tensorflow
       run: git clone https://github.com/tensorflow/tensorflow
-    - name: Checkout tensorflow version        
-      run: git checkout r2.3
+    - name: Checkout tensorflow version ${{github.event.inputs.tf-release-ver}}
+      run: git checkout ${{github.event.inputs.tf-release-ver}}
       working-directory: tensorflow
     - name: Copy ai folder
       run: cp -r ai tensorflow/tensorflow
