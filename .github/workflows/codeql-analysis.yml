@@ -3,30 +3,34 @@ name: "CodeQL"
 on:
   push:
     branches: [ master ]
-    paths-ignore: 
-      - "LICENSE"
-      - ".gitignore"
-      - "docs/**"
-      - "*.md"
-      - "unused/**"
+    paths: 
+      - ".github/workflows/codeql-analysis.yml"
+      - "autobetLib/**"
       - "pack/**"
+      - "ui/**"
+      - "web/**"
       - "resources/**"
-      - ".github/workflows/build.yml"
-      - ".github/workflows/build-ai.yml"
-      - ".github/workflows/build-ai-autobet.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "main.js"
+      - "preload.js"
+      - "renderer.js"
+      - "downloadModel.js"
   pull_request:
     branches: [ master ]
-    paths-ignore: 
-      - "LICENSE"
-      - ".gitignore"
-      - "docs/**"
-      - "*.md"
-      - "unused/**"
+    paths: 
+      - ".github/workflows/codeql-analysis.yml"
+      - "autobetLib/**"
       - "pack/**"
+      - "ui/**"
+      - "web/**"
       - "resources/**"
-      - ".github/workflows/build.yml"
-      - ".github/workflows/build-ai.yml"
-      - ".github/workflows/build-ai-autobet.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "main.js"
+      - "preload.js"
+      - "renderer.js"
+      - "downloadModel.js"
 
 jobs:
   analyze:

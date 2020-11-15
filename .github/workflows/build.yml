@@ -2,25 +2,33 @@ name: autobet-build
 
 on:
   push:
-    paths-ignore: 
-      - "LICENSE"
-      - ".gitignore"
-      - "docs/**"
-      - "*.md"
-      - "unused/**"
-      - ".github/workflows/codeql-analysis.yml"
-      - ".github/workflows/build-ai.yml"
-      - ".github/workflows/build-ai-autobet.yml"
+    paths: 
+      - ".github/workflows/build.yml"
+      - "autobetLib/**"
+      - "pack/**"
+      - "ui/**"
+      - "web/**"
+      - "resources/**"
+      - "package.json"
+      - "package-lock.json"
+      - "main.js"
+      - "preload.js"
+      - "renderer.js"
+      - "downloadModel.js"
   pull_request:
-    paths-ignore: 
-      - "LICENSE"
-      - ".gitignore"
-      - "docs/**"
-      - "*.md"
-      - "unused/**"
-      - ".github/workflows/codeql-analysis.yml"
-      - ".github/workflows/build-ai.yml"
-      - ".github/workflows/build-ai-autobet.yml"
+    paths: 
+      - ".github/workflows/build.yml"
+      - "autobetLib/**"
+      - "pack/**"
+      - "ui/**"
+      - "web/**"
+      - "resources/**"
+      - "package.json"
+      - "package-lock.json"
+      - "main.js"
+      - "preload.js"
+      - "renderer.js"
+      - "downloadModel.js"
 
 jobs:
   build:
