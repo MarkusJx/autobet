@@ -64,7 +64,7 @@ jobs:
     needs: [build-ai]
     runs-on: windows-latest
     env:
-      out_name: autobet-${{github.sha}}
+      out_name: autobet-${{github.run_id}}
       ai_directory: ${{github.workspace}}/ai
       ai_lib: ai-release.dll.if.lib
       ai_dll: ai-release.dll
@@ -105,7 +105,7 @@ jobs:
     
       # Upload the artifact
       - name: Upload unstable build
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.0
         with:
           name: ${{env.out_name}}
           path: dist/autobet.exe
