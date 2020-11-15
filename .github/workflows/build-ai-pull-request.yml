@@ -55,7 +55,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.0
       with:
         name: ai
-        retention-days: 10
+        retention-days: 90
         path: |
           tensorflow/bazel-bin/tensorflow/ai/*.dll
           tensorflow/bazel-bin/tensorflow/ai/*.lib
