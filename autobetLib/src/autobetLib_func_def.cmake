@@ -98,10 +98,11 @@ function(downloadAiLib)
 endfunction(downloadAiLib)
 
 function(copyAiDll SOURCE_PATH)
-    set(AI_DLL_FILE ${CMAKE_SOURCE_DIR}/external/ai-release.dll)
+    set(AI_DLL_DIR ${CMAKE_SOURCE_DIR}/external)
+    set(AI_DLL_FILE ${AI_DLL_DIR}/ai-release.dll)
     message(STATUS "Copying ai-release.dll")
     file(COPY ${SOURCE_PATH}
-            DESTINATION ${AI_DLL_FILE})
+            DESTINATION ${AI_DLL_DIR})
     
     if (NOT EXISTS ${AI_DLL_FILE})
         message(FATAL_ERROR "${AI_DLL_FILE} does not exist, cannot continue")
@@ -111,10 +112,11 @@ function(copyAiDll SOURCE_PATH)
 endfunction(copyAiDll)
 
 function(copyAiLib SOURCE_PATH)
-    set(AI_LIB_FILE ${CMAKE_SOURCE_DIR}/lib/ai-release.dll.if.lib)
+    set(AI_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+    set(AI_LIB_FILE ${AI_LIB_DIR}/ai-release.dll.if.lib)
     message(STATUS "Copying ai-release.dll.if.lib")
     file(COPY ${SOURCE_PATH}
-            DESTINATION ${AI_LIB_FILE})
+            DESTINATION ${AI_LIB_DIR})
 
     if (NOT EXISTS ${AI_LIB_FILE})
         message(FATAL_ERROR "${AI_LIB_FILE} does not exist, cannot continue")
