@@ -1,8 +1,9 @@
 name: ai-build
 
-# Manually triggered workflow
 on:
-  workflow_dispatch
+  push:
+    paths: 
+      - "ai/**"
 
 jobs:
   build:
