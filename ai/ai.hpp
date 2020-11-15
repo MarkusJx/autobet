@@ -79,6 +79,13 @@ namespace tf
     class AI {
     public:
         /**
+         * Get the tensorflow version this was compiled with
+         * 
+         * @return the tensorflow version string in the form 'MAJOR.MINOR.PATCH'
+         */
+        TF_AI_EXPORT static const char *getTFVersion();
+
+        /**
          * Create a new ai instance. Must be deleted using destroy(1).
          * 
          * @param modelPath the path to the model to load (*.pb file).

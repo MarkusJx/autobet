@@ -18,8 +18,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+#include <cstring>
+#include <sstream>
+
 #include "tf_ai.hpp"
 #include "tf_utils.hpp"
+#include "tensorflow/core/public/version.h" // Tensorflow version
 
 #define input_width 224
 #define input_height 224
@@ -35,7 +39,29 @@ limitations under the License.
 using namespace tf;
 using namespace tensorflow;
 
+char VERSION_BUF[9];
+
 // AI class definition ====================================
+
+TF_AI_EXPORT const char *tf::AI::getTFVersion() {
+    if (strlen(VERSION_BUF) == 0) {
+        // VERSION_BUF stores no data, copy the version to it
+        std::stringstream ss;
+        ss << TF_MAJOR_VERSION << "." << TF_MINOR_VERSION << "." << TF_PATCH_VERSION;
+
+        // Get the version string
+        std::string ver = ss.str();
+
+        // Make sure the buffer is large enough
+        if (ver.size() < sizeof(VERSION_BUF)) {
+            strcpy(VERSION_BUF, ver.c_str());
+        } else {
+            strcpy(VERSION_BUF, "ERR");
+        }
+    }
+
+    return VERSION_BUF;
+}
 
 TF_AI_EXPORT tf::AI *tf::AI::create(const char *modelPath, tf::labels l) {
     return new tf::AI(modelPath, l);
