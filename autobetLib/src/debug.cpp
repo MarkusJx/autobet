@@ -88,7 +88,7 @@ bool debug::finish() {
 #endif
 }
 
-void debug::writeImage(utils::bitmap *bmp) {
+void debug::writeImage(const utils::bitmap &bmp) {
 #ifdef AUTOBET_ENABLE_FULL_DEBUG
     if (!zip) {
         return;
@@ -103,7 +103,7 @@ void debug::writeImage(utils::bitmap *bmp) {
         return;
     }
 
-    err = zip_entry_write(zip, bmp->data, bmp->size);
+    err = zip_entry_write(zip, (char *) bmp.data(), bmp.size());
     if (err) {
         StaticLogger::error("Unable to write debug zip file. Error: " + std::to_string(err));
     }

@@ -197,11 +197,11 @@ errno_t utils::isForeground(bool& res) {
     }
 }
 
-utils::bitmap *utils::convertHBitmap(int width, int height, void *HBMP) {
+utils::bitmap utils::convertHBitmap(int width, int height, void *HBMP) {
     return crop(0, 0, width, height, HBMP);
 }
 
-utils::bitmap *utils::crop(int x, int y, int width, int height, void *src) {
+utils::bitmap utils::crop(int x, int y, int width, int height, void *src) {
     auto hSource = (HBITMAP) src;
     HDC hdcMem, hdcMem2;
     // Get some HDCs that are compatible with the display driver
@@ -224,7 +224,7 @@ utils::bitmap *utils::crop(int x, int y, int width, int height, void *src) {
     DeleteDC(hdcMem);
     DeleteDC(hdcMem2);
 
-    std::vector<BYTE> buf;
+    bitmap buf;
     IStream *stream = nullptr;
     CreateStreamOnHGlobal(nullptr, TRUE, &stream);
     CImage image;
@@ -237,12 +237,12 @@ utils::bitmap *utils::crop(int x, int y, int width, int height, void *src) {
     DWORD len = liSize.LowPart;
     IStream_Reset(stream);
     buf.resize(len);
-    IStream_Read(stream, &buf[0], len);
+    IStream_Read(stream, buf.data(), len);
     stream->Release();
 
-    auto tmp = new utils::bitmap(reinterpret_cast<char *>(&buf[0]), buf.size() * sizeof(BYTE));
-    std::vector<BYTE>().swap(buf);
-    return tmp;
+    //auto tmp = new utils::bitmap(reinterpret_cast<char *>(&buf[0]), buf.size() * sizeof(BYTE));
+    //std::vector<BYTE>().swap(buf);
+    return buf;
 }
 
 /**

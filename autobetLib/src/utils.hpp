@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <sstream>
+#include <vector>
 
 namespace utils {
     typedef struct windowSize_s {
@@ -133,7 +134,8 @@ namespace utils {
         }
     } path;
 
-    typedef struct Array<char> bitmap;
+    //typedef struct Array<char> bitmap;
+    using bitmap = std::vector<unsigned char>;
 
     void setCtrlCHandler(std::function<void()> callback);
 
@@ -147,7 +149,7 @@ namespace utils {
 
     void getWindowSize(windowSize &ws);
 
-    bitmap *crop(int x, int y, int width, int height, void *src);
+    bitmap crop(int x, int y, int width, int height, void *src);
 
     bool pressTab();
 
@@ -163,7 +165,7 @@ namespace utils {
 
     bool fileExists(const std::string &name);
 
-    bitmap *convertHBitmap(int width, int height, void *HBMP);
+    bitmap convertHBitmap(int width, int height, void *HBMP);
 
     void getActiveScreen(unsigned int xPos, unsigned int yPos, windowSize &ws);
 

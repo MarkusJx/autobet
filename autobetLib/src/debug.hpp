@@ -8,7 +8,7 @@
 namespace debug {
     bool init();
 
-    void writeImage(utils::bitmap *bmp);
+    void writeImage(const utils::bitmap &bmp);
 
     bool finish();
 

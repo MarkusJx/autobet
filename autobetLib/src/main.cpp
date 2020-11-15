@@ -11,6 +11,7 @@
 #include <future>
 #include <fstream>
 #include <algorithm>
+#include <memory>
 
 #ifdef AUTOBET_WINDOWS
 
@@ -34,20 +35,18 @@ using namespace logger;
 // Every location to a horse to bet on
 const unsigned short int yLocations[6] = {464, 628, 790, 952, 1114, 1276};
 
-CppJsLib::WebGUI *webUi;
-
 std::thread *bt = nullptr;
 
-tf::AI *ai;
+std::shared_ptr<CppJsLib::WebGUI> webUi;
+std::shared_ptr<tf::AI> ai;
 
-unsigned short int xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
-__int64 winnings_all = 0L;
+uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
+int64_t winnings_all = 0L;
 int winnings = 0;
-unsigned int time_running = 0;
 bool gtaVRunning, running, stopping, starting, keyCombListen, runLoops;
 bool debug_full = false, webServer = true;
 float multiplierW, multiplierH;
-unsigned int time_sleep = 36;
+uint32_t time_sleep = 36, time_running = 0;
 
 // Functions from js =======================
 std::function<void(bool)> set_gta_running = {};
@@ -96,21 +95,20 @@ void kill(bool _exit = true) {
 
     // Stop the web servers, so they don't occupy the ports they use
     if (webUi) {
-        if (!CppJsLib::util::stop(webUi, true, 5)) {
+        if (!CppJsLib::util::stop(webUi.get(), true, 5)) {
             StaticLogger::warning("Could not stop web ui web server");
         } else {
             StaticLogger::debug("Stopped web ui web server");
         }
 
-        delete webUi;
+        webUi.reset();
     } else {
         StaticLogger::warning("Could not stop web ui web server");
     }
 
     // Delete the AIs
     StaticLogger::debug("Deleting ai");
-    tf::AI::destroy(ai);
-    ai = nullptr;
+    ai.reset();
     StaticLogger::debug("Deleted ai");
 
     // Sleep
@@ -280,9 +278,8 @@ short get_pos(void *src) {
 
     // Write the src to the debug zip folder
     if (debug_full) {
-        utils::bitmap *bmp = utils::convertHBitmap(width, height, src);
+        utils::bitmap bmp = utils::convertHBitmap(width, height, src);
         debug::writeImage(bmp);
-        delete bmp;
     }
 
     // Results to fill in, every number in the array can be between 1 and 10,
@@ -296,7 +293,7 @@ short get_pos(void *src) {
         xCoord = (int) round(240 * multiplierW);
         _width = (int) round(110 * multiplierW);
         // Crop the screenshot
-        utils::bitmap *b = utils::crop(xCoord, yCoord, _width, _height, src);
+        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src);
 
         // Write bitmap object to debug zip folder
         if (debug_full) {
@@ -304,11 +301,8 @@ short get_pos(void *src) {
         }
 
         // Predict it
-        short b_res = ai->predict(b->data, b->size);
+        short b_res = ai->predict((char *) b.data(), b.size());
         StaticLogger::debug(std::to_string(b_res));
-
-        // Delete the bitmap object
-        delete b;
 
         // Check if the current result already exist, so there are not multiple >10/1 odds ore there is a evens
         // if one of this occurs, bet not on this one
@@ -395,20 +389,18 @@ void getWinnings() {
     auto _width = (short) round(304.0f * multiplierW);
 
     void *src = utils::TakeScreenShot(xPos, yPos, width, height);
-    utils::bitmap *bmp = utils::crop(xCoord, yCoord, _width, _height, src);
+    utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src);
 
     if (debug_full) {
-        utils::bitmap *b = utils::convertHBitmap(width, height, src);
+        utils::bitmap b = utils::convertHBitmap(width, height, src);
         debug::writeImage(b);
         debug::writeImage(bmp);
-        delete b;
     }
 
-    const short res = ai->predict(bmp->data, bmp->size);
+    const short res = ai->predict((char *) bmp.data(), bmp.size());
     StaticLogger::debugStream() << "Winnings prediction: " << res;
 
     DeleteObject(src);
-    delete bmp;
 
     // Update the winnings
     updateWinnings(1000 * (int) res);
@@ -787,11 +779,11 @@ bool startWebUi() {
 #ifndef BUILD_CPPJSLIB
         CppJsLib::createWebGUI(webUi, base_dir);
 #else
-        webUi = new CppJsLib::WebGUI(base_dir);
+        webUi = std::make_shared<CppJsLib::WebGUI>(base_dir);
 #endif //BUILD_CPPJSLIB
     } catch (std::bad_alloc &e) {
         StaticLogger::errorStream() << "Unable to create instance of web ui web server. Error: " << e.what();
-        webUi = nullptr;
+        webUi.reset();
         return false;
     }
 
@@ -818,8 +810,7 @@ bool startWebUi() {
         return true;
     } else {
         StaticLogger::warning("Could not start webUi");
-        delete webUi;
-        webUi = nullptr;
+        webUi.reset();
         return false;
     }
 }
@@ -888,9 +879,11 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         StaticLogger::debug("Initializing AI");
+        //StaticLogger::debugStream() << "The ai was compiled using tensorflow version " << tf::AI::getTFVersion();
 
         try {
-            ai = tf::AI::create("resources/data/model.pb", {labels, sizeof(labels)});
+            tf::AI *ai_ptr = tf::AI::create("resources/data/model.pb", {labels, sizeof(labels)});
+            ai = std::shared_ptr<tf::AI>(ai_ptr, tf::AI::destroy);
         } catch (std::bad_alloc &e) {
             StaticLogger::error("Could not initialize AI: Unable to allocate memory");
             utils::displayError("Could not initialize AI\nNot enough memory", [] {
@@ -912,18 +905,17 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             bt = new std::thread([] {
                 StaticLogger::debug("Running first AI prediction");
                 void *src = utils::TakeScreenShot(0, 0, 100, 100);
-                utils::bitmap *b = utils::crop(0, 0, 100, 100, src);
+                utils::bitmap b = utils::crop(0, 0, 100, 100, src);
                 DeleteObject(src);
-                ai->predict(b->data, b->size);
+                ai->predict((char *) b.data(), b.size());
 
-                delete b;
                 StaticLogger::debug("Done running first AI prediction");
             });
         } else {
             StaticLogger::errorStream() << "Failed to initialize AI. Error: " << ai->getStatus()->getLastStatus();
 
             StaticLogger::debug("Deleting AI");
-            tf::AI::destroy(ai);
+            ai.reset();
             StaticLogger::debug("Deleted AI");
 
             utils::displayError("Could not initialize AI\nCheck the log for further information", [] {
@@ -1139,15 +1131,14 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
             webServer = false;
             if (webUi) {
                 // Try to stop the web server
-                if (!CppJsLib::util::stop(webUi, true, 5)) {
+                if (!CppJsLib::util::stop(webUi.get(), true, 5)) {
                     StaticLogger::warning("Could not stop web ui web server");
                 } else {
                     StaticLogger::debug("Stopped web ui web server");
                 }
 
                 // Delete the instance from existence
-                delete webUi;
-                webUi = nullptr;
+                webUi.reset();
                 return true;
             } else {
                 StaticLogger::warning("Tried to stop webUi server, but it does not exist");
