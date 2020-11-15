@@ -10,7 +10,7 @@ on:
       - "unused/**"
       - ".github/workflows/codeql-analysis.yml"
       - ".github/workflows/build-ai.yml"
-      - ".github/workflows/build-ai-pull-request.yml"
+      - ".github/workflows/build-ai-autobet.yml"
   pull_request:
     paths-ignore: 
       - "LICENSE"
@@ -20,7 +20,7 @@ on:
       - "unused/**"
       - ".github/workflows/codeql-analysis.yml"
       - ".github/workflows/build-ai.yml"
-      - ".github/workflows/build-ai-pull-request.yml"
+      - ".github/workflows/build-ai-autobet.yml"
 
 jobs:
   build:
