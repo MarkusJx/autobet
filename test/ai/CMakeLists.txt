@@ -39,10 +39,9 @@ include(ExternalProject)
 
 # Get and build gtest
 ExternalProject_Add(gtest
-                    URL https://github.com/google/googletest/archive/release-1.10.0.tar.gz
-                    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
-                    CMAKE_ARGS -Dgtest_force_shared_crt=ON -DBUILD_GMOCK=OFF -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-                    )
+    URL https://github.com/google/googletest/archive/release-1.10.0.tar.gz
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
+    CMAKE_ARGS -Dgtest_force_shared_crt=ON -DBUILD_GMOCK=OFF -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>)
 
 ExternalProject_Get_Property(gtest install_dir)
 set(gtest_dir ${install_dir})
@@ -60,13 +59,12 @@ add_dependencies(${PROJECT_NAME} gtest)
 # Copy files post-build
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy external/ai-release.dll ${PROJECT_BINARY_DIR}/ai-release.dll
-    COMMENT "Copied ${PROJECT_BINARY_DIR}/ai-release.dll"
-)
+    COMMENT "Copying $<TARGET_FILE_DIR:${PROJECT_NAME}>/ai-release.dll\n")
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory img ${PROJECT_BINARY_DIR}/img
-    COMMENT "Copied ${PROJECT_BINARY_DIR}/img")
+    COMMENT "Copying $<TARGET_FILE_DIR:${PROJECT_NAME}>/img\n")
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory data ${PROJECT_BINARY_DIR}/data
-    COMMENT "Copied ${PROJECT_BINARY_DIR}/data")
+    COMMENT "Copying $<TARGET_FILE_DIR:${PROJECT_NAME}>/data\n")
