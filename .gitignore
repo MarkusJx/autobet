@@ -229,3 +229,9 @@ node_modules
 /autobetLib/external/
 /autobetLib/lib/
 .DS_Store
+.vscode
+test/ai/build
+test/ai/data
+test/ai/img
+test/ai/external
+test/ai/lib
