@@ -22,5 +22,5 @@ jobs:
 
     - name: Test
       working-directory: test/ai/build/${{env.BUILD_TYPE}}
-      shell: cmd
-      run: Test.exe
+      shell: bash
+      run: ls
