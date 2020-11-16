@@ -38,12 +38,12 @@ copyImages()
 include(ExternalProject)
 
 # Get and build gtest
-ExternalProject_Add(gtest
+ExternalProject_Add(gtest_lib
     URL https://github.com/google/googletest/archive/release-1.10.0.tar.gz
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
     CMAKE_ARGS -Dgtest_force_shared_crt=ON -DBUILD_GMOCK=OFF -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>)
 
-ExternalProject_Get_Property(gtest install_dir)
+ExternalProject_Get_Property(gtest_lib install_dir)
 set(gtest_dir ${install_dir})
 
 # Include gtest
@@ -61,7 +61,7 @@ else ()
 endif()
 
 # Add dependencies
-add_dependencies(${PROJECT_NAME} gtest)
+add_dependencies(${PROJECT_NAME} gtest_lib)
 
 # Copy files post-build
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
