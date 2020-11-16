@@ -12,12 +12,6 @@ add_executable(ai_test ai_test.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ai-release.dll.if.lib)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(OUT_DIR ${PROJECT_BINARY_DIR}/Debug)
-else ()
-    set(OUT_DIR ${PROJECT_BINARY_DIR}/Release)
-endif()
-
 createDirectory(${CMAKE_SOURCE_DIR}/lib)
 createDirectory(${CMAKE_SOURCE_DIR}/external)
 createDirectory(${CMAKE_SOURCE_DIR}/data)
@@ -57,7 +51,14 @@ include_directories(${gtest_dir}/include)
 
 # Set link directories to gtest_dir/lib
 target_link_directories(${PROJECT_NAME} PRIVATE ${gtest_dir}/lib)
-target_link_libraries(${PROJECT_NAME} PRIVATE gtest_maind gtestd)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(OUT_DIR ${PROJECT_BINARY_DIR}/Debug)
+    target_link_libraries(${PROJECT_NAME} PRIVATE gtest_maind gtestd)
+else ()
+    set(OUT_DIR ${PROJECT_BINARY_DIR}/Release)
+    target_link_libraries(${PROJECT_NAME} PRIVATE gtest_main gtest)
+endif()
 
 # Add dependencies
 add_dependencies(${PROJECT_NAME} gtest)
