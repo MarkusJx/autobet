@@ -6,7 +6,7 @@ on:
       - "ai/**"
 
 jobs:
-  build:
+  build-ai:
     runs-on: windows-latest
 
     steps:
@@ -56,3 +56,36 @@ jobs:
           path: |
             tensorflow/bazel-bin/tensorflow/ai/*.dll
             tensorflow/bazel-bin/tensorflow/ai/*.lib
+
+  test-ai:
+    needs: [build-ai]
+    runs-on: windows-latest
+    env:
+      ai_directory: ${{github.workspace}}/ai_lib
+      ai_lib: ai-release.dll.if.lib
+      ai_dll: ai-release.dll
+      BUILD_TYPE: Release
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download the ai artifact
+        uses: actions/download-artifact@v2.0.2
+        with:
+          name: ai
+          path: ${{env.ai_directory}}
+
+      - name: Configure
+        run: cmake . -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        working-directory: test/ai
+        env: 
+          AI_LIB_LOCATION: ${{env.ai_directory}}/${{env.ai_lib}}
+          AI_DLL_LOCATION: ${{env.ai_directory}}/${{env.ai_dll}}
+
+      - name: Build
+        working-directory: test/ai/build
+        run: cmake --build . --config ${{env.BUILD_TYPE}}
+
+      - name: Test
+        working-directory: test/ai/build/${{env.BUILD_TYPE}}
+        shell: cmd
+        run: ai_test.exe
