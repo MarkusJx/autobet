@@ -4,6 +4,7 @@ on:
   push:
     paths: 
       - "ai/**"
+      - ".github/workflows/build-ai.yml"
 
 jobs:
   build-ai:
