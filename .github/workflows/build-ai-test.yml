@@ -17,8 +17,8 @@ jobs:
       working-directory: test/ai
 
     - name: Build
-      working-directory: test/ai/build
-      run: cmake --build . --config $BUILD_TYPE
+      working-directory: test/ai
+      run: cmake --build build --config $BUILD_TYPE
 
     - name: Test
       working-directory: test/ai/build
