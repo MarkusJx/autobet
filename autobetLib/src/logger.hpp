@@ -454,7 +454,7 @@ namespace logger {
         LOGGER_MAYBE_UNUSED static void
         create(LoggerMode mode = LoggerMode::MODE_BOTH, LogLevel lvl = LogLevel::debug,
                const char *fileName = "autobet.log", const char *fileMode = "at") {
-            if (getLogger()) delete getLogger();
+            if (getLogger()) getLogger().reset();
             setLogger(new Logger(mode, lvl, fileName, fileMode));
         }
 

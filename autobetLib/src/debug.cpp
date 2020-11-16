@@ -25,7 +25,7 @@ namespace fs = std::filesystem;
 
 bool debug::init() {
 #ifdef AUTOBET_ENABLE_FULL_DEBUG
-#   pragma message("Building with full debug support enabled")
+#   pragma message("INFO: Building with full debug support enabled")
     std::string path;
     errno_t err = utils::getDesktopDirectory(path);
     if (err) {
@@ -42,7 +42,7 @@ bool debug::init() {
     zip = zip_open(z_name.c_str(), 0, 'w');
     return zip != nullptr;
 #else
-#   pragma message("Building with full debug support disabled")
+#   pragma message("INFO: Building with full debug support disabled")
     DEBUG_UNIMPLEMENTED();
     return false;
 #endif

@@ -21,7 +21,7 @@
 #endif
 
 #define _AUTOBET_STR(x) #x
-#define STR(x) AUTOBET_STR(x)
+#define AUTOBET_STR(x) _AUTOBET_STR(x)
 #define TODO(msg) "TODO: " _AUTOBET_STR(msg) ": " __FILE__ ":" AUTOBET_STR(__LINE__)
 
 #include <CppJsLib.hpp>
@@ -37,8 +37,10 @@ const uint16_t yLocations[6] = {464, 628, 790, 952, 1114, 1276};
 
 std::thread *bt = nullptr;
 
+using ai_unique_ptr = std::unique_ptr<tf::AI, decltype(&tf::AI::destroy)>;
+
 std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
-std::unique_ptr<tf::AI> ai = nullptr;
+ai_unique_ptr ai = nullptr;
 
 uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
 int64_t winnings_all = 0L;
@@ -741,7 +743,7 @@ void listenForKeycomb() {
     };
 
 #ifdef AUTOBET_WINDOWS
-#   pragma message("Compiling on windows")
+#   pragma message("INFO: Building on windows")
     while (keyCombListen) {
         // If SHIFT+CTRL+F9 is pressed, start/stop, if SHIFT+CTRL+F10 is pressed, quit
         if (unsigned(GetKeyState(VK_SHIFT)) & unsigned(0x8000)) {
@@ -804,11 +806,11 @@ bool startWebUi() {
 
     StaticLogger::debug("Starting web ui web server");
 #ifdef CPPJSLIB_ENABLE_WEBSOCKET
-#   pragma message("Compiling with websocket support")
+#   pragma message("INFO: Building with websocket support")
     StaticLogger::debug("Starting with websocket enabled");
     bool res = webUi->start(8027, 8028, getIP(), false);
 #else
-#   pragma message("Compiling without websocket support")
+#   pragma message("INFO: Building without websocket support")
     StaticLogger::debug("Starting with websocket disabled");
     bool res = webUi->start(8027, getIP(), false);
 #endif // CPPJSLIB_ENABLE_WEBSOCKET
@@ -874,10 +876,10 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         autostop::init(&winnings, &time_running);
 
 #ifndef NDEBUG
-#       pragma message("Compiling in debug mode")
+#       pragma message("INFO: Building in debug mode")
         StaticLogger::warning("Program was compiled in debug mode");
 #else
-#       pragma message("Compiling in release mode")
+#       pragma message("INFO: Building in release mode")
 #endif //NDEBUG
         // Check if model.pb exists
         if (!utils::fileExists("resources/data/model.pb")) {
@@ -896,7 +898,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 
         try {
             tf::AI *ai_ptr = tf::AI::create("resources/data/model.pb", {labels, sizeof(labels)});
-            ai = std::unique_ptr<tf::AI>(ai_ptr, tf::AI::destroy);
+            ai = ai_unique_ptr(ai_ptr, tf::AI::destroy);
         } catch (std::bad_alloc &e) {
             StaticLogger::error("Could not initialize AI: Unable to allocate memory");
             utils::displayError("Could not initialize AI\nNot enough memory", [] {
