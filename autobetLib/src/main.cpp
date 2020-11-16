@@ -20,9 +20,9 @@
 
 #endif
 
-#ifndef BUILD_CPPJSLIB
-#   define CPPJSLIB_ENABLE_WEBSOCKET
-#endif //BUILD_CPPJSLIB
+#define _AUTOBET_STR(x) #x
+#define AUTOBET_STR(x) _AUTOBET_STR(x)
+#define TODO(msg) "TODO: " _AUTOBET_STR(msg) ": " __FILE__ ":" AUTOBET_STR(__LINE__)
 
 #include <CppJsLib.hpp>
 #include <ai.hpp>
@@ -33,12 +33,12 @@
 using namespace logger;
 
 // Every location to a horse to bet on
-const unsigned short int yLocations[6] = {464, 628, 790, 952, 1114, 1276};
+const uint16_t yLocations[6] = {464, 628, 790, 952, 1114, 1276};
 
 std::thread *bt = nullptr;
 
-std::shared_ptr<CppJsLib::WebGUI> webUi;
-std::shared_ptr<tf::AI> ai;
+std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
+std::shared_ptr<tf::AI> ai = nullptr;
 
 uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
 int64_t winnings_all = 0L;
@@ -449,7 +449,7 @@ void mainLoop() {
                 place_bet(pos);
                 StaticLogger::debugStream() << "Running: " << std::boolalpha << running;
                 if (!running) continue;
-                // Updating winnings by -10000 because betting costs 100000
+                // Updating winnings by -10000 since betting costs 100000
                 updateWinnings(-10000);
                 if (!running) {
                     continue;
@@ -478,6 +478,7 @@ void mainLoop() {
                     continue;
                 }
             } else {
+                // Should not bet, skip
                 skipBet();
                 StaticLogger::debugStream() << "Sleeping for " << time_sleep << " seconds";
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep));
@@ -740,6 +741,7 @@ void listenForKeycomb() {
     };
 
 #ifdef AUTOBET_WINDOWS
+#   pragma message("INFO: Building on windows")
     while (keyCombListen) {
         // If SHIFT+CTRL+F9 is pressed, start/stop, if SHIFT+CTRL+F10 is pressed, quit
         if (unsigned(GetKeyState(VK_SHIFT)) & unsigned(0x8000)) {
@@ -776,11 +778,8 @@ bool startWebUi() {
             StaticLogger::error("No web folder was found. Unable to start web ui web server");
             return false;
         }
-#ifndef BUILD_CPPJSLIB
-        CppJsLib::createWebGUI(webUi, base_dir);
-#else
-        webUi = std::make_shared<CppJsLib::WebGUI>(base_dir);
-#endif //BUILD_CPPJSLIB
+
+        webUi = std::make_unique<CppJsLib::WebGUI>(base_dir);
     } catch (std::bad_alloc &e) {
         StaticLogger::errorStream() << "Unable to create instance of web ui web server. Error: " << e.what();
         webUi.reset();
@@ -804,7 +803,16 @@ bool startWebUi() {
     webUi->expose(set_autostop_money);
 
     StaticLogger::debug("Starting web ui web server");
+#ifdef CPPJSLIB_ENABLE_WEBSOCKET
+#   pragma message("INFO: Building with websocket support")
+    StaticLogger::debug("Starting with websocket enabled");
     bool res = webUi->start(8027, 8028, getIP(), false);
+#else
+#   pragma message("INFO: Building without websocket support")
+    StaticLogger::debug("Starting with websocket disabled");
+    bool res = webUi->start(8027, getIP(), false);
+#endif // CPPJSLIB_ENABLE_WEBSOCKET
+
     if (res) {
         StaticLogger::debug("Successfully started webUi");
         return true;
@@ -866,9 +874,12 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         autostop::init(&winnings, &time_running);
 
 #ifndef NDEBUG
+#       pragma message("INFO: Building in debug mode")
         StaticLogger::warning("Program was compiled in debug mode");
+#else
+#       pragma message("INFO: Building in release mode")
 #endif //NDEBUG
-        // Check if betting.pb exists
+        // Check if model.pb exists
         if (!utils::fileExists("resources/data/model.pb")) {
             StaticLogger::error("Could not initialize AI: model.pb not found");
             utils::displayError("Could not initialize AI\nmodel.pb not found."
@@ -879,6 +890,8 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         StaticLogger::debug("Initializing AI");
+#       pragma message(TODO(Upload updated ai dll))
+#       pragma message(TODO(Uncomment this))
         //StaticLogger::debugStream() << "The ai was compiled using tensorflow version " << tf::AI::getTFVersion();
 
         try {

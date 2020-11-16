@@ -31,7 +31,7 @@ on:
       - "downloadModel.js"
 
 jobs:
-  build:
+  build_and_pack:
     runs-on: windows-latest
     env:
       BOOST_VERSION: 1.69.0

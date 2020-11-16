@@ -20,20 +20,21 @@ struct zip_t *zip;
 using namespace debug;
 namespace fs = std::filesystem;
 #else
-#   define DEBUG_UNIMPLEMENTED() logger_d->Unimplemented("Application was built with debug disabled");
+#   define DEBUG_UNIMPLEMENTED() StaticLogger::unimplemented("Application was built with debug disabled");
 #endif
 
 bool debug::init() {
 #ifdef AUTOBET_ENABLE_FULL_DEBUG
-    utils::path p;
-    errno_t err = utils::getDesktopDirectory(p);
+#   pragma message("INFO: Building with full debug support enabled")
+    std::string path;
+    errno_t err = utils::getDesktopDirectory(path);
     if (err) {
         StaticLogger::error("Unable to get Desktop directory. Error: " + std::to_string(err));
         home_dir = "";
         return false;
     }
 
-    home_dir = p.toString();
+    home_dir = path;
 
     std::string z_name = home_dir;
     z_name.append("\\autobet_debug.zip");
@@ -41,6 +42,7 @@ bool debug::init() {
     zip = zip_open(z_name.c_str(), 0, 'w');
     return zip != nullptr;
 #else
+#   pragma message("INFO: Building with full debug support disabled")
     DEBUG_UNIMPLEMENTED();
     return false;
 #endif

@@ -28,6 +28,7 @@
 #include <functional>
 #include <sstream>
 #include <ctime>
+#include <memory>
 #include "main.hpp"
 
 #define debug(message) _debug(::logger::LoggerUtils::removeSlash(__FILE__).c_str(), __LINE__, message)
@@ -453,7 +454,7 @@ namespace logger {
         LOGGER_MAYBE_UNUSED static void
         create(LoggerMode mode = LoggerMode::MODE_BOTH, LogLevel lvl = LogLevel::debug,
                const char *fileName = "autobet.log", const char *fileMode = "at") {
-            if (getLogger()) delete getLogger();
+            if (getLogger()) getLogger().reset();
             setLogger(new Logger(mode, lvl, fileName, fileMode));
         }
 
@@ -578,14 +579,13 @@ namespace logger {
          * Destroy the logger instance
          */
         LOGGER_MAYBE_UNUSED static void destroy() {
-            delete getLogger();
-            setLogger(nullptr);
+            getLogger().reset();
         }
 
     private:
         static void setLogger(Logger *);
 
-        static Logger *getLogger();
+        static std::unique_ptr<Logger> &getLogger();
     };
 }
 
