@@ -21,6 +21,6 @@ jobs:
       run: cmake --build build --config ${{env.BUILD_TYPE}}
 
     - name: Test
-      working-directory: test/ai/build
-      shell: bash
-      run: ls
+      working-directory: test/ai/build/${{env.BUILD_TYPE}}
+      shell: cmd
+      run: Test.exe
