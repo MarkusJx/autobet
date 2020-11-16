@@ -27,82 +27,6 @@ namespace utils {
         }
     } IPv4;
 
-    template<typename T>
-    struct Array {
-    public:
-        explicit Array(size_t size) {
-            this->data = (T *) calloc(size, sizeof(T));
-            this->size = size;
-        }
-
-        Array(T *data, size_t size) {
-            this->data = (T *) calloc(size, sizeof(T));
-            if (data) {
-#ifdef AUTOBET_WINDOWS
-                memcpy_s(this->data, size, data, size);
-#else
-                memcpy(this->data, data, size);
-#endif
-            }
-            this->size = size;
-        }
-
-        T &operator[](int index) {
-            return data[index];
-        }
-
-        void setData(T newData) {
-            memcpy(this->data, newData, size);
-        }
-
-        void setData(T newData, size_t newSize) {
-            if (size == newSize) {
-                setData(newData);
-            } else {
-                size = newSize;
-                data = (char *) realloc(data, size);
-            }
-        }
-
-        /**
-         * Resize the array
-         *
-         * @param newSize the new size of the array
-         * @return 0 if no errors, else a error code from memcpy_s or -1 if the allocation failed or 1 if the size was not changed
-         */
-        errno_t resize(size_t newSize) {
-            if (size != newSize) {
-                char *tmp = (char *) calloc(newSize, sizeof(char));
-                if (!tmp) {
-                    return -1;
-                }
-
-                errno_t err;
-                if (newSize > size)
-                    err = memcpy_s(tmp, newSize, data, size);
-                else
-                    err = memcpy_s(tmp, newSize, data, newSize);
-                if (err) {
-                    free(tmp);
-                    return err;
-                }
-                free(data);
-                data = tmp;
-                size = newSize;
-                return 0;
-            } else {
-                return 1;
-            }
-        }
-
-        ~Array() {
-            free(data);
-        }
-
-        T *data;
-        size_t size = 0;
-    };
-
     class Application;
 
     bool startup(Application *application, const char* args = nullptr);
@@ -125,21 +49,11 @@ namespace utils {
         void *pi;
     };
 
-    typedef struct Array_path : Array<char> {
-        Array_path() : Array(261) {}
-
-        std::string toString() {
-            std::string s(data, size - 1);
-            return s;
-        }
-    } path;
-
-    //typedef struct Array<char> bitmap;
     using bitmap = std::vector<unsigned char>;
 
     void setCtrlCHandler(std::function<void()> callback);
 
-    errno_t getDesktopDirectory(path &p);
+    errno_t getDesktopDirectory(std::string &path);
 
     bool getOwnIP(IPv4 &ownIP);
 

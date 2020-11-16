@@ -52,7 +52,7 @@ void utils::setCtrlCHandler(std::function<void()> callback) {
  * @param arr A path object
  * @return a error code or 0 if everything is ok
  */
-errno_t utils::getDesktopDirectory(utils::path &arr) {
+errno_t utils::getDesktopDirectory(std::string &arr) {
     wchar_t path[MAX_PATH + 1] = {0};
 
     if (SHGetFolderPathW(nullptr, CSIDL_DESKTOP, nullptr, 0, path) != S_OK) {
@@ -61,17 +61,17 @@ errno_t utils::getDesktopDirectory(utils::path &arr) {
 
     int pathlen = lstrlenW(path);
 
-    int len = WideCharToMultiByte(CP_UTF8, 0, path, pathlen, arr.data, arr.size, nullptr, nullptr);
+    arr.resize(261);
+    int len = WideCharToMultiByte(CP_UTF8, 0, path, pathlen, arr.data(), arr.size(), nullptr, nullptr);
     if (len <= 0) {
         return -1;
     }
 
-    if (!arr.data)
+    if (!arr.data())
         ++len;
-    else if (len < arr.size)
-        arr[len] = 0;
 
-    return arr.resize(len + 1);
+    arr.resize(len);
+    return 0;
 }
 
 // Application class ================================================

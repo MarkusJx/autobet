@@ -28,6 +28,7 @@
 #include <functional>
 #include <sstream>
 #include <ctime>
+#include <memory>
 #include "main.hpp"
 
 #define debug(message) _debug(::logger::LoggerUtils::removeSlash(__FILE__).c_str(), __LINE__, message)
@@ -578,14 +579,13 @@ namespace logger {
          * Destroy the logger instance
          */
         LOGGER_MAYBE_UNUSED static void destroy() {
-            delete getLogger();
-            setLogger(nullptr);
+            getLogger().reset();
         }
 
     private:
         static void setLogger(Logger *);
 
-        static Logger *getLogger();
+        static std::unique_ptr<Logger> &getLogger();
     };
 }
 

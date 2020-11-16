@@ -1,14 +1,14 @@
 #include "logger.hpp"
 
-logger::Logger *ptr = nullptr;
-bool toFile = false;
-bool toConsole = false;
+static std::unique_ptr<logger::Logger> ptr = nullptr;
+static bool toFile = false;
+static bool toConsole = false;
 
 void logger::StaticLogger::setLogger(Logger *_ptr) {
-    ptr = _ptr;
+    ptr = std::unique_ptr<logger::Logger>(_ptr);
 }
 
-logger::Logger *logger::StaticLogger::getLogger() {
+std::unique_ptr<logger::Logger> &logger::StaticLogger::getLogger() {
     return ptr;
 }
 
