@@ -65,13 +65,13 @@ add_dependencies(${PROJECT_NAME} gtest)
 
 # Copy files post-build
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy external/ai-release.dll ${PROJECT_BINARY_DIR}/ai-release.dll
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/external/ai-release.dll ${PROJECT_BINARY_DIR}/ai-release.dll
     COMMENT "Copying ${PROJECT_BINARY_DIR}/ai-release.dll\n")
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory img ${PROJECT_BINARY_DIR}/img
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/img ${PROJECT_BINARY_DIR}/img
     COMMENT "Copying ${PROJECT_BINARY_DIR}/img\n")
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory data ${PROJECT_BINARY_DIR}/data
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data ${PROJECT_BINARY_DIR}/data
     COMMENT "Copying ${PROJECT_BINARY_DIR}/data\n")
