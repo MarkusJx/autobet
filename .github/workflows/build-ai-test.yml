@@ -1,0 +1,26 @@
+name: CMake
+
+on: [push]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Configure
+      run: cmake . -B build
+      working-directory: test/ai
+
+    - name: Build
+      working-directory: test/ai/build
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Test
+      working-directory: test/ai/build
+      shell: cmd
+      run: Test.exe
