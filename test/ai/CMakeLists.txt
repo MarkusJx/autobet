@@ -12,12 +12,11 @@ add_executable(ai_test ai_test.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ai-release.dll.if.lib)
 
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR})
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR})
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR})
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR})
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR})
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR})
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(OUT_DIR ${PROJECT_BINARY_DIR}/Debug)
+else ()
+    set(OUT_DIR ${PROJECT_BINARY_DIR}/Release)
+endif()
 
 createDirectory(${CMAKE_SOURCE_DIR}/lib)
 createDirectory(${CMAKE_SOURCE_DIR}/external)
@@ -65,13 +64,13 @@ add_dependencies(${PROJECT_NAME} gtest)
 
 # Copy files post-build
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/external/ai-release.dll ${PROJECT_BINARY_DIR}/ai-release.dll
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/external/ai-release.dll ${OUT_DIR}/ai-release.dll
     COMMENT "Copying ${PROJECT_BINARY_DIR}/ai-release.dll\n")
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/img ${PROJECT_BINARY_DIR}/img
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/img ${OUT_DIR}/img
     COMMENT "Copying ${PROJECT_BINARY_DIR}/img\n")
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data ${PROJECT_BINARY_DIR}/data
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data ${OUT_DIR}/data
     COMMENT "Copying ${PROJECT_BINARY_DIR}/data\n")
