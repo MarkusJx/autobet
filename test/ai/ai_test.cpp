@@ -15,7 +15,7 @@ using bitmap = std::vector<unsigned char>;
 
 class AITest : public ::testing::Test {
 protected:
-    AITest() : ai(tf::AI::create("model.pb"), {labels, sizeof(labels)}) {}
+    AITest() : ai(tf::AI::create("data/model.pb", {labels, sizeof(labels)})) {}
 
     bitmap loadImage(const std::string &path) {
         std::ifstream file(path, std::ios::binary | std::ios::ate);
@@ -103,7 +103,7 @@ TEST_F(AITest, NineTest) {
 TEST_F(AITest, TenTest) {
     for (const auto &entry : fs::directory_iterator("img/10")) {
         std::cout << "Predicting image: " << entry.path() << std::endl;
-        bitmap bmp = loadImage(entry.path());
+        bitmap bmp = loadImage(entry.path().string());
         short res = ai->predict((char *) bmp.data(), bmp.size());
 
         EXPECT_EQ(res, 10);

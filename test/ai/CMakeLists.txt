@@ -66,3 +66,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory img ${PROJECT_BINARY_DIR}/img
     COMMENT "Copied ${PROJECT_BINARY_DIR}/img")
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory data ${PROJECT_BINARY_DIR}/data
+    COMMENT "Copied ${PROJECT_BINARY_DIR}/data")
