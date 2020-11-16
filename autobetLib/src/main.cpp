@@ -896,7 +896,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 
         try {
             tf::AI *ai_ptr = tf::AI::create("resources/data/model.pb", {labels, sizeof(labels)});
-            ai = std::shared_ptr(ai_ptr, tf::AI::destroy);
+            ai = std::shared_ptr<tf::AI>(ai_ptr, tf::AI::destroy);
         } catch (std::bad_alloc &e) {
             StaticLogger::error("Could not initialize AI: Unable to allocate memory");
             utils::displayError("Could not initialize AI\nNot enough memory", [] {
