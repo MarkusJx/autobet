@@ -37,10 +37,8 @@ const uint16_t yLocations[6] = {464, 628, 790, 952, 1114, 1276};
 
 std::thread *bt = nullptr;
 
-using ai_unique_ptr = std::unique_ptr<tf::AI, decltype(&tf::AI::destroy)>;
-
 std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
-ai_unique_ptr ai = nullptr;
+std::shared_ptr<tf::AI> ai = nullptr;
 
 uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
 int64_t winnings_all = 0L;
@@ -898,7 +896,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 
         try {
             tf::AI *ai_ptr = tf::AI::create("resources/data/model.pb", {labels, sizeof(labels)});
-            ai = ai_unique_ptr(ai_ptr, tf::AI::destroy);
+            ai = std::shared_ptr(ai_ptr, tf::AI::destroy);
         } catch (std::bad_alloc &e) {
             StaticLogger::error("Could not initialize AI: Unable to allocate memory");
             utils::displayError("Could not initialize AI\nNot enough memory", [] {
