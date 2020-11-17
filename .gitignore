@@ -209,7 +209,6 @@ $RECYCLE.BIN/
 extern/
 include/
 /.vs
-/src/CppJsLib
 /unused/v1.1.0/ui/favicon.ico
 /unused/v1.1.0/ui/qrcode.js
 /web/css/materialize.min.css
@@ -235,3 +234,5 @@ test/ai/data
 test/ai/img
 test/ai/external
 test/ai/lib
+/autobetLib/src/CppJsLib
+/autobetLib/src/zip
