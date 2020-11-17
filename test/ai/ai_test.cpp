@@ -41,8 +41,10 @@ protected:
     ~AITest() override = default;
 
     bitmap one;
-    static std::shared_ptr<tf::AI> ai = nullptr;
+    static std::shared_ptr<tf::AI> ai;
 };
+
+std::shared_ptr<tf::AI> AITest::ai = nullptr;
 
 TEST_F(AITest, EvensTest) {
     bitmap bmp = loadImage("img/1/1.jpg");
