@@ -6,7 +6,6 @@
 #include <fstream>
 #include <filesystem>
 #include <iostream>
-#include <chrono>
 #include <memory>
 
 namespace fs = std::filesystem;
@@ -155,28 +154,16 @@ TEST_F(AITest, FiftyTest) {
 }
 
 TEST_F(AITest, SingleTimeTest) {
-    using namespace std::chrono;
-    int64_t ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-
     short res = ai->predict(one.data(), one.size());
-
-    int64_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-    std::cout << "Operation took: " << (now - ms) << "ms" << std::endl;
 
     EXPECT_EQ(res, 1);
 }
 
 TEST_F(AITest, TenTimeTest) {
-    using namespace std::chrono;
-    int64_t ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-
     uint16_t res = 0;
     for (int i = 0; i < 10; i++) {
         res |= (uint16_t) ai->predict(one.data(), one.size());
     }
-
-    int64_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-    std::cout << "Operation took: " << (now - ms) << "ms" << std::endl;
 
     EXPECT_EQ(res, 1);
 }
