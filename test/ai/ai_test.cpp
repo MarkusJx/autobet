@@ -168,6 +168,10 @@ TEST_F(AITest, TenTimeTest) {
     EXPECT_EQ(res, 1);
 }
 
+TEST_F(AITest, DestructionTest) {
+    ai.reset();
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
