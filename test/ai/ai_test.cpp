@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <iostream>
 #include <chrono>
+#include <memory>
 
 namespace fs = std::filesystem;
 
@@ -16,7 +17,11 @@ using bitmap = std::vector<char>;
 
 class AITest : public ::testing::Test {
 protected:
-    AITest() : ai(tf::AI::create("data/model.pb", {labels, sizeof(labels)})) {
+    AITest() {
+        if (!ai) {
+            ai = std::shared_ptr<tf::AI>(tf::AI::create("data/model.pb", {labels, sizeof(labels)}), tf::AI::destroy);
+        }
+
         one = loadImage("img/1/1.jpg");
     }
 
@@ -33,12 +38,10 @@ protected:
         }
     }
 
-    ~AITest() override {
-        tf::AI::destroy(ai);
-    }
+    ~AITest() override = default;
 
     bitmap one;
-    tf::AI *ai;
+    static std::shared_ptr<tf::AI> ai = nullptr;
 };
 
 TEST_F(AITest, EvensTest) {
