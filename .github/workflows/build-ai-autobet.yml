@@ -7,6 +7,10 @@ on:
         description: 'Tensorflow release version'
         default: 'r2.3'
         required: true
+      bazel-options:
+        description: 'Optional bazel build options'
+        default: ''
+        required: false
 
 jobs:
   build-ai:
@@ -47,7 +51,7 @@ jobs:
       run: python ./configure.py
       working-directory: tensorflow
     - name: Build tensorflow
-      run: bazel build --config=opt //tensorflow/ai:ai-release.dll
+      run: bazel build --config=opt ${{github.event.inputs.bazel-options}} //tensorflow/ai:ai-release.dll
       working-directory: tensorflow
       
     # Upload the result
