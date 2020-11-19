@@ -64,6 +64,7 @@ jobs:
           tensorflow/bazel-bin/tensorflow/ai/*.dll
           tensorflow/bazel-bin/tensorflow/ai/*.lib
 
+# Test ai ========================================
   test-ai:
     needs: [build-ai]
     runs-on: windows-latest
@@ -81,6 +82,7 @@ jobs:
           name: ai
           path: ${{env.ai_directory}}
 
+      # Configure CMake and set the environment variables to the ai library location
       - name: Configure
         run: cmake . -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         working-directory: test/ai
@@ -88,15 +90,26 @@ jobs:
           AI_LIB_LOCATION: ${{env.ai_directory}}/${{env.ai_lib}}
           AI_DLL_LOCATION: ${{env.ai_directory}}/${{env.ai_dll}}
 
+      # Build ai_test.exe
       - name: Build
         working-directory: test/ai/build
         run: cmake --build . --config ${{env.BUILD_TYPE}}
 
+      # Run the test
       - name: Test
         working-directory: test/ai/build/${{env.BUILD_TYPE}}
         shell: cmd
         run: ai_test.exe
+      
+      # Upload ai_test.exe
+      - name: Upload test
+        uses: actions/upload-artifact@v2.2.0
+        with:
+          name: test
+          path: test/ai/build/${{env.BUILD_TYPE}}/ai_test.exe
+          retention-days: 90
   
+# Build autobet ===================================
   build-autobet:
     needs: [build-ai]
     runs-on: windows-latest
