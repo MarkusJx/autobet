@@ -56,9 +56,9 @@
             "ui/qrcode.min.js",
             "ui/startstop.min.js",
             "ui/style.min.css",
+            "ui/err/*",
             "main.js",
-            "preload.js",
-            "renderer.js",
+            "scripts/*",
             "icon.png",
             "!**/v1.1.0/*",
             "!**/v0/*"
