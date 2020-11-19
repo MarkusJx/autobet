@@ -72,7 +72,8 @@ endfunction(createDirectory)
 function(downloadAiDll)
     set(AI_DLL_FILE ${CMAKE_SOURCE_DIR}/external/ai-release.dll)
     message(STATUS "Downloading ai-release.dll")
-    file(DOWNLOAD "https://www.dropbox.com/s/qrzvxjijtt8r6lz/ai-release.dll?dl=1"
+    # Old link: https://www.dropbox.com/s/qrzvxjijtt8r6lz/ai-release.dll?dl=1
+    file(DOWNLOAD "https://www.dropbox.com/s/i56prpjx9zdy29q/ai-release.dll?dl=1"
         ${AI_DLL_FILE}
         SHOW_PROGRESS)
     
@@ -86,7 +87,8 @@ endfunction(downloadAiDll)
 function(downloadAiLib)
     set(AI_LIB_FILE ${CMAKE_SOURCE_DIR}/lib/ai-release.dll.if.lib)
     message(STATUS "Downloading ai-release.dll.if.lib")
-    file(DOWNLOAD "https://www.dropbox.com/s/f6dmgrhqzj7mfw5/ai-release.dll.if.lib?dl=1"
+    # Old link: https://www.dropbox.com/s/f6dmgrhqzj7mfw5/ai-release.dll.if.lib?dl=1
+    file(DOWNLOAD "https://www.dropbox.com/s/uhuyuc7rn3neoel/ai-release.dll.if.lib?dl=1"
         ${AI_LIB_FILE}
         SHOW_PROGRESS)
     

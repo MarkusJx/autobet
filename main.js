@@ -1,8 +1,13 @@
-const {app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const path = require('path');
-const autobetLib = require('./autobetLib');
-const {autoUpdater} = require("electron-updater");
+const { autoUpdater } = require("electron-updater");
+let autobetLib = null, autobetLibError = null;
+try {
+    autobetLib = require('./autobetLib');
+} catch (e) {
+    autobetLibError = e;
+}
 
 let tray = null;
 
@@ -24,7 +29,7 @@ function createWindow() {
         resizable: true,
         icon: "icon.png",
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, 'scripts', 'preload.js'),
             contextIsolation: true,
             worldSafeExecuteJavaScript: true,
             nodeIntegration: false,
@@ -39,11 +44,11 @@ function createWindow() {
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');
     const contextMenu = Menu.buildFromTemplate([
-        {label: 'Autobet', type: 'normal', enabled: false},
-        {type: 'separator'},
-        {label: 'Show UI', type: 'checkbox', checked: true, id: 'show-ui'},
-        {type: 'separator'},
-        {label: 'Quit', type: 'normal', id: 'quit'}
+        { label: 'Autobet', type: 'normal', enabled: false },
+        { type: 'separator' },
+        { label: 'Show UI', type: 'checkbox', checked: true, id: 'show-ui' },
+        { type: 'separator' },
+        { label: 'Quit', type: 'normal', id: 'quit' }
     ]);
     tray.setToolTip("Autobet");
     tray.setContextMenu(contextMenu);
@@ -79,11 +84,61 @@ function createWindow() {
     mainWindowState.manage(mainWindow);
 }
 
+function createErrorWindow() {
+    const errorWindowState = windowStateKeeper({
+        defaultWidth: 705,
+        defaultHeight: 830
+    });
+
+    const errorWindow = new BrowserWindow({
+        x: errorWindowState.x,
+        y: errorWindowState.y,
+        width: 750,
+        height: 440,
+        minWidth: 750,
+        minHeight: 440,
+        frame: true,
+        resizable: true,
+        icon: "icon.png",
+        webPreferences: {
+            preload: path.join(__dirname, 'scripts', 'preload_err.js'),
+            contextIsolation: true,
+            worldSafeExecuteJavaScript: true,
+            nodeIntegration: false,
+            webSecurity: true,
+            enableRemoteModule: true,
+            devTools: false
+        }
+    });
+
+    errorWindow.removeMenu();
+
+    errorWindow.loadFile(path.join(__dirname, 'ui', 'err', 'index.html')).then(() => {
+        console.log("Error window loaded");
+    });
+
+    ipcMain.on('get-error', (event) => {
+        event.returnValue = autobetLibError;
+    });
+
+    errorWindowState.manage(errorWindow);
+}
+
 app.whenReady().then(() => {
-    createWindow();
+    if (autobetLib != null) {
+        createWindow();
+    } else {
+        createErrorWindow();
+    }
 
     app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+        if (BrowserWindow.getAllWindows().length === 0) {
+            if (autobetLib != null) {
+                createWindow();
+            } else {
+                createErrorWindow();
+            }
+        }
     });
 });
 

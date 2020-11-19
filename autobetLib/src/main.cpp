@@ -890,9 +890,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         StaticLogger::debug("Initializing AI");
-#       pragma message(TODO(Upload updated ai dll))
-#       pragma message(TODO(Uncomment this))
-        //StaticLogger::debugStream() << "The ai was compiled using tensorflow version " << tf::AI::getTFVersion();
+        StaticLogger::debugStream() << "The ai was compiled using tensorflow version " << tf::AI::getTFVersion();
 
         try {
             tf::AI *ai_ptr = tf::AI::create("resources/data/model.pb", {labels, sizeof(labels)});
