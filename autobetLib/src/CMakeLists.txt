@@ -57,11 +57,9 @@ add_definitions(-DNAPI_VERSION=4)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
     message(STATUS "Building with debug infos")
-    target_link_libraries(${PROJECT_NAME} ai.dll.if)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10000000")
 else ()
     message(STATUS "Building in release mode")
-    target_link_libraries(${PROJECT_NAME} ai-release.dll.if)
 endif ()
 
 # If BUILD_CPPJSLIB is set, download the CppJsLib repo and add the files to the library

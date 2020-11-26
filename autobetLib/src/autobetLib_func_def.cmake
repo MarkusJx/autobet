@@ -70,18 +70,19 @@ function(createDirectory TO_CREATE)
 endfunction(createDirectory)
 
 function(copyOpencvDll)
+    set(OPENCV_DLL_NAME opencv_world412.dll)
     if (NOT EXISTS $ENV{OpenCV_DIR})
         message(FATAL_ERROR "OpenCV_DIR variable is not set, cannot continue")
     endif ()
 
-    set(OPENCV_BIN_FILE $ENV{OpenCV_DIR}/x64/vc15/bin/opencv_world450.dll)
+    set(OPENCV_BIN_FILE $ENV{OpenCV_DIR}/x64/vc15/bin/${OPENCV_DLL_NAME})
     if (NOT EXISTS ${OPENCV_BIN_FILE})
         message(FATAL_ERROR "${OPENCV_BIN_FILE} does not exist, cannot continue")
     endif ()
 
     set(OPENCV_DLL_DIR ${CMAKE_SOURCE_DIR}/external)
-    set(OPENCV_DLL_FILE ${OPENCV_DLL_DIR}/opencv_world450.dll)
-    message(STATUS "Copying opencv_world450.dll...")
+    set(OPENCV_DLL_FILE ${OPENCV_DLL_DIR}/${OPENCV_DLL_NAME})
+    message(STATUS "Copying ${OPENCV_DLL_NAME}...")
 
     file(COPY ${OPENCV_BIN_FILE}
             DESTINATION ${OPENCV_DLL_DIR})
