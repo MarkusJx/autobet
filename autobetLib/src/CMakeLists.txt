@@ -8,7 +8,6 @@ add_compile_definitions(NAPI_CPP_EXCEPTIONS)
 
 option(BUILD_CPPJSLIB FALSE)
 
-add_compile_definitions(AUTOBET_ENABLE_FULL_DEBUG)
 message(STATUS "Building with debug:full support")
 
 include(autobetLib_func_def.cmake)
@@ -35,7 +34,10 @@ file(GLOB src
         "*.cpp"
         )
 
-add_library(${PROJECT_NAME} SHARED ${src} ${include} ${zip} ${CMAKE_JS_SRC})
+set(OPENCV_LINK_SRC opencv_link/opencv_link.cpp opencv_link/opencv_link.hpp)
+set(NAPI_TOOLS_SRC n_api/jsCallback.hpp n_api/napi_tools.hpp)
+
+add_library(${PROJECT_NAME} SHARED ${src} ${include} ${zip} ${OPENCV_LINK_SRC} ${NAPI_TOOLS_SRC} ${CMAKE_JS_SRC})
 
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")

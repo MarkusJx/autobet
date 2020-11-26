@@ -4,6 +4,7 @@
 #include "autostop.hpp"
 #include "settings.hpp"
 #include "autobetException.hpp"
+#include "opencv_link/opencv_link.hpp"
 
 #include <chrono>
 #include <thread>
@@ -25,20 +26,17 @@
 #define TODO(msg) "TODO: " _AUTOBET_STR(msg) ": " __FILE__ ":" AUTOBET_STR(__LINE__)
 
 #include <CppJsLib.hpp>
-#include <ai.hpp>
 
 #include "logger.hpp"
-#include "jsCallback.hpp"
+#include "n_api/jsCallback.hpp"
 
 using namespace logger;
 
 // Every location to a horse to bet on
 const uint16_t yLocations[6] = {464, 628, 790, 952, 1114, 1276};
 
-std::thread *bt = nullptr;
-
 std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
-std::shared_ptr<tf::AI> ai = nullptr;
+opencv_link::knn knn = nullptr;
 
 uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
 int64_t winnings_all = 0L;
@@ -82,12 +80,6 @@ void kill(bool _exit = true) {
     if (exceptionCallback) exceptionCallback->stop();
     if (logCallback) logCallback->stop();
 
-    // If the threads for doing the first AI prediction did not finish, detach them
-    // so they don't throw an exception
-    if (bt)
-        bt->detach();
-    delete bt;
-
     // Set every possible bool to false
     keyCombListen = false;
     runLoops = false;
@@ -108,7 +100,7 @@ void kill(bool _exit = true) {
 
     // Delete the AIs
     StaticLogger::debug("Deleting ai");
-    ai.reset();
+    knn.reset();
     StaticLogger::debug("Deleted ai");
 
     // Sleep
@@ -119,9 +111,7 @@ void kill(bool _exit = true) {
 
     if (debug_full) {
         StaticLogger::create(LoggerMode::MODE_FILE, LogLevel::debug, "autobet_debug.log", "wt");
-        if (!debug::finish()) {
-            StaticLogger::error("debug::finish returned false");
-        }
+        debug::finish();
         StaticLogger::destroy();
     }
 
@@ -249,60 +239,13 @@ void setGtaVRunning(bool val) {
     set_gta_running(val);
 }
 
-/**
- * Get the position of the horse to bet on
- *
- * @param src the source HBITMAP as a void pointer because <windows.h> throws errors
- * @return the y-coordinate to click or -1 if this one should be skipped
- */
-short get_pos(void *src) {
-    // Join both threads for predicting the first image
-    if (bt) {
-        // Close the threads. Source: https://stackoverflow.com/a/33017819
-        if (bt) {
-            auto future = std::async(std::launch::async, &std::thread::join, bt);
-            if (future.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
-                // bt is still alive, destroy everything
-                StaticLogger::error("bt could not be closed");
-                exception();
-                utils::displayError("An error occurred while initializing the AIs", [] {
-                    quit();
-                });
-            } else {
-                // bt is now d-e-a-d
-                delete bt;
-                bt = nullptr;
-            }
-        }
-    }
-
-    // Write the src to the debug zip folder
-    if (debug_full) {
-        utils::bitmap bmp = utils::convertHBitmap(width, height, src);
-        debug::writeImage(bmp);
-    }
-
+short getBasicBettingPosition(const std::vector<std::string> &odds) {
     // Results to fill in, every number in the array can be between 1 and 10,
     // 1 represents evens, 2 represents 2/1 etc. 10 represents 10/1 and lower
     short res[6] = {-1, -1, -1, -1, -1, -1};
-    unsigned short yCoord, xCoord, _width, _height;
-    StaticLogger::debug("AI results:");
     for (unsigned short i = 0; i < 6; i++) {
-        yCoord = (int) round((float) yLocations[i] * multiplierH);
-        _height = (int) round((float) 46 * multiplierH);
-        xCoord = (int) round(240 * multiplierW);
-        _width = (int) round(110 * multiplierW);
-        // Crop the screenshot
-        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src);
-
-        // Write bitmap object to debug zip folder
-        if (debug_full) {
-            debug::writeImage(b);
-        }
-
-        // Predict it
-        short b_res = ai->predict((char *) b.data(), b.size());
-        StaticLogger::debug(std::to_string(b_res));
+        // Get the odd as a short
+        const short b_res = opencv_link::knn::oddToShort(odds[i]);
 
         // Check if the current result already exist, so there are not multiple >10/1 odds ore there is a evens
         // if one of this occurs, bet not on this one
@@ -312,14 +255,6 @@ short get_pos(void *src) {
         }
 
         res[i] = b_res;
-    }
-
-    // If not ok, exit
-    if (!ai->getStatus()->ok()) {
-        StaticLogger::errorStream() << "Betting ai threw an error. Last error: "
-                                    << ai->getStatus()->getLastStatus();
-        ai->getStatus()->resetLastStatus();
-        throw autobetException("Betting ai is not ok");
     }
 
     // If evens exist, only bet if the second highest percentage is lower than 4/1 (basically only 4/1 or 5/1)
@@ -349,6 +284,48 @@ short get_pos(void *src) {
     }
 
     return (short) yLocations[lowest[1]];
+}
+
+/**
+ * Get the position of the horse to bet on
+ *
+ * @param src the source HBITMAP as a void pointer because <windows.h> throws errors
+ * @return the y-coordinate to click or -1 if this one should be skipped
+ */
+short get_pos(void *src) {
+    // Write the src to the debug zip folder
+    if (debug_full) {
+        utils::bitmap bmp = utils::convertHBitmap(width, height, src);
+        debug::writeImage(bmp);
+    }
+
+    std::vector<std::string> odds(6);
+    unsigned short yCoord, xCoord, _width, _height;
+    for (int i = 0; i < 6; i++) {
+        yCoord = (int) round((float) yLocations[i] * multiplierH);
+        _height = (int) round((float) 46 * multiplierH);
+        xCoord = (int) round(240 * multiplierW);
+        _width = (int) round(110 * multiplierW);
+
+        // Crop the screenshot
+        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src);
+
+        // Write bitmap object to debug zip folder
+        if (debug_full) {
+            debug::writeImage(b);
+        }
+
+        odds[i] = knn.predict(b, multiplierW, multiplierH);
+        if (!opencv_link::knn::isOdd(odds[i])) {
+            StaticLogger::errorStream() << "Knn did not return an odd: " << odds[i];
+            throw autobetException("Knn did not return an odd");
+        } else {
+            StaticLogger::debugStream() << "Odd prediction: " << odds[i];
+        }
+    }
+
+#pragma message(TODO(Add option for custom betting functions))
+    return getBasicBettingPosition(odds);
 }
 
 /**
@@ -388,6 +365,7 @@ void getWinnings() {
     auto xCoord = (short) round(1286.0f * multiplierW);
     auto _width = (short) round(304.0f * multiplierW);
 
+    // Take a screenshot and crop the image
     void *src = utils::TakeScreenShot(xPos, yPos, width, height);
     utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src);
 
@@ -397,19 +375,22 @@ void getWinnings() {
         debug::writeImage(bmp);
     }
 
-    const short res = ai->predict((char *) bmp.data(), bmp.size());
-    StaticLogger::debugStream() << "Winnings prediction: " << res;
-
+    // Delete the original screenshot
     DeleteObject(src);
 
-    // Update the winnings
-    updateWinnings(1000 * (int) res);
-
-    if (!ai->getStatus()->ok()) {
-        StaticLogger::errorStream() << "Winnings ai threw an error. Last error: "
-                                    << ai->getStatus()->getLastStatus();
-        ai->getStatus()->resetLastStatus();
+    // Get the prediction and check if its legit
+    const std::string pred = knn.predict(bmp, multiplierW, multiplierH);
+    if (!opencv_link::knn::isWinning(pred)) {
+        StaticLogger::errorStream() << "The knn prediction was not a winning: " << pred;
+        return;
     }
+
+    // Convert the prediction to an integer
+    const int res = opencv_link::knn::winningToInt(pred);
+    StaticLogger::debugStream() << "Winnings prediction: " << res;
+
+    // Update the winnings
+    updateWinnings(1000 * res);
 }
 
 /**
@@ -880,9 +861,9 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 #       pragma message("INFO: Building in release mode")
 #endif //NDEBUG
         // Check if model.pb exists
-        if (!utils::fileExists("resources/data/model.pb")) {
-            StaticLogger::error("Could not initialize AI: model.pb not found");
-            utils::displayError("Could not initialize AI\nmodel.pb not found."
+        if (!utils::fileExists("resources/data/model.yml")) {
+            StaticLogger::error("Could not initialize AI: model.yml not found");
+            utils::displayError("Could not initialize AI\nmodel.yml not found."
                                 "\nReinstalling the program might fix this error", [] {
                 exception();
             });
@@ -890,11 +871,10 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         StaticLogger::debug("Initializing AI");
-        StaticLogger::debugStream() << "The ai was compiled using tensorflow version " << tf::AI::getTFVersion();
+        StaticLogger::debugStream() << "The knn was compiled using opencv version " << opencv_link::getOpenCvVersion();
 
         try {
-            tf::AI *ai_ptr = tf::AI::create("resources/data/model.pb", {labels, sizeof(labels)});
-            ai = std::shared_ptr<tf::AI>(ai_ptr, tf::AI::destroy);
+            knn = opencv_link::knn("resources/data/model.yml");
         } catch (std::bad_alloc &e) {
             StaticLogger::error("Could not initialize AI: Unable to allocate memory");
             utils::displayError("Could not initialize AI\nNot enough memory", [] {
@@ -909,31 +889,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             return false;
         }
 
-        if (ai->getStatus()->ok()) {
-            StaticLogger::debug("Successfully initialized AI");
-
-            // Run the first prediction as it is painfully slow
-            bt = new std::thread([] {
-                StaticLogger::debug("Running first AI prediction");
-                void *src = utils::TakeScreenShot(0, 0, 100, 100);
-                utils::bitmap b = utils::crop(0, 0, 100, 100, src);
-                DeleteObject(src);
-                ai->predict((char *) b.data(), b.size());
-
-                StaticLogger::debug("Done running first AI prediction");
-            });
-        } else {
-            StaticLogger::errorStream() << "Failed to initialize AI. Error: " << ai->getStatus()->getLastStatus();
-
-            StaticLogger::debug("Deleting AI");
-            ai.reset();
-            StaticLogger::debug("Deleted AI");
-
-            utils::displayError("Could not initialize AI\nCheck the log for further information", [] {
-                quit();
-            });
-            return false;
-        }
+        StaticLogger::debug("Successfully initialized AI");
 
         keyCombListen = true;
         std::thread keyCombThread(listenForKeycomb);
@@ -1112,14 +1068,12 @@ Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
                 StaticLogger::debug("Destroying logger in order to write log to debug zip");
                 StaticLogger::destroy();
                 StaticLogger::create(LoggerMode::MODE_FILE, LogLevel::debug, "autobet_debug.log", "wt");
-                bool res = debug::finish();
+                debug::finish();
                 StaticLogger::destroy();
                 StaticLogger::create();
                 debug_full = false;
-                return res;
-            } else {
-                return true;
             }
+            return true;
         }
     });
 }

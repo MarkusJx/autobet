@@ -1,11 +1,10 @@
 #include "debug.hpp"
 
-#ifdef AUTOBET_ENABLE_FULL_DEBUG
-
 #include <mutex>
 #include <filesystem>
 #include <chrono>
 #include <ctime>
+#include <memory>
 
 #include "zip/src/zip.h"
 #include "logger.hpp"
@@ -17,15 +16,65 @@ unsigned short lastImg = 0;
 std::mutex mtx;
 struct zip_t *zip;
 
+void _finish();
+
+/**
+ * A class for managing the finishing of debugging
+ */
+class debug_finisher {
+public:
+    /**
+     * Init without finishing anything on destruction
+     */
+    debug_finisher(std::nullptr_t) noexcept: doFinish(false) {}
+
+    /**
+     * Normal init
+     */
+    debug_finisher() noexcept: doFinish(true) {}
+
+    /**
+     * Check if debug should be finished on destruction
+     * 
+     * @return true, if doFinish == true
+     */
+    [[nodsicard]] operator bool() const noexcept {
+        return doFinish;
+    }
+
+    /**
+     * Finish up the debugging, if should finish
+     */
+    void reset() {
+        if (doFinish) {
+            _finish();
+            doFinish = false;
+        }
+    }
+
+    /**
+     * Finish up the debugging if required
+     */
+    ~debug_finisher() {
+        if (doFinish) {
+            _finish();
+        }
+    }
+
+private:
+    bool doFinish;
+};
+
+debug_finisher finisher = nullptr;
+
 using namespace debug;
 namespace fs = std::filesystem;
-#else
-#   define DEBUG_UNIMPLEMENTED() StaticLogger::unimplemented("Application was built with debug disabled");
-#endif
 
 bool debug::init() {
-#ifdef AUTOBET_ENABLE_FULL_DEBUG
 #   pragma message("INFO: Building with full debug support enabled")
+    if (finisher) finisher.reset();
+
+    // Get the desktop directory
     std::string path;
     errno_t err = utils::getDesktopDirectory(path);
     if (err) {
@@ -40,18 +89,17 @@ bool debug::init() {
     z_name.append("\\autobet_debug.zip");
     // No compression, as it does not really affect the file size
     zip = zip_open(z_name.c_str(), 0, 'w');
-    return zip != nullptr;
-#else
-#   pragma message("INFO: Building with full debug support disabled")
-    DEBUG_UNIMPLEMENTED();
-    return false;
-#endif
+    if (zip != nullptr) {
+        finisher = debug_finisher();
+        return true;
+    } else {
+        return false;
+    }
 }
 
-bool debug::finish() {
-#ifdef AUTOBET_ENABLE_FULL_DEBUG
+void _finish() {
     if (!zip) {
-        return false;
+        return;
     }
 
     if (fs::exists("autobet.log")) {
@@ -59,39 +107,34 @@ bool debug::finish() {
         int err = zip_entry_open(zip, "autobet.log");
         if (err) {
             StaticLogger::error("Unable to open debug zip file. Error: " + std::to_string(err));
-            mtx.unlock();
-            return false;
+            goto cleanup_unlock;
         }
 
         err = zip_entry_fwrite(zip, "autobet.log");
         if (err) {
             StaticLogger::error("Unable to write debug zip file. Error: " + std::to_string(err));
-            zip_close(zip);
-            return false;
+            goto cleanup;
         }
 
         err = zip_entry_close(zip);
         if (err) {
             StaticLogger::error("Unable to close debug zip file. Error: " + std::to_string(err));
-            zip_close(zip);
-            return false;
         }
 
+    cleanup:
         zip_close(zip);
+    cleanup_unlock:
         mtx.unlock();
-
-        return true;
     } else {
         StaticLogger::error("out.log does not exist");
-        return false;
     }
-#else
-    DEBUG_UNIMPLEMENTED();
-#endif
+}
+
+void debug::finish() {
+    finisher.reset();
 }
 
 void debug::writeImage(const utils::bitmap &bmp) {
-#ifdef AUTOBET_ENABLE_FULL_DEBUG
     if (!zip) {
         return;
     }
@@ -117,9 +160,6 @@ void debug::writeImage(const utils::bitmap &bmp) {
     }
 
     mtx.unlock();
-#else
-    DEBUG_UNIMPLEMENTED();
-#endif
 }
 
 bool debug::checkLogAge() {
