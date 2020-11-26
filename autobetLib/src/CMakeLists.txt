@@ -84,3 +84,5 @@ endif ()
 # Create 'external' and 'lib' directory
 createDirectory(${CMAKE_SOURCE_DIR}/external)
 createDirectory(${CMAKE_SOURCE_DIR}/lib)
+
+copyOpencvDll()
