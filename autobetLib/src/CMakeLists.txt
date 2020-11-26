@@ -21,12 +21,12 @@ file(GLOB zip
         "${ZIP_SOURCE_DIRECTORY}/*.c"
         )
 
-set(AI_SRC_DIRECTORY ${CMAKE_SOURCE_DIR}/../ai)
-if (NOT EXISTS ${AI_SRC_DIRECTORY})
-    message(ERROR "${AI_SRC_DIRECTORY} does not exists, cannot continue")
-endif ()
+find_package(OpenCV REQUIRED)
 
-include_directories(${CMAKE_SOURCE_DIR}/include ${AI_SRC_DIRECTORY})
+message(STATUS "Found OpenCV include dir: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "Found OpenCV libs: ${OpenCV_LIBS}")
+
+include_directories(${CMAKE_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS})
 link_directories(${CMAKE_SOURCE_DIR}/lib ${Boost_LIBRARY_DIRS} "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.27.29110\\atlmfc\\lib\\x64")
 
 file(GLOB src
@@ -41,7 +41,7 @@ add_library(${PROJECT_NAME} SHARED ${src} ${include} ${zip} ${OPENCV_LINK_SRC} $
 
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${OpenCV_LIBS})
 
 # Include N-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"
@@ -84,21 +84,3 @@ endif ()
 # Create 'external' and 'lib' directory
 createDirectory(${CMAKE_SOURCE_DIR}/external)
 createDirectory(${CMAKE_SOURCE_DIR}/lib)
-
-# If environment variables are set, copy ai.dll and ai.lib,
-# if not, download those files
-if (DEFINED ENV{AI_LIB_LOCATION} AND DEFINED ENV{AI_DLL_LOCATION})
-    message(STATUS "Both 'AI_LIB_LOCATION' and 'AI_DLL_LOCATION' are set, copying the files")
-    message(STATUS "'AI_LIB_LOCATION' set to: $ENV{AI_LIB_LOCATION}")
-    message(STATUS "'AI_DLL_LOCATION' set to: $ENV{AI_DLL_LOCATION}")
-
-    # Copy ai dll files
-    copyAiDll($ENV{AI_DLL_LOCATION})
-    copyAiLib($ENV{AI_LIB_LOCATION})
-else ()
-    message(STATUS "'AI_LIB_LOCATION' or 'AI_DLL_LOCATION' or both are not set, downloading both files")
-
-    # Download ai dll files
-    downloadAiDll()
-    downloadAiLib()
-endif ()

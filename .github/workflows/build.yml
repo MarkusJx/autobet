@@ -37,6 +37,8 @@ jobs:
       BOOST_VERSION: 1.69.0
       BOOST_TOOLSET: msvc14.1
       BOOST_PATH: D:\boost\boost-1.69.0-win32-msvc14.1-x86_64
+      OPENCV_VERSION: 4.1.2
+      OpenCV_DIR: C:/tools/opencv/build
 
     steps:
     - uses: actions/checkout@v2
@@ -96,6 +98,10 @@ jobs:
       with:
         boost_version: ${{steps.boost_info.outputs.version}}
         toolset: ${{steps.boost_info.outputs.toolset}}
+
+    # Download and install opencv
+    - name: Install OpenCV
+      run: choco install opencv --version ${{env.OPENCV_VERSION}} -y
     
     # Build steps
     # Runs 'npm install' and 'npm run-script pack'
