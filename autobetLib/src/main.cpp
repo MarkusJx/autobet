@@ -21,10 +21,6 @@
 
 #endif
 
-#define _AUTOBET_STR(x) #x
-#define AUTOBET_STR(x) _AUTOBET_STR(x)
-#define TODO(msg) "TODO: " _AUTOBET_STR(msg) ": " __FILE__ ":" AUTOBET_STR(__LINE__)
-
 #include <CppJsLib.hpp>
 
 #include "logger.hpp"

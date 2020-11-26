@@ -75,52 +75,53 @@ errno_t utils::getDesktopDirectory(std::string &arr) {
 }
 
 // Application class ================================================
+#pragma message(TODO(Remove this))
 /**
  * the Application class constructor
  *
  * @param appName the path of the application to start
  */
-utils::Application::Application(const std::string &appName) {
+/*utils::Application::Application(const std::string &appName) {
     name = appName;
     auto *pI = (PROCESS_INFORMATION *) calloc(1, sizeof(PROCESS_INFORMATION));
     if (!pI) {
         throw std::bad_alloc();
     }
     pi = static_cast<void *>(pI);
-}
+}*/
 
 /**
  * Check if the application is still running
  *
  * @return if the application is running
  */
-bool utils::Application::isRunning() {
+/*bool utils::Application::isRunning() {
     unsigned long exitCode = 0L;
     if (GetExitCodeProcess(static_cast<PROCESS_INFORMATION *>(pi)->hProcess, &exitCode)) {
         return exitCode == STILL_ACTIVE;
     } else {
         return false;
     }
-}
+}*/
 
 /**
  * Kill the application
  *
  * @return if the operation was successful
  */
-bool utils::Application::kill() {
+/*bool utils::Application::kill() {
     return TerminateProcess(static_cast<PROCESS_INFORMATION *>(pi)->hProcess, 0);
-}
+}*/
 
 /**
  * the application class destructor
  */
-utils::Application::~Application() {
+/*utils::Application::~Application() {
     auto *p = static_cast<PROCESS_INFORMATION *>(pi);
     CloseHandle(p->hProcess);
     CloseHandle(p->hThread);
     free(pi);
-}
+}*/
 // ==================================================================
 
 /**
@@ -429,12 +430,13 @@ bool utils::leftClick(int x, int y, bool move) {
     }
 }
 
+#pragma message(TODO(Remove the startup method))
 /**
  * Start a application by name. Source: https://stackoverflow.com/a/15440094
  *
  * @param lpApplicationName the name of the application to start
  */
-bool utils::startup(utils::Application *application, const char *args) {
+/*bool utils::startup(utils::Application *application, const char *args) {
 #ifdef AUTOBET_WINDOWS
     // additional information
     STARTUPINFOA si;
@@ -463,7 +465,7 @@ bool utils::startup(utils::Application *application, const char *args) {
 #else
     ulogger->Unimplemented();
 #endif
-}
+}*/
 
 bool utils::isProcessRunning(const char *processName) {
 #ifdef AUTOBET_WINDOWS

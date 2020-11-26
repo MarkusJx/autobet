@@ -145,7 +145,10 @@ std::string opencv_link::knn::predict(const cv::Mat &m, double scaleX, double sc
                 // Find the kNearest to roi_small
                 cv::Mat results;
                 k_nearest->findNearest(roi_small, 1, results);
-                data.insert(std::pair<int, char>(rect.x, results.at<float>(0)));
+
+                // Insert the result into the data map, with the x-pos as a key
+                // and the result value casted to a char as value
+                data.insert(std::pair<int, char>(rect.x, (char) results.at<float>(0)));
             }
         }
     }
@@ -205,14 +208,17 @@ short opencv_link::knn::oddToShort(const std::string &pred) {
         throw std::runtime_error("The given prediction is no odd");
     }
 
+    // If pred == "evens" return 1
     if (pred == "evens") {
         return 1;
     } else {
+        // Find the first (and only) slash
         size_t slash = pred.find_first_of('/');
         if (slash == std::string::npos) {
             throw std::runtime_error("Could not find a slash");
         }
 
+        // Get the number before the slash
         std::string number = pred.substr(0, slash);
 
         // Set the out pointer and errno
@@ -221,7 +227,7 @@ short opencv_link::knn::oddToShort(const std::string &pred) {
 
         // Get the result number and check for errors
         short res = (short) std::strtol(number.c_str(), &out, 10);
-        if ((out != nullptr && std::strlen(out) > 0) || res < 0 || errno == ERANGE) {
+        if ((out != nullptr && std::strlen(out) > 0) || res < 2 || res > 31 || errno == ERANGE) {
             throw std::runtime_error("The prediction could not be parsed");
         }
 
