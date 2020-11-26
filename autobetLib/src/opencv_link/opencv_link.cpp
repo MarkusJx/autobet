@@ -227,7 +227,7 @@ short opencv_link::knn::oddToShort(const std::string &pred) {
 
         // Get the result number and check for errors
         short res = (short) std::strtol(number.c_str(), &out, 10);
-        if ((out != nullptr && std::strlen(out) > 0) || res < 2 || res > 31 || errno == ERANGE) {
+        if ((out != nullptr && std::strlen(out) > 0) || res < 2 || res > 31 || errno == ERANGE) {
             throw std::runtime_error("The prediction could not be parsed");
         }
 
