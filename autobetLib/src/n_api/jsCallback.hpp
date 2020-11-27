@@ -1,6 +1,8 @@
 #ifndef AUTOBET_JSCALLBACK_HPP
 #define AUTOBET_JSCALLBACK_HPP
 
+#include <vector>
+
 #include "napi_tools.hpp"
 
 template<typename T>
@@ -8,24 +10,45 @@ struct napi_type;
 
 template<>
 struct napi_type<bool> {
-    static Napi::Value create(Napi::Env env, bool val) {
+    static Napi::Value create(const Napi::Env &env, bool val) {
         return Napi::Boolean::New(env, val);
     }
 };
 
 template<>
 struct napi_type<int> {
-    static Napi::Value create(Napi::Env env, int val) {
+    static Napi::Value create(const Napi::Env &env, int val) {
         return Napi::Number::New(env, val);
     }
 };
 
 template<>
 struct napi_type<std::string> {
-    static Napi::Value create(Napi::Env env, const std::string &val) {
+    static Napi::Value create(const Napi::Env &env, const std::string &val) {
         return Napi::String::New(env, val);
     }
 };
+
+template<class T>
+struct napi_type<std::vector<T>> {
+    static Napi::Value create(const Napi::Env &env, const std::vector<T> &vec) {
+        Napi::Array arr = Napi::Array::New(env);
+        for (uint32_t i = 0; i < vec.size(); i++) {
+            arr.Set(i, napi_type<T>::create(env, vec[i]));
+        }
+
+        return arr;
+    }
+}
+
+template<class T>
+struct cpp_val;
+
+struct cpp_val<short> {
+    static short convert(const Napi::Value &toConvert) {
+        return (short) toConvert.ToNumber().Int32Value();
+    }
+}
 
 template<typename T>
 class javascriptCallback {
@@ -164,6 +187,99 @@ private:
     bool run;
     int numCalls;
     std::mutex mtx;
+    const Napi::Promise::Deferred deferred;
+    std::thread nativeThread;
+    Napi::ThreadSafeFunction ts_fn;
+};
+
+template<class R, class T>
+class javascriptCallback {
+public:
+    explicit inline javascriptCallback(const Napi::CallbackInfo &info) : deferred(
+            Napi::Promise::Deferred::New(info.Env())), mtx(), vals_set(false) {
+        CHECK_ARGS(napi_tools::type::FUNCTION);
+        Napi::Env env = info.Env();
+
+        run = true;
+
+        // Create a new ThreadSafeFunction.
+        this->ts_fn = Napi::ThreadSafeFunction::New(env, info[0].As<Napi::Function>(), "javascriptCallback", 0, 1, this,
+                                                    FinalizerCallback<R, T>, (void *) nullptr);
+        this->nativeThread = std::thread(threadEntry<R, T>, this);
+    }
+
+    inline R syncCall(T value) {
+        call_mtx.lock();
+        arg = value;
+        vals_set = true;
+        // Lock the return mutex, threadEntry() will unlock this
+        ret_mtx.lock();
+
+        // Try locking the return mutex.
+        // ThreadEntry() will unlock the last lock
+        ret_mtx.lock();
+
+        R res = ret;
+
+        // Unlock all mutexes
+        ret_mtx.unlock();
+        call_mtx.unlock();
+        return res;
+    }
+
+    [[nodiscard]] inline Napi::Promise getPromise() const {
+        return deferred.Promise();
+    }
+
+    inline void stop() {
+        run = false;
+    }
+
+private:
+    template<class U, class A>
+    static void threadEntry(javascriptCallback<U, A> *jsCallback) {
+        U ret;
+        auto callback = [&ret](Napi::Env env, Napi::Function jsCallback, A *data) {
+            Napi::Value v = jsCallback.Call({napi_type<A>::create(env, *data)});
+            ret = cpp_type<U>::convert(v);
+            delete data;
+        };
+
+        while (jsCallback->run) {
+            if (jsCallback->vals_set) {
+                A *tmp = new A(jsCallback->arg);
+                napi_status status = jsCallback->ts_fn.BlockingCall(tmp, callback);
+
+                if (status != napi_ok) {
+                    Napi::Error::Fatal("ThreadEntry", "Napi::ThreadSafeNapi::Function.BlockingCall() failed");
+                }
+
+                jsCallback->ret = ret;
+
+                jsCallback->vals_set = false;
+                jsCallback->ret_mtx.unlock();
+            }
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
+        jsCallback->ts_fn.Release();
+    }
+
+    template<class U, class A>
+    static void FinalizerCallback(Napi::Env env, void *, javascriptCallback<U, A> *jsCallback) {
+        jsCallback->nativeThread.join();
+
+        jsCallback->deferred.Resolve(env.Null());
+        delete jsCallback;
+    }
+
+    ~javascriptCallback() = default;
+
+    R ret;
+    T arg;
+    bool run, vals_set;
+    std::mutex call_mtx, ret_mtx;
     const Napi::Promise::Deferred deferred;
     std::thread nativeThread;
     Napi::ThreadSafeFunction ts_fn;

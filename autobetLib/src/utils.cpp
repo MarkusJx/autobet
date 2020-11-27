@@ -2,6 +2,7 @@
 #include <vector>
 #include <thread>
 #include <iomanip>
+#include <sstream>
 
 #include "utils.hpp"
 
@@ -24,6 +25,14 @@ std::function<void()> clbk = {};
 
 using namespace logger;
 
+std::string utils::IPv4::to_string() const {
+    std::stringstream stringstream;
+    stringstream << std::to_string(b1) << "." << std::to_string(b2) << ".";
+    stringstream << std::to_string(b3) << "." << std::to_string(b4);
+
+    return stringstream.str();
+}
+
 bool WINAPI CtrlHandler(unsigned long fdwCtrlType) {
     if (fdwCtrlType == 0 || fdwCtrlType == 2) {
         clbk();
@@ -45,13 +54,6 @@ void utils::setCtrlCHandler(std::function<void()> callback) {
     }
 }
 
-/**
- * Gets the path to the current users Desktop
- * Source: https://stackoverflow.com/a/17935926
- *
- * @param arr A path object
- * @return a error code or 0 if everything is ok
- */
 errno_t utils::getDesktopDirectory(std::string &arr) {
     wchar_t path[MAX_PATH + 1] = {0};
 
@@ -74,59 +76,6 @@ errno_t utils::getDesktopDirectory(std::string &arr) {
     return 0;
 }
 
-// Application class ================================================
-#pragma message(TODO(Remove this))
-/**
- * the Application class constructor
- *
- * @param appName the path of the application to start
- */
-/*utils::Application::Application(const std::string &appName) {
-    name = appName;
-    auto *pI = (PROCESS_INFORMATION *) calloc(1, sizeof(PROCESS_INFORMATION));
-    if (!pI) {
-        throw std::bad_alloc();
-    }
-    pi = static_cast<void *>(pI);
-}*/
-
-/**
- * Check if the application is still running
- *
- * @return if the application is running
- */
-/*bool utils::Application::isRunning() {
-    unsigned long exitCode = 0L;
-    if (GetExitCodeProcess(static_cast<PROCESS_INFORMATION *>(pi)->hProcess, &exitCode)) {
-        return exitCode == STILL_ACTIVE;
-    } else {
-        return false;
-    }
-}*/
-
-/**
- * Kill the application
- *
- * @return if the operation was successful
- */
-/*bool utils::Application::kill() {
-    return TerminateProcess(static_cast<PROCESS_INFORMATION *>(pi)->hProcess, 0);
-}*/
-
-/**
- * the application class destructor
- */
-/*utils::Application::~Application() {
-    auto *p = static_cast<PROCESS_INFORMATION *>(pi);
-    CloseHandle(p->hProcess);
-    CloseHandle(p->hThread);
-    free(pi);
-}*/
-// ==================================================================
-
-/**
- * set this process DPI aware
- */
 void utils::setDpiAware() {
 #ifdef AUTOBET_WINDOWS
     if (SetProcessDPIAware()) {
@@ -139,13 +88,6 @@ void utils::setDpiAware() {
 #endif
 }
 
-/**
- * Get this machine's IP address
- * Source: https://stackoverflow.com/a/122225
- *
- * @param myIP a IPv4 struct
- * @return if the operation was successful
- */
 bool utils::getOwnIP(utils::IPv4 &myIP) {
     char szBuffer[1024];
 
@@ -241,21 +183,9 @@ utils::bitmap utils::crop(int x, int y, int width, int height, void *src) {
     IStream_Read(stream, buf.data(), len);
     stream->Release();
 
-    //auto tmp = new utils::bitmap(reinterpret_cast<char *>(&buf[0]), buf.size() * sizeof(BYTE));
-    //std::vector<BYTE>().swap(buf);
     return buf;
 }
 
-/**
- * Take a Screenshot and return its HBITMAP as a void pointer
- * Source: https://stackoverflow.com/a/55938188
- *
- * @param x the x-Position on the screen
- * @param y the y-Position on the screen
- * @param width the width of the screenshot
- * @param height the height of the screenshot
- * @return the image HBITMAP as void pointer
- */
 void *utils::TakeScreenShot(int x, int y, int width, int height) {
 #ifdef AUTOBET_WINDOWS
     // get the device context of the screen
@@ -430,43 +360,6 @@ bool utils::leftClick(int x, int y, bool move) {
     }
 }
 
-#pragma message(TODO(Remove the startup method))
-/**
- * Start a application by name. Source: https://stackoverflow.com/a/15440094
- *
- * @param lpApplicationName the name of the application to start
- */
-/*bool utils::startup(utils::Application *application, const char *args) {
-#ifdef AUTOBET_WINDOWS
-    // additional information
-    STARTUPINFOA si;
-    auto *pi = static_cast<PROCESS_INFORMATION *>(application->pi);
-
-    char *_args;
-    if (args) {
-        std::string ar(" ");
-        ar.append(args);
-
-        _args = _strdup(ar.c_str());
-    } else {
-        _args = nullptr;
-    }
-
-    // set the size of the structures
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
-    ZeroMemory(pi, sizeof(*pi));
-
-    // start the program up
-    bool res = CreateProcessA(application->name.c_str(), _args, nullptr, nullptr, FALSE,
-                              CREATE_NEW_CONSOLE, nullptr, nullptr, &si, pi);
-    free(_args);
-    return res;
-#else
-    ulogger->Unimplemented();
-#endif
-}*/
-
 bool utils::isProcessRunning(const char *processName) {
 #ifdef AUTOBET_WINDOWS
     PROCESSENTRY32 entry;
@@ -574,15 +467,7 @@ void utils::printSystemInformation() {
     stream.clear();
 }
 
-/**
- * Split a string
- * Source: https://stackoverflow.com/a/14266139
- *
- * @warning the resulting chars must be released with free()
- * @param s the string to split
- * @param delimiter the delimiter
- * @param res a vector to put the result
- */
+#pragma message(TODO(Remove splitString definition))
 void utils::splitString(std::string s, const std::string &delimiter, std::vector<char *> *res) {
     size_t pos = 0;
     std::string token;
@@ -595,13 +480,6 @@ void utils::splitString(std::string s, const std::string &delimiter, std::vector
     res->push_back(_strdup(s.c_str()));
 }
 
-/**
- * Check if a file exists
- * Source: https://stackoverflow.com/a/12774387
- *
- * @param name the file name
- * @return if the file exists
- */
 bool utils::fileExists(const std::string &name) {
     struct stat buffer{};
     return (stat(name.c_str(), &buffer) == 0);

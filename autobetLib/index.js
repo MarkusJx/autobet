@@ -164,6 +164,21 @@ module.exports = {
             });
         }
     },
+    customBettingFunction: {
+        /**
+         * Set the callback function to get the horse to bet on
+         *
+         * @param func {function(string[]): number} the callback function
+         * @return {void}
+         */
+        setBettingPositionCallback: function (func) {
+            autobetLib_native.lib_setBettingPositionCallback(func).catch(() => {
+            });
+        },
+        setUseBettingFunction: function (val) {
+            autobetLib_native.lib_setUseBettingFunction(val);
+        }
+    },
     /**
      * A logging namespace
      */

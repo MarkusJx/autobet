@@ -4,9 +4,11 @@
 #include "main.hpp"
 
 #include <functional>
-#include <sstream>
 #include <vector>
 
+/**
+ * Utility namespace
+ */
 namespace utils {
     /**
      * A struct for storing window sizes and positions
@@ -29,37 +31,8 @@ namespace utils {
          * 
          * @return the ip address as a string
          */
-        std::string to_string() {
-            std::stringstream stringstream;
-            stringstream << std::to_string(b1) << "." << std::to_string(b2) << ".";
-            stringstream << std::to_string(b3) << "." << std::to_string(b4);
-
-            return stringstream.str();
-        }
+        [[nodiscard]] std::string to_string() const;
     } IPv4;
-
-#pragma message(TODO(Remove the application class))
-    /*class Application;
-
-    bool startup(Application *application, const char* args = nullptr);
-
-    class Application {
-    public:
-        explicit Application(const std::string &appName);
-
-        bool isRunning();
-
-        inline bool start(const char* args = nullptr) {
-            return startup(this, args);
-        }
-
-        bool kill();
-
-        ~Application();
-
-        std::string name;
-        void *pi;
-    };*/
 
     /**
      * A bitmap
@@ -74,7 +47,8 @@ namespace utils {
     void setCtrlCHandler(std::function<void()> callback);
 
     /**
-     * Get the desktop directory for the current user
+     * Get the desktop directory for the current user.
+     * Source: https://stackoverflow.com/a/17935926
      * 
      * @param path the path to be set
      * @return 0, if everything is ok, an error code otherwise
@@ -82,7 +56,8 @@ namespace utils {
     errno_t getDesktopDirectory(std::string &path);
 
     /**
-     * Get the ip address of this machine
+     * Get the ip address of this machine.
+     * Source: https://stackoverflow.com/a/122225
      * 
      * @param ownIP the ip struct to be filled
      * @return true, if the operation was successful
@@ -95,7 +70,8 @@ namespace utils {
     void setDpiAware();
 
     /**
-     * Take a screenshot
+     * Take a screenshot and return its HBITMAP as a void pointer.
+     * Source: https://stackoverflow.com/a/55938188
      * 
      * @param x the x-position of the screenshot
      * @param y the y-position of the screenshot
@@ -163,7 +139,7 @@ namespace utils {
      */
     void printSystemInformation();
 
-#pragma message(TODO(Check if splitString is used))
+#pragma message(TODO(Remove splitString))
     /**
      * Split a string
      * 
@@ -171,17 +147,17 @@ namespace utils {
      * @param delimiter the delimiter to split by
      * @param res the result vector
      */
-    void splitString(std::string s, const std::string &delimiter, std::vector<char *> *res);
+    //void splitString(std::string s, const std::string &delimiter, std::vector<char *> *res);
 
     /**
-     * Check if a file exists
+     * Check if a file exists.
+     * Source: https://stackoverflow.com/a/12774387
      * 
      * @param name the file name
      * @return true, if the file exists
      */
     bool fileExists(const std::string &name);
 
-#pragma message(TODO(Check if convertHBitmap is used))
     /**
      * Convert a HBitmap to a bitmap
      * 
@@ -210,7 +186,7 @@ namespace utils {
      */
     errno_t isForeground(bool& res);
 
-#pragma message(TODO(Check if getLastStringPart is used))
+#pragma message(TODO(Remove getLastStringPart))
     /**
      * Get the last part of a string by a delimiter
      * 
@@ -218,9 +194,9 @@ namespace utils {
      * @param delimiter the delimiter
      * @return the last part of the string after the last occurrence of the delimiter
      */
-    inline std::string getLastStringPart(const std::string &str, char delimiter) {
+    /*inline std::string getLastStringPart(const std::string &str, char delimiter) {
         return str.substr(str.rfind(delimiter) + 1);
-    }
+    }*/
 }
 
 #endif //GTA_ONLINE_AUTOBET_DEV_UTILS_HPP

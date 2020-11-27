@@ -41,6 +41,7 @@ bool gtaVRunning, running, stopping, starting, keyCombListen, runLoops;
 bool debug_full = false, webServer = true;
 float multiplierW, multiplierH;
 uint32_t time_sleep = 36, time_running = 0;
+bool bettingFunctionSet = false;
 
 // Functions from js =======================
 std::function<void(bool)> set_gta_running = {};
@@ -58,9 +59,7 @@ javascriptCallback<void> *uiKeycombStartCallback = nullptr;
 javascriptCallback<void> *uiKeycombStopCallback = nullptr;
 javascriptCallback<void> *exceptionCallback = nullptr;
 javascriptCallback<std::string> *logCallback = nullptr;
-
-// The labels for the ai. Contains labels for winnings and betting.
-const short labels[15] = {1, 10, 2, 20, 3, 30, 4, 40, 5, 50, 6, 7, 8, 9, 0};
+javascriptCallback<short, std::vector<std::string>> *bettingPositionCallback = nullptr;
 
 /**
  * Kill the program and close all connections
@@ -75,6 +74,7 @@ void kill(bool _exit = true) {
     if (uiKeycombStopCallback) uiKeycombStopCallback->stop();
     if (exceptionCallback) exceptionCallback->stop();
     if (logCallback) logCallback->stop();
+    if (bettingPositionCallback) bettingPositionCallback->stop();
 
     // Set every possible bool to false
     keyCombListen = false;
@@ -320,8 +320,11 @@ short get_pos(void *src) {
         }
     }
 
-#pragma message(TODO(Add option for custom betting functions))
-    return getBasicBettingPosition(odds);
+    if (bettingFunctionSet) {
+        return bettingPositionCallback->syncCall(odds);
+    } else {
+        return getBasicBettingPosition(odds);
+    }
 }
 
 /**
@@ -1024,6 +1027,20 @@ Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
+Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
+    if (bettingPositionCallback) throw Napi::Error::New(info.Env(), "bettingPositionCallback is already defined");
+    TRY
+        bettingPositionCallback = new javascriptCallback<short, std::vector<std::string>>(info);
+
+        return bettingPositionCallback->getPromise();
+    CATCH_EXCEPTIONS
+}
+
+void setUseBettingFunction(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    bettingFunctionSet = info[0].ToBoolean();
+}
+
 void napi_quit(const Napi::CallbackInfo &) {
     quit();
 }
@@ -1179,6 +1196,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setQuitCallback);
     export(setExceptionCallback);
     export(setLogCallback);
+    export(setBettingPositionCallback);
 
     export(napi_quit);
 
@@ -1195,6 +1213,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setTimeSleep);
     export(getTimeSleep);
     export(saveSettings);
+    export(setUseBettingFunction);
 
     try {
         quit = [] {
