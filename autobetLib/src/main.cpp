@@ -59,7 +59,7 @@ javascriptCallback<void> *uiKeycombStartCallback = nullptr;
 javascriptCallback<void> *uiKeycombStopCallback = nullptr;
 javascriptCallback<void> *exceptionCallback = nullptr;
 javascriptCallback<std::string> *logCallback = nullptr;
-javascriptCallback<short, std::vector<std::string>> *bettingPositionCallback = nullptr;
+javascriptCallback<short(std::vector<std::string>)> *bettingPositionCallback = nullptr;
 
 /**
  * Kill the program and close all connections
@@ -1030,7 +1030,7 @@ Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
     if (bettingPositionCallback) throw Napi::Error::New(info.Env(), "bettingPositionCallback is already defined");
     TRY
-        bettingPositionCallback = new javascriptCallback<short, std::vector<std::string>>(info);
+        bettingPositionCallback = new javascriptCallback<short(std::vector<std::string>)>(info);
 
         return bettingPositionCallback->getPromise();
     CATCH_EXCEPTIONS

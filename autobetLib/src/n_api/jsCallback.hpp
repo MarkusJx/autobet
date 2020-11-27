@@ -193,7 +193,7 @@ private:
 };
 
 template<class R, class T>
-class javascriptCallback {
+class javascriptCallback<R(T)> {
 public:
     explicit inline javascriptCallback(const Napi::CallbackInfo &info) : deferred(
             Napi::Promise::Deferred::New(info.Env())), mtx(), vals_set(false) {
@@ -237,7 +237,7 @@ public:
 
 private:
     template<class U, class A>
-    static void threadEntry(javascriptCallback<U, A> *jsCallback) {
+    static void threadEntry(javascriptCallback<U(A)> *jsCallback) {
         U ret;
         auto callback = [&ret](Napi::Env env, Napi::Function jsCallback, A *data) {
             Napi::Value v = jsCallback.Call({napi_type<A>::create(env, *data)});
@@ -267,7 +267,7 @@ private:
     }
 
     template<class U, class A>
-    static void FinalizerCallback(Napi::Env env, void *, javascriptCallback<U, A> *jsCallback) {
+    static void FinalizerCallback(Napi::Env env, void *, javascriptCallback<U(A)> *jsCallback) {
         jsCallback->nativeThread.join();
 
         jsCallback->deferred.Resolve(env.Null());
