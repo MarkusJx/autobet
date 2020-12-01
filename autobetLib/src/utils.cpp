@@ -468,7 +468,7 @@ void utils::printSystemInformation() {
 }
 
 #pragma message(TODO(Remove splitString definition))
-void utils::splitString(std::string s, const std::string &delimiter, std::vector<char *> *res) {
+/*void utils::splitString(std::string s, const std::string &delimiter, std::vector<char *> *res) {
     size_t pos = 0;
     std::string token;
     while ((pos = s.find(delimiter)) != std::string::npos) {
@@ -478,7 +478,7 @@ void utils::splitString(std::string s, const std::string &delimiter, std::vector
     }
 
     res->push_back(_strdup(s.c_str()));
-}
+}*/
 
 bool utils::fileExists(const std::string &name) {
     struct stat buffer{};

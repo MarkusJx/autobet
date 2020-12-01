@@ -24,9 +24,10 @@
 #include <CppJsLib.hpp>
 
 #include "logger.hpp"
-#include "n_api/jsCallback.hpp"
+#include "n_api/napi_tools.hpp"
 
 using namespace logger;
+using namespace napi_tools;
 
 // Every location to a horse to bet on
 const uint16_t yLocations[6] = {464, 628, 790, 952, 1114, 1276};
@@ -52,14 +53,14 @@ std::function<void(int)> setAllMoneyMade = {};
 std::function<void(int)> addMoney = {};
 std::function<void()> exception = {};
 
-javascriptCallback<bool> *setGtaRunningCallback = nullptr;
-javascriptCallback<int> *setAllMoneyMadeCallback = nullptr;
-javascriptCallback<int> *addMoneyCallback = nullptr;
-javascriptCallback<void> *uiKeycombStartCallback = nullptr;
-javascriptCallback<void> *uiKeycombStopCallback = nullptr;
-javascriptCallback<void> *exceptionCallback = nullptr;
-javascriptCallback<std::string> *logCallback = nullptr;
-javascriptCallback<short(std::vector<std::string>)> *bettingPositionCallback = nullptr;
+callbacks::callback<void(bool)> setGtaRunningCallback = nullptr;
+callbacks::callback<void(int)> setAllMoneyMadeCallback = nullptr;
+callbacks::callback<void(int)> addMoneyCallback = nullptr;
+callbacks::callback<void()> uiKeycombStartCallback = nullptr;
+callbacks::callback<void()> uiKeycombStopCallback = nullptr;
+callbacks::callback<void()> exceptionCallback = nullptr;
+callbacks::callback<void(std::string)> logCallback = nullptr;
+callbacks::callback<short(std::vector<std::string>)> bettingPositionCallback = nullptr;
 
 /**
  * Kill the program and close all connections
@@ -67,14 +68,14 @@ javascriptCallback<short(std::vector<std::string>)> *bettingPositionCallback = n
  * @param _exit if exit() shall be called
  */
 void kill(bool _exit = true) {
-    if (setGtaRunningCallback) setGtaRunningCallback->stop();
-    if (setAllMoneyMadeCallback) setAllMoneyMadeCallback->stop();
-    if (addMoneyCallback) addMoneyCallback->stop();
-    if (uiKeycombStartCallback) uiKeycombStartCallback->stop();
-    if (uiKeycombStopCallback) uiKeycombStopCallback->stop();
-    if (exceptionCallback) exceptionCallback->stop();
-    if (logCallback) logCallback->stop();
-    if (bettingPositionCallback) bettingPositionCallback->stop();
+    if (setGtaRunningCallback) setGtaRunningCallback.stop();
+    if (setAllMoneyMadeCallback) setAllMoneyMadeCallback.stop();
+    if (addMoneyCallback) addMoneyCallback.stop();
+    if (uiKeycombStartCallback) uiKeycombStartCallback.stop();
+    if (uiKeycombStopCallback) uiKeycombStopCallback.stop();
+    if (exceptionCallback) exceptionCallback.stop();
+    if (logCallback) logCallback.stop();
+    if (bettingPositionCallback) bettingPositionCallback.stop();
 
     // Set every possible bool to false
     keyCombListen = false;
@@ -155,14 +156,12 @@ void set_positions() {
     yPos = ws.yPos;
     width = ws.width;
     height = ws.height;
-    StaticLogger::debug("Got positions: x: " + std::to_string(xPos) + ", y: " + std::to_string(yPos) + ", w: " +
-                        std::to_string(width) + ", h: " + std::to_string(height));
+    StaticLogger::debugStream() << "Got positions: {x: " << xPos << ", y: " << yPos << ", w: " << width << ", h: " << height << "}";
 
     utils::windowSize screenSize;
     utils::getActiveScreen(xPos + (width / 2), yPos + (height / 2), screenSize);
 
-    StaticLogger::debug("Got active screen width: " + std::to_string(screenSize.width) + " and height: " +
-                        std::to_string(screenSize.height));
+    StaticLogger::debugStream() << "Got active screen width: " << screenSize.width << " and height: " << screenSize.height;
 
     multiplierW = (float) width / 2560.0f;
     multiplierH = (float) height / 1440.0f;
@@ -321,7 +320,24 @@ short get_pos(void *src) {
     }
 
     if (bettingFunctionSet) {
-        return bettingPositionCallback->syncCall(odds);
+        // Call the bettingPositionCallback
+        std::promise<short> promise = bettingPositionCallback(odds);
+        std::future<short> future = promise.get_future();
+
+        // Wait for max 10 seconds
+        std::future_status status = future.wait_for(std::chrono::seconds(10));
+
+        // Check if the result is ready, if so, use it
+        if (status == std::future_status::ready) {
+            const short res = future.get();
+            StaticLogger::debugStream() << "The custom betting function returned: " << res;
+
+            return res;
+        } else {
+            StaticLogger::warning("The custom betting function did not finish within 10 seconds, falling back to the default function");
+#pragma message(TODO(Disable custom betting function on error and mark it as invalid))
+            return getBasicBettingPosition(odds);
+        }
     } else {
         return getBasicBettingPosition(odds);
     }
@@ -438,9 +454,7 @@ void mainLoop() {
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep / 2));
                 if (!running) {
                     // Program is not running anymore, stop it
-                    StaticLogger::debug(
-                            "The script has been stopped, skipping after " + std::to_string(time_sleep / 2) +
-                            " seconds...");
+                    StaticLogger::debugStream() << "The script has been stopped, skipping after " << (time_sleep / 2) << " seconds...";
                     continue;
                 }
 
@@ -617,7 +631,7 @@ void set_starting(const Napi::CallbackInfo &info) {
  * Load winnings_all from binary file winnings.dat
  */
 Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
-    return Promise<void>::create(info.Env(), [] {
+    return promises::promise<void>(info.Env(), [] {
         StaticLogger::debug("Loading winnings from file");
 
         // If the file does not exist, write a new one
@@ -671,6 +685,7 @@ std::string getIP() {
         StaticLogger::error("Could not retrieve own IP!");
         return "";
     }
+
     return iPv4.to_string();
 }
 
@@ -804,7 +819,7 @@ bool startWebUi() {
 }
 
 Napi::Promise init(const Napi::CallbackInfo &info) {
-    return Promise<bool>::create(info.Env(), [] {
+    return promises::promise<bool>(info.Env(), [] {
         // Delete the log if it is was last written more than 7 days ago
         bool log_deleted = debug::checkLogAge();
         try {
@@ -899,7 +914,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 }
 
 Napi::Promise start(const Napi::CallbackInfo &info) {
-    return Promise<void>::create(info.Env(), [] {
+    return promises::promise<void>(info.Env(), [] {
         runLoops = true;
 
         while (runLoops) {
@@ -926,11 +941,11 @@ void node_quit() {
 }
 
 [[maybe_unused]] void node_log(const std::string &val) {
-    if (logCallback) logCallback->asyncCall(val);
+    if (logCallback) logCallback(val);
 }
 
 Napi::Promise stop(const Napi::CallbackInfo &info) {
-    return Promise<void>::create(info.Env(), [] {
+    return promises::promise<void>(info.Env(), [] {
         kill(false);
     });
 }
@@ -938,70 +953,70 @@ Napi::Promise stop(const Napi::CallbackInfo &info) {
 Napi::Promise setSet_gta_running(const Napi::CallbackInfo &info) {
     if (setGtaRunningCallback) throw Napi::Error::New(info.Env(), "setGtaRunningCallback is already defined");
     TRY
-        setGtaRunningCallback = new javascriptCallback<bool>(info);
+        setGtaRunningCallback = callbacks::callback<void(bool)>(info);
         set_gta_running = [](bool val) {
-            setGtaRunningCallback->asyncCall(val);
+            setGtaRunningCallback(val);
         };
 
-        return setGtaRunningCallback->getPromise();
+        return setGtaRunningCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
 Napi::Promise setAddMoneyCallback(const Napi::CallbackInfo &info) {
     if (addMoneyCallback) throw Napi::Error::New(info.Env(), "addMoneyCallback is already defined");
     TRY
-        addMoneyCallback = new javascriptCallback<int>(info);
+        addMoneyCallback = callbacks::callback<void(int)>(info);
         addMoney = [](int value) {
-            addMoneyCallback->asyncCall(value);
+            addMoneyCallback(value);
         };
 
-        return addMoneyCallback->getPromise();
+        return addMoneyCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
 Napi::Promise setSetAllMoneyMadeCallback(const Napi::CallbackInfo &info) {
     if (setAllMoneyMadeCallback) throw Napi::Error::New(info.Env(), "setAllMoneyMadeCallback is already defined");
     TRY
-        setAllMoneyMadeCallback = new javascriptCallback<int>(info);
+        setAllMoneyMadeCallback = callbacks::callback<void(int)>(info);
         setAllMoneyMade = [](int value) {
-            setAllMoneyMadeCallback->asyncCall(value);
+            setAllMoneyMadeCallback(value);
         };
 
-        return setAllMoneyMadeCallback->getPromise();
+        return setAllMoneyMadeCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
 Napi::Promise setUiKeycombStartCallback(const Napi::CallbackInfo &info) {
     if (uiKeycombStartCallback) throw Napi::Error::New(info.Env(), "uiKeycombStartCallback is already defined");
     TRY
-        uiKeycombStartCallback = new javascriptCallback<void>(info);
+        uiKeycombStartCallback = callbacks::callback<void()>(info);
         ui_keycomb_start = [] {
-            uiKeycombStartCallback->asyncCall();
+            uiKeycombStartCallback();
         };
 
-        return uiKeycombStartCallback->getPromise();
+        return uiKeycombStartCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
 Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
     if (uiKeycombStopCallback) throw Napi::Error::New(info.Env(), "uiKeycombStopCallback is already defined");
     TRY
-        uiKeycombStopCallback = new javascriptCallback<void>(info);
+        uiKeycombStopCallback = callbacks::callback<void()>(info);
         ui_keycomb_stop = [] {
-            uiKeycombStopCallback->asyncCall();
+            uiKeycombStopCallback();
         };
 
-        return uiKeycombStopCallback->getPromise();
+        return uiKeycombStopCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
 void setQuitCallback(const Napi::CallbackInfo &info) {
     TRY
-        auto q = new javascriptCallback<void>(info);
-        quit = [q] {
+        callbacks::callback<void()> q(info);
+        quit = [&q] {
             kill(false);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            q->asyncCall();
+            q();
         };
     CATCH_EXCEPTIONS
 }
@@ -1009,30 +1024,30 @@ void setQuitCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setExceptionCallback(const Napi::CallbackInfo &info) {
     if (exceptionCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
     TRY
-        exceptionCallback = new javascriptCallback<void>(info);
+        exceptionCallback = callbacks::callback<void()>(info);
         exception = [] {
-            exceptionCallback->asyncCall();
+            exceptionCallback();
         };
 
-        return exceptionCallback->getPromise();
+        return exceptionCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
 Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
     if (logCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
     TRY
-        logCallback = new javascriptCallback<std::string>(info);
+        logCallback = callbacks::callback<void(std::string)>(info);
 
-        return logCallback->getPromise();
+        return logCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
 Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
     if (bettingPositionCallback) throw Napi::Error::New(info.Env(), "bettingPositionCallback is already defined");
     TRY
-        bettingPositionCallback = new javascriptCallback<short(std::vector<std::string>)>(info);
+        bettingPositionCallback = callbacks::callback<short(std::vector<std::string>)>(info);
 
-        return bettingPositionCallback->getPromise();
+        return bettingPositionCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
@@ -1066,7 +1081,7 @@ Napi::Boolean node_logToConsole(const Napi::CallbackInfo &info) {
 Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::type::BOOLEAN);
     bool val = info[0].ToBoolean();
-    return Promise<bool>::create(info.Env(), [val] {
+    return promises::promise<bool>(info.Env(), [val] {
         if (val) {
             if (!debug_full) {
                 if (!debug::init()) {
@@ -1094,7 +1109,7 @@ Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
 Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::type::BOOLEAN);
     bool val = info[0].ToBoolean();
-    return Promise<bool>::create(info.Env(), [val] {
+    return promises::promise<bool>(info.Env(), [val] {
         if (val) {
             // Try to start the web ui
             webServer = true;
@@ -1127,7 +1142,7 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
 }
 
 Napi::Promise startWebServer(const Napi::CallbackInfo &info) {
-    return Promise<bool>::create(info.Env(), [] {
+    return promises::promise<bool>(info.Env(), [] {
         if (webServer) {
             StaticLogger::debug("Trying to start web ui");
             if (startWebUi()) {
@@ -1166,7 +1181,7 @@ Napi::Number getTimeSleep(const Napi::CallbackInfo &info) {
 }
 
 Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
-    return Promise<void>::create(info.Env(), [] {
+    return promises::promise<void>(info.Env(), [] {
         settings::save(logger::logToFile(), logger::logToConsole(), webServer, time_sleep);
     });
 }

@@ -29,15 +29,20 @@ message(STATUS "Found OpenCV libs: ${OpenCV_LIBS}")
 include_directories(${CMAKE_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS})
 link_directories(${CMAKE_SOURCE_DIR}/lib ${Boost_LIBRARY_DIRS} "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.27.29110\\atlmfc\\lib\\x64")
 
+# Add sources
 file(GLOB src
         "*.hpp"
         "*.cpp"
         )
 
 set(OPENCV_LINK_SRC opencv_link/opencv_link.cpp opencv_link/opencv_link.hpp)
-set(NAPI_TOOLS_SRC n_api/jsCallback.hpp n_api/napi_tools.hpp)
+set(NAPI_TOOLS_SRC n_api/napi_tools.hpp)
 
+# Add the library
 add_library(${PROJECT_NAME} SHARED ${src} ${include} ${zip} ${OPENCV_LINK_SRC} ${NAPI_TOOLS_SRC} ${CMAKE_JS_SRC})
+
+# Precompile napi_tools.hpp
+target_precompile_headers(${PROJECT_NAME} PRIVATE ${NAPI_TOOLS_SRC})
 
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
