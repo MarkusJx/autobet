@@ -623,7 +623,7 @@ void node_js_stop_script(const Napi::CallbackInfo &info) {
 }
 
 void set_starting(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     starting = info[0].ToBoolean();
 }
 
@@ -1052,7 +1052,7 @@ Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
 }
 
 void setUseBettingFunction(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     bettingFunctionSet = info[0].ToBoolean();
 }
 
@@ -1061,7 +1061,7 @@ void napi_quit(const Napi::CallbackInfo &) {
 }
 
 void node_setLogToFile(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     logger::setLogToFile(info[0].ToBoolean());
 }
 
@@ -1070,7 +1070,7 @@ Napi::Boolean node_logToFile(const Napi::CallbackInfo &info) {
 }
 
 void node_setLogToConsole(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     logger::setLogToConsole(info[0].ToBoolean());
 }
 
@@ -1079,7 +1079,7 @@ Napi::Boolean node_logToConsole(const Napi::CallbackInfo &info) {
 }
 
 Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     bool val = info[0].ToBoolean();
     return promises::promise<bool>(info.Env(), [val] {
         if (val) {
@@ -1107,7 +1107,7 @@ Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
 }
 
 Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     bool val = info[0].ToBoolean();
     return promises::promise<bool>(info.Env(), [val] {
         if (val) {
@@ -1172,7 +1172,7 @@ Napi::Boolean webServerRunning(const Napi::CallbackInfo &info) {
 }
 
 void setTimeSleep(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::type::NUMBER);
+    CHECK_ARGS(napi_tools::napi_type::NUMBER);
     time_sleep = info[0].ToNumber().operator unsigned int();
 }
 
