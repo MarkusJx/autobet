@@ -42,7 +42,7 @@ set(NAPI_TOOLS_SRC n_api/napi_tools.hpp)
 add_library(${PROJECT_NAME} SHARED ${src} ${include} ${zip} ${OPENCV_LINK_SRC} ${NAPI_TOOLS_SRC} ${CMAKE_JS_SRC})
 
 # Precompile napi_tools.hpp
-target_precompile_headers(${PROJECT_NAME} PRIVATE ${NAPI_TOOLS_SRC})
+#target_precompile_headers(${PROJECT_NAME} PRIVATE ${NAPI_TOOLS_SRC})
 
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
