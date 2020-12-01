@@ -655,7 +655,7 @@ namespace napi_tools {
                  */
                 [[nodiscard]] inline Napi::Promise getPromise() const {
                     if (ptr && !ptr->stopped) {
-                        ptr->fn->getPromise();
+                        return ptr->fn->getPromise();
                     } else {
                         throw std::runtime_error("Callback was never initialized");
                     }

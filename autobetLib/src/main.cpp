@@ -60,7 +60,7 @@ callbacks::callback<void()> uiKeycombStartCallback = nullptr;
 callbacks::callback<void()> uiKeycombStopCallback = nullptr;
 callbacks::callback<void()> exceptionCallback = nullptr;
 callbacks::callback<void(std::string)> logCallback = nullptr;
-callbacks::callback<short(std::vector<std::string>)> bettingPositionCallback = nullptr;
+callbacks::callback<int(std::vector<std::string>)> bettingPositionCallback = nullptr;
 
 /**
  * Kill the program and close all connections
@@ -321,18 +321,18 @@ short get_pos(void *src) {
 
     if (bettingFunctionSet) {
         // Call the bettingPositionCallback
-        std::promise<short> promise = bettingPositionCallback(odds);
-        std::future<short> future = promise.get_future();
+        std::promise<int> promise = bettingPositionCallback(odds);
+        std::future<int> future = promise.get_future();
 
         // Wait for max 10 seconds
         std::future_status status = future.wait_for(std::chrono::seconds(10));
 
         // Check if the result is ready, if so, use it
         if (status == std::future_status::ready) {
-            const short res = future.get();
+            const int res = future.get();
             StaticLogger::debugStream() << "The custom betting function returned: " << res;
 
-            return res;
+            return (short) res;
         } else {
             StaticLogger::warning("The custom betting function did not finish within 10 seconds, falling back to the default function");
 #pragma message(TODO(Disable custom betting function on error and mark it as invalid))
@@ -1045,7 +1045,7 @@ Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
     if (bettingPositionCallback) throw Napi::Error::New(info.Env(), "bettingPositionCallback is already defined");
     TRY
-        bettingPositionCallback = callbacks::callback<short(std::vector<std::string>)>(info);
+        bettingPositionCallback = callbacks::callback<int(std::vector<std::string>)>(info);
 
         return bettingPositionCallback.getPromise();
     CATCH_EXCEPTIONS
