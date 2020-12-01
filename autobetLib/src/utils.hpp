@@ -139,16 +139,6 @@ namespace utils {
      */
     void printSystemInformation();
 
-#pragma message(TODO(Remove splitString))
-    /**
-     * Split a string
-     * 
-     * @param s the string to split
-     * @param delimiter the delimiter to split by
-     * @param res the result vector
-     */
-    //void splitString(std::string s, const std::string &delimiter, std::vector<char *> *res);
-
     /**
      * Check if a file exists.
      * Source: https://stackoverflow.com/a/12774387
@@ -185,18 +175,6 @@ namespace utils {
      * @return 0 if everything is ok, an error code otherwise
      */
     errno_t isForeground(bool& res);
-
-#pragma message(TODO(Remove getLastStringPart))
-    /**
-     * Get the last part of a string by a delimiter
-     * 
-     * @param str the string to split
-     * @param delimiter the delimiter
-     * @return the last part of the string after the last occurrence of the delimiter
-     */
-    /*inline std::string getLastStringPart(const std::string &str, char delimiter) {
-        return str.substr(str.rfind(delimiter) + 1);
-    }*/
 }
 
 #endif //GTA_ONLINE_AUTOBET_DEV_UTILS_HPP
