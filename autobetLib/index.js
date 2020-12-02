@@ -164,6 +164,9 @@ module.exports = {
             });
         }
     },
+    /**
+     * A namespace for the custom betting function
+     */
     customBettingFunction: {
         /**
          * Set the callback function to get the horse to bet on
@@ -175,6 +178,11 @@ module.exports = {
             autobetLib_native.lib_setBettingPositionCallback(func).catch(() => {
             });
         },
+        /**
+         * Set whether to use the custom betting function
+         * 
+         * @param {boolean} val whether to use the function
+         */
         setUseBettingFunction: function (val) {
             autobetLib_native.lib_setUseBettingFunction(val);
         }

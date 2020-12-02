@@ -44,3 +44,9 @@ body {
     font-family: 'Open Sans', sans-serif;
     color: #3a3f44;
 }
+
+#error-container {
+    width: max-content;
+    max-width: calc(100% - 32px);
+    margin: 0 auto;
+}

@@ -28,11 +28,14 @@
         "electron-builder": "^22.8.0"
     },
     "dependencies": {
+        "ace-builds": "^1.4.12",
         "custom-electron-titlebar": "^3.2.4",
+        "electron-store": "^6.0.1",
         "electron-updater": "^4.3.4",
         "electron-window-state": "^5.0.3",
         "material-components-web": "^7.0.0",
-        "request": "^2.88.2"
+        "request": "^2.88.2",
+        "vm2": "^3.9.2"
     },
     "build": {
         "appId": "markusjx.autobet",

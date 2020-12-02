@@ -25,7 +25,7 @@ function createWindow() {
         height: mainWindowState.height,
         minHeight: 500,
         minWidth: 530,
-        frame: false,
+        //frame: false,
         resizable: true,
         icon: "icon.png",
         webPreferences: {
@@ -35,11 +35,11 @@ function createWindow() {
             nodeIntegration: false,
             webSecurity: true,
             enableRemoteModule: true,
-            devTools: false
+            //devTools: false
         }
     });
 
-    mainWindow.removeMenu();
+    //mainWindow.removeMenu();
 
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');
@@ -125,7 +125,7 @@ function createErrorWindow() {
 }
 
 app.whenReady().then(() => {
-    if (autobetLib != null) {
+    if (autobetLib == null) {
         createWindow();
     } else {
         createErrorWindow();
