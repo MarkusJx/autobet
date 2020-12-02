@@ -160,13 +160,33 @@ namespace logger {
         };
     }
 
-    void setLogToFile(bool val);
+    /**
+     * Set whether to log to file
+     * 
+     * @param val if set to true, the logger will log to a file
+     */
+    void setLogToFile(bool val) noexcept;
 
-    bool logToFile();
+    /**
+     * Check if the logger is logging to a file
+     * 
+     * @return true, if the logger is logging to file
+     */
+    bool logToFile() noexcept;
 
-    void setLogToConsole(bool val);
+    /**
+     * Set whether to log to the fake console
+     * 
+     * @param val if set to true, the logger will log to the fake console
+     */
+    void setLogToConsole(bool val) noexcept;
 
-    bool logToConsole();
+    /**
+     * Check if the logger is logging to the fake console
+     * 
+     * @return true, if the logger is logging to the fake console
+     */
+    bool logToConsole() noexcept;
 
     /**
      * The main logger class
@@ -583,9 +603,19 @@ namespace logger {
         }
 
     private:
-        static void setLogger(Logger *);
+        /**
+         * Set the logger
+         * 
+         * @param l the logger to set
+         */
+        static void setLogger(Logger *l);
 
-        static std::unique_ptr<Logger> &getLogger();
+        /**
+         * Get the logger unique_ptr
+         * 
+         * @return a reference to the logger unique_ptr
+         */
+        static std::unique_ptr<Logger> &getLogger() noexcept;
     };
 }
 

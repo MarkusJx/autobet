@@ -8,22 +8,22 @@ void logger::StaticLogger::setLogger(Logger *_ptr) {
     ptr = std::unique_ptr<logger::Logger>(_ptr);
 }
 
-std::unique_ptr<logger::Logger> &logger::StaticLogger::getLogger() {
+std::unique_ptr<logger::Logger> &logger::StaticLogger::getLogger() noexcept {
     return ptr;
 }
 
-void logger::setLogToConsole(bool val) {
+void logger::setLogToConsole(bool val) noexcept {
     toConsole = val;
 }
 
-bool logger::logToConsole() {
+bool logger::logToConsole() noexcept {
     return toConsole;
 }
 
-void logger::setLogToFile(bool val) {
+void logger::setLogToFile(bool val) noexcept {
     toFile = val;
 }
 
-bool logger::logToFile() {
+bool logger::logToFile() noexcept {
     return toFile;
 }

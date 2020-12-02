@@ -14,6 +14,8 @@
 * [chocolatey](https://chocolatey.org/install) for installing boost
 * [Boost](https://chocolatey.org/packages/boost-msvc-14.1) installed using chocolatey
 (run ``choco install -y boost-msvc-14.1 --version 1.67.0`` in an elevated cmd) version >= 1.67.0
+* [OpenCV](https://opencv.org/releases/) any version greater than 4.0.0
+(The ``OpenCV_DIR`` environment variable must be set to the OpenCV directory)
 
 ## Build steps
 For newer versions of autobet, run these steps in a command line with 

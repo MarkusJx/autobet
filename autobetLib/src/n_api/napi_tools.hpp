@@ -33,6 +33,12 @@
 #include <future>
 #include <map>
 
+#ifndef NAPI_TOOLS_CALLBACK_SLEEP_TIME
+    // The time to sleep between checking for new
+    // function calls in the queue in callbacks
+#   define NAPI_TOOLS_CALLBACK_SLEEP_TIME 10
+#endif // NAPI_TOOLS_CALLBACK_SLEEP_TIME
+
 #define TRY try {
 #define CATCH_EXCEPTIONS                                                 \
     } catch (const std::exception& e) {                                  \
@@ -884,7 +890,7 @@ namespace napi_tools {
                         jsCallback->queue.clear();
                         jsCallback->mtx.unlock();
 
-                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        std::this_thread::sleep_for(std::chrono::milliseconds(NAPI_TOOLS_CALLBACK_SLEEP_TIME));
                     } else {
                         jsCallback->mtx.unlock();
                     }
@@ -1041,7 +1047,7 @@ namespace napi_tools {
                         jsCallback->mtx.unlock();
 
                         // Sleep for some time
-                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        std::this_thread::sleep_for(std::chrono::milliseconds(NAPI_TOOLS_CALLBACK_SLEEP_TIME));
                     } else {
                         jsCallback->mtx.unlock();
                     }

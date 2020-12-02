@@ -60,8 +60,7 @@
             "main.js",
             "scripts/*",
             "icon.png",
-            "!**/v1.1.0/*",
-            "!**/v0/*"
+            "!**/unused/*"
         ],
         "extraResources": [
             {

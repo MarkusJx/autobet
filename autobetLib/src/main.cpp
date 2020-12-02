@@ -22,8 +22,9 @@
 #endif
 
 #include <CppJsLib.hpp>
-
 #include "logger.hpp"
+
+#define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
 #include "n_api/napi_tools.hpp"
 
 using namespace logger;
@@ -44,23 +45,34 @@ float multiplierW, multiplierH;
 uint32_t time_sleep = 36, time_running = 0;
 bool bettingFunctionSet = false;
 
-// Functions from js =======================
-std::function<void(bool)> set_gta_running = {};
-std::function<void()> ui_keycomb_start = {};
-std::function<void()> ui_keycomb_stop = {};
+// Callbacks ==============================================
 
-std::function<void(int)> setAllMoneyMade = {};
-std::function<void(int)> addMoney = {};
-std::function<void()> exception = {};
-
+// A callback to set if gta is running
 callbacks::callback<void(bool)> setGtaRunningCallback = nullptr;
+
+// A callback to set all money made
 callbacks::callback<void(int)> setAllMoneyMadeCallback = nullptr;
+
+// A callback to add money made this session
 callbacks::callback<void(int)> addMoneyCallback = nullptr;
+
+// A callback so signal the betting has started
 callbacks::callback<void()> uiKeycombStartCallback = nullptr;
+
+// A callback to signal the betting has stopped
 callbacks::callback<void()> uiKeycombStopCallback = nullptr;
+
+// A callback to be called if an exception is thrown
+// and the program is unable to continue
 callbacks::callback<void()> exceptionCallback = nullptr;
+
+// A callback to log to the fake console
 callbacks::callback<void(std::string)> logCallback = nullptr;
+
+// A callback with a custom betting function
 callbacks::callback<int(std::vector<std::string>)> bettingPositionCallback = nullptr;
+
+// EndCallbacks ===========================================
 
 /**
  * Kill the program and close all connections
@@ -95,7 +107,7 @@ void kill(bool _exit = true) {
         StaticLogger::warning("Could not stop web ui web server");
     }
 
-    // Delete the AIs
+    // Delete the AI
     StaticLogger::debug("Deleting ai");
     knn.reset();
     StaticLogger::debug("Deleted ai");
@@ -225,13 +237,13 @@ void reset() {
 }
 
 /**
- * Set the GTA V running variable in C and JS
+ * Set the GTA V running variable in C++ and JS
  *
  * @param val the new value
  */
 void setGtaVRunning(bool val) {
     gtaVRunning = val;
-    set_gta_running(val);
+    setGtaRunningCallback(val);
 }
 
 short getBasicBettingPosition(const std::vector<std::string> &odds) {
@@ -356,7 +368,7 @@ void updateWinnings(int amount) {
         winnings += amount;
         winnings_all += amount;
 
-        setAllMoneyMade(winnings_all);
+        setAllMoneyMadeCallback(winnings_all);
         writeWinnings();
 
         // If the amount is not negative count it as a won race
@@ -368,7 +380,7 @@ void updateWinnings(int amount) {
         racesLost++;
     }
 
-    addMoney(amount);
+    addMoneyCallback(amount);
 }
 
 /**
@@ -485,7 +497,7 @@ void mainLoop() {
             if (err == 0) {
                 if (!foreground) {
                     StaticLogger::debug("GTA V is not the currently focused window. Betting will be stopped");
-                    ui_keycomb_stop();
+                    uiKeycombStopCallback();
                     running = false;
                     break;
                 }
@@ -497,7 +509,7 @@ void mainLoop() {
             utils::getWindowSize(ws);
             if ((ws.width == 0 && ws.height == 0) || !utils::isProcessRunning("GTA5.exe")) {
                 StaticLogger::debug("The game seems to be closed, stopping betting");
-                ui_keycomb_stop();
+                uiKeycombStopCallback();
                 running = false;
             }
         }
@@ -532,7 +544,7 @@ void start_script() {
     // Only start if it is not already running or stopping
     if (!running && !stopping) {
         StaticLogger::debug("Set running to true");
-        ui_keycomb_start();
+        uiKeycombStartCallback();
         running = true;
     }
 
@@ -552,7 +564,7 @@ void stop_script() {
     // Only stop if it is running and not stopping
     if (running && !stopping) {
         StaticLogger::debug("Waiting for main thread to finish");
-        ui_keycomb_stop();
+        uiKeycombStopCallback();
         running = false;
         stopping = true;
     }
@@ -606,22 +618,37 @@ int get_running() {
 
 // ======= node functions =================================
 
+/**
+ * Get the time the betting is running
+ */
 Napi::Number node_get_time(const Napi::CallbackInfo &info) {
     return Napi::Number::New(info.Env(), (double) time_running);
 }
 
+/**
+ * Get if gta is running
+ */
 Napi::Boolean node_get_gta_running(const Napi::CallbackInfo &info) {
     return Napi::Boolean::New(info.Env(), gtaVRunning);
 }
 
+/**
+ * Start the betting from node.js
+ */
 void node_js_start_script(const Napi::CallbackInfo &info) {
     start_script();
 }
 
+/**
+ * Stop the betting from node.js
+ */
 void node_js_stop_script(const Napi::CallbackInfo &info) {
     stop_script();
 }
 
+/**
+ * Set if the start button was pressed in the ui
+ */
 void set_starting(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     starting = info[0].ToBoolean();
@@ -670,7 +697,7 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
         }
 
         StaticLogger::debugStream() << "Read winnings: " << winnings_all;
-        setAllMoneyMade(winnings_all);
+        setAllMoneyMadeCallback(winnings_all);
     });
 }
 
@@ -689,12 +716,15 @@ std::string getIP() {
     return iPv4.to_string();
 }
 
+/**
+ * Get the IP address of this machine from the node process
+ */
 Napi::String node_getIP(const Napi::CallbackInfo &info) {
     return Napi::String::New(info.Env(), getIP());
 }
 
 /**
- * open the web ui
+ * Open the web ui
  */
 void open_website(const Napi::CallbackInfo &) {
     std::string addr = "http://";
@@ -762,8 +792,15 @@ void listenForKeycomb() {
     }
 }
 
+/**
+ * Try to start the web ui
+ * 
+ * @return true, if the operation was successful
+ */
 bool startWebUi() {
     try {
+        // Set the base directory to the appropriate directory
+        // depending on whether the program is packed or not
         std::string base_dir;
         if (utils::fileExists("web")) {
             base_dir = "web";
@@ -776,6 +813,7 @@ bool startWebUi() {
 
         webUi = std::make_unique<CppJsLib::WebGUI>(base_dir);
     } catch (std::bad_alloc &e) {
+        // This should not happen on a modern system
         StaticLogger::errorStream() << "Unable to create instance of web ui web server. Error: " << e.what();
         webUi.reset();
         return false;
@@ -783,6 +821,7 @@ bool startWebUi() {
 
     StaticLogger::debug("Exposing functions to the webUi");
 
+    // Expose a lot of functions
     webUi->expose(js_start_script);
     webUi->expose(js_stop_script);
     webUi->expose(get_races_won);
@@ -798,6 +837,10 @@ bool startWebUi() {
     webUi->expose(set_autostop_money);
 
     StaticLogger::debug("Starting web ui web server");
+
+    // We're building with websocket protocol support by default.
+    // This may only be disabled when boost is not installed
+    // or the BOOST_ROOT environment variable is not set.
 #ifdef CPPJSLIB_ENABLE_WEBSOCKET
 #   pragma message("INFO: Building with websocket support")
     StaticLogger::debug("Starting with websocket enabled");
@@ -808,6 +851,7 @@ bool startWebUi() {
     bool res = webUi->start(8027, getIP(), false);
 #endif // CPPJSLIB_ENABLE_WEBSOCKET
 
+    // Check the result, if it is set to true, everything is ok
     if (res) {
         StaticLogger::debug("Successfully started webUi");
         return true;
@@ -818,6 +862,9 @@ bool startWebUi() {
     }
 }
 
+/**
+ * Initialize autobet
+ */
 Napi::Promise init(const Napi::CallbackInfo &info) {
     return promises::promise<bool>(info.Env(), [] {
         // Delete the log if it is was last written more than 7 days ago
@@ -826,7 +873,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             StaticLogger::create();
         } catch (std::bad_alloc &) {
             utils::displayError("Unable to create Logger", [] {
-                exception();
+                exceptionCallback();
             });
             return false;
         }
@@ -874,12 +921,12 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 #else
 #       pragma message("INFO: Building in release mode")
 #endif //NDEBUG
-        // Check if model.pb exists
+        // Check if model.yml exists
         if (!utils::fileExists("resources/data/model.yml")) {
             StaticLogger::error("Could not initialize AI: model.yml not found");
             utils::displayError("Could not initialize AI\nmodel.yml not found."
                                 "\nReinstalling the program might fix this error", [] {
-                exception();
+                exceptionCallback();
             });
             return false;
         }
@@ -887,18 +934,19 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         StaticLogger::debug("Initializing AI");
         StaticLogger::debugStream() << "The knn was compiled using opencv version " << opencv_link::getOpenCvVersion();
 
+        // Try to initialize the knn
         try {
             knn = opencv_link::knn("resources/data/model.yml");
         } catch (std::bad_alloc &e) {
             StaticLogger::error("Could not initialize AI: Unable to allocate memory");
             utils::displayError("Could not initialize AI\nNot enough memory", [] {
-                exception();
+                exceptionCallback();
             });
             return false;
         } catch (...) {
             StaticLogger::error("Could not initialize AI: Unknown error");
             utils::displayError("Could not initialize AI\nUnknown error", [] {
-                exception();
+                exceptionCallback();
             });
             return false;
         }
@@ -913,7 +961,11 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
     });
 }
 
+/**
+ * Start the main loop
+ */
 Napi::Promise start(const Napi::CallbackInfo &info) {
+    // This promise will probably never resolve
     return promises::promise<void>(info.Env(), [] {
         runLoops = true;
 
@@ -921,11 +973,15 @@ Napi::Promise start(const Napi::CallbackInfo &info) {
             try {
                 mainLoop();
             } catch (autobetException &e) {
-                exception();
+                exceptionCallback();
                 utils::displayError(e.what(), [] {
                     quit();
                 });
             }
+
+            // Sleep until the betting is started.
+            // Will still call the mainLoop() every 10 seconds
+            // to see if the game is running
             for (int i = 0; i < 100; i++) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 if (running) {
@@ -936,80 +992,100 @@ Napi::Promise start(const Napi::CallbackInfo &info) {
     });
 }
 
+/**
+ * Quit.
+ */
 void node_quit() {
     quit();
 }
 
+/**
+ * Log to the node process.
+ * Used to log to the fake console in the ui.
+ */
 [[maybe_unused]] void node_log(const std::string &val) {
     if (logCallback) logCallback(val);
 }
 
+/**
+ * Stop the autobet native module
+ */
 Napi::Promise stop(const Napi::CallbackInfo &info) {
     return promises::promise<void>(info.Env(), [] {
         kill(false);
     });
 }
 
+// Set callbacks ==========================================
+
+/**
+ * Set the setGtaRunningCallback, which is called every time
+ * the running state of the game changes
+ */
 Napi::Promise setSet_gta_running(const Napi::CallbackInfo &info) {
     if (setGtaRunningCallback) throw Napi::Error::New(info.Env(), "setGtaRunningCallback is already defined");
     TRY
         setGtaRunningCallback = callbacks::callback<void(bool)>(info);
-        set_gta_running = [](bool val) {
-            setGtaRunningCallback(val);
-        };
 
         return setGtaRunningCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the addMoneyCallback, which is called every time
+ * some money is made or lost
+ */
 Napi::Promise setAddMoneyCallback(const Napi::CallbackInfo &info) {
     if (addMoneyCallback) throw Napi::Error::New(info.Env(), "addMoneyCallback is already defined");
     TRY
         addMoneyCallback = callbacks::callback<void(int)>(info);
-        addMoney = [](int value) {
-            addMoneyCallback(value);
-        };
 
         return addMoneyCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the setAllMoneyMadeCallback, which is called every
+ * time the overall money made value is changed
+ */
 Napi::Promise setSetAllMoneyMadeCallback(const Napi::CallbackInfo &info) {
     if (setAllMoneyMadeCallback) throw Napi::Error::New(info.Env(), "setAllMoneyMadeCallback is already defined");
     TRY
         setAllMoneyMadeCallback = callbacks::callback<void(int)>(info);
-        setAllMoneyMade = [](int value) {
-            setAllMoneyMadeCallback(value);
-        };
 
         return setAllMoneyMadeCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the uiKeycombStartCallback, which is called every time
+ * the betting is started using a key combination
+ */
 Napi::Promise setUiKeycombStartCallback(const Napi::CallbackInfo &info) {
     if (uiKeycombStartCallback) throw Napi::Error::New(info.Env(), "uiKeycombStartCallback is already defined");
     TRY
         uiKeycombStartCallback = callbacks::callback<void()>(info);
-        ui_keycomb_start = [] {
-            uiKeycombStartCallback();
-        };
 
         return uiKeycombStartCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the uiKeycombStopCallback, which is called every time
+ * the betting is stopped using a key combination
+ */
 Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
     if (uiKeycombStopCallback) throw Napi::Error::New(info.Env(), "uiKeycombStopCallback is already defined");
     TRY
         uiKeycombStopCallback = callbacks::callback<void()>(info);
-        ui_keycomb_stop = [] {
-            uiKeycombStopCallback();
-        };
 
         return uiKeycombStopCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the quit callback, which is used to quit the program
+ */
 void setQuitCallback(const Napi::CallbackInfo &info) {
     TRY
         callbacks::callback<void()> q(info);
@@ -1021,20 +1097,23 @@ void setQuitCallback(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the exception callback
+ */
 Napi::Promise setExceptionCallback(const Napi::CallbackInfo &info) {
     if (exceptionCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
     TRY
         exceptionCallback = callbacks::callback<void()>(info);
-        exception = [] {
-            exceptionCallback();
-        };
 
         return exceptionCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the log callback, which is used to log to the fake console
+ */
 Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
-    if (logCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
+    if (logCallback) throw Napi::Error::New(info.Env(), "logCallback is already defined");
     TRY
         logCallback = callbacks::callback<void(std::string)>(info);
 
@@ -1042,6 +1121,10 @@ Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the bettingPositionCallback, which is used
+ * to get the horse to bet on, if a custom betting function is defined
+ */
 Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
     if (bettingPositionCallback) throw Napi::Error::New(info.Env(), "bettingPositionCallback is already defined");
     TRY
@@ -1051,38 +1134,61 @@ Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set whether to use a custom betting function
+ */
 void setUseBettingFunction(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     bettingFunctionSet = info[0].ToBoolean();
 }
 
+/**
+ * Quit from n-api
+ */
 void napi_quit(const Napi::CallbackInfo &) {
     quit();
 }
 
+/**
+ * Set whether to log to a file
+ */
 void node_setLogToFile(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     logger::setLogToFile(info[0].ToBoolean());
 }
 
+/**
+ * Check if the program is logging to a file
+ */
 Napi::Boolean node_logToFile(const Napi::CallbackInfo &info) {
     return Napi::Boolean::New(info.Env(), logger::logToFile());
 }
 
+/**
+ * Set whether to log to the fake console in the ui
+ */
 void node_setLogToConsole(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
     logger::setLogToConsole(info[0].ToBoolean());
 }
 
+/**
+ * Check if the program is logging to the fake console in th ui
+ */
 Napi::Boolean node_logToConsole(const Napi::CallbackInfo &info) {
     return Napi::Boolean::New(info.Env(), logger::logToConsole());
 }
 
+/**
+ * Set debugging with images and more information
+ */
 Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
-    bool val = info[0].ToBoolean();
-    return promises::promise<bool>(info.Env(), [val] {
-        if (val) {
+    // If set_debug_full is set to true, full debug should be enabled
+    bool set_debug_full = info[0].ToBoolean();
+    return promises::promise<bool>(info.Env(), [set_debug_full] {
+        if (set_debug_full) {
+            // Check if debug_full is not already set, if not init debugging
             if (!debug_full) {
                 if (!debug::init()) {
                     StaticLogger::error("Could not create debug folder. Cannot collect debug information");
@@ -1092,7 +1198,12 @@ Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
             }
             return true;
         } else {
+            // Only destroy if debug_full is already running
             if (debug_full) {
+                // In order to finish the logging and write the log file to the zip,
+                // the current logger must be destroyed, to write all data to the
+                // log file and copy it to the zip. Another logger instance is created
+                // during the copy process to log potential errors during this operation
                 StaticLogger::debug("Destroying logger in order to write log to debug zip");
                 StaticLogger::destroy();
                 StaticLogger::create(LoggerMode::MODE_FILE, LogLevel::debug, "autobet_debug.log", "wt");
@@ -1106,17 +1217,22 @@ Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
     });
 }
 
+/**
+ * Start the web server
+ */
 Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
-    bool val = info[0].ToBoolean();
-    return promises::promise<bool>(info.Env(), [val] {
-        if (val) {
+    // If start_web_server is set to true, the web server should be started
+    bool start_web_server = info[0].ToBoolean();
+    return promises::promise<bool>(info.Env(), [start_web_server] {
+        if (start_web_server) {
             // Try to start the web ui
             webServer = true;
             if (!webUi) {
                 // If web ui isn't already started, start it
                 return startWebUi();
             } else {
+                // The web server already exists
                 StaticLogger::warning("Tried to start webUi server, but it already is running");
                 return false;
             }
@@ -1141,6 +1257,9 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
     });
 }
 
+/**
+ * Start the web server
+ */
 Napi::Promise startWebServer(const Napi::CallbackInfo &info) {
     return promises::promise<bool>(info.Env(), [] {
         if (webServer) {
@@ -1149,11 +1268,12 @@ Napi::Promise startWebServer(const Napi::CallbackInfo &info) {
                 StaticLogger::debug("Web ui started");
                 return true;
             } else {
-                StaticLogger::debug("Web ui could not be started");
+                StaticLogger::warning("Web ui could not be started");
                 return false;
             }
         } else {
-            StaticLogger::debug("Web ui was disabled, not starting the web server");
+            // Tried to start the web server when it was not enabled. Weird.
+            StaticLogger::warning("Web ui was disabled, not starting the web server");
             return false;
         }
     });
@@ -1163,6 +1283,9 @@ Napi::Boolean node_getWebServer(const Napi::CallbackInfo &info) {
     return Napi::Boolean::New(info.Env(), webServer);
 }
 
+/**
+ * Check if the web server is running
+ */
 Napi::Boolean webServerRunning(const Napi::CallbackInfo &info) {
     if (webUi) {
         return Napi::Boolean::New(info.Env(), webUi->isRunning());
@@ -1171,15 +1294,24 @@ Napi::Boolean webServerRunning(const Napi::CallbackInfo &info) {
     }
 }
 
+/**
+ * Set the time to sleep between bets
+ */
 void setTimeSleep(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::NUMBER);
     time_sleep = info[0].ToNumber().operator unsigned int();
 }
 
+/**
+ * Get the time to sleep between bets
+ */
 Napi::Number getTimeSleep(const Napi::CallbackInfo &info) {
     return Napi::Number::New(info.Env(), time_sleep);
 }
 
+/**
+ * Save the settings
+ */
 Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
     return promises::promise<void>(info.Env(), [] {
         settings::save(logger::logToFile(), logger::logToConsole(), webServer, time_sleep);
@@ -1188,6 +1320,9 @@ Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
 
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
 
+/**
+ * Export all functions
+ */
 Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(init);
     export(start);
