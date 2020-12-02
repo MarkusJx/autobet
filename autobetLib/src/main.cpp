@@ -765,6 +765,7 @@ void listenForKeycomb() {
         }
     };
 
+#pragma message(TODO(Maybe add custom key combinations))
 #ifdef AUTOBET_WINDOWS
 #   pragma message("INFO: Building on windows")
     while (keyCombListen) {
