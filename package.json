@@ -34,7 +34,6 @@
         "electron-store": "^6.0.1",
         "electron-updater": "^4.3.4",
         "electron-window-state": "^5.0.3",
-        "isolated-vm": "^3.3.7",
         "material-components-web": "^7.0.0",
         "request": "^2.88.2",
         "vm2": "^3.9.2"
@@ -61,6 +60,7 @@
             "ui/qrcode.min.js",
             "ui/startstop.min.js",
             "ui/style.min.css",
+            "ui/jsEditor.min.js",
             "ui/err/*",
             "main.js",
             "scripts/*",

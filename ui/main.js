@@ -1,3 +1,5 @@
+'use strict';
+
 let startstop = document.getElementById('startstop');
 
 mdc.ripple.MDCRipple.attachTo(startstop);
@@ -371,6 +373,8 @@ log_to_file_switch.listen('change', () => {
 
 // Listen for change on the switch that toggles logging to "console"
 log_to_console_switch.listen('change', () => {
+    // Disable the log to console switch,
+    // re-enable it when the settings are saved
     log_to_console_switch.disabled = true;
     autobetLib.logging.setLogToConsole(log_to_console_switch.checked);
 
@@ -381,7 +385,7 @@ log_to_console_switch.listen('change', () => {
 
         // Do the exact thing again. All these calls are async so it can still
         // be written to the "console" even though logging is disabled.
-        // Jank solutions require more janky solutions as a response.
+        // Jank solutions require more janky response. Write that down, kids.
         setTimeout(() => {
             log_textfield.value = "";
             log_textfield_resizer.style.height = "56px";

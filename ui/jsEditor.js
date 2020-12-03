@@ -45,6 +45,7 @@
     editor.getSession().on('change', () => {
         if (current_selected_impl != null) {
             save_impl_button.disabled = current_selected_impl.waiting;
+            check_impl_button.disabled = true;
             set_default_button.disabled = true;
         }
     });
@@ -70,10 +71,17 @@
         }
     });
 
+    // Set the error message dialog opener
     document.getElementById('editor-message-snackbar-show-info').addEventListener('click', () => {
         error_dialog.open();
     });
 
+    /**
+     * Show the message snackbar
+     * 
+     * @param {string} text the text to show in the snackbar
+     * @param {string} extended_info the info displayed in the info dialog
+     */
     function showMessageSnackbar(text, extended_info = "Not available") {
         error_dialog.close();
         error_dialog_text.innerHTML = extended_info;
@@ -146,6 +154,12 @@ function run() {
 setResult(run());
 `;
 
+    /**
+     * Highlight syntax of an object.
+     * Source: https://stackoverflow.com/a/7220510
+     * 
+     * @param {string | object} json the object to highlight
+     */
     function syntaxHighlight(json) {
         if (typeof json != 'string') {
             json = JSON.stringify(json, undefined, 2);
@@ -386,6 +400,7 @@ setResult(run());
             }
 
             // Wait for the check to finish (NOTE: This should be in a promise)
+            console.warn("TODO: This should return a promise");
             let res = isolatedFunction.checkFunction(this.fnString);
             // Set whether this is ok and set waiting to false
             this.setOk(res.ok);

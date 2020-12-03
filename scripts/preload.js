@@ -1,13 +1,11 @@
 const { contextBridge, ipcRenderer } = require('electron');
-console.warn("Uncomment this")
-//const autobetLib = require('../autobetLib');
+const autobetLib = require('../autobetLib');
 const { Titlebar, Color } = require('custom-electron-titlebar');
 const Store = require('electron-store');
 const isolate = require('./isolatedFunction/isolatedFunction');
 const { functionStore } = require('./functionStore/functionStore');
 
-console.warn("Uncomment this")
-//contextBridge.exposeInMainWorld('autobetLib', autobetLib);
+contextBridge.exposeInMainWorld('autobetLib', autobetLib);
 contextBridge.exposeInMainWorld('electron', {
     quit: () => ipcRenderer.send('close-window'),
     hide: () => ipcRenderer.send('hide-window')
@@ -62,14 +60,12 @@ let usedUids = store.get('usedUids');
 
 // Set whether to use the custom betting function
 if (activeFunction > 0 && activeFunction < functions.length) {
-    console.warn("Uncomment this")
-    //autobetLib.customBettingFunction.setUseBettingFunction(true);
+    autobetLib.customBettingFunction.setUseBettingFunction(true);
     isolatedFunction.setFunction(functions[activeFunction].getFunctionString());
     functions[activeFunction].setActive(true);
     store.set('functions', functions);
 } else {
-    console.warn("Uncomment this")
-    //autobetLib.customBettingFunction.setUseBettingFunction(false);
+    autobetLib.customBettingFunction.setUseBettingFunction(false);
 }
 
 /**
@@ -109,8 +105,7 @@ function bettingFunctionError() {
     store.set('activeFunction', activeFunction);
 }
 
-console.warn("Uncomment this");
-/*autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
+autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
     if (activeFunction == -1 || activeFunction < 0 || activeFunction >= functions.length) {
         return -2;
     }
@@ -145,7 +140,7 @@ console.warn("Uncomment this");
         // Again, return -2 on error
         return -2;
     }
-});*/
+});
 
 let revertToDefaultCallback = () => { };
 
@@ -249,8 +244,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
             isolatedFunction.setFunction(fnStore.functionString);
 
             // Set use the custom betting function to true
-            console.warn("Uncomment this")
-            //autobetLib.customBettingFunction.setUseBettingFunction(true);
+            autobetLib.customBettingFunction.setUseBettingFunction(true);
 
             // Store everything
             store.set('functions', functions);
@@ -275,8 +269,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
         // Set the active function to -1 and set use
         // the custom betting function to false
         activeFunction = -1;
-        console.warn("Uncomment this")
-        //autobetLib.customBettingFunction.setUseBettingFunction(false);
+        autobetLib.customBettingFunction.setUseBettingFunction(false);
 
         // Store everything
         store.set('functions', functions);
