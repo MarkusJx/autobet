@@ -1,11 +1,13 @@
 const { contextBridge, ipcRenderer } = require('electron');
-const autobetLib = require('../autobetLib');
+console.warn("Uncomment this")
+//const autobetLib = require('../autobetLib');
 const { Titlebar, Color } = require('custom-electron-titlebar');
 const Store = require('electron-store');
 const isolate = require('./isolatedFunction/isolatedFunction');
 const { functionStore } = require('./functionStore/functionStore');
 
-contextBridge.exposeInMainWorld('autobetLib', autobetLib);
+console.warn("Uncomment this")
+//contextBridge.exposeInMainWorld('autobetLib', autobetLib);
 contextBridge.exposeInMainWorld('electron', {
     quit: () => ipcRenderer.send('close-window'),
     hide: () => ipcRenderer.send('hide-window')
@@ -24,7 +26,9 @@ contextBridge.exposeInMainWorld('titlebar', {
 
 const schema = {
     functions: {
-        type: 'functionStore[]',
+        default: []
+    },
+    usedUids: {
         default: []
     },
     activeFunction: {
@@ -50,14 +54,22 @@ let functions = store.get('functions');
  */
 let activeFunction = store.get('activeFunction');
 
+/**
+ * The used uids
+ * @type {string[]}
+ */
+let usedUids = store.get('usedUids');
+
 // Set whether to use the custom betting function
 if (activeFunction > 0 && activeFunction < functions.length) {
-    autobetLib.customBettingFunction.setUseBettingFunction(true);
+    console.warn("Uncomment this")
+    //autobetLib.customBettingFunction.setUseBettingFunction(true);
     isolatedFunction.setFunction(functions[activeFunction].getFunctionString());
     functions[activeFunction].setActive(true);
     store.set('functions', functions);
 } else {
-    autobetLib.customBettingFunction.setUseBettingFunction(false);
+    console.warn("Uncomment this")
+    //autobetLib.customBettingFunction.setUseBettingFunction(false);
 }
 
 /**
@@ -91,19 +103,22 @@ function bettingFunctionError() {
     }
 
     activeFunction = -1;
+    revertToDefaultCallback();
 
     store.set('functions', functions);
     store.set('activeFunction', activeFunction);
 }
 
-autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
+console.warn("Uncomment this");
+/*autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
     if (activeFunction == -1 || activeFunction < 0 || activeFunction >= functions.length) {
         return -2;
     }
 
     let res = null;
     try {
-        res = isolatedFunction.run(odds);
+        let odds_cpy = Array.from(odds);
+        res = isolatedFunction.run(odds_cpy);
         res = oddToNumber(res);
     } catch (e) {
         functions[activeFunction].setOk(false);
@@ -114,18 +129,40 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
         return -2;
     }
 
-    if (res == null) {
+    if (res === null) {
         // Return -1 on 'Do not bet'
         return -1;
-    } else if (typeof res === "number") {
-        // Return the result
-        return res;
+    } else if (typeof res === "string") {
+        let res_index = odds.indexOf(res);
+        if (res_index < 0) {
+            return -2;
+        } else {
+            // Return the result
+            return res_index
+        }
     } else {
         bettingFunctionError();
         // Again, return -2 on error
         return -2;
     }
-});
+});*/
+
+let revertToDefaultCallback = () => { };
+
+/**
+ * Generate a unique id.
+ * Source: https://learnersbucket.com/examples/javascript/unique-id-generator-in-javascript/
+ * 
+ * @returns {string} the uid in the format 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+ */
+function generateUid() {
+    const s4 = () => {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
 
 contextBridge.exposeInMainWorld('isolatedFunction', {
     functionStore: functionStore,
@@ -136,19 +173,40 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
      * @param {string} fnString the function string
      */
     addFunction: (name, fnString) => {
-        let fn = new functionStore(name, fnString);
+        let uid = generateUid();
+        while (usedUids.includes(uid)) uid = generateUid();
+
+        let fn = new functionStore(name, fnString, uid);
         functions.push(fn);
+        usedUids.push(uid);
+
+        store.set('usedUids', usedUids);
 
         return fn;
     },
+    /**
+     * Test a function
+     * 
+     * @param {string} fnString the function string to test
+     */
     checkFunction: (fnString) => {
-        return new Promise((res) => {
-            let isolatedFn = new isolate.isolatedFunction();
-            isolatedFn.setFunction(fnString);
-            let result = isolatedFn.testFunction();
+        let isolatedFn = new isolate.isolatedFunction();
+        isolatedFn.setFunction(fnString);
+        let result;
+        try {
+            result = isolatedFn.testFunction(25);
+        } catch (e) {
+            result = {
+                ok: false,
+                res: {
+                    error: e.toString(),
+                    stack: e.stack,
+                    data: null
+                }
+            }
+        }
 
-            res(result);
-        });
+        return result;
     },
     /**
      * Get the functions
@@ -165,27 +223,34 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
      */
     setActiveFunction: (fnStore) => {
         // Get the index of the fnStore function
-        let index = functions.indexOf(fnStore);
+        let index = -1;
+        for (let i = 0; i < functions.length; i++) {
+            if (functions[i].id == fnStore.id) {
+                index = i;
+                break;
+            }
+        }
 
         // Make sure that fnStore exists in functions
         if (index != -1) {
             // If activeFunction is a index of functions, set the function to not active
             if (activeFunction > 0 && activeFunction < functions.length) {
-                functions[activeFunction].setActive(false);
+                functions[activeFunction].active = false;
             } else {
                 // Otherwise, set all to inactive
                 for (let i = 0; i < functions.length; i++) {
-                    functions[i].setActive(false);
+                    functions[i].active = false;
                 }
             }
 
             // Set the active function to activate as active
             activeFunction = index;
-            fnStore.setActive(true);
-            isolatedFunction.setFunction(fnStore.getFunctionString());
+            fnStore.active = true;
+            isolatedFunction.setFunction(fnStore.functionString);
 
             // Set use the custom betting function to true
-            autobetLib.customBettingFunction.setUseBettingFunction(true);
+            console.warn("Uncomment this")
+            //autobetLib.customBettingFunction.setUseBettingFunction(true);
 
             // Store everything
             store.set('functions', functions);
@@ -200,17 +265,18 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     revertToDefaultImpl: () => {
         // Set all functions to inactive
         if (activeFunction > 0 && activeFunction < functions.length) {
-            functions[activeFunction].setActive(false);
+            functions[activeFunction].active = false;
         } else {
             for (let i = 0; i < functions.length; i++) {
-                functions[i].setActive(false);
+                functions[i].active = false;
             }
         }
 
         // Set the active function to -1 and set use
         // the custom betting function to false
         activeFunction = -1;
-        autobetLib.customBettingFunction.setUseBettingFunction(false);
+        console.warn("Uncomment this")
+        //autobetLib.customBettingFunction.setUseBettingFunction(false);
 
         // Store everything
         store.set('functions', functions);
@@ -223,6 +289,26 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
      */
     deleteFunction: (fn) => {
         functions.splice(functions.indexOf(fn), 1);
+        usedUids.splice(usedUids.indexOf(fn.id), 1);
+
+        store.set('usedUids', usedUids);
+        store.set('functions', functions);
+    },
+    /**
+     * Set the callback to be called when the betting function is reverted to default
+     * 
+     * @param {() => void} fn the callback function
+     */
+    setRevertToDefaultCallback: (fn) => {
+        revertToDefaultCallback = fn;
+    },
+    /**
+     * Save the functions
+     * 
+     * @param {functionStore[]} the functions array
+     */
+    saveFunctions: (fns) => {
+        functions = fns;
         store.set('functions', functions);
     }
 });

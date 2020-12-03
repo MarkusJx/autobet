@@ -500,7 +500,7 @@ body {
 }
 
 .editor-button:disabled {
-    color: rgb(37, 37, 37);
+    color: #3c3c3c;
 }
 
 #open-editor {
@@ -518,6 +518,26 @@ body {
 #impl-name-text-field {
     margin-top: 10px;
 }
+
+#editor-error-dialog {
+    --mdc-theme-primary: blue;
+}
+
+.mdc-button.mdc-snackbar__action.editor-message-snackbar-action {
+    color: rgb(0, 145, 255);
+    --mdc-theme-primary: rgb(0, 145, 255);
+}
+
+#editor-error-dialog-surface {
+    max-width: calc(100vw - 40px);
+}
+
+pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }
 
 /* ========== Attributes to be set when width >= 860px ========== */
 @media only screen and (min-width: 860px) {

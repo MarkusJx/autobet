@@ -160,7 +160,7 @@
 
             <button class="mdc-button mdc-button--outlined" id="open-editor" title="Open the editor">
                 <div class="mdc-button__ripple"></div>
-                <span class="mdc-button__label">Open editor</span>
+                <span class="mdc-button__label" id="open-editor-button-label">Open editor</span>
             </button>
 
             <div id="editor-container">
@@ -202,6 +202,10 @@
                             </section>
                             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
                                 role="toolbar">
+                                <button
+                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                    aria-label="Test" title="Run tests on this implementation" id="check-impl-button"
+                                    disabled>cached</button>
                                 <button
                                     class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
                                     aria-label="SetDefault" title="Set this as your default implementation"
@@ -351,7 +355,8 @@
                         <span class="mdc-notched-outline">
                             <span class="mdc-notched-outline__leading"></span>
                             <span class="mdc-notched-outline__notch">
-                                <span class="mdc-floating-label" id="impl-name-text-field-label">Implementation name</span>
+                                <span class="mdc-floating-label" id="impl-name-text-field-label">Implementation
+                                    name</span>
                             </span>
                             <span class="mdc-notched-outline__trailing"></span>
                         </span>
@@ -373,8 +378,52 @@
         <div class="mdc-dialog__scrim"></div>
     </div>
 
+    <!-- Editor error message dialog -->
+    <div class="mdc-dialog" id="editor-error-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="editor-error-dialog-surface"
+                aria-describedby="editor-error-dialog-content" aria-labelledby="editor-error-dialog-title">
+                <h2 class="mdc-dialog__title" id="editor-error-dialog-title">
+                    Last message
+                </h2>
+                <div class="mdc-dialog__content" id="editor-error-dialog-content">
+                    None available
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="ok">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Ok</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
     <!-- Snackbars -->
 
+    <!-- Editor message snackbar -->
+    <div class="mdc-snackbar" id="editor-message-snackbar">
+        <div class="mdc-snackbar__surface" role="status" aria-relevant="additions">
+            <div class="mdc-snackbar__label" aria-atomic="false" id="editor-message-label">
+                Message
+            </div>
+            <div class="mdc-snackbar__actions" aria-atomic="true">
+                <button type="button" class="mdc-button mdc-snackbar__action editor-message-snackbar-action">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">Ok</span>
+                </button>
+
+                <button type="button" class="mdc-button mdc-snackbar__action editor-message-snackbar-action"
+                    id="editor-message-snackbar-show-info">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">View info</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings saved message snackbar -->
     <div class="mdc-snackbar" id="settings-saved-message">
         <div class="mdc-snackbar__surface">
             <div class="mdc-snackbar__label" role="status" aria-live="polite">
@@ -383,6 +432,7 @@
         </div>
     </div>
 
+    <!-- GTA ont running message snackbar -->
     <div class="mdc-snackbar noselect" id="gta-not-running-message">
         <div class="mdc-snackbar__surface">
             <div aria-live="polite" class="mdc-snackbar__label" role="status">

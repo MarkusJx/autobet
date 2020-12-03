@@ -344,7 +344,13 @@ short get_pos(void *src) {
             const int res = future.get();
             StaticLogger::debugStream() << "The custom betting function returned: " << res;
 
-            return (short) res;
+            if (res < -1) {
+                StaticLogger::warning("The custom betting function returned a result < -1, falling back to the default implementation");
+                return getBasicBettingPosition(odds);
+            } else {
+                // Return the yLocation at res
+                return yLocations[res];
+            }
         } else {
             StaticLogger::warning("The custom betting function did not finish within 10 seconds, falling back to the default function");
 #pragma message(TODO(Disable custom betting function on error and mark it as invalid))

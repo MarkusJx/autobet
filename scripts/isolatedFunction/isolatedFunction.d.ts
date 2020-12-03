@@ -39,7 +39,11 @@ export type err_res = {
     /**
      * The stack trace
      */
-    stack: string
+    stack: string,
+    /**
+     * The data used to produce this error
+     */
+    data: test_res_arr
 };
 
 /**

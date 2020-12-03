@@ -104,7 +104,7 @@ module.exports = {
             this.running = true;
 
             // Initialize the result
-            this.result = null;
+            this.result = undefined;
 
             // Set the odds and run the function
             this.vm.setGlobal("odds", odds);
@@ -112,7 +112,7 @@ module.exports = {
 
             // Get the result and set this.result to null
             const res = this.result;
-            this.result = null;
+            this.result = undefined;
             this.running = false;
             return res;
         }
@@ -220,20 +220,36 @@ module.exports = {
                 const o = generateOdds();
                 try {
                     // Run the function with o
-                    const r = this.run(o);
+                    let r = this.run(o);
+
+                    if (typeof r == "string") {
+                        // Basic xss protection
+                        r = r.replaceAll(/</g, "&lt;").replaceAll(/>/g, "&gt;").replace(/'/g, "&#39;").replace(/"/g, "&#34;");
+                    }
 
                     // Push the result of the call to vals
                     vals.push({
                         odds: o,
                         result: r
                     });
+
+                    if (r === undefined) {
+                        throw new Error("The test run returned undefined");
+                    } else if (r !== null) {
+                        if (typeof r !== "string") {
+                            throw new Error(`The result did not return a string, it returned type ${typeof r}`);
+                        } else if (!o.includes(r)) {
+                            throw new Error(`The test run returned a result which is not a member of odds: ${r}`);
+                        }
+                    }
                 } catch (e) {
                     // Return the error result
                     return {
                         ok: false,
                         res: {
                             error: e.toString(),
-                            stack: e.stack
+                            stack: e.stack,
+                            data: vals
                         }
                     };
                 }

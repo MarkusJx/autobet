@@ -61,12 +61,12 @@ function showQRCode() {
     showqrbutton.disabled = true;
 }
 
-qrdialog.listen('MDCDialog:closing', function() {
+qrdialog.listen('MDCDialog:closing', function () {
     startstop.disabled = false;
     showqrbutton.disabled = false;
 });
 
-showqrbutton.addEventListener('click', function() {
+showqrbutton.addEventListener('click', function () {
     showQRCode();
 });
 
@@ -74,7 +74,7 @@ autobetLib.callbacks.setExceptionCallback(exception);
 
 function exception() {
     errordialog.open();
-    errordialog.listen("MDCDialog:closed", function() {
+    errordialog.listen("MDCDialog:closed", function () {
         autobetLib.shutdown();
         electron.quit();
     });
@@ -205,7 +205,7 @@ enable_webserver.listen('change', () => {
 });
 
 // when the window unloads, quit electron
-window.onbeforeunload = function() {
+window.onbeforeunload = function () {
     autobetLib.shutdown().then(() => {
         electron.quit();
     });
@@ -272,7 +272,7 @@ main().then(() => {
 }, () => {
     // main failed
     errordialog.open();
-    errordialog.listen("MDCDialog:closed", function() {
+    errordialog.listen("MDCDialog:closed", function () {
         autobetLib.shutdown();
         electron.quit();
     });
@@ -441,4 +441,11 @@ document.getElementById("full-debug-info").addEventListener('click', () => {
 document.getElementById("debug-info").addEventListener('click', () => {
     showDescription("Debugging and logging", "Log to File: Set if the program should log to a file. This option will automatically activated, when the full debug " +
         "option is activated. Log to Console: This option will display logging information in the 'View log' text field.");
+});
+
+document.getElementById("custom-betting-function-info").addEventListener('click', () => {
+    showDescription("Custom betting function", "In here you can set a custom function to be called in order to determine whether (an where) a bet should be placed." +
+        "The function should be written in JavaScript, the odds are stored in the odds variable and at the end, you should pass the odd for a bet to be placed on to " +
+        "the setResult() function. If no bet should be placed, pass null to setResult(). If you don't pass anythin, the result will be interpreted as invalid and the " +
+        "Program will fall back to the native implementation.");
 });
