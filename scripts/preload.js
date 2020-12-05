@@ -59,10 +59,10 @@ let activeFunction = store.get('activeFunction');
 let usedUids = store.get('usedUids');
 
 // Set whether to use the custom betting function
-if (activeFunction > 0 && activeFunction < functions.length) {
+if (activeFunction >= 0 && activeFunction < functions.length && functions[activeFunction].active) {
     autobetLib.customBettingFunction.setUseBettingFunction(true);
-    isolatedFunction.setFunction(functions[activeFunction].getFunctionString());
-    functions[activeFunction].setActive(true);
+    isolatedFunction.setFunction(functions[activeFunction].functionString);
+    functions[activeFunction].active = true;
     store.set('functions', functions);
 } else {
     autobetLib.customBettingFunction.setUseBettingFunction(false);
@@ -90,11 +90,11 @@ function oddToNumber(val) {
 }
 
 function bettingFunctionError() {
-    if (activeFunction > 0 && activeFunction < functions.length) {
-        functions[activeFunction].setActive(false);
+    if (activeFunction >= 0 && activeFunction < functions.length) {
+        functions[activeFunction].active = false;
     } else {
         for (let i = 0; i < functions.length; i++) {
-            functions[i].setActive(false);
+            functions[i].active = false;
         }
     }
 
@@ -106,7 +106,7 @@ function bettingFunctionError() {
 }
 
 autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
-    if (activeFunction == -1 || activeFunction < 0 || activeFunction >= functions.length) {
+    if (activeFunction < 0 || activeFunction >= functions.length) {
         return -2;
     }
 
@@ -116,8 +116,8 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
         res = isolatedFunction.run(odds_cpy);
         res = oddToNumber(res);
     } catch (e) {
-        functions[activeFunction].setOk(false);
-        functions[activeFunction].setLastError(e.message);
+        functions[activeFunction].ok = false;
+        functions[activeFunction].lastError = e.message;
 
         bettingFunctionError();
         // Return -2 on error
@@ -229,7 +229,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
         // Make sure that fnStore exists in functions
         if (index != -1) {
             // If activeFunction is a index of functions, set the function to not active
-            if (activeFunction > 0 && activeFunction < functions.length) {
+            if (activeFunction >= 0 && activeFunction < functions.length) {
                 functions[activeFunction].active = false;
             } else {
                 // Otherwise, set all to inactive
@@ -240,7 +240,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
 
             // Set the active function to activate as active
             activeFunction = index;
-            fnStore.active = true;
+            functions[index].active = true;
             isolatedFunction.setFunction(fnStore.functionString);
 
             // Set use the custom betting function to true
@@ -258,7 +258,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
      */
     revertToDefaultImpl: () => {
         // Set all functions to inactive
-        if (activeFunction > 0 && activeFunction < functions.length) {
+        if (activeFunction >= 0 && activeFunction < functions.length) {
             functions[activeFunction].active = false;
         } else {
             for (let i = 0; i < functions.length; i++) {

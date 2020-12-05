@@ -42,6 +42,8 @@
         enableLiveAutocompletion: false
     });
 
+    // On changes made in the editor,
+    // disable the check and set default buttons
     editor.getSession().on('change', () => {
         if (current_selected_impl != null) {
             save_impl_button.disabled = current_selected_impl.waiting;
@@ -192,6 +194,9 @@ setResult(run());
         editor.textInput.getElement().disabled = val;
     }
 
+    /**
+     * A class for storing custom implementations and represententing them
+     */
     class sidebarButton {
         /**
          * Create a sidebar button. If isDefault is false, the button will be generated
@@ -379,6 +384,7 @@ setResult(run());
             if (this.isDefault) {
                 isolatedFunction.revertToDefaultImpl();
             } else {
+                this.fn.active = true;
                 isolatedFunction.setActiveFunction(this.fn);
             }
         }
@@ -477,14 +483,15 @@ setResult(run());
     current_default_button = default_button;
     current_selected_impl = default_button;
 
-    // Set the default as default
+    // Open the default and set it to ok
     default_button.setOpened();
     default_button.setOk(true);
-    default_button.setDefault(true);
-    message_snackbar.close();
     to_hide_divider.style.visibility = "hidden";
 
+    // Import the saved functions into the editor
     {
+        let anyIsActive = false;
+
         // Iterate over the stored functions and add them to the ui
         let functions = isolatedFunction.getFunctions();
         for (let i = 0; i < functions.length; i++) {
@@ -496,10 +503,21 @@ setResult(run());
             // If functions[i] is active, set fn as default
             if (functions[i].active) {
                 fn.setDefault(true);
+                anyIsActive = true;
+                message_snackbar.close();
             }
+        }
+
+        // If not any other is active, the default will be the active function
+        if (!anyIsActive) {
+            default_button.setDefault(true);
+            message_snackbar.close();
         }
     }
 
+    /**
+     * Save all functions
+     */
     function saveAllFunctions() {
         let fns = [];
         for (let i = 1; i < buttons.length; i++) {
@@ -589,6 +607,11 @@ setResult(run());
         }
     });
 
+    /**
+     * Check if the current implementations contain a function name
+     * 
+     * @param {string} name the function name to search
+     */
     function buttonsContainName(name) {
         for (let i = 0; i < buttons.length; i++) {
             if (buttons[i].name == name) {
