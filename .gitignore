@@ -221,7 +221,7 @@ node_modules
 /winnings.dat
 /autobet.log
 /autobet.conf
-/resources/data/model.pb
+/resources/data/model.*
 /dist
 /autobetLib/bin/
 /autobetLib/build/

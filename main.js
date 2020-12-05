@@ -125,7 +125,7 @@ function createErrorWindow() {
 }
 
 app.whenReady().then(() => {
-    if (autobetLib == null) {
+    if (autobetLib != null) {
         createWindow();
     } else {
         createErrorWindow();
