@@ -1,3 +1,4 @@
+/* Disable selection on the whole document */
 body {
     margin: 0;
     -ms-overflow-style: none;
@@ -532,12 +533,23 @@ body {
     max-width: calc(100vw - 40px);
 }
 
+/* Options for colored js objects */
 pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .string { color: green; }
 .number { color: darkorange; }
 .boolean { color: blue; }
 .null { color: magenta; }
 .key { color: red; }
+
+/* 
+Hide the editor action buttons when the sidebar is open
+and there is not enough space left
+*/
+@media only screen and (max-width: 735px) {
+    #editor-action-bar.opened {
+        display: none;
+    }
+}
 
 /* ========== Attributes to be set when width >= 860px ========== */
 @media only screen and (min-width: 860px) {

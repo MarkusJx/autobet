@@ -6,7 +6,8 @@
     const editor_container = document.getElementById('editor-container');
     let drawer = new mdc.drawer.MDCDrawer(document.getElementById('editor-menu-drawer'));
     const sidebar_buttons = document.getElementById('editor-sidebar-buttons');
-    const to_hide_divider = document.getElementById("to-hide-divider");
+    const to_hide_divider = document.getElementById('to-hide-divider');
+    const editor_action_bar = document.getElementById('editor-action-bar');
 
     // Attach a ripple to the open editor button
     mdc.ripple.MDCRipple.attachTo(open_editor);
@@ -16,10 +17,10 @@
         // If the editor container is already opened, close it, open it otherwise
         if (editor_container.classList.contains("opened")) {
             editor_container.classList.remove("opened");
-            document.getElementById('open-editor-button-label').innerText = "OPEN EDITOR";
+            document.getElementById('open-editor-button-label').innerText = "SHOW EDITOR";
         } else {
             editor_container.classList.add("opened");
-            document.getElementById('open-editor-button-label').innerText = "CLOSE EDITOR";
+            document.getElementById('open-editor-button-label').innerText = "HIDE EDITOR";
         }
     });
 
@@ -27,6 +28,19 @@
     const topAppBar = new mdc.topAppBar.MDCTopAppBar(document.getElementById('editor-top-bar'));
     topAppBar.setScrollTarget(document.getElementById('editor-top-bar'));
     topAppBar.listen('MDCTopAppBar:nav', () => {
+        // Add or remove the 'opened' attribute to the editor action bar
+        // in order to hide it when there is no space for it available
+        if (drawer.open) {
+            if (editor_action_bar.classList.contains("opened")) {
+                editor_action_bar.classList.remove("opened");
+            }
+        } else {
+            if (!editor_action_bar.classList.contains("opened")) {
+                editor_action_bar.classList.add("opened");
+            }
+        }
+
+        // Open / Close the drawer
         drawer.open = !drawer.open;
     });
 
@@ -384,8 +398,13 @@ setResult(run());
             if (this.isDefault) {
                 isolatedFunction.revertToDefaultImpl();
             } else {
-                this.fn.active = true;
-                isolatedFunction.setActiveFunction(this.fn);
+                try {
+                    isolatedFunction.setActiveFunction(this.fn);
+                    this.fn.active = true;
+                } catch (e) {
+                    autobetLib.logging.error(`Could not set the active function: ${e.message}`);
+                    isolatedFunction.revertToDefaultImpl();
+                }
             }
         }
 
@@ -406,7 +425,7 @@ setResult(run());
             }
 
             // Wait for the check to finish (NOTE: This should be in a promise)
-            console.warn("TODO: This should return a promise");
+            autobetLib.logging.warn("TODO: This should return a promise");
             let res = isolatedFunction.checkFunction(this.fnString);
             // Set whether this is ok and set waiting to false
             this.setOk(res.ok);
@@ -422,7 +441,7 @@ setResult(run());
                     syntaxHighlight(JSON.stringify(res.res.data, null, 6)) + "</pre>");
             }
 
-            // IF the current selected implementation is this, enable saving and deleting
+            // If the current selected implementation is this, enable saving and deleting
             if (current_selected_impl == this) {
                 check_impl_button.disabled = false;
                 if (!this.isDefault) {

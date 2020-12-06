@@ -1,5 +1,11 @@
 'use strict';
 
+// Do not require autobetLib in here, require will always be undefined.
+// This is just here as vs code automatically imports it
+if (require != undefined) {
+    var autobetLib = require("../autobetLib");
+}
+
 let startstop = document.getElementById('startstop');
 
 mdc.ripple.MDCRipple.attachTo(startstop);
@@ -144,7 +150,6 @@ function getMoneyPerHour() {
 autobetLib.callbacks.setGtaRunningCallback(set_gta_running);
 
 function set_gta_running(val) {
-    console.log("set gta v running to " + val);
     gta_running = val;
     if (gta_running) {
         game_running.innerText = "Yes";
@@ -249,12 +254,12 @@ async function main() {
         initialized = await autobetLib.startWebServer();
         enable_webserver.checked = initialized;
         if (initialized) {
-            console.log("Web server started.");
+            autobetLib.logging.debug("Web server started.");
             weblink.disabled = false;
             showqrbutton.disabled = false;
             setIPs();
         } else {
-            console.error("Could not start web server");
+            autobetLib.logging.error("Could not start web server");
             weblink.disabled = true;
             weblink.innerText = "not running";
             showqrbutton.disabled = true;
@@ -270,7 +275,7 @@ async function main() {
 }
 
 main().then(() => {
-    console.log("Main finished.");
+    autobetLib.logging.debug("JS main function finished");
 }, () => {
     // main failed
     errordialog.open();
@@ -352,8 +357,9 @@ full_debug.listen('change', () => {
     autobetLib.settings.setDebugFull(full_debug.checked).then((res) => {
         if (!res) { // If the call failed, do some stuff
             full_debug.checked = false;
-            console.warn("setDebugFull returned false");
+            autobetLib.logging.warn("setDebugFull returned false");
         }
+
         full_debug.disabled = false;
     });
 });

@@ -116,6 +116,7 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
         res = isolatedFunction.run(odds_cpy);
         res = oddToNumber(res);
     } catch (e) {
+        autobetLib.logging.error(`The custom betting function threw: ${e.message}`);
         functions[activeFunction].ok = false;
         functions[activeFunction].lastError = e.message;
 
@@ -130,12 +131,14 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
     } else if (typeof res === "string") {
         let res_index = odds.indexOf(res);
         if (res_index < 0) {
+            autobetLib.logging.error(`The odds did not contain the result by the custom betting function: '${res}'`);
             return -2;
         } else {
             // Return the result
             return res_index
         }
     } else {
+        autobetLib.logging.error("The result from the custom betting function was neither null or a string");
         bettingFunctionError();
         // Again, return -2 on error
         return -2;
@@ -170,6 +173,8 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     addFunction: (name, fnString) => {
         let uid = generateUid();
         while (usedUids.includes(uid)) uid = generateUid();
+
+        autobetLib.logging.debug(`Creating new custom function with name '${name}' and UID '${uid}'`);
 
         let fn = new functionStore(name, fnString, uid);
         functions.push(fn);
@@ -214,6 +219,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     /**
      * Set the active function
      * 
+     * @throws Will throw an error if fnStore is not in the functions array
      * @param {functionStore} fnStore the function
      */
     setActiveFunction: (fnStore) => {
@@ -237,6 +243,8 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
                     functions[i].active = false;
                 }
             }
+
+            autobetLib.logging.debug(`Setting active betting function to function with uid '${fnStore.id}'`);
 
             // Set the active function to activate as active
             activeFunction = index;
@@ -270,6 +278,8 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
         // the custom betting function to false
         activeFunction = -1;
         autobetLib.customBettingFunction.setUseBettingFunction(false);
+
+        autobetLib.logging.debug("Reverting to the default implementation");
 
         // Store everything
         store.set('functions', functions);

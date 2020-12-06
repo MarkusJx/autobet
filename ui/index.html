@@ -158,11 +158,13 @@
                 <i class="material-icons infoicon" id="custom-betting-function-info">info</i>
             </div>
 
-            <button class="mdc-button mdc-button--outlined" id="open-editor" title="Open the editor">
+            <!-- The show/hide the editor button -->
+            <button class="mdc-button mdc-button--outlined" id="open-editor" title="Show/hide the editor">
                 <div class="mdc-button__ripple"></div>
-                <span class="mdc-button__label" id="open-editor-button-label">Open editor</span>
+                <span class="mdc-button__label" id="open-editor-button-label">Show editor</span>
             </button>
 
+            <!-- The editor side bar -->
             <div id="editor-container">
                 <aside class="mdc-drawer mdc-drawer--dismissible" id="editor-menu-drawer">
                     <div class="mdc-drawer__content">
@@ -195,13 +197,15 @@
                 <div class="mdc-drawer-app-content" id="editor-drawer-main-content">
                     <header class="mdc-top-app-bar mdc-top-app-bar--dense app-bar" id="editor-top-bar">
                         <div class="mdc-top-app-bar__row">
+                            <!-- The sidebar open button -->
                             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
                                 <button
                                     class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button">menu</button>
                                 <span class="mdc-top-app-bar__title" id="editor-title">Code editor</span>
                             </section>
-                            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end"
-                                role="toolbar">
+                            <!-- The editor action buttons -->
+                            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar"
+                                id="editor-action-bar">
                                 <button
                                     class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
                                     aria-label="Test" title="Run tests on this implementation" id="check-impl-button"
@@ -212,7 +216,7 @@
                                     id="set-default-button" disabled>done</button>
                                 <button
                                     class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
-                                    aria-label="Save" title="Save the current state" id="save-impl-button"
+                                    aria-label="Save" title="Save the current state and test it" id="save-impl-button"
                                     disabled>save</button>
                                 <button
                                     class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
@@ -222,6 +226,7 @@
                         </div>
                     </header>
 
+                    <!-- The actual code editor is in here -->
                     <main class="main-content" id="editor-main-content">
                         <div class="mdc-top-app-bar--fixed-adjust" id="editor-top-app-bar">
                             <pre id="editor"></pre>
@@ -240,6 +245,7 @@
             </div>
 
             <div class="textalign" id="log-switches-container">
+                <!-- The log to file text & switch -->
                 <div class="infoalign logging">
                     <p class="text subheading"> Log to File</p>
                     <div class="mdc-switch" id="log-to-file-switch">
@@ -252,6 +258,7 @@
                     </div>
                 </div>
 
+                <!-- The log to console text & switch-->
                 <div class="infoalign logging">
                     <p class="text subheading"> Log to Console</p>
                     <div class="mdc-switch" id="log-to-console-switch">
@@ -265,6 +272,7 @@
                 </div>
             </div>
 
+            <!-- The fake console displaying logs -->
             <label class="mdc-text-field mdc-text-field--outlined mdc-text-field--textarea mdc-text-field--fullwidth"
                 id="log-textfield">
                 <span class="mdc-text-field__resizer" style="height: 56px;" id="log-textfield-resizer">

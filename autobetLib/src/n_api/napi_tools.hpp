@@ -72,7 +72,8 @@ namespace napi_tools {
         FUNCTION,
         OBJECT,
         BOOLEAN,
-        ARRAY
+        ARRAY,
+        UNDEFINED
     };
 
     /**
@@ -133,6 +134,11 @@ namespace napi_tools {
                     if (!info[i].IsArray()) {
                         throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
                                                         " requires type array at position " + std::to_string(i + 1));
+                    }
+                } else if (types[i] == UNDEFINED) {
+                    if (!info[i].IsUndefined()) {
+                        throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
+                                                        " requires type undefined at position " + std::to_string(i + 1));
                     }
                 }
             }

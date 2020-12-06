@@ -1,5 +1,51 @@
 const autobetLib_native = require("./bin/autobetLib.node");
 
+/**
+ * Get the caller file and line
+ * 
+ * @returns {callerInfo | undefinedCallerInfo} the caller info
+ */
+function getFileLine() {
+    /**
+     * Create a caller info
+     * 
+     * @param {string} file the caller file
+     * @param {number} line the caller line
+     */
+    function callerInfo(file, line) {
+        this.file = file;
+        this.line = line;
+    }
+
+    /**
+     * Create a undefined caller info
+     */
+    function undefinedCallerInfo() {
+        this.file = undefined;
+        this.line = undefined;
+    }
+
+    // Get the stack using an error
+    const err = new Error();
+    const stack = err.stack.toString().split(/\r\n|\n/);
+
+    // Check if the stack trace is long enough
+    if (stack.length >= 4) {
+        const fileLineRegex = /[a-zA-Z]+\.(js|ts):[0-9]+:[0-9]+/;
+        let obj = stack[3].match(fileLineRegex);
+        if (obj != null) {
+            obj = obj[0].split(":");
+            const file = obj[0];
+            const line = Number.parseInt(obj[1]);
+            return new callerInfo(file, line);
+        } else {
+            return new undefinedCallerInfo();
+        }
+    } else {
+        return new undefinedCallerInfo();
+    }
+}
+
 module.exports = {
     /**
      * Initialize everything
@@ -232,6 +278,33 @@ module.exports = {
          */
         setLogToConsole: function (logToConsole) {
             autobetLib_native.lib_node_setLogToConsole(logToConsole);
+        },
+        /**
+         * Log a debug message
+         * 
+         * @param {string} message the message to log
+         */
+        debug: function (message) {
+            const info = getFileLine();
+            autobetLib_native.lib_node_debug(info.file, info.line, message);
+        },
+        /**
+         * Log a warning message
+         * 
+         * @param {string} message the message to log
+         */
+        warn: function (message) {
+            const info = getFileLine();
+            autobetLib_native.lib_node_warn(info.file, info.line, message);
+        },
+        /**
+         * Log an error message
+         * 
+         * @param {string} message the message to log
+         */
+        error: function (message) {
+            const info = getFileLine();
+            autobetLib_native.lib_node_error(info.file, info.line, message);
         }
     },
     /**

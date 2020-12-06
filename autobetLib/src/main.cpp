@@ -1325,6 +1325,75 @@ Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
     });
 }
 
+/**
+ * A class for storing a file, line and message to log from node
+ */
+class file_line_message {
+public:
+    /**
+     * Create a file_line_message
+     * 
+     * @param info to CallbackInfo to convert
+     */
+    explicit file_line_message(const Napi::CallbackInfo &info) {
+        CHECK_LENGTH(3);
+        if (info[0].IsUndefined() || info[1].IsUndefined()) {
+            CHECK_ARGS(napi_tools::napi_type::UNDEFINED, napi_tools::napi_type::UNDEFINED, napi_tools::napi_type::STRING);
+            file = "unknown";
+            line = 0;
+        } else {
+            CHECK_ARGS(napi_tools::napi_type::STRING, napi_tools::napi_type::NUMBER, napi_tools::napi_type::STRING);
+            file = info[0].ToString();
+            line = info[1].ToNumber();
+        }
+
+        message = info[2].ToString();
+    }
+
+    std::string file;
+    int line;
+    std::string message;
+};
+
+/**
+ * Print a debug message from node.js
+ */
+Napi::Value node_debug(const Napi::CallbackInfo &info) {
+    if (!logger::logToFile() && !logger::logToConsole())
+        return info.Env().Undefined();
+    file_line_message dt(info);
+
+    return promises::promise<void>(info.Env(), [&dt] {
+        StaticLogger::_debug(dt.file.c_str(), dt.line, dt.message);
+    });
+}
+
+/**
+ * Print a warning message from node.js
+ */
+Napi::Value node_warn(const Napi::CallbackInfo &info) {
+    if (!logger::logToFile() && !logger::logToConsole())
+        return info.Env().Undefined();
+    file_line_message dt(info);
+
+    return promises::promise<void>(info.Env(), [&dt] {
+        StaticLogger::_warning(dt.file.c_str(), dt.line, dt.message);
+    });
+}
+
+/**
+ * Print an error message from node.js
+ */
+Napi::Value node_error(const Napi::CallbackInfo &info) {
+    if (!logger::logToFile() && !logger::logToConsole())
+        return info.Env().Undefined();
+    file_line_message dt(info);
+
+    return promises::promise<void>(info.Env(), [&dt] {
+        StaticLogger::_error(dt.file.c_str(), dt.line, dt.message);
+    });
+}
+
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
 
 /**
@@ -1371,6 +1440,10 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(getTimeSleep);
     export(saveSettings);
     export(setUseBettingFunction);
+
+    export(node_debug);
+    export(node_warn);
+    export(node_error);
 
     try {
         quit = [] {
