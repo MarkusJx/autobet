@@ -34,7 +34,7 @@ const download = (url, dest) => {
 };
 
 // Source: https://stackoverflow.com/a/32197381
-const deleteFolderRecursive = function(p) {
+const deleteFolderRecursive = function (p) {
     if (fs.existsSync(p)) {
         fs.readdirSync(p).forEach((file) => {
             const curPath = path.join(p, file);
@@ -73,6 +73,22 @@ function cleanUp() {
     deleteIfExists(zip_dir);
 }
 
+function full_clean() {
+    cleanUp();
+
+    const model_yml = path.join(__dirname, "resources", "data", "model.yml");
+    const node_modules = path.join(__dirname, "node_modules");
+    const lib_node_modules = path.join(__dirname, "autobetLib", "node_modules");
+
+    if (fs.existsSync(model_yml)) {
+        console.log("The model file exists, deleting it");
+        fs.unlinkSync(model_yml);
+    }
+
+    deleteIfExists(node_modules);
+    deleteIfExists(lib_node_modules);
+}
+
 async function downloadModel() {
     const dl_addr = "https://www.dropbox.com/s/wjmimum2lzmfdb2/model.yml?dl=1";
     const modelPath = path.join(__dirname, 'resources', 'data', 'model.yml');
@@ -97,6 +113,9 @@ if (process.argv.length !== 3) {
             break;
         case "--clean":
             cleanUp();
+            break;
+        case "--clean_all":
+            full_clean();
             break;
         default:
             throw new Error(`Unknown argument: '${process.argv[2]}'`);
