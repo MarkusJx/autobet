@@ -656,7 +656,7 @@ void node_js_stop_script(const Napi::CallbackInfo &info) {
  * Set if the start button was pressed in the ui
  */
 void set_starting(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::boolean);
     starting = info[0].ToBoolean();
 }
 
@@ -1145,7 +1145,7 @@ Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
  * Set whether to use a custom betting function
  */
 void setUseBettingFunction(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::boolean);
     bettingFunctionSet = info[0].ToBoolean();
 }
 
@@ -1160,7 +1160,7 @@ void napi_quit(const Napi::CallbackInfo &) {
  * Set whether to log to a file
  */
 void node_setLogToFile(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::boolean);
     logger::setLogToFile(info[0].ToBoolean());
 }
 
@@ -1175,7 +1175,7 @@ Napi::Boolean node_logToFile(const Napi::CallbackInfo &info) {
  * Set whether to log to the fake console in the ui
  */
 void node_setLogToConsole(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::boolean);
     logger::setLogToConsole(info[0].ToBoolean());
 }
 
@@ -1190,7 +1190,7 @@ Napi::Boolean node_logToConsole(const Napi::CallbackInfo &info) {
  * Set debugging with images and more information
  */
 Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::boolean);
     // If set_debug_full is set to true, full debug should be enabled
     bool set_debug_full = info[0].ToBoolean();
     return promises::promise<bool>(info.Env(), [set_debug_full] {
@@ -1228,7 +1228,7 @@ Napi::Promise setDebugFull(const Napi::CallbackInfo &info) {
  * Start the web server
  */
 Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::napi_type::BOOLEAN);
+    CHECK_ARGS(napi_tools::napi_type::boolean);
     // If start_web_server is set to true, the web server should be started
     bool start_web_server = info[0].ToBoolean();
     return promises::promise<bool>(info.Env(), [start_web_server] {
@@ -1305,7 +1305,7 @@ Napi::Boolean webServerRunning(const Napi::CallbackInfo &info) {
  * Set the time to sleep between bets
  */
 void setTimeSleep(const Napi::CallbackInfo &info) {
-    CHECK_ARGS(napi_tools::napi_type::NUMBER);
+    CHECK_ARGS(napi_tools::napi_type::number);
     time_sleep = info[0].ToNumber().operator unsigned int();
 }
 
@@ -1336,13 +1336,13 @@ public:
      * @param info to CallbackInfo to convert
      */
     explicit file_line_message(const Napi::CallbackInfo &info) {
-        CHECK_LENGTH(3);
+        using namespace napi_tools;
+        CHECK_ARGS(undefined | string, undefined | number, string);
         if (info[0].IsUndefined() || info[1].IsUndefined()) {
-            CHECK_ARGS(napi_tools::napi_type::UNDEFINED, napi_tools::napi_type::UNDEFINED, napi_tools::napi_type::STRING);
             file = "unknown";
             line = 0;
         } else {
-            CHECK_ARGS(napi_tools::napi_type::STRING, napi_tools::napi_type::NUMBER, napi_tools::napi_type::STRING);
+            CHECK_ARGS(string, number, string);
             file = info[0].ToString();
             line = info[1].ToNumber();
         }

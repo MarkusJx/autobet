@@ -31,13 +31,8 @@
 #include <thread>
 #include <memory>
 #include <future>
+#include <sstream>
 #include <map>
-
-#ifndef NAPI_TOOLS_CALLBACK_SLEEP_TIME
-    // The time to sleep between checking for new
-    // function calls in the queue in callbacks
-#   define NAPI_TOOLS_CALLBACK_SLEEP_TIME 10
-#endif // NAPI_TOOLS_CALLBACK_SLEEP_TIME
 
 #define TRY try {
 #define CATCH_EXCEPTIONS                                                 \
@@ -67,13 +62,14 @@ namespace napi_tools {
      * Napi types
      */
     enum napi_type {
-        STRING,
-        NUMBER,
-        FUNCTION,
-        OBJECT,
-        BOOLEAN,
-        ARRAY,
-        UNDEFINED
+        string = 0x1,
+        number = 0x2,
+        function = 0x4,
+        object = 0x8,
+        boolean = 0x10,
+        array = 0x20,
+        undefined = 0x40,
+        null = 0x80
     };
 
     /**
@@ -91,6 +87,35 @@ namespace napi_tools {
         }
 
         /**
+         * Convert one or multiple napi type(s) to a string
+         *
+         * @param t the type bits
+         * @return the type(s) as a string
+         */
+        inline std::string napi_type_to_string(uint16_t t) {
+            std::stringstream ss;
+
+            const auto print_to_stream = [&ss](const char *c) {
+                if (ss.tellp() != std::streampos(0)) {
+                    ss << " or ";
+                }
+
+                ss << c;
+            };
+
+            if (t & napi_type::string) ss << "string";
+            if (t & napi_type::number) print_to_stream("number");
+            if (t & napi_type::function) print_to_stream("function");
+            if (t & napi_type::object) print_to_stream("object");
+            if (t & napi_type::boolean) print_to_stream("boolean");
+            if (t & napi_type::array) print_to_stream("array");
+            if (t & napi_type::undefined) print_to_stream("undefined");
+            if (t & napi_type::null) print_to_stream("null");
+
+            return ss.str();
+        }
+
+        /**
          * Check the argument types of a function
          *
          * @param info the callback info
@@ -98,48 +123,32 @@ namespace napi_tools {
          * @param types the expected argument types
          */
         inline void
-        checkArgs(const Napi::CallbackInfo &info, const std::string &funcName, const std::vector<napi_type> &types) {
+        checkArgs(const Napi::CallbackInfo &info, const std::string &funcName, const std::vector<uint16_t> &types) {
             Napi::Env env = info.Env();
             if (info.Length() < types.size()) {
                 throw Napi::TypeError::New(env, funcName + " requires " + std::to_string(types.size()) + " arguments");
             }
 
+            // Check the argument type, returns true, if one requirement is satisfied
+            const auto check_arg = [](const Napi::Value &val, uint16_t t) {
+                if (t & napi_type::string && val.IsString()) return true;
+                if (t & napi_type::number && val.IsNumber()) return true;
+                if (t & napi_type::function && val.IsFunction()) return true;
+                if (t & napi_type::object && val.IsObject()) return true;
+                if (t & napi_type::boolean && val.IsBoolean()) return true;
+                if (t & napi_type::array && val.IsArray()) return true;
+                if (t & napi_type::undefined && val.IsUndefined()) return true;
+                if (t & napi_type::null && val.IsNull()) return true;
+
+                return false;
+            };
+
             for (size_t i = 0; i < types.size(); i++) {
-                if (types[i] == STRING) {
-                    if (!info[i].IsString()) {
-                        throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
-                                                        " requires type string at position " + std::to_string(i + 1));
-                    }
-                } else if (types[i] == NUMBER) {
-                    if (!info[i].IsNumber()) {
-                        throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
-                                                        " requires type number at position " + std::to_string(i + 1));
-                    }
-                } else if (types[i] == FUNCTION) {
-                    if (!info[i].IsFunction()) {
-                        throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
-                                                        " requires type function at position " + std::to_string(i + 1));
-                    }
-                } else if (types[i] == OBJECT) {
-                    if (!info[i].IsObject()) {
-                        throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
-                                                        " requires type object at position " + std::to_string(i + 1));
-                    }
-                } else if (types[i] == BOOLEAN) {
-                    if (!info[i].IsBoolean()) {
-                        throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
-                                                        " requires type boolean at position " + std::to_string(i + 1));
-                    }
-                } else if (types[i] == ARRAY) {
-                    if (!info[i].IsArray()) {
-                        throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
-                                                        " requires type array at position " + std::to_string(i + 1));
-                    }
-                } else if (types[i] == UNDEFINED) {
-                    if (!info[i].IsUndefined()) {
-                        throw Napi::TypeError::New(env, "Argument type mismatch: " + funcName +
-                                                        " requires type undefined at position " + std::to_string(i + 1));
-                    }
+                if (!check_arg(info[i], types[i])) {
+                    std::stringstream ss;
+                    ss << "Argument type mismatch: " << funcName << " requires type " << napi_type_to_string(types[i]);
+                    ss << " at position " << (i + 1);
+                    throw Napi::TypeError::New(env, ss.str());
                 }
             }
         }
@@ -693,7 +702,7 @@ namespace napi_tools {
 
                 /**
                  * Check if the promise is initialized and not stopped
-                 * 
+                 *
                  * @return true, if initialized and running
                  */
                 inline operator bool() const {
@@ -702,7 +711,7 @@ namespace napi_tools {
 
                 /**
                  * Check if the promise is not initialized or stopped
-                 * 
+                 *
                  * @return true, if not initialized or is stopped
                  */
                 inline bool stopped() const {
@@ -779,7 +788,7 @@ namespace napi_tools {
              */
             explicit inline javascriptCallback(const Napi::CallbackInfo &info) : deferred(
                     Napi::Promise::Deferred::New(info.Env())), mtx() {
-                CHECK_ARGS(::napi_tools::napi_type::FUNCTION);
+                CHECK_ARGS(::napi_tools::napi_type::function);
                 Napi::Env env = info.Env();
 
                 run = true;
@@ -832,8 +841,8 @@ namespace napi_tools {
                  * @param values the values to store
                  * @param func the callback function
                  */
-                inline args(A &&...values, const std::function<void(R)> &func) : args_t(std::forward<A>(values)...),
-                                                                                 fun(func) {}
+                inline explicit args(A &&...values, const std::function<void(R)> &func) : args_t(
+                        std::forward<A>(values)...), fun(func) {}
 
                 /**
                  * Convert the args to a napi_value vector.
@@ -896,7 +905,7 @@ namespace napi_tools {
                         jsCallback->queue.clear();
                         jsCallback->mtx.unlock();
 
-                        std::this_thread::sleep_for(std::chrono::milliseconds(NAPI_TOOLS_CALLBACK_SLEEP_TIME));
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     } else {
                         jsCallback->mtx.unlock();
                     }
@@ -948,7 +957,7 @@ namespace napi_tools {
              */
             explicit inline javascriptCallback(const Napi::CallbackInfo &info) : deferred(
                     Napi::Promise::Deferred::New(info.Env())), queue(), mtx() {
-                CHECK_ARGS(::napi_tools::napi_type::FUNCTION);
+                CHECK_ARGS(::napi_tools::napi_type::function);
                 Napi::Env env = info.Env();
 
                 run = true;
@@ -999,7 +1008,7 @@ namespace napi_tools {
                  *
                  * @param values the values to store
                  */
-                args(A &&...values) : args_t(std::forward<A>(values)...) {}
+                explicit args(A &&...values) : args_t(std::forward<A>(values)...) {}
 
                 /**
                  * Convert the args to a napi_value vector.
@@ -1053,7 +1062,7 @@ namespace napi_tools {
                         jsCallback->mtx.unlock();
 
                         // Sleep for some time
-                        std::this_thread::sleep_for(std::chrono::milliseconds(NAPI_TOOLS_CALLBACK_SLEEP_TIME));
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     } else {
                         jsCallback->mtx.unlock();
                     }
@@ -1102,16 +1111,25 @@ namespace napi_tools {
             using cb_template::cb_template;
 
             /**
-             * Call the javascript function. Async call
+             * Call the javascript function. Async call.
              *
              * @param args the function arguments
              */
-            inline void operator()(Args...args) {
+            inline void call(Args...args) {
                 if (this->ptr && !this->ptr->stopped) {
                     this->ptr->fn->asyncCall(std::forward<Args>(args)...);
                 } else {
                     throw std::runtime_error("Callback was never initialized");
                 }
+            }
+
+            /**
+             * Call the javascript function. Async call.
+             *
+             * @param args the function arguments
+             */
+            inline void operator()(Args...args) {
+                this->call(args...);
             }
         };
 
@@ -1133,12 +1151,49 @@ namespace napi_tools {
              * @param args the function arguments
              * @param callback the callback function to be called, as this is async
              */
-            inline void operator()(Args...args, const std::function<void(R)> &callback) {
+            inline void call(Args...args, const std::function<void(R)> &callback) {
                 if (this->ptr && !this->ptr->stopped) {
                     this->ptr->fn->asyncCall(std::forward<Args>(args)..., callback);
                 } else {
                     throw std::runtime_error("Callback was never initialized");
                 }
+            }
+
+            /**
+             * Call the javascript function.
+             *
+             * @param args the function arguments
+             * @return a promise to be resolved
+             */
+            inline std::promise<R> call(Args...args) {
+                std::promise<R> promise;
+                this->operator()(args..., [&promise](const R &val) {
+                    promise.set_value(val);
+                });
+
+                return promise;
+            }
+
+            /**
+             * Call the javascript function with a supplied promise.
+             *
+             * @param args the function arguments
+             * @param promise the promise to be resolved
+             */
+            inline void call(Args...args, std::promise<R> &promise) {
+                this->operator()(args..., [&promise](const R &val) {
+                    promise.set_value(val);
+                });
+            }
+
+            /**
+             * Call the javascript function async.
+             *
+             * @param args the function arguments
+             * @param callback the callback function to be called, as this is async
+             */
+            inline void operator()(Args...args, const std::function<void(R)> &callback) {
+                this->call(args..., callback);
             }
 
             /**
@@ -1156,12 +1211,7 @@ namespace napi_tools {
              * @return a promise to be resolved
              */
             inline std::promise<R> operator()(Args...args) {
-                std::promise<R> promise;
-                this->operator()(args..., [&promise](const R &val) {
-                    promise.set_value(val);
-                });
-
-                return promise;
+                return this->call(args...);
             }
 
             /**
@@ -1179,9 +1229,7 @@ namespace napi_tools {
              * @param promise the promise to be resolved
              */
             inline void operator()(Args...args, std::promise<R> &promise) {
-                this->operator()(args..., [&promise](const R &val) {
-                    promise.set_value(val);
-                });
+                this->call(args..., promise);
             }
         };
     } // namespace callbacks
