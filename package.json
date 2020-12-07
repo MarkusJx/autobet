@@ -26,8 +26,7 @@
     "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
     "devDependencies": {
         "electron": "^11.0.0-beta.23",
-        "electron-builder": "^22.8.0",
-        "electron-rebuild": "^2.3.4"
+        "electron-builder": "^22.8.0"
     },
     "dependencies": {
         "ace-builds": "^1.4.12",
@@ -56,17 +55,15 @@
             "**/autobetLib/index.js",
             "**/autobetLib/package.json",
             "ui/index.html",
-            "ui/main.min.js",
+            "ui/**.min.js",
             "ui/mountains.svg",
-            "ui/qrcode.min.js",
-            "ui/startstop.min.js",
             "ui/style.min.css",
-            "ui/jsEditor.min.js",
             "ui/err/*",
             "main.js",
             "scripts/*",
             "icon.png",
-            "!**/unused/*"
+            "!**/unused/*",
+            "!**.md"
         ],
         "extraResources": [
             {

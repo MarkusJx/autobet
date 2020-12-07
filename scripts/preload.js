@@ -1,3 +1,5 @@
+'use strict';
+
 const { contextBridge, ipcRenderer } = require('electron');
 const autobetLib = require('../autobetLib');
 const { Titlebar, Color } = require('custom-electron-titlebar');
@@ -5,12 +7,16 @@ const Store = require('electron-store');
 const isolate = require('./isolatedFunction/isolatedFunction');
 const { functionStore } = require('./functionStore/functionStore');
 
+// Expose autobetLib
 contextBridge.exposeInMainWorld('autobetLib', autobetLib);
+
+// Expose hide and close actions
 contextBridge.exposeInMainWorld('electron', {
     quit: () => ipcRenderer.send('close-window'),
     hide: () => ipcRenderer.send('hide-window')
 });
 
+// Expose the title bar options
 contextBridge.exposeInMainWorld('titlebar', {
     create: () => {
         new Titlebar({
@@ -22,6 +28,9 @@ contextBridge.exposeInMainWorld('titlebar', {
     }
 });
 
+/**
+ * The schema for the store
+ */
 const schema = {
     functions: {
         default: []
@@ -37,6 +46,7 @@ const schema = {
     }
 };
 
+// Create the store
 const store = new Store({ schema });
 const isolatedFunction = new isolate.isolatedFunction();
 
@@ -89,6 +99,9 @@ function oddToNumber(val) {
     }
 }
 
+/**
+ * A function to be called when the custom betting function failed
+ */
 function bettingFunctionError() {
     if (activeFunction >= 0 && activeFunction < functions.length) {
         functions[activeFunction].active = false;
@@ -105,6 +118,7 @@ function bettingFunctionError() {
     store.set('activeFunction', activeFunction);
 }
 
+// Set the custom betting function callback
 autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
     if (activeFunction < 0 || activeFunction >= functions.length) {
         return -2;
@@ -145,6 +159,10 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
     }
 });
 
+/**
+ * A callback to be called to the ui when the betting
+ * function is reverted to the default one
+ */
 let revertToDefaultCallback = () => { };
 
 /**

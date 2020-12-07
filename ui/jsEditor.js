@@ -2,12 +2,14 @@
 
 // Isolate the code in brackets, so names can be reused later, if needed
 {
-    const open_editor = document.getElementById('open-editor');
-    const editor_container = document.getElementById('editor-container');
-    let drawer = new mdc.drawer.MDCDrawer(document.getElementById('editor-menu-drawer'));
-    const sidebar_buttons = document.getElementById('editor-sidebar-buttons');
+    const open_editor = document.getElementById('open-editor'); // The show/hide editor button
+    const editor_container = document.getElementById('editor-container'); // The editor container
+    let drawer = new mdc.drawer.MDCDrawer(document.getElementById('editor-menu-drawer')); // The editor menu sidebar
+    const sidebar_buttons = document.getElementById('editor-sidebar-buttons'); // The editor sidebar button container
+    // The divider in the sidebar that should be hidden,
+    // when there are no custom implementations saved
     const to_hide_divider = document.getElementById('to-hide-divider');
-    const editor_action_bar = document.getElementById('editor-action-bar');
+    const editor_action_bar = document.getElementById('editor-action-bar'); // The editor action bar
 
     // Attach a ripple to the open editor button
     mdc.ripple.MDCRipple.attachTo(open_editor);
@@ -67,19 +69,19 @@
     });
 
     // Get all required elements
-    const check_impl_button = document.getElementById('check-impl-button');
-    const set_default_button = document.getElementById("set-default-button");
-    const save_impl_button = document.getElementById("save-impl-button");
-    const delete_impl_button = document.getElementById("delete-impl-button");
-    const select_name_dialog = new mdc.dialog.MDCDialog(document.getElementById('select-name-dialog'));
-    const impl_text_field = new mdc.textField.MDCTextField(document.getElementById('impl-name-text-field'));
-    const message_snackbar = new mdc.snackbar.MDCSnackbar(document.getElementById('editor-message-snackbar'));
-    const message_snackbar_label = document.getElementById('editor-message-label');
-    const error_dialog = new mdc.dialog.MDCDialog(document.getElementById('editor-error-dialog'));
-    const error_dialog_text = document.getElementById('editor-error-dialog-content');
+    const check_impl_button = document.getElementById('check-impl-button'); // The 'run tests' button
+    const set_default_button = document.getElementById("set-default-button"); // The 'set as default' button
+    const save_impl_button = document.getElementById("save-impl-button"); // The save button
+    const delete_impl_button = document.getElementById("delete-impl-button"); // The delete button
+    const select_name_dialog = new mdc.dialog.MDCDialog(document.getElementById('select-name-dialog')); // The 'select name' dialog
+    const impl_text_field = new mdc.textField.MDCTextField(document.getElementById('impl-name-text-field')); // The impl name text field
+    const message_snackbar = new mdc.snackbar.MDCSnackbar(document.getElementById('editor-message-snackbar')); // The editor message snachbar
+    const message_snackbar_label = document.getElementById('editor-message-label'); // The message snackbar label
+    const error_dialog = new mdc.dialog.MDCDialog(document.getElementById('editor-error-dialog')); // The error/message dialog
+    const error_dialog_text = document.getElementById('editor-error-dialog-content'); // The errror/message dialog text
 
-    const editor_title = document.getElementById("editor-title");
-    const add_button = document.getElementById("add-impl-button");
+    const editor_title = document.getElementById("editor-title"); // The editor title
+    const add_button = document.getElementById("add-impl-button"); // The 'add implementation' button
 
     check_impl_button.addEventListener('click', () => {
         if (current_selected_impl != null) {
