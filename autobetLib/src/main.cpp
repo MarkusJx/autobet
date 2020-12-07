@@ -1336,13 +1336,13 @@ public:
      * @param info to CallbackInfo to convert
      */
     explicit file_line_message(const Napi::CallbackInfo &info) {
-        CHECK_ARGS(napi_tools::napi_type::undefined | napi_tools::napi_type::string,
-                   napi_tools::napi_type::undefined | napi_tools::napi_type::number,
-                   napi_tools::napi_type::string);
+        // Allow undefined for the first two args, string for the last one
+        CHECK_ARGS(undefined | string, undefined | number, string);
         if (info[0].IsUndefined() || info[1].IsUndefined()) {
             file = "unknown";
             line = 0;
         } else {
+            // In this case, only accept string, number and string
             CHECK_ARGS(string, number, string);
             file = info[0].ToString();
             line = info[1].ToNumber();
