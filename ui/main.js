@@ -43,6 +43,7 @@ mdc.ripple.MDCRipple.attachTo(startstop);
     }
     setQuitCallback();
 
+    // Set the autobet version
     document.getElementById("autobet-version").innerText = `Version ${autobet_info.version}`;
 
     // Show the copyright on hovered over the name container
