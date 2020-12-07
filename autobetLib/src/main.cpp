@@ -353,7 +353,6 @@ short get_pos(void *src) {
             }
         } else {
             StaticLogger::warning("The custom betting function did not finish within 10 seconds, falling back to the default function");
-#pragma message(TODO(Disable custom betting function on error and mark it as invalid))
             return getBasicBettingPosition(odds);
         }
     } else {

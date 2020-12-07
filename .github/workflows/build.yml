@@ -59,10 +59,10 @@ jobs:
       shell: bash
     - name: Set version name
       id: version_name
-      run: echo "::set-output name=version::autobet-${{ steps.latest_release.outputs.release }}-${{ steps.date.outputs.date }}"
+      run: echo "::set-output name=version::autobet-${{steps.latest_release.outputs.release}}-${{steps.date.outputs.date}}"
       shell: bash
     - name: Print version name
-      run: echo ${{ steps.version_name.outputs.version }}
+      run: echo ${{steps.version_name.outputs.version}}
       shell: bash
     - name: Set boost version and toolset
       id: boost_info
@@ -102,6 +102,10 @@ jobs:
     # Download and install opencv
     - name: Install OpenCV
       run: choco install opencv --version ${{env.OPENCV_VERSION}} -y
+
+    # Set the autobet package version using npm
+    - name: Set autobet version
+      run: npm version --no-git-tag-version ${{steps.latest_release.outputs.release}}-${{steps.date.outputs.date}} -f
     
     # Build steps
     # Runs 'npm install' and 'npm run-script pack'
@@ -115,11 +119,11 @@ jobs:
     - name: Package
       run: npm run-script pack
       env:
-        GH_TOKEN: ${{ secrets.github_token }}
+        GH_TOKEN: ${{secrets.github_token}}
     
     # Upload the artifact
     - name: Upload unstable build
       uses: actions/upload-artifact@v1
       with:
-        name: ${{ steps.version_name.outputs.version }}
+        name: ${{steps.version_name.outputs.version}}
         path: dist/autobet.exe

@@ -60,9 +60,9 @@
             "ui/style.min.css",
             "ui/err/*",
             "main.js",
-            "scripts/*",
+            "scripts/**",
             "icon.png",
-            "!**/unused/*",
+            "!**/unused/**",
             "!**.md"
         ],
         "extraResources": [
