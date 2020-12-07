@@ -1336,8 +1336,9 @@ public:
      * @param info to CallbackInfo to convert
      */
     explicit file_line_message(const Napi::CallbackInfo &info) {
-        using namespace napi_tools;
-        CHECK_ARGS(undefined | string, undefined | number, string);
+        CHECK_ARGS(napi_tools::napi_type::undefined | napi_tools::napi_type::string,
+                   napi_tools::napi_type::undefined | napi_tools::napi_type::number,
+                   napi_tools::napi_type::string);
         if (info[0].IsUndefined() || info[1].IsUndefined()) {
             file = "unknown";
             line = 0;
