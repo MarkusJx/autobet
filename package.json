@@ -62,6 +62,7 @@
             "main.js",
             "scripts/**",
             "icon.png",
+            "package.json",
             "!**/unused/**",
             "!**.md"
         ],

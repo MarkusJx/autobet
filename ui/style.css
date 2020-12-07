@@ -51,7 +51,7 @@ body {
 }
 
 #namecontainer.hovered {
-    height: 130px;
+    height: 170px;
 }
 
 #autobet {
@@ -71,6 +71,21 @@ body {
     margin: 5px 0;
 }
 
+#autobet-version {
+    text-align: center;
+    font-family: 'Open Sans', Roboto, sans-serif;
+    font-weight: 300;
+    color: white;
+    margin: -10px 0 0 0;
+    opacity: 0;
+    transition: all .1s ease-in-out;
+}
+
+#autobet-version.hovered {
+    opacity: 1;
+    margin: 10px 0;
+}
+
 #copyright {
     text-align: center;
     font-family: 'Open Sans', Roboto, sans-serif;
@@ -78,7 +93,7 @@ body {
     color: white;
     margin: -10px 0 0 0;
     opacity: 0;
-    transition: all .25s ease-in-out;
+    transition: all .1s ease-in-out;
 }
 
 #copyright.hovered {

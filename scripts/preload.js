@@ -7,6 +7,13 @@ const Store = require('electron-store');
 const isolate = require('./isolatedFunction/isolatedFunction');
 const { functionStore } = require('./functionStore/functionStore');
 
+// Get the current autobet version
+const autobet_version = require('../package.json').version;
+
+contextBridge.exposeInMainWorld('autobet_info', {
+    version: autobet_version
+});
+
 // Expose autobetLib
 contextBridge.exposeInMainWorld('autobetLib', autobetLib);
 

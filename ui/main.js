@@ -12,10 +12,10 @@ mdc.ripple.MDCRipple.attachTo(startstop);
     const raceswon = document.getElementById('raceswon'); // The races won text
     const winprobability = document.getElementById('winprobability'); // The win probability text
     const moneyall = document.getElementById('moneyall'); // The money all made text
-    const errordialog = new mdc.dialog.MDCDialog(document.getElementById("error-dialog-container")); // The error dialog container
-    const namecontainter = document.getElementById("namecontainer"); // The autobet name container
+    const errordialog = new mdc.dialog.MDCDialog(document.getElementById('error-dialog-container')); // The error dialog container
+    const namecontainter = document.getElementById('namecontainer'); // The autobet name container
 
-    const weblink = document.getElementById("weblink"); // The web interface open button
+    const weblink = document.getElementById('weblink'); // The web interface open button
     mdc.ripple.MDCRipple.attachTo(weblink);
 
     mdc.autoInit();
@@ -43,15 +43,19 @@ mdc.ripple.MDCRipple.attachTo(startstop);
     }
     setQuitCallback();
 
+    document.getElementById("autobet-version").innerText = `Version ${autobet_info.version}`;
+
     // Show the copyright on hovered over the name container
     namecontainter.onmouseenter = () => {
         namecontainter.classList = "hovered subcontainer";
         document.getElementById("copyright").classList = "hovered";
+        document.getElementById("autobet-version").classList = "hovered";
     };
 
     namecontainter.onmouseleave = () => {
         namecontainter.classList = "subcontainer";
         document.getElementById("copyright").classList = "";
+        document.getElementById("autobet-version").classList = "";
     };
 
     let moneyMade = 0;
