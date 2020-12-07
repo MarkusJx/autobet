@@ -1,5 +1,5 @@
-let timeDisp = document.getElementById("time");
-let statusinfo = document.getElementById("statusinfo");
+const timeDisp = document.getElementById("time");
+const statusinfo = document.getElementById("statusinfo");
 
 const gtanotrunningmessage = new mdc.snackbar.MDCSnackbar(document.getElementById("gta-not-running-message"));
 gtanotrunningmessage.timeoutMs = 10000;
@@ -10,6 +10,7 @@ let pausing = 0;
 let timer = null;
 let time = 0;
 
+// Start/stop on click on the start/stop button
 startstop.addEventListener('click', function() {
     if (!running) {
         start();
@@ -20,6 +21,9 @@ startstop.addEventListener('click', function() {
 
 autobetLib.callbacks.setUiKeycombStartCallback(ui_keycomb_start);
 
+/**
+ * Start betting from a key combination
+ */
 function ui_keycomb_start() {
     startstop.disabled = true;
     startTimer();
@@ -31,10 +35,16 @@ function ui_keycomb_start() {
 
 autobetLib.callbacks.setUiKeycombStopCallback(ui_keycomb_stop);
 
+/**
+ * Stop the betting using a key combination
+ */
 function ui_keycomb_stop() {
     pause(true);
 }
 
+/**
+ * Start betting
+ */
 function start() {
     if (!gta_running) {
         gtanotrunningmessage.open();
@@ -59,6 +69,9 @@ function start() {
     }, 1000);
 }
 
+/**
+ * Pause the betting
+ */
 function is_paused() {
     if (pausing) {
         pausing = 0;
@@ -70,6 +83,11 @@ function is_paused() {
     }
 }
 
+/**
+ * Start pausing
+ * 
+ * @param {boolean} nstoppy whether to stop the actual betting in the backend
+ */
 function pause(nstoppy) {
     if (!nstoppy)
         autobetLib.stopBetting();
@@ -86,6 +104,9 @@ function pause(nstoppy) {
     }, 1000);
 }
 
+/**
+ * Start the timer
+ */
 function startTimer() {
     paused = 0;
     running = 1;
@@ -96,12 +117,20 @@ function startTimer() {
     }, 1000);
 }
 
+/**
+ * Pause the timer
+ */
 function pauseTimer() {
     clearInterval(timer);
     paused = 1;
     running = 0;
 }
 
+/**
+ * Conver time in seconds to more readable time in the format HH:mm:ss
+ * 
+ * @param {number} secs the seconds to convert
+ */
 function convertToTime(secs) {
     let hours = Math.floor((secs % 86400) / 3600);
     let minutes = Math.floor((secs % 3600) / 60);

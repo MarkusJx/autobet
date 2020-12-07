@@ -524,7 +524,14 @@ body {
     --mdc-theme-primary: blue;
 }
 
+/* Set the snackbar action buttons on the info snackbar to blue */
 .mdc-button.mdc-snackbar__action.editor-message-snackbar-action {
+    color: rgb(0, 145, 255);
+    --mdc-theme-primary: rgb(0, 145, 255);
+}
+
+/* Set the ok button on the gta not running message to blue */
+#gta-not-running-message-ok {
     color: rgb(0, 145, 255);
     --mdc-theme-primary: rgb(0, 145, 255);
 }
