@@ -10,7 +10,7 @@
         "test": "electron .",
         "pack": "electron-builder",
         "prepack": "npm run-script build",
-        "postinstall": "node install.js --downloadModel",
+        "postinstall": "node install.js --downloadModel && cd autobetLib && npm install",
         "clean": "node install.js --clean && cd autobetLib && cmake-js clean",
         "clean_all": "cd autobetLib && cmake-js clean && cd .. && node install.js --clean_all"
     },
