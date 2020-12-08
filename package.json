@@ -36,7 +36,6 @@
         "electron-updater": "^4.3.5",
         "electron-window-state": "^5.0.3",
         "material-components-web": "^8.0.0",
-        "request": "^2.88.2",
         "vm2": "^3.9.2"
     },
     "build": {
