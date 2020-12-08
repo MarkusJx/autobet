@@ -59,12 +59,12 @@ function deleteIfExists(p) {
 
 function cleanUp() {
     const dist_dir = path.join(__dirname, "dist");
-    const bin_dir = path.join(__dirname, "autobetLib", "bin");
-    const ext_dir = path.join(__dirname, "autobetLib", "external");
-    const inc_dir = path.join(__dirname, "autobetLib", "include");
-    const lib_lib_dir = path.join(__dirname, "autobetLib", "lib");
-    const CppJsLib_dir = path.join(__dirname, "autobetLib", "src", "CppJsLib");
-    const zip_dir = path.join(__dirname, "autobetLib", "src", "zip");
+    const bin_dir = path.join(__dirname, "autobetlib", "bin");
+    const ext_dir = path.join(__dirname, "autobetlib", "external");
+    const inc_dir = path.join(__dirname, "autobetlib", "include");
+    const lib_lib_dir = path.join(__dirname, "autobetlib", "lib");
+    const CppJsLib_dir = path.join(__dirname, "autobetlib", "src", "CppJsLib");
+    const zip_dir = path.join(__dirname, "autobetlib", "src", "zip");
 
     deleteIfExists(dist_dir);
     deleteIfExists(bin_dir);
@@ -80,7 +80,7 @@ function full_clean() {
 
     const model_yml = path.join(__dirname, "resources", "data", "model.yml");
     const node_modules = path.join(__dirname, "node_modules");
-    const lib_node_modules = path.join(__dirname, "autobetLib", "node_modules");
+    const lib_node_modules = path.join(__dirname, "autobetlib", "node_modules");
 
     if (fs.existsSync(model_yml)) {
         console.log("The model file exists, deleting it");

@@ -1,7 +1,7 @@
 'use strict';
 
 const { contextBridge, ipcRenderer } = require('electron');
-const autobetLib = require('../autobetLib');
+const autobetLib = require('@autobet/autobetlib');
 const { Titlebar, Color } = require('custom-electron-titlebar');
 const Store = require('electron-store');
 const isolate = require('./isolatedFunction/isolatedFunction');

@@ -4,7 +4,7 @@ const path = require('path');
 const { autoUpdater } = require("electron-updater");
 let autobetLib = null, autobetLibError = null;
 try {
-    autobetLib = require('./autobetLib');
+    autobetLib = require('@autobet/autobetlib');
 } catch (e) {
     autobetLibError = e;
 }
