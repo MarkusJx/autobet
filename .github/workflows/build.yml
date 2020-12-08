@@ -48,7 +48,8 @@ jobs:
     # autobet-${LATEST_RELEASE_TAG}-YYYYmmdd-HHMMSS
     - name: Get latest release tag
       id: latest_release
-      run: echo "::set-output name=release::$(node -p \"require('./package.json').version\")"
+      run: echo "::set-output name=release::$(node -p 'require(`./package.json`).version')"
+      shell: bash
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d.%H%M%S')"
