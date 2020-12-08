@@ -52,11 +52,11 @@ jobs:
       shell: bash
     - name: Get current date
       id: date
-      run: echo "::set-output name=date::$(date +'%Y%m%d.%H%M%S')"
+      run: echo "::set-output name=date::$(date +'%Y%m%d.1%H%M%S')"
       shell: bash
     - name: Set version name
       id: version_name
-      run: echo "::set-output name=version::autobet-${{steps.latest_release.outputs.release}}-${{steps.date.outputs.date}}"
+      run: echo "::set-output name=version::autobet-${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}}"
       shell: bash
     - name: Print version name
       run: echo ${{steps.version_name.outputs.version}}
