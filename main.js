@@ -9,10 +9,16 @@ try {
     autobetLibError = e;
 }
 
-const version = require('./package.json').version;
-const rel_ver_regex = /^([0-9]+\.?)+$/;
+let enableDevTools;
 
-console.log(`Starting with devTools ${rel_ver_regex.test(version) ? "disabled" : "enabled"}`);
+{
+    const version = require('./package.json').version;
+    const rel_ver_regex = /^([0-9]+\.?)+$/;
+
+    enableDevTools = !rel_ver_regex.test(version) || (process.argv.length >= 3 && process.argv[2] == "--enableDevTools");
+
+    console.log(`Starting with devTools ${enableDevTools ? "enabled" : "disabled"}`);
+}
 
 let tray = null;
 
@@ -40,11 +46,13 @@ function createWindow() {
             nodeIntegration: false,
             webSecurity: true,
             enableRemoteModule: true,
-            devTools: !rel_ver_regex.test(version)
+            devTools: enableDevTools
         }
     });
 
-    mainWindow.removeMenu();
+    if (!enableDevTools) {
+        mainWindow.removeMenu();
+    }
 
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');
@@ -112,11 +120,13 @@ function createErrorWindow() {
             nodeIntegration: false,
             webSecurity: true,
             enableRemoteModule: true,
-            devTools: !rel_ver_regex.test(version)
+            devTools: enableDevTools
         }
     });
 
-    errorWindow.removeMenu();
+    if (!enableDevTools) {
+        errorWindow.removeMenu();
+    }
 
     errorWindow.loadFile(path.join(__dirname, 'ui', 'err', 'index.html')).then(() => {
         console.log("Error window loaded");

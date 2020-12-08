@@ -4,6 +4,11 @@
 const startstop = document.getElementById('startstop');
 mdc.ripple.MDCRipple.attachTo(startstop);
 
+/**
+ * Whether GTA is running
+ */
+let gta_running = false;
+
 {
     const showqrbutton = document.getElementById('showqrbutton'); // The 'show qr code' button
     mdc.ripple.MDCRipple.attachTo(showqrbutton);
@@ -62,7 +67,6 @@ mdc.ripple.MDCRipple.attachTo(startstop);
     let moneyMade = 0;
     let won = 0;
     let lost = 0;
-    let gta_running = false;
 
     /**
      * Show the qr code
