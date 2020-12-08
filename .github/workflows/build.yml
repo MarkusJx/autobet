@@ -48,11 +48,7 @@ jobs:
     # autobet-${LATEST_RELEASE_TAG}-YYYYmmdd-HHMMSS
     - name: Get latest release tag
       id: latest_release
-      uses: pozetroninc/github-action-get-latest-release@master
-      with:
-        owner: MarkusJx
-        repo: autobet
-        excludes: prerelease, draft
+      run: echo "::set-output name=release::$(node -p \"require('./package.json').version\")"
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d.%H%M%S')"
@@ -105,7 +101,7 @@ jobs:
 
     # Set the autobet package version using npm
     - name: Set autobet version
-      run: npm version --no-git-tag-version ${{steps.latest_release.outputs.release}}-${{steps.date.outputs.date}} -f
+      run: npm version --no-git-tag-version ${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}} -f
     
     # Build steps
     # Runs 'npm install' and 'npm run-script pack'
