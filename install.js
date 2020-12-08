@@ -9,6 +9,7 @@ const https = require('https');
  */
 class ProgressBar {
     constructor() {
+        this.activate = typeof process.stdout.clearLine == "function";
         this.total;
         this.current;
         this.bar_length = process.stdout.columns - 30;
@@ -21,13 +22,14 @@ class ProgressBar {
     }
 
     update(current) {
+        if (!this.activate) return;
         this.current = current;
         const current_progress = this.current / this.total;
         this.draw(current_progress);
     }
 
     draw(current_progress) {
-        if (this.finished) return;
+        if (!this.activate) return;
         const filled_bar_length = (current_progress * this.bar_length).toFixed(0);
         const empty_bar_length = this.bar_length - filled_bar_length;
 
