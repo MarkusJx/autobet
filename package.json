@@ -44,7 +44,7 @@
         "nsis": {
             "guid": "41a0f9e2-b869-421a-a98f-2ac0e8f8d02d",
             "oneClick": false,
-            "artifactName": "${productName}.${ext}",
+            "artifactName": "${productName}-v${version}.${ext}",
             "license": "pack/license.txt",
             "installerLanguages": [
                 "en_US"

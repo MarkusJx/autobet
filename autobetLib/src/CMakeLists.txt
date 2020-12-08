@@ -75,11 +75,6 @@ if (BUILD_CPPJSLIB)
     include(CppJsLib/src/InitCppJsLib.cmake)
     initCppJsLib(${PROJECT_NAME} "CppJsLib/src" "${CMAKE_SOURCE_DIR}/include" FALSE FALSE)
 
-    #if (EXISTS ${CMAKE_SOURCE_DIR}/websocketpp)
-    #    message(STATUS "Deleting websocketpp folder")
-    #    file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/websocketpp)
-    #endif ()
-
     add_compile_definitions(BUILD_CPPJSLIB)
 else ()
     target_link_libraries(${PROJECT_NAME} CppJsLib)
