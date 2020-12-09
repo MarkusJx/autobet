@@ -1,3 +1,5 @@
+'use strict';
+
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const path = require('path');
@@ -9,6 +11,9 @@ try {
     autobetLibError = e;
 }
 
+/**
+ * @type {boolean}
+ */
 let enableDevTools;
 
 {

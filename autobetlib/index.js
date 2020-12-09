@@ -1,5 +1,9 @@
 const autobetLib_native = require("./bin/autobetLib.node");
 
+// Set the autobetlib version
+const autobetlib_version = require('./package.json').version;
+autobetLib_native.lib_setAutobetlibVersion(autobetlib_version);
+
 /**
  * Get the caller file and line
  * 

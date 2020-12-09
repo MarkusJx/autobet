@@ -75,7 +75,7 @@ async function download(url, filePath, file = null) {
                     url = url.match(addr_regex)[0] + response.headers.location;
                 }
 
-                console.log(`\x1b[2mRedirecting to: ${url}\x1b[0m`);
+                console.log(`\x1b[90mRedirecting to: ${url}\x1b[0m`);
 
                 return download(url, filePath, file).then(resolve, reject);
             } else if (response.statusCode !== 200) {

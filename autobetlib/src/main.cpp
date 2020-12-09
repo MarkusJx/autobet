@@ -45,6 +45,11 @@ float multiplierW, multiplierH;
 uint32_t time_sleep = 36, time_running = 0;
 bool bettingFunctionSet = false;
 
+/**
+ * The current autobetlib version
+ */
+std::string autobetlib_version = "unknown";
+
 // Callbacks ==============================================
 
 // A callback to set if gta is running
@@ -894,7 +899,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         // Log the current version
-        StaticLogger::debugStream() << "Initializing Autobet version " << AUTOBET_VERSION;
+        StaticLogger::debugStream() << "Initializing autobetlib version " << autobetlib_version;
 
         if (log_deleted) {
             StaticLogger::debug("The last log file was deleted since it is older than 7 days");
@@ -1343,15 +1348,15 @@ public:
         } else {
             // In this case, only accept string, number and string
             CHECK_ARGS(string, number, string);
-            file = info[0].ToString();
-            line = info[1].ToNumber();
+            file = info[0].ToString().Utf8Value();
+            line = info[1].ToNumber().Int32Value();
         }
 
-        message = info[2].ToString();
+        message = info[2].ToString().Utf8Value();
     }
 
     std::string file;
-    int line;
+    int32_t line;
     std::string message;
 };
 
@@ -1392,6 +1397,16 @@ Napi::Value node_error(const Napi::CallbackInfo &info) {
     return promises::promise<void>(info.Env(), [&dt] {
         StaticLogger::_error(dt.file.c_str(), dt.line, dt.message);
     });
+}
+
+/**
+ * Set the current autobetlib version
+ */
+void setAutobetlibVersion(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(string);
+    TRY
+        autobetlib_version = info[0].ToString().Utf8Value();
+    CATCH_EXCEPTIONS
 }
 
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
@@ -1444,6 +1459,8 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(node_debug);
     export(node_warn);
     export(node_error);
+
+    export(setAutobetlibVersion);
 
     try {
         quit = [] {

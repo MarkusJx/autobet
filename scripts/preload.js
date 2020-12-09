@@ -36,7 +36,7 @@ contextBridge.exposeInMainWorld('titlebar', {
 });
 
 /**
- * The schema for the store
+ * The schema for the electron-store
  */
 const schema = {
     functions: {
