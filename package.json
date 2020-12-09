@@ -52,9 +52,6 @@
             "installerIcon": "pack/icon.ico"
         },
         "files": [
-            "**/autobetlib/bin/*",
-            "**/autobetlib/index.js",
-            "**/autobetlib/package.json",
             "ui/index.html",
             "ui/**.min.js",
             "ui/mountains.svg",
@@ -65,14 +62,21 @@
             "icon.png",
             "package.json",
             "!**/unused/**",
-            "!**.md"
+            "!**.md",
+            "!**/autobetlib/prelaunch.js",
+            "!**/autobetlib/build",
+            "!**/autobetlib/external",
+            "!**/autobetlib/include",
+            "!**/autobetlib/src",
+            "!**/autobetlib/CMake**"
         ],
         "extraResources": [
             {
                 "from": "resources/data",
                 "to": "data",
                 "filter": [
-                    "**/*"
+                    "**/*",
+                    "!*.md"
                 ]
             },
             {
@@ -87,9 +91,6 @@
                 ]
             }
         ],
-        "asar": true,
-        "asarUnpack": [
-            "**/autobetlib/bin/*"
-        ]
+        "asar": true
     }
 }
