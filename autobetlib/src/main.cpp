@@ -247,6 +247,7 @@ void reset() {
  * @param val the new value
  */
 void setGtaVRunning(bool val) {
+#pragma message(TODO(Call webGui function on gtaVRunning change))
     gtaVRunning = val;
     setGtaRunningCallback(val);
 }
@@ -375,19 +376,23 @@ void updateWinnings(int amount) {
 
     // If the amount to add is not zero add it to winnings and winnings_all
     if (amount != 0) {
+#pragma message(TODO(Call webUi function on winnings updated))
         winnings += amount;
         winnings_all += amount;
 
+#pragma message(TODO(Call webUi function on winnings_all updated))
         setAllMoneyMadeCallback(winnings_all);
         writeWinnings();
 
         // If the amount is not negative count it as a won race
         if (amount > 0) {
             racesWon++;
+#pragma message(TODO(Call webUi function on racesWon updated))
         }
     } else {
         // Add a lost race
         racesLost++;
+#pragma message(TODO(Call webUi function on racesLost updated))
     }
 
     addMoneyCallback(amount);
@@ -623,6 +628,7 @@ int get_running() {
     } else { //stopping
         return 0;
     }
+#pragma message(TODO(Call webUi on script running state changed))
 }
 // ========================================================
 

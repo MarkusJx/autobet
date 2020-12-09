@@ -72,7 +72,7 @@ startstop.addEventListener('click', () => {
 });
 
 // Add event listener to the autostop configure button
-configurebutton.addEventListener('click', function() {
+configurebutton.addEventListener('click', function () {
     if (autostopMoney !== -1) {
         moneyinput.value = autostopMoney;
     } else {
@@ -104,7 +104,7 @@ notconnectedmessage.listen('MDCSnackbar:closing', () => {
 });
 
 // Add an event listener for the settings done button
-settingsdonebutton.addEventListener('click', function() {
+settingsdonebutton.addEventListener('click', function () {
     if (moneyinput.value < 10000 || moneyinput.value === "") { // Trash the values if they are trash
         moneyinput.value = "";
         autostopMoney = -1;
@@ -156,7 +156,7 @@ function showAutostopMessages() {
     }
 }
 
-cppJsLib.onLoad(function(res) {
+cppJsLib.onLoad(function (res) {
     if (res) {
         clearInterval(x);
         console.log("Connected!");
@@ -211,7 +211,7 @@ function makeSumsDisplayable(sum, k = false) {
 /**
  * Set an Interval if the website is disconnected
  */
-var x = setInterval(function() {
+var x = setInterval(function () {
     if (cppJsLib.connected) {
         clearInterval(x);
         console.log("Connected!");
@@ -228,7 +228,7 @@ function main() {
     if (isMobile()) {
         console.log("Running on a mobile device");
 
-        datasaverdialog.listen('MDCDialog:closing', ev => {
+        /*datasaverdialog.listen('MDCDialog:closing', ev => {
             if (ev.detail.action === "yes") {
                 console.log("Enabling Data Saver");
                 if (!initialized) init(true);
@@ -239,12 +239,13 @@ function main() {
                 initialized = true;
             }
         });
-        datasaverdialog.open();
+        datasaverdialog.open();*/
     } else {
         console.log("Running on a desktop device");
-        if (!initialized) init(false);
-        initialized = true;
     }
+
+    if (!initialized) init(false);
+    initialized = true;
 }
 
 /**
@@ -268,7 +269,7 @@ function init(datasaver) {
     /**
      * The main interval
      */
-    mainInterval = setInterval(async function() {
+    mainInterval = setInterval(async function () {
         if (cppJsLib.connected) {
             await asyncMain();
         } else {
@@ -287,7 +288,7 @@ function disconnected() {
     notconnectedlabel.innerText = "Connection lost.";
     notconnectedmessage.open(); // Notify the user about this disconnect
 
-    let x = setInterval(async() => { // Start an Interval to time the retries
+    let x = setInterval(async () => { // Start an Interval to time the retries
         if (timeUntilRetry < 1) {
             notconnectedlabel.innerText = "Trying to reconnect...";
             timeUntilRetry = 5;
