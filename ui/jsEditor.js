@@ -1,7 +1,7 @@
 'use strict';
 
 // Isolate the code in brackets, so names can be reused later, if needed
-{
+try {
     const open_editor = document.getElementById('open-editor'); // The show/hide editor button
     const editor_container = document.getElementById('editor-container'); // The editor container
     let drawer = new mdc.drawer.MDCDrawer(document.getElementById('editor-menu-drawer')); // The editor menu sidebar
@@ -702,4 +702,7 @@ setResult(run());
         // Empty the impl name text field
         impl_text_field.value = "";
     });
+} catch (e) {
+    autobetLib.logging.error(`Js exception thrown: ${e.message}`);
+    exception();
 }

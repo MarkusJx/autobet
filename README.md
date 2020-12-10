@@ -15,7 +15,6 @@ Table of contents
      * [Not what you expected?](#this-is-not-what-you-expected)
      * [Like it?](#like-it)
      * [Actual feedback](#Actual-feedback)
-   * [Known bugs](#Known-bugs)
    * **[Download](#download)**
 <!--te-->
 

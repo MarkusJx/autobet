@@ -9,7 +9,21 @@ mdc.ripple.MDCRipple.attachTo(startstop);
  */
 let gta_running = false;
 
-{
+// The error dialog container
+const errordialog = new mdc.dialog.MDCDialog(document.getElementById('error-dialog-container'));
+
+/**
+ * A function to be called when a fatal exception is thrown
+ */
+function exception() {
+    errordialog.open();
+    errordialog.listen("MDCDialog:closed", () => {
+        autobetLib.shutdown();
+        electron.quit();
+    });
+}
+
+try {
     const showqrbutton = document.getElementById('showqrbutton'); // The 'show qr code' button
     mdc.ripple.MDCRipple.attachTo(showqrbutton);
 
@@ -17,7 +31,6 @@ let gta_running = false;
     const raceswon = document.getElementById('raceswon'); // The races won text
     const winprobability = document.getElementById('winprobability'); // The win probability text
     const moneyall = document.getElementById('moneyall'); // The money all made text
-    const errordialog = new mdc.dialog.MDCDialog(document.getElementById('error-dialog-container')); // The error dialog container
     const namecontainter = document.getElementById('namecontainer'); // The autobet name container
 
     const weblink = document.getElementById('weblink'); // The web interface open button
@@ -90,17 +103,6 @@ let gta_running = false;
 
     // Set the exception callback
     autobetLib.callbacks.setExceptionCallback(exception);
-
-    /**
-     * The exception callback
-     */
-    function exception() {
-        errordialog.open();
-        errordialog.listen("MDCDialog:closed", function () {
-            autobetLib.shutdown();
-            electron.quit();
-        });
-    }
 
     /**
      * Make sums more readable by adding 'K' for thousand
@@ -519,4 +521,7 @@ let gta_running = false;
             "the setResult() function. If no bet should be placed, pass null to setResult(). If you don't pass anythin, the result will be interpreted as invalid and the " +
             "Program will fall back to the native implementation.");
     });
+} catch (e) {
+    autobetLib.logging.error(`Js exception thrown: ${e.message}`);
+    exception();
 }

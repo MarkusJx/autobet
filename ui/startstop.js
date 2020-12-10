@@ -1,7 +1,7 @@
 'use strict';
 const statusinfo = document.getElementById("statusinfo");
 
-{
+try {
     const timeDisp = document.getElementById("time"); // The time text field
     const gtanotrunningmessage = new mdc.snackbar.MDCSnackbar(document.getElementById("gta-not-running-message"));
     gtanotrunningmessage.timeoutMs = 10000;
@@ -169,4 +169,7 @@ const statusinfo = document.getElementById("statusinfo");
         seconds = (seconds < 10) ? "0" + seconds : seconds;
         return hours + ':' + minutes + ':' + seconds;
     }
+} catch (e) {
+    autobetLib.logging.error(`Js exception thrown: ${e.message}`);
+    exception();
 }

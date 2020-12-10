@@ -37,7 +37,7 @@ std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
 opencv_link::knn knn = nullptr;
 
 uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
-int64_t winnings_all = 0L;
+int64_t winnings_all = 0L; // NOTE: This could alse be a int32, you would have to bet 11 years to fill that shit up
 int winnings = 0;
 bool gtaVRunning, running, stopping, starting, keyCombListen, runLoops;
 bool debug_full = false, webServer = true;
@@ -49,6 +49,18 @@ bool bettingFunctionSet = false;
  * The current autobetlib version
  */
 std::string autobetlib_version = "unknown";
+
+// web functions ==========================================
+
+std::function<void(bool)> webSetGtaRunning = nullptr;
+std::function<void(int)> webSetWinnings = nullptr;
+std::function<void(int)> webSetWinningsAll = nullptr;
+std::function<void(int)> webSetRacesWon = nullptr;
+std::function<void(int)> webSetRacesLost = nullptr;
+std::function<void()> webSetStarted = nullptr;
+std::function<void()> webSetStopped = nullptr;
+std::function<void()> webSetStopping = nullptr;
+std::function<void(bool)> webSetStarting = nullptr;
 
 // Callbacks ==============================================
 
@@ -248,6 +260,8 @@ void reset() {
  */
 void setGtaVRunning(bool val) {
 #pragma message(TODO(Call webGui function on gtaVRunning change))
+    // Only tell the web listeners changes, not stuff they already know
+    if (webSetGtaRunning && val != gtaVRunning) webSetGtaRunning(val);
     gtaVRunning = val;
     setGtaRunningCallback(val);
 }
@@ -380,6 +394,9 @@ void updateWinnings(int amount) {
         winnings += amount;
         winnings_all += amount;
 
+        if (webSetWinnings) webSetWinnings(winnings);
+        if (webSetWinningsAll) webSetWinningsAll(winnings_all);
+
 #pragma message(TODO(Call webUi function on winnings_all updated))
         setAllMoneyMadeCallback(winnings_all);
         writeWinnings();
@@ -387,11 +404,13 @@ void updateWinnings(int amount) {
         // If the amount is not negative count it as a won race
         if (amount > 0) {
             racesWon++;
+            if (webSetRacesWon) webSetRacesWon(racesWon);
 #pragma message(TODO(Call webUi function on racesWon updated))
         }
     } else {
         // Add a lost race
         racesLost++;
+        if (webSetRacesLost) webSetRacesLost(racesLost);
 #pragma message(TODO(Call webUi function on racesLost updated))
     }
 
@@ -529,6 +548,7 @@ void mainLoop() {
             }
         }
         stopping = false;
+        if (webSetStopped) webSetStopped();
         StaticLogger::debug("Betting is now paused");
     } else {
         // The Game is not running, tell it everyone and sleep some time
@@ -653,12 +673,14 @@ Napi::Boolean node_get_gta_running(const Napi::CallbackInfo &info) {
  */
 void node_js_start_script(const Napi::CallbackInfo &info) {
     start_script();
+    if (webSetStarted) webSetStarted();
 }
 
 /**
  * Stop the betting from node.js
  */
 void node_js_stop_script(const Napi::CallbackInfo &info) {
+    if (webSetStopping) webSetStopping();
     stop_script();
 }
 
@@ -668,6 +690,7 @@ void node_js_stop_script(const Napi::CallbackInfo &info) {
 void set_starting(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::boolean);
     starting = info[0].ToBoolean();
+    if (webSetStarting) webSetStarting(starting);
 }
 
 /**
@@ -810,6 +833,21 @@ void listenForKeycomb() {
 }
 
 /**
+ * Set all imported webUi functions to nullptr
+ */
+void destroyImportedWebFunctions() {
+    webSetGtaRunning = nullptr;
+    webSetWinnings = nullptr;
+    webSetWinningsAll = nullptr;
+    webSetRacesWon = nullptr;
+    webSetRacesLost = nullptr;
+    webSetStarted = nullptr;
+    webSetStopped = nullptr;
+    webSetStopping = nullptr;
+    webSetStarting = nullptr;
+}
+
+/**
  * Try to start the web ui
  * 
  * @return true, if the operation was successful
@@ -853,6 +891,17 @@ bool startWebUi() {
     webUi->expose(set_autostop_time);
     webUi->expose(set_autostop_money);
 
+    // Import some functions
+    webUi->import(webSetGtaRunning);
+    webUi->import(webSetWinnings);
+    webUi->import(webSetWinningsAll);
+    webUi->import(webSetRacesWon);
+    webUi->import(webSetRacesLost);
+    webUi->import(webSetStarted);
+    webUi->import(webSetStopped);
+    webUi->import(webSetStopping);
+    webUi->import(webSetStarting);
+
     StaticLogger::debug("Starting web ui web server");
 
     // We're building with websocket protocol support by default.
@@ -875,6 +924,10 @@ bool startWebUi() {
     } else {
         StaticLogger::warning("Could not start webUi");
         webUi.reset();
+
+        // Set all functions to nullptr
+        destroyImportedWebFunctions();
+
         return false;
     }
 }
@@ -1265,6 +1318,9 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
 
                 // Delete the instance from existence
                 webUi.reset();
+
+                // Set all imported functions to nullptr
+                destroyImportedWebFunctions();
                 return true;
             } else {
                 StaticLogger::warning("Tried to stop webUi server, but it does not exist");

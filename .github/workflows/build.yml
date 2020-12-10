@@ -4,7 +4,7 @@ on:
   push:
     paths: 
       - ".github/workflows/build.yml"
-      - "autobetLib/**"
+      - "autobetlib/**"
       - "pack/**"
       - "ui/**"
       - "web/**"
@@ -12,13 +12,12 @@ on:
       - "package.json"
       - "package-lock.json"
       - "main.js"
-      - "preload.js"
-      - "renderer.js"
-      - "downloadModel.js"
+      - "scripts/**"
+      - "install.js"
   pull_request:
     paths: 
       - ".github/workflows/build.yml"
-      - "autobetLib/**"
+      - "autobetlib/**"
       - "pack/**"
       - "ui/**"
       - "web/**"
@@ -26,20 +25,25 @@ on:
       - "package.json"
       - "package-lock.json"
       - "main.js"
-      - "preload.js"
-      - "renderer.js"
-      - "downloadModel.js"
+      - "scripts/**"
+      - "install.js"
 
 jobs:
-  build_and_pack:
+  build:
     runs-on: windows-latest
     env:
       OPENCV_VERSION: 4.1.2
       OpenCV_DIR: C:/tools/opencv/build
+      BOOST_VERSION: 1.69.0
+      BOOST_TOOLSET: msvc14.1
+      BOOST_PATH: D:\boost\boost-1.69.0-win32-msvc14.1-x86_64
 
     steps:
     - uses: actions/checkout@v2
 
+    # Steps for getting the name for this artifact
+    # The artifact name has the followig format:
+    # autobet-${LATEST_RELEASE_TAG}-beta.YYYYmmdd-1HHMMSS
     - name: Get latest release tag
       id: latest_release
       run: echo "::set-output name=release::$(node -p 'require(`./package.json`).version')"
@@ -67,6 +71,21 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
+    - name: Cache boost
+      uses: actions/cache@v2
+      id: cache-boost
+      with:
+        path: ${{env.BOOST_PATH}}
+        key: boost-${{env.BOOST_VERSION}}-${{env.BOOST_TOOLSET}}
+
+    # Download and install boost
+    - name: Install boost
+      if: steps.cache-boost.outputs.cache-hit != 'true'
+      uses: MarkusJx/install-boost@v1.0
+      id: install-boost
+      with:
+        boost_version: ${{env.BOOST_VERSION}}
+        toolset: ${{env.BOOST_TOOLSET}}
 
     # Download and install opencv
     - name: Install OpenCV
@@ -83,6 +102,8 @@ jobs:
       run: npm install
     - name: Build
       run: npm run-script build
+      env:
+        BOOST_ROOT: ${{env.BOOST_PATH}}
     - name: Package
       run: npm run-script pack
       env:
