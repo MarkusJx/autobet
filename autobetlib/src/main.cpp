@@ -60,7 +60,9 @@ std::function<void(int)> webSetRacesLost = nullptr;
 std::function<void()> webSetStarted = nullptr;
 std::function<void()> webSetStopped = nullptr;
 std::function<void()> webSetStopping = nullptr;
-std::function<void(bool)> webSetStarting = nullptr;
+std::function<void()> webSetStarting = nullptr;
+std::function<void(int)> webSetAutostopMoney = nullptr;
+std::function<void(int)> webSetAutostopTime = nullptr;
 
 // Callbacks ==============================================
 
@@ -690,7 +692,7 @@ void node_js_stop_script(const Napi::CallbackInfo &info) {
 void set_starting(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::boolean);
     starting = info[0].ToBoolean();
-    if (webSetStarting) webSetStarting(starting);
+    if (webSetStarting && starting) webSetStarting();
 }
 
 /**
@@ -845,6 +847,8 @@ void destroyImportedWebFunctions() {
     webSetStopped = nullptr;
     webSetStopping = nullptr;
     webSetStarting = nullptr;
+    webSetAutostopMoney = nullptr;
+    webSetAutostopTime = nullptr;
 }
 
 /**
@@ -901,6 +905,8 @@ bool startWebUi() {
     webUi->import(webSetStopped);
     webUi->import(webSetStopping);
     webUi->import(webSetStarting);
+    webUi->import(webSetAutostopMoney);
+    webUi->import(webSetAutostopTime);
 
     StaticLogger::debug("Starting web ui web server");
 
@@ -983,7 +989,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         });
 
         // Init autostop
-        autostop::init(&winnings, &time_running);
+        autostop::init(&winnings, &time_running, webSetAutostopMoney, webSetAutostopTime);
 
 #ifndef NDEBUG
 #       pragma message("INFO: Building in debug mode")

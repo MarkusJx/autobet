@@ -110,35 +110,28 @@ try {
      * 
      * @param {number} sum the sum to make pretty
      * @param {boolean} k whether to replace thousand by 'K'
+     * @returns {string} the resulting value in the format [-]$<0-999>.<0-99><B|M|K>
      */
     function makeSumsDisplayable(sum, k = false) {
         const negative = sum < 0;
         sum = Math.abs(sum);
 
+        let res;
+
         if (sum > 1000000000) { // One billion
-            if (negative) {
-                return ((Math.round(sum / 100000000) / 10) * (-1)) + "B";
-            } else {
-                return Math.round(sum / 100000000) / 10 + "B";
-            }
+            res = Math.round(sum / 100000000) / 10 + "B";
         } else if (sum > 1000000) { // One million
-            if (negative) {
-                return ((Math.round(sum / 100000) / 10) * (-1)) + "M";
-            } else {
-                return Math.round(sum / 100000) / 10 + "M";
-            }
+            res = Math.round(sum / 100000) / 10 + "M";
         } else if (k && sum > 1000) { // One thousand
-            if (negative) {
-                return ((Math.round(sum / 100) / 10) * (-1)) + "K";
-            } else {
-                return Math.round(sum / 100) / 10 + "K";
-            }
+            res = Math.round(sum / 100) / 10 + "K";
         } else {
-            if (negative) {
-                return sum * (-1);
-            } else {
-                return sum;
-            }
+            res = sum;
+        }
+
+        if (negative) {
+            return "-$" + res;
+        } else {
+            return "$" + res;
         }
     }
 
@@ -169,14 +162,14 @@ try {
      * @param {number} value the overall amount of money made all time
      */
     function setAllMoneyMade(value) {
-        moneyall.innerText = "$" + makeSumsDisplayable(value);
+        moneyall.innerText = makeSumsDisplayable(value);
     }
 
     /**
      * Update the money this hour, races won and win probability texts
      */
     function updateValues() {
-        moneythishour.innerText = "$" + makeSumsDisplayable(getMoneyPerHour(), true) + "/hr";
+        moneythishour.innerText = makeSumsDisplayable(getMoneyPerHour(), true) + "/hr";
         raceswon.innerText = won;
         winprobability.innerText = Math.round((won / (won + lost)) * 1000) / 10 + "%";
     }

@@ -1,6 +1,8 @@
 #ifndef AUTOBET_AUTOSTOP_HPP
 #define AUTOBET_AUTOSTOP_HPP
 
+#include <functional>
+
 /**
  * The autostop namespace
  */
@@ -10,8 +12,10 @@ namespace autostop {
      * 
      * @param winnings a pointer to the winnings variable
      * @param time_running a pointer to the time_running variable
+     * @param webSetAutostopMoney a reference to the webSetAutostopMoney function
+     * @param webSetAutostopTime a reference to the webSetAutostopTime function
      */
-    void init(int *winnings, unsigned int *time_running);
+    void init(int *winnings, unsigned int *time_running, std::function<void(int)> &webSetAutostopMoney, std::function<void(int)> &webSetAutostopTime);
 
     /**
      * Check if one (or more) of the stop conditions are met
