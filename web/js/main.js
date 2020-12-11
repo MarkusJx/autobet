@@ -265,12 +265,13 @@ async function init() {
     });
 
     // Get the races won
-    let won = await cppJsLib.get_races_won();
+    let won = Number(await cppJsLib.get_races_won());
     racesWon = won;
     raceswon.innerText = won;
 
     // get the races lost
     cppJsLib.get_races_lost().then((lost) => {
+        lost = Number(lost);
         racesLost = lost;
         // Do some heavy mathematics to calculate a win probability
         if ((won + lost) > 0) winprobability.innerText = Math.round((won / (won + lost)) * 1000) / 10 + "%";
@@ -354,7 +355,7 @@ async function init() {
     cppJsLib.expose(webSetRacesWon);
     function webSetRacesWon(won) {
         raceswon.innerText = won;
-        racesWon = won;
+        racesWon = Number(won);
 
         // Do some heavy mathematics to calculate a win probability
         if ((racesWon + racesLost) > 0)
@@ -363,7 +364,7 @@ async function init() {
 
     cppJsLib.expose(webSetRacesLost);
     function webSetRacesLost(lost) {
-        racesLost = lost;
+        racesLost = Number(lost);
 
         // Do some heavy mathematics to calculate a win probability
         if ((racesWon + racesLost) > 0)

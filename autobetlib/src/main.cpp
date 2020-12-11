@@ -30,8 +30,10 @@
 using namespace logger;
 using namespace napi_tools;
 
-// Every location to a horse to bet on
-const uint16_t yLocations[6] = {464, 628, 790, 952, 1114, 1276};
+// Every location to a horse to bet on.
+// These also double as the upper y-location of the image
+// to crop to extract the odd of the horse
+const uint16_t yLocations[6] = {452, 616, 778, 940, 1102, 1264};
 
 std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
 opencv_link::knn knn = nullptr;
@@ -91,6 +93,9 @@ callbacks::callback<void(std::string)> logCallback = nullptr;
 // A callback with a custom betting function
 callbacks::callback<int(std::vector<std::string>)> bettingPositionCallback = nullptr;
 
+// A callback to be called when the betting is stopped due to an error
+callbacks::callback<void(std::string)> bettingExceptionCallback = nullptr;
+
 // EndCallbacks ===========================================
 
 /**
@@ -107,6 +112,7 @@ void kill(bool _exit = true) {
     if (exceptionCallback) exceptionCallback.stop();
     if (logCallback) logCallback.stop();
     if (bettingPositionCallback) bettingPositionCallback.stop();
+    if (bettingExceptionCallback) bettingExceptionCallback.stop();
 
     // Set every possible bool to false
     keyCombListen = false;
@@ -329,12 +335,12 @@ short get_pos(void *src) {
     }
 
     std::vector<std::string> odds(6);
-    unsigned short yCoord, xCoord, _width, _height;
+    uint16_t yCoord, xCoord, _width, _height;
     for (int i = 0; i < 6; i++) {
-        yCoord = (int) round((float) yLocations[i] * multiplierH);
-        _height = (int) round((float) 46 * multiplierH);
-        xCoord = (int) round(240 * multiplierW);
-        _width = (int) round(110 * multiplierW);
+        yCoord = static_cast<uint16_t>(std::round((float) yLocations[i] * multiplierH));
+        _height = static_cast<uint16_t>(std::round((float) 60 * multiplierH));
+        xCoord = static_cast<uint16_t>(std::round(230 * multiplierW));
+        _width = static_cast<uint16_t>(std::round(120 * multiplierW));
 
         // Crop the screenshot
         utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src);
@@ -346,7 +352,7 @@ short get_pos(void *src) {
 
         odds[i] = knn.predict(b, multiplierW, multiplierH);
         if (!opencv_link::knn::isOdd(odds[i])) {
-            StaticLogger::errorStream() << "Knn did not return an odd: " << odds[i];
+            StaticLogger::errorStream() << "Knn did not return an odd: " << (odds[i].empty() ? "[empty]" : odds[i]);
             throw autobetException("Knn did not return an odd");
         } else {
             StaticLogger::debugStream() << "Odd prediction: " << odds[i];
@@ -423,10 +429,15 @@ void updateWinnings(int amount) {
  * Get the winnings
  */
 void getWinnings() {
-    auto yCoord = (short) round(1060.0f * multiplierH);
-    auto _height = (short) round(86.0f * multiplierH);
-    auto xCoord = (short) round(1286.0f * multiplierW);
-    auto _width = (short) round(304.0f * multiplierW);
+    // Set coordinates, width and height to get the image from.
+    // These values are based on the positions on a 2560x1440 screen.
+    // They are then scaled to the current game resulution and rounded.
+    // If the images cropped are too small/big/wrong placed,
+    // these values probably should be changed.
+    short yCoord = static_cast<short>(std::round(1060.0f * multiplierH));
+    short _height = static_cast<short>(std::round(86.0f * multiplierH));
+    short xCoord = static_cast<short>(std::round(1286.0f * multiplierW));
+    short _width = static_cast<short>(std::round(304.0f * multiplierW));
 
     // Take a screenshot and crop the image
     void *src = utils::TakeScreenShot(xPos, yPos, width, height);
@@ -441,7 +452,9 @@ void getWinnings() {
     // Delete the original screenshot
     DeleteObject(src);
 
-    // Get the prediction and check if its legit
+    // Get the prediction and check if its an actual odd.
+    // For further information on how an odd looks like,
+    // take a look at the implementation of opencv_link::knn::isWinning(1)
     std::string pred;
     try {
         pred = knn.predict(bmp, multiplierW, multiplierH);
@@ -471,6 +484,11 @@ void skipBet() {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     leftClick(633, 448);
 
+    // Sleep between clicks as the game cannot accept so many clicks in quick succession
+    // Also, this helps making our clicks seem more human.
+    // Just so we going the safer route as of not getting banned.
+    // Rockstar would probably not ban anyone for using this,
+    // since they are incompetent as fuck, despite having billions of dollars.
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     leftClick(1720, 1036);
 }
@@ -479,7 +497,7 @@ void skipBet() {
  * The main loop
  */
 void mainLoop() {
-    // Stop the betting
+    // Stop the betting as a lambda
     const auto stopBetting = [] {
         uiKeycombStopCallback();
         if (webSetStopping) webSetStopping();
@@ -490,10 +508,13 @@ void mainLoop() {
     if (utils::isProcessRunning("GTA5.exe")) {
         StaticLogger::debug("GTA V running");
         setGtaVRunning(true);
+
         // Set the game's positions
         set_positions();
         utils::windowSize ws;
 
+        // A note to my C Professor: I've learned my lesson,
+        // this is not a while(TRUE) loop. It never was, honestly.
         while (running) {
             // Take a screen shot
             void *src = utils::TakeScreenShot(xPos, yPos, width, height);
@@ -504,24 +525,32 @@ void mainLoop() {
                 pos = get_pos(src);
             } catch (std::exception &e) {
                 DeleteObject(src);
-                StaticLogger::errorStream() << "Could not get the position to bet on. Error: " << e.what();
+                std::string err = "Could not get the position to bet on. Error: ";
+                err.append(e.what());
+
+                StaticLogger::errorStream() << err;
+                bettingExceptionCallback(err);
+
                 stopBetting();
                 break;
             }
 
             DeleteObject(src);
             if (pos != -1) {
-                if (!running) {
-                    break;
-                }
+                // If the user somehow managed to hammer the stop button in ~100ms, stop
+                if (!running) break;
+
+                // Plot twist: pos is actually the y-position
+                // of the button of the horse to bet on
                 place_bet(pos);
                 StaticLogger::debugStream() << "Running: " << std::boolalpha << running;
-                if (!running) continue;
+
                 // Updating winnings by -10000 since betting costs 100000
                 updateWinnings(-10000);
-                if (!running) {
-                    continue;
-                }
+                if (!running) continue;
+
+                // Only sleep 1/2 of the time at once, so we can
+                // stop earlier when the user requests to stop
                 StaticLogger::debugStream() << "Sleeping for " << time_sleep << " seconds";
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep / 2));
                 if (!running) {
@@ -530,10 +559,9 @@ void mainLoop() {
                     continue;
                 }
 
+                // Sleep through the last half
                 std::this_thread::sleep_for(std::chrono::seconds((int) ceil((double) time_sleep / 2.0)));
-                if (!running) {
-                    continue;
-                }
+                if (!running) continue;
 
                 StaticLogger::debug("Getting winnings");
                 // Update the winnings and return to the betting screen
@@ -557,6 +585,7 @@ void mainLoop() {
             if (err == 0) {
                 if (!foreground) {
                     StaticLogger::debug("GTA V is not the currently focused window. Betting will be stopped");
+                    bettingExceptionCallback("GTA V is not the currently focused window.");
                     stopBetting();
                     break;
                 }
@@ -1231,6 +1260,19 @@ Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
         bettingPositionCallback = callbacks::callback<int(std::vector<std::string>)>(info);
 
         return bettingPositionCallback.getPromise();
+    CATCH_EXCEPTIONS
+}
+
+/**
+ * Set the bettingExceptionCallback, which is called whenever
+ * the betting is stopped due to an exception thrown
+ */
+Napi::Promise setBettingExceptionCallback(const Napi::CallbackInfo &info) {
+    if (bettingExceptionCallback) throw Napi::Error::New(info.Env(), "bettingExceptionCallback is already defined");
+    TRY
+        bettingExceptionCallback = callbacks::callback<void(td::string)>(info);
+
+        return bettingExceptionCallback.getPromise();
     CATCH_EXCEPTIONS
 }
 

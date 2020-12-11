@@ -124,6 +124,13 @@ export namespace callbacks {
      * @param exception the callback function
      */
     function setExceptionCallback(exception: () => void): void;
+
+    /**
+     * Set the function to be called when the betting is stopped due to an error
+     * 
+     * @param callback the callback function
+     */
+    function setBettingExceptionCallback(callback: (errMsg: string) => void): void;
 }
 
 /**

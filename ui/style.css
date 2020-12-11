@@ -284,6 +284,9 @@ body {
     margin: 0 auto;
 }
 
+#betting-error-dialog {
+    --mdc-theme-primary: blue;
+}
 
 /* ============================= Settings ============================= */
 

@@ -39,14 +39,17 @@ try {
     mdc.autoInit();
 
     // The qr code dialog
-    const qrdialog = new mdc.dialog.MDCDialog(document.getElementById("qrdialog"));
+    const qrdialog = new mdc.dialog.MDCDialog(document.getElementById('qrdialog'));
 
     //The enable webserver switch
-    const enable_webserver = new mdc.switchControl.MDCSwitch(document.getElementById("enable-webserver-switch"));
+    const enable_webserver = new mdc.switchControl.MDCSwitch(document.getElementById('enable-webserver-switch'));
 
     // The settings saved message snackbar
-    const settings_saved_msg = new mdc.snackbar.MDCSnackbar(document.getElementById("settings-saved-message"));
+    const settings_saved_msg = new mdc.snackbar.MDCSnackbar(document.getElementById('settings-saved-message'));
     settings_saved_msg.timeoutMs = 4000;
+
+    // The betting error dialog
+    const bettingErrorDialog = new mdc.dialog.MDCDialog(document.getElementById('betting-error-dialog'));
 
     // The game running info text
     const game_running = document.getElementById("game-running");
@@ -60,6 +63,14 @@ try {
         });
     }
     setQuitCallback();
+
+    // Set the betting exception callback function
+    autobetLib.callbacks.setBettingExceptionCallback((err) => {
+        document.getElementById('betting-error-dialog-content').innerText = "The betting was stopped due to an " +
+            "exception thrown in the native module. This may be caused by a program error or the game being " +
+            "stuck on a screen. Error message: " + err;
+        bettingErrorDialog.open();
+    });
 
     // Set the autobet version
     document.getElementById("autobet-version").innerText = `Version ${autobet_info.version}`;

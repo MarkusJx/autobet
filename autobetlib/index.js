@@ -212,6 +212,10 @@ module.exports = {
         setExceptionCallback: function (exception) {
             autobetLib_native.lib_setExceptionCallback(exception).catch(() => {
             });
+        },
+        setBettingExceptionCallback: function(callback) {
+            autobetLib_native.lib_setBettingExceptionCallback(callback).catch(() => {
+            });
         }
     },
     /**
