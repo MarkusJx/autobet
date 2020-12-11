@@ -108,8 +108,10 @@ std::string opencv_link::knn::predict(const cv::Mat &m, double scaleX, double sc
     cv::addWeighted(m_cpy, 1.5, img_blur, -0.5, 16, m_cpy);
 
     // Convert to grayscale and apply blur
-    cv::cvtColor(m_cpy, gray, cv::COLOR_BGR2GRAY);
-    cv::GaussianBlur(gray, blur, {3, 3}, 2);
+    //cv::cvtColor(m_cpy, gray, cv::COLOR_BGR2GRAY);
+    //cv::GaussianBlur(gray, blur, {3, 3}, 2);
+
+    cv::GaussianBlur(m_cpy, blur, {3, 3}, 2);
 
     // Apply adaptive threshold
     cv::adaptiveThreshold(blur, thresh, 255, 1, 1, 11, 2);
