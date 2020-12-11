@@ -442,7 +442,14 @@ void getWinnings() {
     DeleteObject(src);
 
     // Get the prediction and check if its legit
-    const std::string pred = knn.predict(bmp, multiplierW, multiplierH);
+    std::string pred;
+    try {
+        pred = knn.predict(bmp, multiplierW, multiplierH);
+    } catch (std::exception &e) {
+        StaticLogger::errorStream() << "Could not predict the winnings. Error: " << e.what();
+        return;
+    }
+    
     if (!opencv_link::knn::isWinning(pred)) {
         StaticLogger::errorStream() << "The knn prediction was not a winning: " << pred;
         return;
@@ -472,6 +479,13 @@ void skipBet() {
  * The main loop
  */
 void mainLoop() {
+    // Stop the betting
+    const auto stopBetting = [] {
+        uiKeycombStopCallback();
+        if (webSetStopping) webSetStopping();
+        running = false;
+    };
+
     // Check if the game is running
     if (utils::isProcessRunning("GTA5.exe")) {
         StaticLogger::debug("GTA V running");
@@ -483,8 +497,18 @@ void mainLoop() {
         while (running) {
             // Take a screen shot
             void *src = utils::TakeScreenShot(xPos, yPos, width, height);
+
             // Get the position to bet on
-            short pos = get_pos(src);
+            short pos;
+            try {
+                pos = get_pos(src);
+            } catch (std::exception &e) {
+                DeleteObject(src);
+                StaticLogger::errorStream() << "Could not get the position to bet on. Error: " << e.what();
+                stopBetting();
+                break;
+            }
+
             DeleteObject(src);
             if (pos != -1) {
                 if (!running) {
@@ -516,8 +540,8 @@ void mainLoop() {
                 getWinnings();
                 reset();
                 if (autostop::checkStopConditions()) {
-                    running = false;
-                    continue;
+                    stopBetting();
+                    break;
                 }
             } else {
                 // Should not bet, skip
@@ -533,8 +557,7 @@ void mainLoop() {
             if (err == 0) {
                 if (!foreground) {
                     StaticLogger::debug("GTA V is not the currently focused window. Betting will be stopped");
-                    uiKeycombStopCallback();
-                    running = false;
+                    stopBetting();
                     break;
                 }
             } else {
@@ -545,10 +568,11 @@ void mainLoop() {
             utils::getWindowSize(ws);
             if ((ws.width == 0 && ws.height == 0) || !utils::isProcessRunning("GTA5.exe")) {
                 StaticLogger::debug("The game seems to be closed, stopping betting");
-                uiKeycombStopCallback();
-                running = false;
+                stopBetting();
             }
         }
+        
+        // Set stopped
         stopping = false;
         if (webSetStopped) webSetStopped();
         StaticLogger::debug("Betting is now paused");

@@ -357,7 +357,8 @@ async function init() {
         racesWon = won;
 
         // Do some heavy mathematics to calculate a win probability
-        if ((racesWon + racesLost) > 0) winprobability.innerText = Math.round((racesWon / (racesWon + racesLost)) * 1000) / 10 + "%";
+        if ((racesWon + racesLost) > 0)
+            winprobability.innerText = Math.round((racesWon / (racesWon + racesLost)) * 1000) / 10 + "%";
     }
 
     cppJsLib.expose(webSetRacesLost);
@@ -365,7 +366,8 @@ async function init() {
         racesLost = lost;
 
         // Do some heavy mathematics to calculate a win probability
-        if ((racesWon + racesLost) > 0) winprobability.innerText = Math.round((racesWon / (racesWon + racesLost)) * 1000) / 10 + "%";
+        if ((racesWon + racesLost) > 0)
+            winprobability.innerText = Math.round((racesWon / (racesWon + racesLost)) * 1000) / 10 + "%";
     }
 
     cppJsLib.expose(webSetStarted);

@@ -290,7 +290,7 @@ module.exports = {
          */
         debug: function (message) {
             const info = getFileLine();
-            autobetLib_native.lib_node_debug(info.file, info.line, message);
+            //autobetLib_native.lib_node_debug(info.file, info.line, message);
         },
         /**
          * Log a warning message
@@ -299,7 +299,7 @@ module.exports = {
          */
         warn: function (message) {
             const info = getFileLine();
-            autobetLib_native.lib_node_warn(info.file, info.line, message);
+            //autobetLib_native.lib_node_warn(info.file, info.line, message);
         },
         /**
          * Log an error message
@@ -308,7 +308,7 @@ module.exports = {
          */
         error: function (message) {
             const info = getFileLine();
-            autobetLib_native.lib_node_error(info.file, info.line, message);
+            //autobetLib_native.lib_node_error(info.file, info.line, message);
         }
     },
     /**

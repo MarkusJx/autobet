@@ -148,9 +148,11 @@ std::string opencv_link::knn::predict(const cv::Mat &m, double scaleX, double sc
                 cv::Mat results;
                 k_nearest->findNearest(roi_small, 1, results);
 
-                // Insert the result into the data map, with the x-pos as a key
-                // and the result value casted to a char as value
-                data.insert(std::pair<int, char>(rect.x, (char) results.at<float>(0)));
+                if (!results.empty()) {
+                    // Insert the result into the data map, with the x-pos as a key
+                    // and the result value casted to a char as value
+                    data.insert(std::pair<int, char>(rect.x, (char) results.at<float>(0)));
+                }
             }
         }
     }
