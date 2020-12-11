@@ -1572,6 +1572,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setExceptionCallback);
     export(setLogCallback);
     export(setBettingPositionCallback);
+    export(setBettingExceptionCallback);
 
     export(napi_quit);
 
