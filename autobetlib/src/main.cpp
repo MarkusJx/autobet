@@ -1270,7 +1270,7 @@ Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setBettingExceptionCallback(const Napi::CallbackInfo &info) {
     if (bettingExceptionCallback) throw Napi::Error::New(info.Env(), "bettingExceptionCallback is already defined");
     TRY
-        bettingExceptionCallback = callbacks::callback<void(td::string)>(info);
+        bettingExceptionCallback = callbacks::callback<void(std::string)>(info);
 
         return bettingExceptionCallback.getPromise();
     CATCH_EXCEPTIONS
