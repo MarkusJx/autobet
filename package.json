@@ -29,7 +29,7 @@
         "electron-builder": "^22.9.1"
     },
     "dependencies": {
-        "@autobet/autobetlib": "file:autobetlib",
+        "@autobet/autobetlib": "file:autobetLib",
         "ace-builds": "^1.4.12",
         "custom-electron-titlebar": "^3.2.5",
         "electron-store": "^6.0.1",
