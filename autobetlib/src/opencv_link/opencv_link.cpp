@@ -48,6 +48,9 @@ static std::string mapToString(const std::map<int, char> &m) {
  * @return true, if any column was already visited, false if no column was already visited
  */
 static bool markVisited(std::vector<bool> &visited, int x1, int x2) {
+    // Check if x1 and x2 are inside the bounds of visited
+    if (x1 >= visited.size() || x2 >= visited.size() || x1 < 0 || x2 < 0) return true;
+
     int v = 0;
     // Check if any column was already visited
     for (int i = x1; i < x2; i++) {
@@ -83,12 +86,12 @@ opencv_link::knn::knn(const std::string &modelPath) {
     }
 }
 
-std::string opencv_link::knn::predict(const std::vector<byte> &image, double scaleX, double scaleY) const {
+std::string opencv_link::knn::predict(const std::vector <byte> &image, double scaleX, double scaleY) const {
     // Create a data mat with the image data
     cv::Mat data_mat(image, true);
 
-    // Decode the image, convert it to grayscale and store it in a mat
-    cv::Mat gray(cv::imdecode(data_mat, 0));
+    // Decode the image and store it in a mat
+    cv::Mat gray(cv::imdecode(data_mat, 1));
     return this->predict(gray, scaleX, scaleY);
 }
 
@@ -108,17 +111,15 @@ std::string opencv_link::knn::predict(const cv::Mat &m, double scaleX, double sc
     cv::addWeighted(m_cpy, 1.5, img_blur, -0.5, 16, m_cpy);
 
     // Convert to grayscale and apply blur
-    //cv::cvtColor(m_cpy, gray, cv::COLOR_BGR2GRAY);
-    //cv::GaussianBlur(gray, blur, {3, 3}, 2);
-
-    cv::GaussianBlur(m_cpy, blur, {3, 3}, 2);
+    cv::cvtColor(m_cpy, gray, cv::COLOR_BGR2GRAY);
+    cv::GaussianBlur(gray, blur, {3, 3}, 2);
 
     // Apply adaptive threshold
     cv::adaptiveThreshold(blur, thresh, 255, 1, 1, 11, 2);
 
     // Find contours
-    std::vector<std::vector<cv::Point>> contours;
-    std::vector<cv::Vec4i> hierarchy;
+    std::vector <std::vector<cv::Point>> contours;
+    std::vector <cv::Vec4i> hierarchy;
     cv::findContours(thresh, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
 
     // The result data. Will contain the predicted string
@@ -127,12 +128,12 @@ std::string opencv_link::knn::predict(const cv::Mat &m, double scaleX, double sc
     // A vector containing indices of all columns
     std::vector<bool> visited(gray.cols, false);
 
-    for (const std::vector<cv::Point> &cnt : contours) {
+    for (const std::vector <cv::Point> &cnt : contours) {
         if (cv::contourArea(cnt) > 50) {
             cv::Rect rect = cv::boundingRect(cnt);
             if (rect.height > 28 && rect.width < 28 && rect.width > 9) {
                 // If this area already has been visited, skip this contour
-                if (markVisited(visited, rect.x, rect.x + rect.width)) continue;
+                //if (markVisited(visited, rect.x, rect.x + rect.width)) continue;
 
 #if SHOW_IMAGES
                 cv::rectangle(m_cpy, {rect.x, rect.y}, {rect.x + rect.width, rect.y + rect.height}, {0, 255, 0}, 1);

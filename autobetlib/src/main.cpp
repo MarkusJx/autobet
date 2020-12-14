@@ -25,6 +25,7 @@
 #include "logger.hpp"
 
 #define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
+
 #include "n_api/napi_tools.hpp"
 
 using namespace logger;
@@ -35,7 +36,7 @@ using namespace napi_tools;
 // to crop to extract the odd of the horse
 const uint16_t yLocations[6] = {452, 616, 778, 940, 1102, 1264};
 
-std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
+std::unique_ptr <CppJsLib::WebGUI> webUi = nullptr;
 opencv_link::knn knn = nullptr;
 
 uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
@@ -91,7 +92,7 @@ callbacks::callback<void()> exceptionCallback = nullptr;
 callbacks::callback<void(std::string)> logCallback = nullptr;
 
 // A callback with a custom betting function
-callbacks::callback<int(std::vector<std::string>)> bettingPositionCallback = nullptr;
+callbacks::callback<int(std::vector < std::string > )> bettingPositionCallback = nullptr;
 
 // A callback to be called when the betting is stopped due to an error
 callbacks::callback<void(std::string)> bettingExceptionCallback = nullptr;
@@ -193,12 +194,14 @@ void set_positions() {
     yPos = ws.yPos;
     width = ws.width;
     height = ws.height;
-    StaticLogger::debugStream() << "Got positions: {x: " << xPos << ", y: " << yPos << ", w: " << width << ", h: " << height << "}";
+    StaticLogger::debugStream() << "Got positions: {x: " << xPos << ", y: " << yPos << ", w: " << width << ", h: "
+                                << height << "}";
 
     utils::windowSize screenSize;
     utils::getActiveScreen(xPos + (width / 2), yPos + (height / 2), screenSize);
 
-    StaticLogger::debugStream() << "Got active screen width: " << screenSize.width << " and height: " << screenSize.height;
+    StaticLogger::debugStream() << "Got active screen width: " << screenSize.width << " and height: "
+                                << screenSize.height;
 
     multiplierW = (float) width / 2560.0f;
     multiplierH = (float) height / 1440.0f;
@@ -274,7 +277,7 @@ void setGtaVRunning(bool val) {
     setGtaRunningCallback(val);
 }
 
-short getBasicBettingPosition(const std::vector<std::string> &odds) {
+short getBasicBettingPosition(const std::vector <std::string> &odds) {
     // Results to fill in, every number in the array can be between 1 and 10,
     // 1 represents evens, 2 represents 2/1 etc. 10 represents 10/1 and lower
     short res[6] = {-1, -1, -1, -1, -1, -1};
@@ -334,7 +337,7 @@ short get_pos(void *src) {
         debug::writeImage(bmp);
     }
 
-    std::vector<std::string> odds(6);
+    std::vector <std::string> odds(6);
     uint16_t yCoord, xCoord, _width, _height;
     for (int i = 0; i < 6; i++) {
         yCoord = static_cast<uint16_t>(std::round((float) yLocations[i] * multiplierH));
@@ -373,14 +376,16 @@ short get_pos(void *src) {
             StaticLogger::debugStream() << "The custom betting function returned: " << res;
 
             if (res < -1) {
-                StaticLogger::warning("The custom betting function returned a result < -1, falling back to the default implementation");
+                StaticLogger::warning(
+                        "The custom betting function returned a result < -1, falling back to the default implementation");
                 return getBasicBettingPosition(odds);
             } else {
                 // Return the yLocation at res
                 return yLocations[res];
             }
         } else {
-            StaticLogger::warning("The custom betting function did not finish within 10 seconds, falling back to the default function");
+            StaticLogger::warning(
+                    "The custom betting function did not finish within 10 seconds, falling back to the default function");
             return getBasicBettingPosition(odds);
         }
     } else {
@@ -462,7 +467,7 @@ void getWinnings() {
         StaticLogger::errorStream() << "Could not predict the winnings. Error: " << e.what();
         return;
     }
-    
+
     if (!opencv_link::knn::isWinning(pred)) {
         StaticLogger::errorStream() << "The knn prediction was not a winning: " << pred;
         return;
@@ -473,7 +478,7 @@ void getWinnings() {
     StaticLogger::debugStream() << "Winnings prediction: " << res;
 
     // Update the winnings
-    updateWinnings(1000 * res);
+    updateWinnings(res);
 }
 
 /**
@@ -555,7 +560,8 @@ void mainLoop() {
                 std::this_thread::sleep_for(std::chrono::seconds(time_sleep / 2));
                 if (!running) {
                     // Program is not running anymore, stop it
-                    StaticLogger::debugStream() << "The script has been stopped, skipping after " << (time_sleep / 2) << " seconds...";
+                    StaticLogger::debugStream() << "The script has been stopped, skipping after " << (time_sleep / 2)
+                                                << " seconds...";
                     continue;
                 }
 
@@ -600,7 +606,7 @@ void mainLoop() {
                 stopBetting();
             }
         }
-        
+
         // Set stopped
         stopping = false;
         if (webSetStopped) webSetStopped();
@@ -1217,11 +1223,12 @@ Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
  */
 void setQuitCallback(const Napi::CallbackInfo &info) {
     TRY
-        callbacks::callback<void()> q(info);
-        quit = [&q] {
+        // Use a raw callback in here, as any other callback would get deleted
+        auto *q = new callbacks::javascriptCallback<void()>(info);
+        quit = [q] {
             kill(false);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            q();
+            q->asyncCall();
         };
     CATCH_EXCEPTIONS
 }
@@ -1257,7 +1264,7 @@ Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
     if (bettingPositionCallback) throw Napi::Error::New(info.Env(), "bettingPositionCallback is already defined");
     TRY
-        bettingPositionCallback = callbacks::callback<int(std::vector<std::string>)>(info);
+        bettingPositionCallback = callbacks::callback<int(std::vector < std::string > )>(info);
 
         return bettingPositionCallback.getPromise();
     CATCH_EXCEPTIONS
@@ -1610,4 +1617,5 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     return exports;
 }
 
-NODE_API_MODULE(autobetLib, InitAll)
+NODE_API_MODULE(autobetLib, InitAll
+)

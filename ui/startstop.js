@@ -1,5 +1,6 @@
 'use strict';
 const statusinfo = document.getElementById("statusinfo");
+let time = 0;
 
 try {
     const timeDisp = document.getElementById("time"); // The time text field
@@ -13,7 +14,6 @@ try {
     let running = 0;
     let pausing = 0;
     let timer = null;
-    let time = 0;
 
     /**
      * Close and disable the code editor

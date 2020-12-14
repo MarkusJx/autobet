@@ -140,8 +140,13 @@ const deleteFolderRecursive = function (p) {
 
 function deleteIfExists(p) {
     if (fs.existsSync(p)) {
-        console.log(`${p} exists, deleting it`);
-        deleteFolderRecursive(p);
+        if (fs.lstatSync(p).isDirectory()) {
+            console.log(`Directory ${p} exists, deleting it`);
+            deleteFolderRecursive(p);
+        } else {
+            console.log(`${p} exists, deleting it`);
+            fs.unlinkSync(p);
+        }
     }
 }
 
@@ -169,11 +174,14 @@ function full_clean() {
     const model_yml = path.join(__dirname, "resources", "data", "model.yml");
     const node_modules = path.join(__dirname, "node_modules");
     const lib_node_modules = path.join(__dirname, "autobetlib", "node_modules");
+    const autobet_conf = path.join(__dirname, "autobet.conf");
+    const autobet_log = path.join(__dirname, "autobet.log");
+    const winnings_dat = path.join(__dirname, "winnings.dat");
 
-    if (fs.existsSync(model_yml)) {
-        console.log("The model file exists, deleting it");
-        fs.unlinkSync(model_yml);
-    }
+    deleteIfExists(model_yml);
+    deleteIfExists(autobet_conf);
+    deleteIfExists(autobet_log);
+    deleteIfExists(winnings_dat);
 
     deleteIfExists(node_modules);
     deleteIfExists(lib_node_modules);

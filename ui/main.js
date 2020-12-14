@@ -129,15 +129,17 @@ try {
 
         let res;
 
-        if (sum > 1000000000) { // One billion
-            res = Math.round(sum / 100000000) / 10 + "B";
-        } else if (sum > 1000000) { // One million
-            res = Math.round(sum / 100000) / 10 + "M";
-        } else if (k && sum > 1000) { // One thousand
-            res = Math.round(sum / 100) / 10 + "K";
+        if (sum >= 1000000000) { // One billion
+            res = (sum / 1000000000).toFixed(2) + "B";
+        } else if (sum >= 1000000) { // One million
+            res = (sum / 1000000).toFixed(2) + "M";
+        } else if (k && sum >= 1000) { // One thousand
+            res = (sum / 1000).toFixed(2) + "K";
         } else {
             res = sum;
         }
+
+        // Optional: Convert gazillions
 
         if (negative) {
             return "-$" + res;
