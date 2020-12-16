@@ -127,7 +127,7 @@ export namespace callbacks {
 
     /**
      * Set the function to be called when the betting is stopped due to an error
-     * 
+     *
      * @param callback the callback function
      */
     function setBettingExceptionCallback(callback: (errMsg: string) => void): void;
@@ -146,7 +146,7 @@ export namespace customBettingFunction {
 
     /**
      * Set whether to use the custom betting function
-     * 
+     *
      * @param val whether to use the function
      */
     function setUseBettingFunction(val: boolean): void;
@@ -193,21 +193,21 @@ export namespace logging {
 
     /**
      * Log a debug message
-     * 
+     *
      * @param message the message to log
      */
     function debug(message: string): void;
 
     /**
      * Log a warning message
-     * 
+     *
      * @param message the message to log
      */
     function warn(message: string): void;
 
     /**
      * Log an error message
-     * 
+     *
      * @param message the message to log
      */
     function error(message: string): void;
@@ -276,3 +276,8 @@ export function quit(): void;
  * Start the shutdown hook
  */
 export function shutdown(): Promise<void>;
+
+/**
+ * Set the odd translations
+ */
+export function setOddTranslations(): Promise<void>;

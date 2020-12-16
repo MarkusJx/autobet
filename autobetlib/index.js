@@ -6,13 +6,13 @@ autobetLib_native.lib_setAutobetlibVersion(autobetlib_version);
 
 /**
  * Get the caller file and line
- * 
+ *
  * @returns {callerInfo | undefinedCallerInfo} the caller info
  */
 function getFileLine() {
     /**
      * Create a caller info
-     * 
+     *
      * @param {string} file the caller file
      * @param {number} line the caller line
      */
@@ -213,7 +213,7 @@ module.exports = {
             autobetLib_native.lib_setExceptionCallback(exception).catch(() => {
             });
         },
-        setBettingExceptionCallback: function(callback) {
+        setBettingExceptionCallback: function (callback) {
             autobetLib_native.lib_setBettingExceptionCallback(callback).catch(() => {
             });
         }
@@ -234,7 +234,7 @@ module.exports = {
         },
         /**
          * Set whether to use the custom betting function
-         * 
+         *
          * @param {boolean} val whether to use the function
          */
         setUseBettingFunction: function (val) {
@@ -289,7 +289,7 @@ module.exports = {
         },
         /**
          * Log a debug message
-         * 
+         *
          * @param {string} message the message to log
          */
         debug: function (message) {
@@ -298,7 +298,7 @@ module.exports = {
         },
         /**
          * Log a warning message
-         * 
+         *
          * @param {string} message the message to log
          */
         warn: function (message) {
@@ -307,7 +307,7 @@ module.exports = {
         },
         /**
          * Log an error message
-         * 
+         *
          * @param {string} message the message to log
          */
         error: function (message) {
@@ -391,5 +391,19 @@ module.exports = {
      */
     shutdown: async function () {
         await autobetLib_native.lib_stop();
+    },
+    setOddTranslations: function () {
+        try {
+            const translations = [];
+            const translations_file = require('./odd_translations.json');
+            for (let lang in translations_file) {
+                if (translations_file.hasOwnProperty(lang)) {
+                    translations.push(translations_file[lang]);
+                }
+            }
+
+            autobetLib_native.lib_setOddTranslations(translations);
+        } catch (e) {
+        }
     }
 };

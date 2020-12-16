@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+#include <map>
 #include <opencv2/ml.hpp>
 
 /**
@@ -68,9 +70,16 @@ namespace opencv_link {
         void reset();
 
         /**
-         * Free all ressources
+         * Free all resources
          */
         ~knn();
+
+        /**
+         * Set the odd translations map
+         *
+         * @param m the map to set
+         */
+        static void setOddTranslations(const std::map<std::string, std::string> &m);
 
         /**
          * Check if a prediction is a valid prediction for a winning.
@@ -82,11 +91,19 @@ namespace opencv_link {
         static bool isWinning(const std::string &pred);
 
         /**
+         * Translate an odd using the odd_translations.json file
+         *
+         * @param pred the odd to translate
+         * @return the translated odd or pred, if the file did not contain a definition for this odd
+         */
+        static std::string translateOdd(const std::string &pred);
+
+        /**
          * Check if a prediction is a valid prediction for an Odd.
          * Valid odds have the form [2-31]/1.
          *
-         * @param pred the prediciton made by knn
-         * @return true, if the prediciton is valid
+         * @param pred the prediction made by knn
+         * @return true, if the prediction is valid
          */
         static bool isOdd(const std::string &pred);
 
@@ -95,13 +112,13 @@ namespace opencv_link {
          * Throws an std::runtime_error when the prediction is no winning or
          * when the prediction could not be parsed.
          *
-         * @param pred the prediciton
-         * @return the prediciton as an integer
+         * @param pred the prediction
+         * @return the prediction as an integer
          */
         static int winningToInt(const std::string &pred);
 
         /**
-         * Convert an odd prediciton to a short.
+         * Convert an odd prediction to a short.
          * Outputs 1 for 'evens' and removes the '/1' part from every other
          * odd, e.g. '2/1' -> 2 or '17/1' -> 17.
          *
@@ -112,6 +129,7 @@ namespace opencv_link {
 
     private:
         cv::Ptr<cv::ml::KNearest> k_nearest;
+        static std::unique_ptr<std::map<std::string, std::string>> oddTranslations;
     };
 } // namespace opencv_link
 

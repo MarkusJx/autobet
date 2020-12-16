@@ -338,6 +338,8 @@ try {
         }
         enable_webserver.disabled = false;
 
+        autobetLib.setOddTranslations();
+
         autobetLib.start();
     }
 

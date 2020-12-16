@@ -36,7 +36,7 @@ using namespace napi_tools;
 // to crop to extract the odd of the horse
 const uint16_t yLocations[6] = {452, 616, 778, 940, 1102, 1264};
 
-std::unique_ptr <CppJsLib::WebGUI> webUi = nullptr;
+std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
 opencv_link::knn knn = nullptr;
 
 uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
@@ -92,7 +92,7 @@ callbacks::callback<void()> exceptionCallback = nullptr;
 callbacks::callback<void(std::string)> logCallback = nullptr;
 
 // A callback with a custom betting function
-callbacks::callback<int(std::vector < std::string > )> bettingPositionCallback = nullptr;
+callbacks::callback<int(std::vector<std::string>)> bettingPositionCallback = nullptr;
 
 // A callback to be called when the betting is stopped due to an error
 callbacks::callback<void(std::string)> bettingExceptionCallback = nullptr;
@@ -277,7 +277,7 @@ void setGtaVRunning(bool val) {
     setGtaRunningCallback(val);
 }
 
-short getBasicBettingPosition(const std::vector <std::string> &odds) {
+short getBasicBettingPosition(const std::vector<std::string> &odds) {
     // Results to fill in, every number in the array can be between 1 and 10,
     // 1 represents evens, 2 represents 2/1 etc. 10 represents 10/1 and lower
     short res[6] = {-1, -1, -1, -1, -1, -1};
@@ -337,7 +337,7 @@ short get_pos(void *src) {
         debug::writeImage(bmp);
     }
 
-    std::vector <std::string> odds(6);
+    std::vector<std::string> odds(6);
     uint16_t yCoord, xCoord, _width, _height;
     for (int i = 0; i < 6; i++) {
         yCoord = static_cast<uint16_t>(std::round((float) yLocations[i] * multiplierH));
@@ -356,8 +356,10 @@ short get_pos(void *src) {
         odds[i] = knn.predict(b, multiplierW, multiplierH);
         if (!opencv_link::knn::isOdd(odds[i])) {
             StaticLogger::errorStream() << "Knn did not return an odd: " << (odds[i].empty() ? "[empty]" : odds[i]);
-            throw autobetException("Knn did not return an odd");
+            throw autobetException("Knn did not return an odd: " + (odds[i].empty() ? "[empty]" : odds[i]));
         } else {
+            // Translate the odd
+            odds[i] = opencv_link::knn::translateOdd(odds[i]);
             StaticLogger::debugStream() << "Odd prediction: " << odds[i];
         }
     }
@@ -439,10 +441,10 @@ void getWinnings() {
     // They are then scaled to the current game resulution and rounded.
     // If the images cropped are too small/big/wrong placed,
     // these values probably should be changed.
-    short yCoord = static_cast<short>(std::round(1060.0f * multiplierH));
-    short _height = static_cast<short>(std::round(86.0f * multiplierH));
-    short xCoord = static_cast<short>(std::round(1286.0f * multiplierW));
-    short _width = static_cast<short>(std::round(304.0f * multiplierW));
+    auto yCoord = static_cast<short>(std::round(1060.0f * multiplierH));
+    auto _height = static_cast<short>(std::round(86.0f * multiplierH));
+    auto xCoord = static_cast<short>(std::round(1286.0f * multiplierW));
+    auto _width = static_cast<short>(std::round(304.0f * multiplierW));
 
     // Take a screenshot and crop the image
     void *src = utils::TakeScreenShot(xPos, yPos, width, height);
@@ -1264,7 +1266,7 @@ Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
 Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
     if (bettingPositionCallback) throw Napi::Error::New(info.Env(), "bettingPositionCallback is already defined");
     TRY
-        bettingPositionCallback = callbacks::callback<int(std::vector < std::string > )>(info);
+        bettingPositionCallback = callbacks::callback<int(std::vector<std::string>)>(info);
 
         return bettingPositionCallback.getPromise();
     CATCH_EXCEPTIONS
@@ -1550,6 +1552,19 @@ void setAutobetlibVersion(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
+void setOddTranslations(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(array);
+    auto arr = info[0].As<Napi::Array>();
+    std::map<std::string, std::string> translations;
+    for (uint32_t i = 0; i < arr.Length(); i++) {
+        auto obj = arr.Get(i).As<Napi::Object>();
+        translations.insert_or_assign(obj.Get("from").ToString(), obj.Get("to").ToString());
+    }
+
+    StaticLogger::debug("Setting odd translations");
+    opencv_link::knn::setOddTranslations(translations);
+}
+
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
 
 /**
@@ -1603,6 +1618,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(node_error);
 
     export(setAutobetlibVersion);
+    export(setOddTranslations);
 
     try {
         quit = [] {

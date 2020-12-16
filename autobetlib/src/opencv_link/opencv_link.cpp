@@ -86,7 +86,7 @@ opencv_link::knn::knn(const std::string &modelPath) {
     }
 }
 
-std::string opencv_link::knn::predict(const std::vector <byte> &image, double scaleX, double scaleY) const {
+std::string opencv_link::knn::predict(const std::vector<byte> &image, double scaleX, double scaleY) const {
     // Create a data mat with the image data
     cv::Mat data_mat(image, true);
 
@@ -118,8 +118,8 @@ std::string opencv_link::knn::predict(const cv::Mat &m, double scaleX, double sc
     cv::adaptiveThreshold(blur, thresh, 255, 1, 1, 11, 2);
 
     // Find contours
-    std::vector <std::vector<cv::Point>> contours;
-    std::vector <cv::Vec4i> hierarchy;
+    std::vector<std::vector<cv::Point>> contours;
+    std::vector<cv::Vec4i> hierarchy;
     cv::findContours(thresh, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
 
     // The result data. Will contain the predicted string
@@ -128,12 +128,12 @@ std::string opencv_link::knn::predict(const cv::Mat &m, double scaleX, double sc
     // A vector containing indices of all columns
     std::vector<bool> visited(gray.cols, false);
 
-    for (const std::vector <cv::Point> &cnt : contours) {
+    for (const std::vector<cv::Point> &cnt : contours) {
         if (cv::contourArea(cnt) > 50) {
             cv::Rect rect = cv::boundingRect(cnt);
             if (rect.height > 28 && rect.width < 28 && rect.width > 9) {
                 // If this area already has been visited, skip this contour
-                //if (markVisited(visited, rect.x, rect.x + rect.width)) continue;
+                if (markVisited(visited, rect.x, rect.x + rect.width)) continue;
 
 #if SHOW_IMAGES
                 cv::rectangle(m_cpy, {rect.x, rect.y}, {rect.x + rect.width, rect.y + rect.height}, {0, 255, 0}, 1);
@@ -177,16 +177,28 @@ void opencv_link::knn::reset() {
 
 opencv_link::knn::~knn() = default;
 
+void opencv_link::knn::setOddTranslations(const std::map<std::string, std::string> &m) {
+    oddTranslations = std::make_unique<std::map<std::string, std::string>>(m);
+}
+
 bool opencv_link::knn::isWinning(const std::string &pred) {
     // Matches every number with a prefix of "+" or matches a single "0"
     static const std::regex winning_regex("^0|(\\+[1-9][0-9]*)$");
     return std::regex_match(pred, winning_regex);
 }
 
+std::string opencv_link::knn::translateOdd(const std::string &pred) {
+    if (oddTranslations && oddTranslations->contains(pred)) {
+        return oddTranslations->at(pred);
+    } else {
+        return pred;
+    }
+}
+
 bool opencv_link::knn::isOdd(const std::string &pred) {
     // Regex matches everything between 2/1 and 31/1 or matches "evens"
     static const std::regex odd_regex("^(([2-9]|([1-2][0-9])|(3[0-1]))\\/1)|(evens)$");
-    return std::regex_match(pred, odd_regex);
+    return std::regex_match(pred, odd_regex) || (oddTranslations && oddTranslations->contains(pred));
 }
 
 int opencv_link::knn::winningToInt(const std::string &pred) {
@@ -231,7 +243,7 @@ short opencv_link::knn::oddToShort(const std::string &pred) {
         errno = 0;
 
         // Get the result number and check for errors
-        short res = (short) std::strtol(number.c_str(), &out, 10);
+        auto res = (short) std::strtol(number.c_str(), &out, 10);
         if ((out != nullptr && std::strlen(out) > 0) || res < 2 || res > 31 || errno == ERANGE) {
             throw std::runtime_error("The prediction could not be parsed");
         }
@@ -239,3 +251,5 @@ short opencv_link::knn::oddToShort(const std::string &pred) {
         return res;
     }
 }
+
+std::unique_ptr<std::map<std::string, std::string>> opencv_link::knn::oddTranslations = nullptr;
