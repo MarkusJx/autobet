@@ -330,10 +330,10 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
  * @param src the source HBITMAP as a void pointer because <windows.h> throws errors
  * @return the y-coordinate to click or -1 if this one should be skipped
  */
-short get_pos(void *src) {
+short get_pos(const std::shared_ptr<void> &src) {
     // Write the src to the debug zip folder
     if (debug_full) {
-        utils::bitmap bmp = utils::convertHBitmap(width, height, src);
+        utils::bitmap bmp = utils::convertHBitmap(width, height, src.get());
         debug::writeImage(bmp);
     }
 
@@ -346,7 +346,7 @@ short get_pos(void *src) {
         _width = static_cast<uint16_t>(std::round(120 * multiplierW));
 
         // Crop the screenshot
-        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src);
+        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src.get());
 
         // Write bitmap object to debug zip folder
         if (debug_full) {
@@ -447,17 +447,17 @@ void getWinnings() {
     auto _width = static_cast<short>(std::round(304.0f * multiplierW));
 
     // Take a screenshot and crop the image
-    void *src = utils::TakeScreenShot(xPos, yPos, width, height);
-    utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src);
+    std::shared_ptr<void> src(utils::TakeScreenShot(xPos, yPos, width, height), DeleteObject);
+    utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src.get());
 
     if (debug_full) {
-        utils::bitmap b = utils::convertHBitmap(width, height, src);
+        utils::bitmap b = utils::convertHBitmap(width, height, src.get());
         debug::writeImage(b);
         debug::writeImage(bmp);
     }
 
     // Delete the original screenshot
-    DeleteObject(src);
+    src.reset();
 
     // Get the prediction and check if its an actual odd.
     // For further information on how an odd looks like,
@@ -523,26 +523,42 @@ void mainLoop() {
         // A note to my C Professor: I've learned my lesson,
         // this is not a while(TRUE) loop. It never was, honestly.
         while (running) {
-            // Take a screen shot
-            void *src = utils::TakeScreenShot(xPos, yPos, width, height);
-
             // Get the position to bet on
-            short pos;
-            try {
-                pos = get_pos(src);
-            } catch (std::exception &e) {
-                DeleteObject(src);
-                std::string err = "Could not get the position to bet on. Error: ";
-                err.append(e.what());
+            short pos = -2;
+            std::string lastError;
 
-                StaticLogger::errorStream() << err;
-                bettingExceptionCallback(err);
+            // If the call fails, retry 3 times, reset in between. This is just in case the
+            // Game is stuck on the 'transaction pending' screen, so if it is stuck, retry.
+            // Will try to reset (go back to the betting screen) and sleep 5 seconds.
+            // If this doesn't help, the betting will be stopped.
+            for (int i = 0; i < 3; i++) {
+                try {
+                    // Take a screen shot
+                    std::shared_ptr<void> src(utils::TakeScreenShot(xPos, yPos, width, height), DeleteObject);
+                    pos = get_pos(src);
+                    break;
+                } catch (const std::exception &e) {
+                    lastError = "Could not get the position to bet on. Error: ";
+                    lastError.append(e.what());
 
+                    StaticLogger::errorStream() << lastError;
+                    StaticLogger::debug("Assuming the game is stuck, resetting...");
+                    reset();
+
+                    StaticLogger::debug("Sleeping for 5 seconds");
+                    std::this_thread::sleep_for(std::chrono::seconds(5));
+                }
+            }
+
+            // Check if the position could be retrieved
+            if (pos == -2) {
+                StaticLogger::error(
+                        "Could not get the position to bet on, retried 3 times, which did not help, stopping betting.");
+                bettingExceptionCallback(lastError);
                 stopBetting();
                 break;
             }
 
-            DeleteObject(src);
             if (pos != -1) {
                 // If the user somehow managed to hammer the stop button in ~100ms, stop
                 if (!running) break;
@@ -582,8 +598,15 @@ void mainLoop() {
             } else {
                 // Should not bet, skip
                 skipBet();
+                updateWinnings(-100);
                 StaticLogger::debugStream() << "Sleeping for " << time_sleep << " seconds";
-                std::this_thread::sleep_for(std::chrono::seconds(time_sleep));
+                std::this_thread::sleep_for(std::chrono::seconds(time_sleep / 2));
+                if (!running) continue;
+                std::this_thread::sleep_for(
+                        std::chrono::seconds(static_cast<int>(ceil(static_cast<double>(time_sleep / 2.0)))));
+
+                // Update the winnings and return to the betting screen
+                getWinnings();
                 reset();
             }
 
@@ -643,6 +666,7 @@ void start_script() {
     if (!running && !stopping) {
         StaticLogger::debug("Set running to true");
         uiKeycombStartCallback();
+        if (webSetStarted) webSetStarted();
         running = true;
     }
 
@@ -661,8 +685,9 @@ void start_script() {
 void stop_script() {
     // Only stop if it is running and not stopping
     if (running && !stopping) {
-        StaticLogger::debug("Waiting for main thread to finish");
         uiKeycombStopCallback();
+        if (webSetStopping) webSetStopping();
+        StaticLogger::debug("Waiting for main thread to finish");
         running = false;
         stopping = true;
     }
@@ -736,14 +761,12 @@ Napi::Boolean node_get_gta_running(const Napi::CallbackInfo &info) {
  */
 void node_js_start_script(const Napi::CallbackInfo &info) {
     start_script();
-    if (webSetStarted) webSetStarted();
 }
 
 /**
  * Stop the betting from node.js
  */
 void node_js_stop_script(const Napi::CallbackInfo &info) {
-    if (webSetStopping) webSetStopping();
     stop_script();
 }
 

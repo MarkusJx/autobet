@@ -37,7 +37,6 @@ const statusinfo = document.getElementById("statusinfo");
 const moneythissession = document.getElementById("moneythissession");
 
 var lastTime = 0;
-//var mainInterval = null;
 
 var start = true;
 var initialized = false;
@@ -153,9 +152,25 @@ function showAutostopMessages() {
     }
 }
 
+/**
+ * Set an Interval if the website is disconnected
+ */
+let x = setInterval(function () {
+    if (cppJsLib.connected) {
+        if (x != null) clearInterval(x);
+        x = null;
+        console.log("Connected!");
+        main();
+    } else {
+        console.log("Still connecting...")
+    }
+}, 100);
+
+// Add a on load listener
 cppJsLib.onLoad(function (res) {
     if (res) {
-        clearInterval(x);
+        if (x != null) clearInterval(x);
+        x = null;
         console.log("Connected!");
         cppJsLib.js_initialized().then(res => {
             if (res) {
@@ -170,7 +185,7 @@ cppJsLib.onLoad(function (res) {
 /**
  * Make sums more readable by adding 'K' for thousand
  * or 'M' for million to the end of the sum
- * 
+ *
  * @param {number} sum the sum to make pretty
  * @param {boolean} k whether to replace thousand by 'K'
  * @returns {string} the resulting value in the format [-]$<0-999>.<0-99><B|M|K>
@@ -199,42 +214,16 @@ function makeSumsDisplayable(sum, k = false) {
 }
 
 /**
- * Set an Interval if the website is disconnected
- */
-var x = setInterval(function () {
-    if (cppJsLib.connected) {
-        clearInterval(x);
-        console.log("Connected!");
-        main();
-    } else {
-        console.log("Still connecting...")
-    }
-}, 100);
-
-/**
  * The main function
  */
 function main() {
     if (isMobile()) {
         console.log("Running on a mobile device");
-
-        /*datasaverdialog.listen('MDCDialog:closing', ev => {
-            if (ev.detail.action === "yes") {
-                console.log("Enabling Data Saver");
-                if (!initialized) init(true);
-                initialized = true;
-            } else {
-                console.log("Not enabling Data Saver");
-                if (!initialized) init(false);
-                initialized = true;
-            }
-        });
-        datasaverdialog.open();*/
     } else {
         console.log("Running on a desktop device");
     }
 
-    if (!initialized) init(false);
+    if (!initialized) init();
     initialized = true;
 }
 
@@ -252,9 +241,6 @@ async function init() {
         console.log("Money earned all time: " + val);
         moneyall.innerText = makeSumsDisplayable(val);
     });
-
-    //let waitTime = 500;
-    //if (datasaver) waitTime = 5000; // Set the wait time to 5 seconds if data saver is enabled
 
     // Get the time running
     cppJsLib.get_time().then((t) => {
@@ -323,24 +309,24 @@ async function init() {
     // Get the autostop settings
     await getAutostopSettings();
 
-    /**
-     * The main interval
-     */
-    /*mainInterval = setInterval(async function () {
-        if (cppJsLib.connected) {
-            await asyncMain();
-        } else {
-            clearInterval(mainInterval); // Clear this interval
-            disconnected();
-        }
-    }, waitTime);*/
-
     cppJsLib.expose(webSetGtaRunning);
+
+    /**
+     * Set whether gta is running
+     * 
+     * @param {boolean} val true, if gta is running
+     */
     function webSetGtaRunning(val) {
         gtaRunning = val;
     }
 
     cppJsLib.expose(webSetWinnings);
+
+    /**
+     * Set the winnings made this session
+     * 
+     * @param {number} moneyMade the amount of money made this session
+     */
     function webSetWinnings(moneyMade) {
         moneythissession.innerText = makeSumsDisplayable(moneyMade, false);
         if (lastTime > 0)
@@ -348,11 +334,23 @@ async function init() {
     }
 
     cppJsLib.expose(webSetWinningsAll);
+
+    /**
+     * Set all money made
+     * 
+     * @param {number} allMoney the amount of money made all time
+     */
     function webSetWinningsAll(allMoney) {
         moneyall.innerText = makeSumsDisplayable(allMoney);
     }
 
     cppJsLib.expose(webSetRacesWon);
+
+    /**
+     * Set the number of races won
+     * 
+     * @param {number} won the number of races won
+     */
     function webSetRacesWon(won) {
         raceswon.innerText = won;
         racesWon = Number(won);
@@ -363,6 +361,12 @@ async function init() {
     }
 
     cppJsLib.expose(webSetRacesLost);
+
+    /**
+     * Set the number of races lost
+     * 
+     * @param {number} lost the number of races lost
+     */
     function webSetRacesLost(lost) {
         racesLost = Number(lost);
 
@@ -372,16 +376,32 @@ async function init() {
     }
 
     cppJsLib.expose(webSetStarted);
+
+    /**
+     * Set the scrip started
+     */
     function webSetStarted() {
         statusinfo.innerText = "Running";
         statusinfo.className = "text status_running maintext";
         startstop.innerText = "stop";
         start = false;
         startstop.disabled = false;
-        startTimer();
+
+        // Get the time running
+        cppJsLib.get_time().then((t) => {
+            if (t !== lastTime) {
+                timeDisp.innerText = convertToTime(t);
+                lastTime = t;
+            }
+            startTimer();
+        });
     }
 
     cppJsLib.expose(webSetStopped);
+
+    /**
+     * Set the script stopped
+     */
     function webSetStopped() {
         statusinfo.innerText = "Stopped";
         statusinfo.className = "text status_stopped maintext";
@@ -391,6 +411,10 @@ async function init() {
     }
 
     cppJsLib.expose(webSetStopping);
+
+    /**
+     * Set the script stopping
+     */
     function webSetStopping() {
         statusinfo.innerText = "Stopping";
         statusinfo.className = "text status_stopping maintext";
@@ -398,6 +422,10 @@ async function init() {
     }
 
     cppJsLib.expose(webSetStarting);
+
+    /**
+     * Set the script starting
+     */
     function webSetStarting() {
         statusinfo.innerText = "Starting";
         statusinfo.className = "text status_stopping maintext";
@@ -405,6 +433,12 @@ async function init() {
     }
 
     cppJsLib.expose(webSetAutostopMoney);
+
+    /**
+     * Set the autostop money
+     * 
+     * @param {number} val the money value
+     */
     function webSetAutostopMoney(val) {
         if (val !== autostopMoney) {
             autostopMoney = val;
@@ -413,6 +447,12 @@ async function init() {
     }
 
     cppJsLib.expose(webSetAutostopTime);
+
+    /**
+     * Set the autostop time
+     * 
+     * @param {number} val the time
+     */
     function webSetAutostopTime(val) {
         if (val !== autostopTime) {
             autostopTime = nTime;
@@ -421,7 +461,12 @@ async function init() {
     }
 }
 
+// The timer interval
 let timer = null;
+
+/**
+ * Start the timer
+ */
 function startTimer() {
     if (timer == null) {
         timer = setInterval(() => {
@@ -431,6 +476,9 @@ function startTimer() {
     }
 }
 
+/**
+ * Stop the timer
+ */
 function stopTimer() {
     if (timer != null) {
         clearInterval(timer);
@@ -452,10 +500,9 @@ function disconnected() {
             notconnectedlabel.innerText = "Trying to reconnect...";
             timeUntilRetry = 5;
 
-            //cppJsLib.init();
-
             if (cppJsLib.connected) {
-                clearInterval(x);
+                if (x != null) clearInterval(x);
+                x = null;
                 notconnectedlabel.innerText = "Reconnected. Reloading page in 3 seconds";
                 setTimeout(() => {
                     location.reload();
