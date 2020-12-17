@@ -1,11 +1,11 @@
 'use strict';
 
-const { contextBridge, ipcRenderer } = require('electron');
+const {contextBridge, ipcRenderer} = require('electron');
 const autobetLib = require('@autobet/autobetlib');
-const { Titlebar, Color } = require('custom-electron-titlebar');
+const {Titlebar, Color} = require('custom-electron-titlebar');
 const Store = require('electron-store');
 const isolate = require('./isolatedFunction/isolatedFunction');
-const { functionStore } = require('./functionStore/functionStore');
+const {functionStore} = require('./functionStore/functionStore');
 
 // Get the current autobet version
 const autobet_version = require('../package.json').version;
@@ -54,8 +54,10 @@ const schema = {
 };
 
 // Create the store
-const store = new Store({ schema });
-const isolatedFunction = new isolate.isolatedFunction();
+const store = new Store({schema});
+const isolatedFunction = new isolate.isolatedFunction((msg) => {
+    autobetLib.logging.debug(`activeBettingFunction`, msg);
+});
 
 /**
  * @type {functionStore[]}
@@ -87,16 +89,16 @@ if (activeFunction >= 0 && activeFunction < functions.length && functions[active
 
 /**
  * Convert an odd to a number
- * 
+ *
  * @param {string} val the value to convert
- * @returns {number} the odd as a number
+ * @returns {number | null} the odd as a number
  */
 function oddToNumber(val) {
     const oddRegex = /^(([2-9]|([1-2][0-9])|(3[0-1]))\/1)|(evens)$/g;
     if (val == null) {
         return null;
     } else if (oddRegex.test(val)) {
-        if (val == "evens") {
+        if (val === "evens") {
             return 1;
         } else {
             return Number(val.split('/')[0]);
@@ -137,7 +139,7 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
         res = isolatedFunction.run(odds_cpy);
         res = oddToNumber(res);
     } catch (e) {
-        autobetLib.logging.error(`The custom betting function threw: ${e.message}`);
+        autobetLib.logging.error("preload.js", `The custom betting function threw: ${e.message}`);
         functions[activeFunction].ok = false;
         functions[activeFunction].lastError = e.message;
 
@@ -146,20 +148,20 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
         return -2;
     }
 
-    if (res === null) {
+    if (res == null) {
         // Return -1 on 'Do not bet'
         return -1;
     } else if (typeof res === "string") {
         let res_index = odds.indexOf(res);
         if (res_index < 0) {
-            autobetLib.logging.error(`The odds did not contain the result by the custom betting function: '${res}'`);
+            autobetLib.logging.error("preload.js", `The odds did not contain the result by the custom betting function: '${res}'`);
             return -2;
         } else {
             // Return the result
             return res_index
         }
     } else {
-        autobetLib.logging.error("The result from the custom betting function was neither null or a string");
+        autobetLib.logging.error("preload.js", "The result from the custom betting function was neither null or a string");
         bettingFunctionError();
         // Again, return -2 on error
         return -2;
@@ -170,12 +172,13 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
  * A callback to be called to the ui when the betting
  * function is reverted to the default one
  */
-let revertToDefaultCallback = () => { };
+let revertToDefaultCallback = () => {
+};
 
 /**
  * Generate a unique id.
  * Source: https://learnersbucket.com/examples/javascript/unique-id-generator-in-javascript/
- * 
+ *
  * @returns {string} the uid in the format 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
  */
 function generateUid() {
@@ -191,7 +194,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     functionStore: functionStore,
     /**
      * Add a new function
-     * 
+     *
      * @param {string} name the function name
      * @param {string} fnString the function string
      */
@@ -199,7 +202,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
         let uid = generateUid();
         while (usedUids.includes(uid)) uid = generateUid();
 
-        autobetLib.logging.debug(`Creating new custom function with name '${name}' and UID '${uid}'`);
+        autobetLib.logging.debug("preload.js", `Creating new custom function with name '${name}' and UID '${uid}'`);
 
         let fn = new functionStore(name, fnString, uid);
         functions.push(fn);
@@ -211,11 +214,16 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     },
     /**
      * Test a function
-     * 
+     *
      * @param {string} fnString the function string to test
+     * @param {string} fnId the function id
      */
-    checkFunction: (fnString) => {
-        let isolatedFn = new isolate.isolatedFunction();
+    checkFunction: (fnString, fnId = "null") => {
+        let isolatedFn = new isolate.isolatedFunction((msg) => {
+            if (typeof msg == "string")
+                autobetLib.logging.debug(`isolatedFunction-${fnId}`, msg);
+        });
+
         isolatedFn.setFunction(fnString);
         let result;
         try {
@@ -235,7 +243,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     },
     /**
      * Get the functions
-     * 
+     *
      * @returns {functionStore[]} the functions
      */
     getFunctions: () => {
@@ -243,7 +251,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     },
     /**
      * Set the active function
-     * 
+     *
      * @throws Will throw an error if fnStore is not in the functions array
      * @param {functionStore} fnStore the function
      */
@@ -251,14 +259,14 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
         // Get the index of the fnStore function
         let index = -1;
         for (let i = 0; i < functions.length; i++) {
-            if (functions[i].id == fnStore.id) {
+            if (functions[i].id === fnStore.id) {
                 index = i;
                 break;
             }
         }
 
         // Make sure that fnStore exists in functions
-        if (index != -1) {
+        if (index !== -1) {
             // If activeFunction is a index of functions, set the function to not active
             if (activeFunction >= 0 && activeFunction < functions.length) {
                 functions[activeFunction].active = false;
@@ -269,7 +277,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
                 }
             }
 
-            autobetLib.logging.debug(`Setting active betting function to function with uid '${fnStore.id}'`);
+            autobetLib.logging.debug("preload.js", `Setting active betting function to function with uid '${fnStore.id}'`);
 
             // Set the active function to activate as active
             activeFunction = index;
@@ -304,7 +312,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
         activeFunction = -1;
         autobetLib.customBettingFunction.setUseBettingFunction(false);
 
-        autobetLib.logging.debug("Reverting to the default implementation");
+        autobetLib.logging.debug("preload.js", "Reverting to the default implementation");
 
         // Store everything
         store.set('functions', functions);
@@ -312,7 +320,7 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     },
     /**
      * Delete a function
-     * 
+     *
      * @param {functionStore} fn the function to delete
      */
     deleteFunction: (fn) => {
@@ -324,16 +332,16 @@ contextBridge.exposeInMainWorld('isolatedFunction', {
     },
     /**
      * Set the callback to be called when the betting function is reverted to default
-     * 
-     * @param {() => void} fn the callback function
+     *
+     * @param {function(): void} fn the callback function
      */
     setRevertToDefaultCallback: (fn) => {
         revertToDefaultCallback = fn;
     },
     /**
      * Save the functions
-     * 
-     * @param {functionStore[]} the functions array
+     *
+     * @param {functionStore[]} fns the functions array
      */
     saveFunctions: (fns) => {
         functions = fns;

@@ -24,6 +24,9 @@ export class functionStore {
      */
     lastError: string;
 
+    /**
+     * The function id
+     */
     id: string;
 
     /**

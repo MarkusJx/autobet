@@ -270,7 +270,6 @@ void reset() {
  * @param val the new value
  */
 void setGtaVRunning(bool val) {
-#pragma message(TODO(Call webGui function on gtaVRunning change))
     // Only tell the web listeners changes, not stuff they already know
     if (webSetGtaRunning && val != gtaVRunning) webSetGtaRunning(val);
     gtaVRunning = val;
@@ -405,14 +404,12 @@ void updateWinnings(int amount) {
 
     // If the amount to add is not zero add it to winnings and winnings_all
     if (amount != 0) {
-#pragma message(TODO(Call webUi function on winnings updated))
         winnings += amount;
         winnings_all += amount;
 
         if (webSetWinnings) webSetWinnings(winnings);
         if (webSetWinningsAll) webSetWinningsAll(winnings_all);
 
-#pragma message(TODO(Call webUi function on winnings_all updated))
         setAllMoneyMadeCallback(winnings_all);
         writeWinnings();
 
@@ -420,13 +417,11 @@ void updateWinnings(int amount) {
         if (amount > 0) {
             racesWon++;
             if (webSetRacesWon) webSetRacesWon(racesWon);
-#pragma message(TODO(Call webUi function on racesWon updated))
         }
     } else {
         // Add a lost race
         racesLost++;
         if (webSetRacesLost) webSetRacesLost(racesLost);
-#pragma message(TODO(Call webUi function on racesLost updated))
     }
 
     addMoneyCallback(amount);
@@ -585,11 +580,12 @@ void mainLoop() {
 
                 // Sleep through the last half
                 std::this_thread::sleep_for(std::chrono::seconds((int) ceil((double) time_sleep / 2.0)));
-                if (!running) continue;
 
                 StaticLogger::debug("Getting winnings");
                 // Update the winnings and return to the betting screen
                 getWinnings();
+
+                if (!running) continue;
                 reset();
                 if (autostop::checkStopConditions()) {
                     stopBetting();
@@ -736,7 +732,6 @@ int get_running() {
     } else { //stopping
         return 0;
     }
-#pragma message(TODO(Call webUi on script running state changed))
 }
 // ========================================================
 
@@ -1534,7 +1529,7 @@ Napi::Value node_debug(const Napi::CallbackInfo &info) {
         return info.Env().Undefined();
     file_line_message dt(info);
 
-    return promises::promise<void>(info.Env(), [&dt] {
+    return promises::promise<void>(info.Env(), [dt] {
         StaticLogger::_debug(dt.file.c_str(), dt.line, dt.message);
     });
 }
@@ -1547,7 +1542,7 @@ Napi::Value node_warn(const Napi::CallbackInfo &info) {
         return info.Env().Undefined();
     file_line_message dt(info);
 
-    return promises::promise<void>(info.Env(), [&dt] {
+    return promises::promise<void>(info.Env(), [dt] {
         StaticLogger::_warning(dt.file.c_str(), dt.line, dt.message);
     });
 }
@@ -1560,7 +1555,7 @@ Napi::Value node_error(const Napi::CallbackInfo &info) {
         return info.Env().Undefined();
     file_line_message dt(info);
 
-    return promises::promise<void>(info.Env(), [&dt] {
+    return promises::promise<void>(info.Env(), [dt] {
         StaticLogger::_error(dt.file.c_str(), dt.line, dt.message);
     });
 }

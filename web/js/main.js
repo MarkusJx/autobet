@@ -188,20 +188,20 @@ cppJsLib.onLoad(function (res) {
  *
  * @param {number} sum the sum to make pretty
  * @param {boolean} k whether to replace thousand by 'K'
+ * @param {number} fractionDigits the number of fraction digits to display
  * @returns {string} the resulting value in the format [-]$<0-999>.<0-99><B|M|K>
  */
-function makeSumsDisplayable(sum, k = false) {
+function makeSumsDisplayable(sum, k = false, fractionDigits = 2) {
     const negative = sum < 0;
     sum = Math.abs(sum);
 
     let res;
-
     if (sum >= 1000000000) { // One billion
-        res = (sum / 1000000000).toFixed(2) + "B";
+        res = (sum / 1000000000).toFixed(fractionDigits) + "B";
     } else if (sum >= 1000000) { // One million
-        res = (sum / 1000000).toFixed(2) + "M";
+        res = (sum / 1000000).toFixed(fractionDigits) + "M";
     } else if (k && sum >= 1000) { // One thousand
-        res = (sum / 1000).toFixed(2) + "K";
+        res = (sum / 1000).toFixed(fractionDigits) + "K";
     } else {
         res = sum;
     }
@@ -267,7 +267,7 @@ async function init() {
     cppJsLib.get_current_winnings().then(moneyMade => {
         moneythissession.innerText = makeSumsDisplayable(moneyMade, false);
         if (lastTime > 0)
-            moneythishour.innerText = makeSumsDisplayable(moneyMade * (3600 / lastTime), true) + "/hr";
+            moneythishour.innerText = makeSumsDisplayable(moneyMade * (3600 / lastTime), true, 0) + "/hr";
     });
 
     // Set the overall money made values
@@ -313,7 +313,7 @@ async function init() {
 
     /**
      * Set whether gta is running
-     * 
+     *
      * @param {boolean} val true, if gta is running
      */
     function webSetGtaRunning(val) {
@@ -324,20 +324,20 @@ async function init() {
 
     /**
      * Set the winnings made this session
-     * 
+     *
      * @param {number} moneyMade the amount of money made this session
      */
     function webSetWinnings(moneyMade) {
         moneythissession.innerText = makeSumsDisplayable(moneyMade, false);
         if (lastTime > 0)
-            moneythishour.innerText = makeSumsDisplayable(moneyMade * (3600 / lastTime), true) + "/hr";
+            moneythishour.innerText = makeSumsDisplayable(moneyMade * (3600 / lastTime), true, 0) + "/hr";
     }
 
     cppJsLib.expose(webSetWinningsAll);
 
     /**
      * Set all money made
-     * 
+     *
      * @param {number} allMoney the amount of money made all time
      */
     function webSetWinningsAll(allMoney) {
@@ -348,7 +348,7 @@ async function init() {
 
     /**
      * Set the number of races won
-     * 
+     *
      * @param {number} won the number of races won
      */
     function webSetRacesWon(won) {
@@ -364,7 +364,7 @@ async function init() {
 
     /**
      * Set the number of races lost
-     * 
+     *
      * @param {number} lost the number of races lost
      */
     function webSetRacesLost(lost) {
@@ -436,7 +436,7 @@ async function init() {
 
     /**
      * Set the autostop money
-     * 
+     *
      * @param {number} val the money value
      */
     function webSetAutostopMoney(val) {
@@ -450,7 +450,7 @@ async function init() {
 
     /**
      * Set the autostop time
-     * 
+     *
      * @param {number} val the time
      */
     function webSetAutostopTime(val) {

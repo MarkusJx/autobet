@@ -404,7 +404,7 @@ setResult(run());
                     isolatedFunction.setActiveFunction(this.fn);
                     this.fn.active = true;
                 } catch (e) {
-                    autobetLib.logging.error(`Could not set the active function: ${e.message}`);
+                    autobetLib.logging.error("jsEditor.js", `Could not set the active function: ${e.message}`);
                     isolatedFunction.revertToDefaultImpl();
                 }
             }
@@ -427,8 +427,8 @@ setResult(run());
             }
 
             // Wait for the check to finish (NOTE: This should be in a promise)
-            autobetLib.logging.warn("TODO: This should return a promise");
-            let res = isolatedFunction.checkFunction(this.fnString);
+            autobetLib.logging.warn("jsEditor.js", "TODO: This should return a promise");
+            let res = isolatedFunction.checkFunction(this.fnString, this.fn == null ? "default" : this.fn.id);
             // Set whether this is ok and set waiting to false
             this.setOk(res.ok);
             this.waiting = false;
@@ -703,6 +703,6 @@ setResult(run());
         impl_text_field.value = "";
     });
 } catch (e) {
-    autobetLib.logging.error(`Js exception thrown: ${e.message}`);
+    autobetLib.logging.error("jsEditor.js", `Js exception thrown: ${e.message}`);
     exception();
 }

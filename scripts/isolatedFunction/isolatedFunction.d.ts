@@ -92,8 +92,10 @@ export class isolatedFunction {
 
     /**
      * Create an isolated function
+     *
+     * @param loggingFunction the logging function callback
      */
-    constructor();
+    constructor(loggingFunction?: (msg: string) => void);
 
     /**
      * Set the script to run
@@ -116,5 +118,5 @@ export class isolatedFunction {
      * @param maxTests the maximum number of tests to run
      * @returns the rest result
      */
-    testFunction(maxTests = 10): testResult;
+    testFunction(maxTests?: number): testResult;
 }

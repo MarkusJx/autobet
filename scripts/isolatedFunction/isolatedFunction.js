@@ -60,7 +60,7 @@ module.exports = {
         /**
          * Create an isolated function
          */
-        constructor() {
+        constructor(loggingFunction = console.log) {
             this.running = false;
             this.result = null;
             this.function = null;
@@ -71,7 +71,7 @@ module.exports = {
                 wasm: false,
                 fixAsync: true,
                 sandbox: {
-                    log: console.log,
+                    log: loggingFunction,
                     setResult: (res) => {
                         this.result = res;
                     }

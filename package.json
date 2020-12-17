@@ -87,7 +87,9 @@
                 "from": "web",
                 "to": "web",
                 "filter": [
-                    "**/*"
+                    "**/*.min.*",
+                    "**/index.html",
+                    "**/favicon.ico"
                 ]
             }
         ],

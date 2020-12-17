@@ -62,6 +62,7 @@ try {
             electron.quit();
         });
     }
+
     setQuitCallback();
 
     // Set the betting exception callback function
@@ -118,7 +119,7 @@ try {
     /**
      * Make sums more readable by adding 'K' for thousand
      * or 'M' for million to the end of the sum
-     * 
+     *
      * @param {number} sum the sum to make pretty
      * @param {boolean} k whether to replace thousand by 'K'
      * @returns {string} the resulting value in the format [-]$<0-999>.<0-99><B|M|K>
@@ -153,11 +154,11 @@ try {
 
     /**
      * Add some money that was made
-     * 
+     *
      * @param {number} value the amount of money to add/subtract
      */
     function addMoney(value) {
-        if (value != 0) {
+        if (value !== 0) {
             moneyMade += value;
             if (value > 0) won++;
         } else {
@@ -171,7 +172,7 @@ try {
 
     /**
      * Set all money made
-     * 
+     *
      * @param {number} value the overall amount of money made all time
      */
     function setAllMoneyMade(value) {
@@ -189,7 +190,7 @@ try {
 
     /**
      * Get the money made per hour
-     * 
+     *
      * @returns {number} the amount of money made this hour
      */
     function getMoneyPerHour() {
@@ -201,7 +202,7 @@ try {
 
     /**
      * Set whether GTA V is running
-     * 
+     *
      * @param {boolean} val whether GTA V is running
      */
     function set_gta_running(val) {
@@ -217,7 +218,7 @@ try {
 
     /**
      * Set the qr code with an ip address
-     * 
+     *
      * @param {string} ip the ip address to display in the qr code
      */
     function setQRCode(ip) {
@@ -297,10 +298,10 @@ try {
             statusinfo.classList.remove("status_init");
             statusinfo.classList.add("status_stopped");
             statusinfo.innerText = "Stopped";
-            console.log("Initialized.");
+            autobetLib.logging.debug("main.js", "autobetlib initialized.");
             startstop.disabled = false;
         } else {
-            console.error("Could not initialize");
+            autobetLib.logging.error("main.js", "Could not initialize");
         }
 
         // Load the winnings
@@ -321,12 +322,12 @@ try {
             initialized = await autobetLib.startWebServer();
             enable_webserver.checked = initialized;
             if (initialized) {
-                autobetLib.logging.debug("Web server started.");
+                autobetLib.logging.debug("main.js", "Web server started.");
                 weblink.disabled = false;
                 showqrbutton.disabled = false;
                 setIPs();
             } else {
-                autobetLib.logging.error("Could not start web server");
+                autobetLib.logging.error("main.js", "Could not start web server");
                 weblink.disabled = true;
                 weblink.innerText = "not running";
                 showqrbutton.disabled = true;
@@ -345,7 +346,7 @@ try {
 
     // Run the main function
     main().then(() => {
-        autobetLib.logging.debug("JS main function finished");
+        autobetLib.logging.debug("main.js", "JS main function finished");
     }, () => {
         // main failed
         errordialog.open();
@@ -369,7 +370,7 @@ try {
 
     /**
      * Show the description
-     * 
+     *
      * @param {String} title the title
      * @param {String} description the description
      */
@@ -530,6 +531,6 @@ try {
             "Program will fall back to the native implementation.");
     });
 } catch (e) {
-    autobetLib.logging.error(`Js exception thrown: ${e.message}`);
+    autobetLib.logging.error("main.js", `Js exception thrown: ${e.message}`);
     exception();
 }

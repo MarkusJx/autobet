@@ -170,6 +170,6 @@ try {
         return hours + ':' + minutes + ':' + seconds;
     }
 } catch (e) {
-    autobetLib.logging.error(`Js exception thrown: ${e.message}`);
+    autobetLib.logging.error("jsEditor.js", `Js exception thrown: ${e.message}`);
     exception();
 }
