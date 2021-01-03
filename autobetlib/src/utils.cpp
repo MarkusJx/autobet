@@ -487,3 +487,10 @@ void utils::getActiveScreen(unsigned int xPos, unsigned int yPos, utils::windowS
     ws.xPos = target.rcMonitor.left;
     ws.yPos = target.rcMonitor.bottom;
 }
+
+bool utils::isAlreadyRunning(const std::string &programName) {
+    std::string addr = "Local\\";
+    addr.append(programName);
+    CreateMutexA(nullptr, false, addr.c_str());
+    return GetLastError() == ERROR_ALREADY_EXISTS;
+}

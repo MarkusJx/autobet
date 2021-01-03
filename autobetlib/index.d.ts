@@ -284,3 +284,10 @@ export function shutdown(): Promise<void>;
  * Set the odd translations
  */
 export function setOddTranslations(): Promise<void>;
+
+/**
+ * Check if autobet is already running
+ *
+ * @return true, if it is already running
+ */
+export function programIsRunning(): boolean;

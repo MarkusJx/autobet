@@ -204,5 +204,8 @@ module.exports = {
             autobetLib_native.lib_setOddTranslations(translations);
         } catch (e) {
         }
+    },
+    programIsRunning: function () {
+        return autobetLib_native.lib_programIsRunning();
     }
 };

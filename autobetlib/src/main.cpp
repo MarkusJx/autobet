@@ -1570,6 +1570,9 @@ void setAutobetlibVersion(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
+/**
+ * Set the odd translations map
+ */
 void setOddTranslations(const Napi::CallbackInfo &info) {
     CHECK_ARGS(array);
     auto arr = info[0].As<Napi::Array>();
@@ -1581,6 +1584,22 @@ void setOddTranslations(const Napi::CallbackInfo &info) {
 
     StaticLogger::debug("Setting odd translations");
     opencv_link::knn::setOddTranslations(translations);
+}
+
+/**
+ * Check if autobet is already running
+ */
+Napi::Boolean programIsRunning(const Napi::CallbackInfo &info) {
+    TRY
+        bool val = utils::isAlreadyRunning("autobet");
+        if (val) {
+            utils::displayError("Autobet is already running", [] {
+                kill(true);
+            });
+        }
+
+        return Napi::Boolean::New(info.Env(), val);
+    CATCH_EXCEPTIONS
 }
 
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
@@ -1637,6 +1656,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 
     export(setAutobetlibVersion);
     export(setOddTranslations);
+    export(programIsRunning);
 
     try {
         quit = [] {

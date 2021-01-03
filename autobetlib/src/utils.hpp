@@ -135,7 +135,7 @@ namespace utils {
     int displayError(const std::string &error, const std::function<void()> &callback = nullptr);
 
     /**
-     * Print systrem information to the logger
+     * Print system information to the logger
      */
     void printSystemInformation();
 
@@ -175,6 +175,15 @@ namespace utils {
      * @return 0 if everything is ok, an error code otherwise
      */
     errno_t isForeground(bool& res);
+
+    /**
+     * Check if this program is already running.
+     * Source: https://stackoverflow.com/a/14176581
+     *
+     * @param programName the program name
+     * @return true, if this program is already running
+     */
+    bool isAlreadyRunning(const std::string &programName);
 }
 
 #endif //GTA_ONLINE_AUTOBET_DEV_UTILS_HPP

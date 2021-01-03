@@ -144,9 +144,53 @@ function createErrorWindow() {
     errorWindowState.manage(errorWindow);
 }
 
+function createAlreadyRunningWindow() {
+    const runningWindowState = windowStateKeeper({
+        defaultWidth: 705,
+        defaultHeight: 830
+    });
+
+    const runningWindow = new BrowserWindow({
+        x: runningWindowState.x,
+        y: runningWindowState.y,
+        width: 750,
+        height: 440,
+        minWidth: 750,
+        minHeight: 440,
+        frame: true,
+        resizable: true,
+        icon: "icon.png",
+        webPreferences: {
+            //preload: path.join(__dirname, 'scripts', 'preload_err.js'),
+            contextIsolation: true,
+            worldSafeExecuteJavaScript: true,
+            nodeIntegration: false,
+            webSecurity: true,
+            enableRemoteModule: true,
+            devTools: enableDevTools
+        }
+    });
+
+    if (!enableDevTools) {
+        runningWindow.removeMenu();
+    }
+
+    runningWindow.loadFile(path.join(__dirname, 'ui', 'err', 'index.html')).then(() => {
+        console.log("Error window loaded");
+    });
+
+    runningWindowState.manage(runningWindow);
+}
+
 app.whenReady().then(() => {
     if (autobetLib != null) {
-        createWindow();
+        if (autobetLib.programIsRunning()) {
+            autobetLib.callbacks.setQuitCallback(() => {
+                app.quit();
+            });
+        } else {
+            createWindow();
+        }
     } else {
         createErrorWindow();
     }
