@@ -68,7 +68,10 @@
             "!**/autobetlib/external",
             "!**/autobetlib/include",
             "!**/autobetlib/src",
-            "!**/autobetlib/CMake**"
+            "!**/autobetlib/CMake**",
+            "!**/autobetlib/cmake-build-*",
+            "!**/autobetlib/conan*",
+            "!**/autobetlib/graph_info.json"
         ],
         "extraResources": [
             {

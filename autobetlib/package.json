@@ -8,7 +8,8 @@
         "build": "cmake-js build --CDBUILD_CPPJSLIB=TRUE",
         "postbuild": "node prelaunch.js",
         "prestart": "node prelaunch.js",
-        "clean": "cmake-js clean"
+        "clean": "cmake-js clean",
+        "postinstall": "conan install ."
     },
     "repository": {
         "type": "git",

@@ -87,9 +87,13 @@ jobs:
         boost_version: ${{env.BOOST_VERSION}}
         toolset: ${{env.BOOST_TOOLSET}}
 
+    # Install conan
+    - name: Get Conan
+      uses: turtlebrowser/get-conan@v1.0
+
     # Download and install opencv
-    - name: Install OpenCV
-      run: choco install opencv --version ${{env.OPENCV_VERSION}} -y
+    #- name: Install OpenCV
+    #  run: choco install opencv --version ${{env.OPENCV_VERSION}} -y
 
     # Set the autobet package version using npm
     - name: Set autobet version

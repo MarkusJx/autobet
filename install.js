@@ -158,6 +158,10 @@ function cleanUp() {
     const lib_lib_dir = path.join(__dirname, "autobetlib", "lib");
     const CppJsLib_dir = path.join(__dirname, "autobetlib", "src", "CppJsLib");
     const zip_dir = path.join(__dirname, "autobetlib", "src", "zip");
+    const conanbuildinfo_cmake = path.join(__dirname, "autobetlib", "conanbuildinfo.cmake");
+    const conanbuildinfo_txt = path.join(__dirname, "autobetlib", "conanbuildinfo.txt");
+    const conaninfo_txt = path.join(__dirname, "autobetlib", "conaninfo.txt");
+    const graph_info_json = path.join(__dirname, "autobetlib", "graph_info.json");
 
     deleteIfExists(dist_dir);
     deleteIfExists(bin_dir);
@@ -166,6 +170,11 @@ function cleanUp() {
     deleteIfExists(lib_lib_dir);
     deleteIfExists(CppJsLib_dir);
     deleteIfExists(zip_dir);
+
+    deleteIfExists(conanbuildinfo_cmake);
+    deleteIfExists(conanbuildinfo_txt);
+    deleteIfExists(conaninfo_txt);
+    deleteIfExists(graph_info_json);
 }
 
 function full_clean() {

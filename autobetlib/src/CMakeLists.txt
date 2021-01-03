@@ -11,6 +11,8 @@ option(BUILD_CPPJSLIB FALSE)
 message(STATUS "Building with debug:full support")
 
 include(autobetLib_func_def.cmake)
+include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 # Download the zip repo
 downloadZip()
@@ -21,10 +23,10 @@ file(GLOB zip
         "${ZIP_SOURCE_DIRECTORY}/*.c"
         )
 
-find_package(OpenCV REQUIRED)
+#find_package(OpenCV REQUIRED)
 
-message(STATUS "Found OpenCV include dir: ${OpenCV_INCLUDE_DIRS}")
-message(STATUS "Found OpenCV libs: ${OpenCV_LIBS}")
+#message(STATUS "Found OpenCV include dir: ${OpenCV_INCLUDE_DIRS}")
+#message(STATUS "Found OpenCV libs: ${OpenCV_LIBS}")
 
 include_directories(${CMAKE_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS})
 link_directories(${CMAKE_SOURCE_DIR}/lib ${Boost_LIBRARY_DIRS} "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.27.29110\\atlmfc\\lib\\x64")
@@ -47,7 +49,8 @@ message(NOTICE "Check for precompiled headers")
 
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${OpenCV_LIBS})
+#target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CONAN_LIBS})
 
 # Include N-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"
@@ -86,6 +89,6 @@ else ()
 endif ()
 
 # Create 'external' and 'lib' directory
-createDirectory(${CMAKE_SOURCE_DIR}/external)
+#createDirectory(${CMAKE_SOURCE_DIR}/external)
 
-copyOpencvDll()
+#copyOpencvDll()

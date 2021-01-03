@@ -236,3 +236,7 @@ test/ai/external
 test/ai/lib
 /autobetLib/src/CppJsLib
 /autobetLib/src/zip
+/autobetlib/conanbuildinfo.cmake
+/autobetlib/conanbuildinfo.txt
+/autobetlib/conaninfo.txt
+/autobetlib/graph_info.json
