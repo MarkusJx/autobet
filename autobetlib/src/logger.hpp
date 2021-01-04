@@ -248,6 +248,30 @@ namespace logger {
         }
 
         /**
+         * Just print a debug message with a timestamp
+         *
+         * @param message the message to log
+         */
+        inline void simpleDebug(const std::string &message) {
+            std::string _time;
+            if (_mode != LoggerMode::MODE_NONE && level == LogLevel::debug) {
+                _time = LoggerUtils::currentDateTime();
+            }
+
+            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level == LogLevel::debug &&
+                logToFile()) {
+                fprintf(this->file, "[%s] %s\n", _time.c_str(), message.c_str());
+                fflush(this->file);
+            }
+
+            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level == LogLevel::debug && logToConsole()) {
+                std::string s = "[";
+                s.append(_time).append("] ").append(message).append("\n");
+                node_log(s);
+            }
+        }
+
+        /**
          * Write an error message.
          * You should use the error macro. Usage:
          *
@@ -275,6 +299,30 @@ namespace logger {
                 std::string s = "[";
                 s.append(_time).append("] [").append(_file).append(":").append(std::to_string(line)).append(
                         "] [ERROR] ").append(message).append("\n");
+                node_log(s);
+            }
+        }
+
+        /**
+         * Just print a error message with a timestamp
+         *
+         * @param message the message to log
+         */
+        inline void simpleError(const std::string &message) {
+            std::string _time;
+            if (_mode != MODE_NONE && level != LogLevel::none) {
+                _time = LoggerUtils::currentDateTime();
+            }
+
+            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level != LogLevel::none &&
+                logToFile()) {
+                fprintf(this->file, "[%s] %s\n", _time.c_str(), message.c_str());
+                fflush(this->file);
+            }
+
+            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level != LogLevel::none && logToConsole()) {
+                std::string s = "[";
+                s.append(_time).append("] ").append(message).append("\n");
                 node_log(s);
             }
         }
@@ -496,6 +544,16 @@ namespace logger {
         }
 
         /**
+         * Just print a debug message with a timestamp
+         *
+         * @param message the message to log
+         */
+        static void simpleDebug(const std::string &message) {
+            if (getLogger())
+                getLogger()->simpleDebug(message);
+        }
+
+        /**
          * Write a error message.
          * You should use the error macro. Usage:
          *
@@ -510,6 +568,16 @@ namespace logger {
         LOGGER_MAYBE_UNUSED static void _error(const char *_file, int line, const std::string &message) {
             if (getLogger())
                 getLogger()->_error(_file, line, message);
+        }
+
+        /**
+         * Just print a error message with a timestamp
+         *
+         * @param message the message to log
+         */
+        static void simpleError(const std::string &message) {
+            if (getLogger())
+                getLogger()->simpleError(message);
         }
 
         /**

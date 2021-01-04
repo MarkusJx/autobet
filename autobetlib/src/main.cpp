@@ -6,6 +6,7 @@
 #include "autobetException.hpp"
 #include "opencv_link/opencv_link.hpp"
 
+#include <CppJsLib.hpp>
 #include <chrono>
 #include <thread>
 #include <cmath>
@@ -13,15 +14,9 @@
 #include <fstream>
 #include <algorithm>
 #include <memory>
+#include <Windows.h>
+#include <shellapi.h>
 
-#ifdef AUTOBET_WINDOWS
-
-#   include <windows.h>
-#   include <shellapi.h>
-
-#endif
-
-#include <CppJsLib.hpp>
 #include "logger.hpp"
 
 #define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
@@ -36,7 +31,7 @@ using namespace napi_tools;
 // to crop to extract the odd of the horse
 const uint16_t yLocations[6] = {452, 616, 778, 940, 1102, 1264};
 
-std::unique_ptr<CppJsLib::WebGUI> webUi = nullptr;
+std::unique_ptr<markusjx::cppJsLib::Server> webUi = nullptr;
 opencv_link::knn knn = nullptr;
 
 uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
@@ -122,7 +117,11 @@ void kill(bool _exit = true) {
 
     // Stop the web servers, so they don't occupy the ports they use
     if (webUi) {
-        if (!CppJsLib::util::stop(webUi.get(), true, 5)) {
+        std::promise<void> stopPromise;
+        webUi->stop(stopPromise);
+        std::future<void> stopFuture = stopPromise.get_future();
+
+        if (stopFuture.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
             StaticLogger::warning("Could not stop web ui web server");
         } else {
             StaticLogger::debug("Stopped web ui web server");
@@ -949,7 +948,14 @@ bool startWebUi() {
             return false;
         }
 
-        webUi = std::make_unique<CppJsLib::WebGUI>(base_dir);
+        webUi = std::make_unique<markusjx::cppJsLib::Server>(base_dir);
+        webUi->setLogger([](const std::string &s) {
+            StaticLogger::simpleDebug(s);
+        });
+
+        webUi->setError([](const std::string &s) {
+            StaticLogger::simpleError(s);
+        });
     } catch (std::bad_alloc &e) {
         // This should not happen on a modern system
         StaticLogger::errorStream() << "Unable to create instance of web ui web server. Error: " << e.what();
@@ -995,7 +1001,7 @@ bool startWebUi() {
 #ifdef CPPJSLIB_ENABLE_WEBSOCKET
 #   pragma message("INFO: Building with websocket support")
     StaticLogger::debug("Starting with websocket enabled");
-    bool res = webUi->start(8027, 8028, getIP(), false);
+    bool res = webUi->start(8027, getIP(), 8028, false);
 #else
 #   pragma message("INFO: Building without websocket support")
     StaticLogger::debug("Starting with websocket disabled");
@@ -1052,13 +1058,13 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         utils::setDpiAware();
 
         // Set CppJsLib loggers
-        CppJsLib::setLogger([](const std::string &s) {
+        /*CppJsLib::setLogger([](const std::string &s) {
             StaticLogger::debug(s);
         });
 
         CppJsLib::setError([](const std::string &s) {
             StaticLogger::error(s);
-        });
+        });*/
 
         // Print some system information
         utils::printSystemInformation();
@@ -1408,8 +1414,12 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
         } else {
             webServer = false;
             if (webUi) {
+                std::promise<void> stopPromise;
+                webUi->stop(stopPromise);
+                std::future<void> stopFuture = stopPromise.get_future();
+
                 // Try to stop the web server
-                if (!CppJsLib::util::stop(webUi.get(), true, 5)) {
+                if (stopFuture.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
                     StaticLogger::warning("Could not stop web ui web server");
                 } else {
                     StaticLogger::debug("Stopped web ui web server");
@@ -1460,7 +1470,7 @@ Napi::Boolean node_getWebServer(const Napi::CallbackInfo &info) {
  */
 Napi::Boolean webServerRunning(const Napi::CallbackInfo &info) {
     if (webUi) {
-        return Napi::Boolean::New(info.Env(), webUi->isRunning());
+        return Napi::Boolean::New(info.Env(), webUi->running());
     } else {
         return Napi::Boolean::New(info.Env(), false);
     }

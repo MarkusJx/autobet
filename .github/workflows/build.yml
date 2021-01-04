@@ -91,9 +91,9 @@ jobs:
     - name: Get Conan
       uses: turtlebrowser/get-conan@v1.0
 
-    # Download and install opencv
-    #- name: Install OpenCV
-    #  run: choco install opencv --version ${{env.OPENCV_VERSION}} -y
+    # Add https://api.bintray.com/conan/markusjx/CppJsLib to conan remotes
+    - name: Add CppJsLib conan remote
+      run: conan remote add CppJsLib https://api.bintray.com/conan/markusjx/CppJsLib
 
     # Set the autobet package version using npm
     - name: Set autobet version

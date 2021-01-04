@@ -43,10 +43,6 @@ set(NAPI_TOOLS_SRC n_api/napi_tools.hpp)
 # Add the library
 add_library(${PROJECT_NAME} SHARED ${src} ${include} ${zip} ${OPENCV_LINK_SRC} ${NAPI_TOOLS_SRC} ${CMAKE_JS_SRC})
 
-message(NOTICE "Check for precompiled headers")
-# Precompile napi_tools.hpp
-#target_precompile_headers(${PROJECT_NAME} PRIVATE ${NAPI_TOOLS_SRC})
-
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 #target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${OpenCV_LIBS})
@@ -71,22 +67,24 @@ else ()
     message(STATUS "Building in release mode")
 endif ()
 
+add_compile_definitions(CPPJSLIB_ENABLE_WEBSOCKET)
+
 # If BUILD_CPPJSLIB is set, download the CppJsLib repo and add the files to the library
-if (BUILD_CPPJSLIB)
-    downloadCppJsLib()
-
-    include(CppJsLib/src/InitCppJsLib.cmake)
-    initCppJsLib(${PROJECT_NAME} "CppJsLib/src" "${CMAKE_SOURCE_DIR}/include" TRUE FALSE)
-
-    if (EXISTS ${CMAKE_SOURCE_DIR}/websocketpp)
-        message(STATUS "Deleting websocketpp folder")
-        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/websocketpp)
-    endif ()
-
-    add_compile_definitions(BUILD_CPPJSLIB)
-else ()
-    target_link_libraries(${PROJECT_NAME} CppJsLib)
-endif ()
+#if (BUILD_CPPJSLIB)
+#    downloadCppJsLib()
+#
+#    include(CppJsLib/src/InitCppJsLib.cmake)
+#    initCppJsLib(${PROJECT_NAME} "CppJsLib/src" "${CMAKE_SOURCE_DIR}/include" TRUE FALSE)
+#
+#    if (EXISTS ${CMAKE_SOURCE_DIR}/websocketpp)
+#        message(STATUS "Deleting websocketpp folder")
+#        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/websocketpp)
+#    endif ()
+#
+#    add_compile_definitions(BUILD_CPPJSLIB)
+#else ()
+#    target_link_libraries(${PROJECT_NAME} CppJsLib)
+#endif ()
 
 # Create 'external' and 'lib' directory
 #createDirectory(${CMAKE_SOURCE_DIR}/external)
