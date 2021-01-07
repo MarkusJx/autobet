@@ -7,20 +7,19 @@ unsigned int *cur_time;
 int autostop_time = -1;
 int autostop_money = -1;
 
-std::function<void(int)> fn_initializer = nullptr;
-std::function<void(int)> &webSetAutostopMoneyF = fn_initializer;
-std::function<void(int)> &webSetAutostopTimeF = fn_initializer;
+void(*webSetAutostopMoneyF)(int) = nullptr;
+void(*webSetAutostopTimeF)(int) = nullptr;
 
-void autostop::init(int *winnings, unsigned int *time_running, std::function<void(int)> &webSetAutostopMoney, std::function<void(int)> &webSetAutostopTime) {
+void autostop::init(int *winnings, unsigned int *time_running, void(*webSetAutostopMoney)(int), void(*webSetAutostopTime)(int)) {
     money = winnings;
     cur_time = time_running;
 
     webSetAutostopMoneyF = webSetAutostopMoney;
-    webSetAutostopTimeF = webSetAutostopMoney;
+    webSetAutostopTimeF = webSetAutostopTime;
 }
 
 bool autostop::checkStopConditions() {
-    if (autostop_time != -1 && autostop_time > *cur_time) {
+    if (autostop_time != -1 && autostop_time > static_cast<signed>(*cur_time)) {
         autostop_money = -1;
         autostop_time = -1;
 
@@ -40,7 +39,11 @@ bool autostop::checkStopConditions() {
 void set_autostop_money(int val) {
     logger::StaticLogger::debug("Set autostop money to " + std::to_string(val));
     autostop_money = val;
-    if (webSetAutostopMoneyF) webSetAutostopMoneyF(val);
+    try {
+        if (webSetAutostopMoneyF) webSetAutostopMoneyF(val);
+    } catch (const std::exception &e) {
+        logger::StaticLogger::errorStream() << "Exception thrown: " << e.what();
+    }
 }
 
 int get_autostop_money() {
@@ -50,7 +53,11 @@ int get_autostop_money() {
 void set_autostop_time(int val) {
     logger::StaticLogger::debug("Set autostop time to " + std::to_string(val));
     autostop_time = val;
-    if (webSetAutostopTimeF) webSetAutostopTimeF(val);
+    try {
+        if (webSetAutostopTimeF) webSetAutostopTimeF(val);
+    } catch (const std::exception &e) {
+        logger::StaticLogger::errorStream() << "Exception thrown: " << e.what();
+    }
 }
 
 int get_autostop_time() {

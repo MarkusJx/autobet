@@ -5,11 +5,17 @@
     "main": "index.js",
     "scripts": {
         "test": "node test.js",
-        "build": "cmake-js build --CDBUILD_CPPJSLIB=TRUE",
+        "pretest": "npm run-script build",
+        "test:dev": "node test.js",
+        "pretest:dev": "npm run-script build:dev",
+        "build": "cmake-js build",
+        "build:dev": "cmake-js configure --release && cmake --build build --config RelWithDebInfo",
+        "postbuild:dev": "node prelaunch.js --dev",
         "postbuild": "node prelaunch.js",
-        "prestart": "node prelaunch.js",
         "clean": "cmake-js clean",
-        "postinstall": "conan install ."
+        "preinstall": "conan install .",
+        "conan_install:dev": "conan install . -s build_type=Debug",
+        "conan_install": "conan install ."
     },
     "repository": {
         "type": "git",
@@ -28,6 +34,7 @@
     },
     "devDependencies": {
         "cmake-js": "^6.1.0",
-        "node-addon-api": "^3.0.2"
+        "node-addon-api": "^3.0.2",
+        "segfault-handler": "^1.3.0"
     }
 }

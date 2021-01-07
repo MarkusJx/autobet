@@ -425,7 +425,7 @@ namespace napi_tools {
                 try {
                     Run();
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                } catch (std::exception &e) {
+                } catch (const std::exception &e) {
                     Napi::AsyncWorker::SetError(e.what());
                 } catch (...) {
                     Napi::AsyncWorker::SetError("An unknown error occurred");

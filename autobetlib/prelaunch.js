@@ -24,4 +24,6 @@ if (fs.existsSync(bin_dir)) {
 
 fs.mkdirSync(bin_dir);
 fs.copyFileSync("./build/src/bin/autobetLib.node", bin_dir + "/autobetLib.node");
-//fs.copyFileSync("./external/opencv_world412.dll", bin_dir + "/opencv_world412.dll");
+if (process.argv.length === 3 && process.argv[2] === "--dev") {
+    fs.copyFileSync("./build/src/bin/autobetLib.pdb", bin_dir + "/autobetLib.pdb");
+}

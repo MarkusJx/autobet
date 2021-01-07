@@ -1,12 +1,3 @@
-#include "main.hpp"
-#include "utils.hpp"
-#include "debug.hpp"
-#include "autostop.hpp"
-#include "settings.hpp"
-#include "autobetException.hpp"
-#include "opencv_link/opencv_link.hpp"
-
-#include <CppJsLib.hpp>
 #include <chrono>
 #include <thread>
 #include <cmath>
@@ -17,7 +8,15 @@
 #include <Windows.h>
 #include <shellapi.h>
 
+#include "main.hpp"
+#include "utils.hpp"
+#include "debug.hpp"
+#include "autostop.hpp"
+#include "settings.hpp"
+#include "autobetException.hpp"
+#include "opencv_link/opencv_link.hpp"
 #include "logger.hpp"
+#include "webui.hpp"
 
 #define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
 
@@ -31,10 +30,9 @@ using namespace napi_tools;
 // to crop to extract the odd of the horse
 const uint16_t yLocations[6] = {452, 616, 778, 940, 1102, 1264};
 
-std::unique_ptr<markusjx::cppJsLib::Server> webUi = nullptr;
 opencv_link::knn knn = nullptr;
 
-uint16_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
+int32_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
 int64_t winnings_all = 0L; // NOTE: This could alse be a int32, you would have to bet 11 years to fill that shit up
 int winnings = 0;
 bool gtaVRunning, running, stopping, starting, keyCombListen, runLoops;
@@ -47,20 +45,6 @@ bool bettingFunctionSet = false;
  * The current autobetlib version
  */
 std::string autobetlib_version = "unknown";
-
-// web functions ==========================================
-
-std::function<void(bool)> webSetGtaRunning = nullptr;
-std::function<void(int)> webSetWinnings = nullptr;
-std::function<void(int)> webSetWinningsAll = nullptr;
-std::function<void(int)> webSetRacesWon = nullptr;
-std::function<void(int)> webSetRacesLost = nullptr;
-std::function<void()> webSetStarted = nullptr;
-std::function<void()> webSetStopped = nullptr;
-std::function<void()> webSetStopping = nullptr;
-std::function<void()> webSetStarting = nullptr;
-std::function<void(int)> webSetAutostopMoney = nullptr;
-std::function<void(int)> webSetAutostopTime = nullptr;
 
 // Callbacks ==============================================
 
@@ -115,22 +99,7 @@ void kill(bool _exit = true) {
     runLoops = false;
     running = false;
 
-    // Stop the web servers, so they don't occupy the ports they use
-    if (webUi) {
-        std::promise<void> stopPromise;
-        webUi->stop(stopPromise);
-        std::future<void> stopFuture = stopPromise.get_future();
-
-        if (stopFuture.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
-            StaticLogger::warning("Could not stop web ui web server");
-        } else {
-            StaticLogger::debug("Stopped web ui web server");
-        }
-
-        webUi.reset();
-    } else {
-        StaticLogger::warning("Could not stop web ui web server");
-    }
+    webui::reset();
 
     // Delete the AI
     StaticLogger::debug("Deleting ai");
@@ -269,10 +238,15 @@ void reset() {
  * @param val the new value
  */
 void setGtaVRunning(bool val) {
-    // Only tell the web listeners changes, not stuff they already know
-    if (webSetGtaRunning && val != gtaVRunning) webSetGtaRunning(val);
-    gtaVRunning = val;
-    setGtaRunningCallback(val);
+    try {
+        // Only tell the web listeners changes, not stuff they already know
+        if (val != gtaVRunning) webui::setGtaRunning(val);
+
+        gtaVRunning = val;
+        setGtaRunningCallback(val);
+    } catch (const std::exception &e) {
+        StaticLogger::errorStream() << "Exception thrown: " << e.what();
+    }
 }
 
 short getBasicBettingPosition(const std::vector<std::string> &odds) {
@@ -401,29 +375,33 @@ short get_pos(const std::shared_ptr<void> &src) {
 void updateWinnings(int amount) {
     StaticLogger::debugStream() << "Updating winnings by " << amount;
 
-    // If the amount to add is not zero add it to winnings and winnings_all
-    if (amount != 0) {
-        winnings += amount;
-        winnings_all += amount;
+    try {
+        // If the amount to add is not zero add it to winnings and winnings_all
+        if (amount != 0) {
+            winnings += amount;
+            winnings_all += amount;
 
-        if (webSetWinnings) webSetWinnings(winnings);
-        if (webSetWinningsAll) webSetWinningsAll(winnings_all);
+            webui::setWinnings(winnings);
+            webui::setWinningsAll(winnings_all);
 
-        setAllMoneyMadeCallback(winnings_all);
-        writeWinnings();
+            setAllMoneyMadeCallback(static_cast<int>(winnings_all));
+            writeWinnings();
 
-        // If the amount is not negative count it as a won race
-        if (amount > 0) {
-            racesWon++;
-            if (webSetRacesWon) webSetRacesWon(racesWon);
+            // If the amount is not negative count it as a won race
+            if (amount > 0) {
+                racesWon++;
+                webui::setRacesWon(racesWon);
+            }
+        } else {
+            // Add a lost race
+            racesLost++;
+            webui::setRacesLost(racesLost);
         }
-    } else {
-        // Add a lost race
-        racesLost++;
-        if (webSetRacesLost) webSetRacesLost(racesLost);
-    }
 
-    addMoneyCallback(amount);
+        addMoneyCallback(amount);
+    } catch (const std::exception &e) {
+        StaticLogger::errorStream() << "Exception thrown: " << e.what();
+    }
 }
 
 /**
@@ -500,8 +478,12 @@ void skipBet() {
 void mainLoop() {
     // Stop the betting as a lambda
     const auto stopBetting = [] {
-        uiKeycombStopCallback();
-        if (webSetStopping) webSetStopping();
+        try {
+            uiKeycombStopCallback();
+            webui::setStopping();
+        } catch (const std::exception &e) {
+            StaticLogger::errorStream() << "Exception thrown: " << e.what();
+        }
         running = false;
     };
 
@@ -629,7 +611,7 @@ void mainLoop() {
 
         // Set stopped
         stopping = false;
-        if (webSetStopped) webSetStopped();
+        webui::setStopped();
         StaticLogger::debug("Betting is now paused");
     } else {
         // The Game is not running, tell it everyone and sleep some time
@@ -657,21 +639,26 @@ bool stopped() {
  */
 void start_script() {
     StaticLogger::debug("Starting script");
-    // Only start if it is not already running or stopping
-    if (!running && !stopping) {
-        StaticLogger::debug("Set running to true");
-        uiKeycombStartCallback();
-        if (webSetStarted) webSetStarted();
-        running = true;
-    }
 
-    // Count the time running
-    std::thread([] {
-        while (!stopped()) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-            time_running++;
+    try {
+        // Only start if it is not already running or stopping
+        if (!running && !stopping) {
+            StaticLogger::debug("Set running to true");
+            uiKeycombStartCallback();
+            webui::setStarted();
+            running = true;
         }
-    }).detach();
+
+        // Count the time running
+        std::thread([] {
+            while (!stopped()) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                time_running++;
+            }
+        }).detach();
+    } catch (const std::exception &e) {
+        StaticLogger::errorStream() << "Exception thrown: " << e.what();
+    }
 }
 
 /**
@@ -680,8 +667,12 @@ void start_script() {
 void stop_script() {
     // Only stop if it is running and not stopping
     if (running && !stopping) {
-        uiKeycombStopCallback();
-        if (webSetStopping) webSetStopping();
+        try {
+            uiKeycombStopCallback();
+            webui::setStopping();
+        } catch (const std::exception &e) {
+            StaticLogger::errorStream() << "Exception thrown: " << e.what();
+        }
         StaticLogger::debug("Waiting for main thread to finish");
         running = false;
         stopping = true;
@@ -698,15 +689,15 @@ void js_stop_script() {
 }
 
 int get_races_won() {
-    return racesWon;
+    return static_cast<int>(racesWon);
 }
 
 int get_races_lost() {
-    return racesLost;
+    return static_cast<int>(racesLost);
 }
 
 int get_all_winnings() {
-    return (int) winnings_all;
+    return static_cast<int>(winnings_all);
 }
 
 int get_current_winnings() {
@@ -714,7 +705,7 @@ int get_current_winnings() {
 }
 
 int get_time() {
-    return (int) time_running;
+    return static_cast<int>(time_running);
 }
 
 bool get_gta_running() {
@@ -740,7 +731,7 @@ int get_running() {
  * Get the time the betting is running
  */
 Napi::Number node_get_time(const Napi::CallbackInfo &info) {
-    return Napi::Number::New(info.Env(), (double) time_running);
+    return Napi::Number::New(info.Env(), static_cast<double>(time_running));
 }
 
 /**
@@ -753,14 +744,14 @@ Napi::Boolean node_get_gta_running(const Napi::CallbackInfo &info) {
 /**
  * Start the betting from node.js
  */
-void node_js_start_script(const Napi::CallbackInfo &info) {
+void node_js_start_script(const Napi::CallbackInfo &) {
     start_script();
 }
 
 /**
  * Stop the betting from node.js
  */
-void node_js_stop_script(const Napi::CallbackInfo &info) {
+void node_js_stop_script(const Napi::CallbackInfo &) {
     stop_script();
 }
 
@@ -770,7 +761,7 @@ void node_js_stop_script(const Napi::CallbackInfo &info) {
 void set_starting(const Napi::CallbackInfo &info) {
     CHECK_ARGS(napi_tools::napi_type::boolean);
     starting = info[0].ToBoolean();
-    if (webSetStarting && starting) webSetStarting();
+    webui::setStarting();
 }
 
 /**
@@ -816,7 +807,7 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
         }
 
         StaticLogger::debugStream() << "Read winnings: " << winnings_all;
-        setAllMoneyMadeCallback(winnings_all);
+        setAllMoneyMadeCallback(static_cast<int>(winnings_all));
     });
 }
 
@@ -879,14 +870,12 @@ void listenForKeycomb() {
                 stop_script();
             }
         } else {
-            StaticLogger::debug(
-                    "Keycomb to start was triggered, but the 'start' button was already pressed at this time, ignoring the event");
+            StaticLogger::debug("Keycomb to start was triggered, but the 'start' button was already"
+                                "pressed at this time, ignoring the event");
         }
     };
 
-#pragma message(TODO(Maybe add custom key combinations))
-#ifdef AUTOBET_WINDOWS
-#   pragma message("INFO: Building on windows")
+#   pragma message(TODO(Maybe add custom key combinations))
     while (keyCombListen) {
         // If SHIFT+CTRL+F9 is pressed, start/stop, if SHIFT+CTRL+F10 is pressed, quit
         if (unsigned(GetKeyState(VK_SHIFT)) & unsigned(0x8000)) {
@@ -903,123 +892,11 @@ void listenForKeycomb() {
         // Sleep for 50 milliseconds to reduce cpu usage
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
-#endif
 
     // Kill the program if SHIFT+CTRL+F9 is pressed, this on activates if break on the loop is called
     // and keyCombListen is still true, if it is false, the program is about to stop already
     if (keyCombListen) {
         quit();
-    }
-}
-
-/**
- * Set all imported webUi functions to nullptr
- */
-void destroyImportedWebFunctions() {
-    webSetGtaRunning = nullptr;
-    webSetWinnings = nullptr;
-    webSetWinningsAll = nullptr;
-    webSetRacesWon = nullptr;
-    webSetRacesLost = nullptr;
-    webSetStarted = nullptr;
-    webSetStopped = nullptr;
-    webSetStopping = nullptr;
-    webSetStarting = nullptr;
-    webSetAutostopMoney = nullptr;
-    webSetAutostopTime = nullptr;
-}
-
-/**
- * Try to start the web ui
- * 
- * @return true, if the operation was successful
- */
-bool startWebUi() {
-    try {
-        // Set the base directory to the appropriate directory
-        // depending on whether the program is packed or not
-        std::string base_dir;
-        if (utils::fileExists("web")) {
-            base_dir = "web";
-        } else if (utils::fileExists("resources/web")) {
-            base_dir = "resources/web";
-        } else {
-            StaticLogger::error("No web folder was found. Unable to start web ui web server");
-            return false;
-        }
-
-        webUi = std::make_unique<markusjx::cppJsLib::Server>(base_dir);
-        webUi->setLogger([](const std::string &s) {
-            StaticLogger::simpleDebug(s);
-        });
-
-        webUi->setError([](const std::string &s) {
-            StaticLogger::simpleError(s);
-        });
-    } catch (std::bad_alloc &e) {
-        // This should not happen on a modern system
-        StaticLogger::errorStream() << "Unable to create instance of web ui web server. Error: " << e.what();
-        webUi.reset();
-        return false;
-    }
-
-    StaticLogger::debug("Exposing functions to the webUi");
-
-    // Expose a lot of functions
-    webUi->expose(js_start_script);
-    webUi->expose(js_stop_script);
-    webUi->expose(get_races_won);
-    webUi->expose(get_races_lost);
-    webUi->expose(get_all_winnings);
-    webUi->expose(get_current_winnings);
-    webUi->expose(get_time);
-    webUi->expose(get_gta_running);
-    webUi->expose(get_running);
-    webUi->expose(get_autostop_money);
-    webUi->expose(get_autostop_time);
-    webUi->expose(set_autostop_time);
-    webUi->expose(set_autostop_money);
-
-    // Import some functions
-    webUi->import(webSetGtaRunning);
-    webUi->import(webSetWinnings);
-    webUi->import(webSetWinningsAll);
-    webUi->import(webSetRacesWon);
-    webUi->import(webSetRacesLost);
-    webUi->import(webSetStarted);
-    webUi->import(webSetStopped);
-    webUi->import(webSetStopping);
-    webUi->import(webSetStarting);
-    webUi->import(webSetAutostopMoney);
-    webUi->import(webSetAutostopTime);
-
-    StaticLogger::debug("Starting web ui web server");
-
-    // We're building with websocket protocol support by default.
-    // This may only be disabled when boost is not installed
-    // or the BOOST_ROOT environment variable is not set.
-#ifdef CPPJSLIB_ENABLE_WEBSOCKET
-#   pragma message("INFO: Building with websocket support")
-    StaticLogger::debug("Starting with websocket enabled");
-    bool res = webUi->start(8027, getIP(), 8028, false);
-#else
-#   pragma message("INFO: Building without websocket support")
-    StaticLogger::debug("Starting with websocket disabled");
-    bool res = webUi->start(8027, getIP(), false);
-#endif // CPPJSLIB_ENABLE_WEBSOCKET
-
-    // Check the result, if it is set to true, everything is ok
-    if (res) {
-        StaticLogger::debug("Successfully started webUi");
-        return true;
-    } else {
-        StaticLogger::warning("Could not start webUi");
-        webUi.reset();
-
-        // Set all functions to nullptr
-        destroyImportedWebFunctions();
-
-        return false;
     }
 }
 
@@ -1057,15 +934,6 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 
         utils::setDpiAware();
 
-        // Set CppJsLib loggers
-        /*CppJsLib::setLogger([](const std::string &s) {
-            StaticLogger::debug(s);
-        });
-
-        CppJsLib::setError([](const std::string &s) {
-            StaticLogger::error(s);
-        });*/
-
         // Print some system information
         utils::printSystemInformation();
         utils::setCtrlCHandler([] {
@@ -1074,7 +942,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         });
 
         // Init autostop
-        autostop::init(&winnings, &time_running, webSetAutostopMoney, webSetAutostopTime);
+        autostop::init(&winnings, &time_running, webui::setAutostopMoney, webui::setAutostopTime);
 
 #ifndef NDEBUG
 #       pragma message("INFO: Building in debug mode")
@@ -1098,7 +966,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         // Try to initialize the knn
         try {
             knn = opencv_link::knn("resources/data/model.yml");
-        } catch (std::bad_alloc &e) {
+        } catch (const std::bad_alloc &) {
             StaticLogger::error("Could not initialize AI: Unable to allocate memory");
             utils::displayError("Could not initialize AI\nNot enough memory", [] {
                 exceptionCallback();
@@ -1131,6 +999,7 @@ Napi::Promise start(const Napi::CallbackInfo &info) {
         runLoops = true;
 
         while (runLoops) {
+            StaticLogger::debug("Running main loop");
             try {
                 mainLoop();
             } catch (autobetException &e) {
@@ -1139,6 +1008,8 @@ Napi::Promise start(const Napi::CallbackInfo &info) {
                     quit();
                 });
             }
+
+            StaticLogger::debug("main function finished");
 
             // Sleep until the betting is started.
             // Will still call the mainLoop() every 10 seconds
@@ -1403,9 +1274,9 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
         if (start_web_server) {
             // Try to start the web ui
             webServer = true;
-            if (!webUi) {
+            if (!webui::initialized()) {
                 // If web ui isn't already started, start it
-                return startWebUi();
+                return webui::startWebUi(getIP());
             } else {
                 // The web server already exists
                 StaticLogger::warning("Tried to start webUi server, but it already is running");
@@ -1413,28 +1284,7 @@ Napi::Promise setWebServer(const Napi::CallbackInfo &info) {
             }
         } else {
             webServer = false;
-            if (webUi) {
-                std::promise<void> stopPromise;
-                webUi->stop(stopPromise);
-                std::future<void> stopFuture = stopPromise.get_future();
-
-                // Try to stop the web server
-                if (stopFuture.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
-                    StaticLogger::warning("Could not stop web ui web server");
-                } else {
-                    StaticLogger::debug("Stopped web ui web server");
-                }
-
-                // Delete the instance from existence
-                webUi.reset();
-
-                // Set all imported functions to nullptr
-                destroyImportedWebFunctions();
-                return true;
-            } else {
-                StaticLogger::warning("Tried to stop webUi server, but it does not exist");
-                return false;
-            }
+            return webui::reset();
         }
     });
 }
@@ -1446,7 +1296,7 @@ Napi::Promise startWebServer(const Napi::CallbackInfo &info) {
     return promises::promise<bool>(info.Env(), [] {
         if (webServer) {
             StaticLogger::debug("Trying to start web ui");
-            if (startWebUi()) {
+            if (webui::startWebUi(getIP())) {
                 StaticLogger::debug("Web ui started");
                 return true;
             } else {
@@ -1469,8 +1319,8 @@ Napi::Boolean node_getWebServer(const Napi::CallbackInfo &info) {
  * Check if the web server is running
  */
 Napi::Boolean webServerRunning(const Napi::CallbackInfo &info) {
-    if (webUi) {
-        return Napi::Boolean::New(info.Env(), webUi->running());
+    if (webui::initialized()) {
+        return Napi::Boolean::New(info.Env(), webui::running());
     } else {
         return Napi::Boolean::New(info.Env(), false);
     }
@@ -1669,6 +1519,17 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(programIsRunning);
 
     try {
+        // Set the web ui exported functions down here
+        webui::set_js_start_script(js_start_script);
+        webui::set_js_stop_script(js_stop_script);
+        webui::set_get_races_won(get_races_won);
+        webui::set_get_races_lost(get_races_lost);
+        webui::set_get_all_winnings(get_all_winnings);
+        webui::set_get_current_winnings(get_current_winnings);
+        webui::set_get_time(get_time);
+        webui::set_get_gta_running(get_gta_running);
+        webui::set_get_running(get_running);
+
         quit = [] {
             kill(true);
         };

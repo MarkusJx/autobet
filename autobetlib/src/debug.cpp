@@ -38,7 +38,7 @@ public:
      * 
      * @return true, if doFinish == true
      */
-    [[nodsicard]] operator bool() const noexcept {
+    [[nodiscard]] operator bool() const noexcept {
         return doFinish;
     }
 

@@ -33,7 +33,9 @@ std::string utils::IPv4::to_string() const {
     return stringstream.str();
 }
 
-bool WINAPI CtrlHandler(unsigned long fdwCtrlType) {
+bool WINAPI
+
+CtrlHandler(unsigned long fdwCtrlType) {
     if (fdwCtrlType == 0 || fdwCtrlType == 2) {
         clbk();
         return true;
@@ -64,7 +66,8 @@ errno_t utils::getDesktopDirectory(std::string &arr) {
     int pathlen = lstrlenW(path);
 
     arr.resize(261);
-    int len = WideCharToMultiByte(CP_UTF8, 0, path, pathlen, arr.data(), arr.size(), nullptr, nullptr);
+    int len = WideCharToMultiByte(CP_UTF8, 0, path, pathlen, arr.data(), static_cast<int>(arr.size()), nullptr,
+                                  nullptr);
     if (len <= 0) {
         return -1;
     }
@@ -126,11 +129,11 @@ bool utils::getOwnIP(utils::IPv4 &myIP) {
     return true;
 }
 
-errno_t utils::isForeground(bool& res) {
+errno_t utils::isForeground(bool &res) {
     HWND h = GetForegroundWindow();
     if (h != nullptr) {
         std::wstring title(GetWindowTextLength(h) + 1, L'\0');
-        GetWindowTextW(h, &title[0], title.size()); //note: C++11 only
+        GetWindowTextW(h, &title[0], static_cast<int>(title.size())); //note: C++11 only
         res = wcscmp(title.c_str(), L"Grand Theft Auto V") == 0;
 
         return 0;
@@ -303,7 +306,7 @@ bool utils::pressTab() {
     INPUT input;
     WORD v_key = VK_TAB;
     input.type = INPUT_KEYBOARD;
-    input.ki.wScan = MapVirtualKey(v_key, MAPVK_VK_TO_VSC);
+    input.ki.wScan = static_cast<WORD>(MapVirtualKey(v_key, MAPVK_VK_TO_VSC));
     input.ki.time = 0;
     input.ki.dwExtraInfo = 0;
     input.ki.wVk = v_key;

@@ -15,7 +15,7 @@ namespace autostop {
      * @param webSetAutostopMoney a reference to the webSetAutostopMoney function
      * @param webSetAutostopTime a reference to the webSetAutostopTime function
      */
-    void init(int *winnings, unsigned int *time_running, std::function<void(int)> &webSetAutostopMoney, std::function<void(int)> &webSetAutostopTime);
+    void init(int *winnings, unsigned int *time_running, void(*webSetAutostopMoney)(int), void(*webSetAutostopTime)(int));
 
     /**
      * Check if one (or more) of the stop conditions are met

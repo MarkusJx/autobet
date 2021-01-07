@@ -166,19 +166,19 @@ let x = setInterval(function () {
     }
 }, 100);
 
+let hasDisconnectListener = false;
+
 // Add a on load listener
-cppJsLib.onLoad(function (res) {
+cppJsLib.listen("loaded", function (res) {
     if (res) {
         if (x != null) clearInterval(x);
         x = null;
         console.log("Connected!");
-        cppJsLib.js_initialized().then(res => {
-            if (res) {
-                main();
-            } else {
-                document.location.href = "index.html";
-            }
-        })
+        if (!hasDisconnectListener) {
+            cppJsLib.listen("disconnected", disconnected);
+            hasDisconnectListener = true;
+        }
+        main();
     }
 });
 

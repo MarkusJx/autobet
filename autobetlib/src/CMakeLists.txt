@@ -6,8 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories(${CMAKE_JS_INC})
 add_compile_definitions(NAPI_CPP_EXCEPTIONS)
 
-option(BUILD_CPPJSLIB FALSE)
-
 message(STATUS "Building with debug:full support")
 
 include(autobetLib_func_def.cmake)
@@ -23,14 +21,6 @@ file(GLOB zip
         "${ZIP_SOURCE_DIRECTORY}/*.c"
         )
 
-#find_package(OpenCV REQUIRED)
-
-#message(STATUS "Found OpenCV include dir: ${OpenCV_INCLUDE_DIRS}")
-#message(STATUS "Found OpenCV libs: ${OpenCV_LIBS}")
-
-include_directories(${CMAKE_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS})
-link_directories(${CMAKE_SOURCE_DIR}/lib ${Boost_LIBRARY_DIRS} "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.27.29110\\atlmfc\\lib\\x64")
-
 # Add sources
 file(GLOB src
         "*.hpp"
@@ -45,7 +35,6 @@ add_library(${PROJECT_NAME} SHARED ${src} ${include} ${zip} ${OPENCV_LINK_SRC} $
 
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
-#target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${OpenCV_LIBS})
 target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CONAN_LIBS})
 
 # Include N-API wrappers
@@ -67,26 +56,9 @@ else ()
     message(STATUS "Building in release mode")
 endif ()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+
+# NOTE: This option is required when building a debug build (debug/relWithDebInfo)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+
 add_compile_definitions(CPPJSLIB_ENABLE_WEBSOCKET)
-
-# If BUILD_CPPJSLIB is set, download the CppJsLib repo and add the files to the library
-#if (BUILD_CPPJSLIB)
-#    downloadCppJsLib()
-#
-#    include(CppJsLib/src/InitCppJsLib.cmake)
-#    initCppJsLib(${PROJECT_NAME} "CppJsLib/src" "${CMAKE_SOURCE_DIR}/include" TRUE FALSE)
-#
-#    if (EXISTS ${CMAKE_SOURCE_DIR}/websocketpp)
-#        message(STATUS "Deleting websocketpp folder")
-#        file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/websocketpp)
-#    endif ()
-#
-#    add_compile_definitions(BUILD_CPPJSLIB)
-#else ()
-#    target_link_libraries(${PROJECT_NAME} CppJsLib)
-#endif ()
-
-# Create 'external' and 'lib' directory
-#createDirectory(${CMAKE_SOURCE_DIR}/external)
-
-#copyOpencvDll()
