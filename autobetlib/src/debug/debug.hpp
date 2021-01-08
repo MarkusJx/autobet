@@ -2,8 +2,7 @@
 #define AUTOBET_DEBUG_HPP
 
 #include <string>
-
-#include "utils.hpp"
+#include <vector>
 
 /**
  * Debugging namespace
@@ -21,7 +20,7 @@ namespace debug {
      * 
      * @param bmp the bitmap to write
      */
-    void writeImage(const utils::bitmap &bmp);
+    void writeImage(const std::vector<unsigned char> &bmp);
 
     /**
      * Finish up the debugging

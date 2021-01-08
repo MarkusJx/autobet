@@ -426,12 +426,11 @@ try {
 
         // Set debug:full
         autobetLib.settings.setDebugFull(full_debug.checked).then((res) => {
+            full_debug.disabled = false;
             if (!res) { // If the call failed, do some stuff
                 full_debug.checked = false;
-                autobetLib.logging.warn("setDebugFull returned false");
+                autobetLib.logging.warn("main.js", "setDebugFull returned false");
             }
-
-            full_debug.disabled = false;
         });
     });
 

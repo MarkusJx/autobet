@@ -228,11 +228,9 @@ function main() {
 }
 
 /**
- * Initialize everything
- *
- * @param {boolean} datasaver if datasaver should be enabled
+ * Load all data
  */
-async function init() {
+async function loadData() {
     cppJsLib.get_current_winnings().then((val) => {
         moneythissession.innerText = makeSumsDisplayable(val, false);
     });
@@ -308,6 +306,48 @@ async function init() {
 
     // Get the autostop settings
     await getAutostopSettings();
+}
+
+/**
+ * Handle page visibility changes.
+ * Source: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+ */
+function handleVisibilityChange() {
+    // Set the name of the hidden property and the change event for visibility
+    let hidden, visibilityChange;
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+        hidden = "hidden";
+        visibilityChange = "visibilitychange";
+    } else if (typeof document.msHidden !== "undefined") {
+        hidden = "msHidden";
+        visibilityChange = "msvisibilitychange";
+    } else if (typeof document.webkitHidden !== "undefined") {
+        hidden = "webkitHidden";
+        visibilityChange = "webkitvisibilitychange";
+    }
+
+    // Warn if the browser doesn't support addEventListener or the Page Visibility API
+    if (typeof document.addEventListener === "undefined" || hidden === undefined) {
+        console.warn("This browser does not support the PageVisibility API");
+    } else {
+        // Handle page visibility change
+        document.addEventListener(visibilityChange, () => {
+            if (document[hidden]) {
+                stopTimer();
+            } else {
+                console.log("Reloading data");
+                loadData().then(() => console.log("Data reloaded"));
+            }
+        }, false);
+    }
+}
+
+/**
+ * Initialize everything
+ */
+async function init() {
+    await loadData();
+    handleVisibilityChange();
 
     cppJsLib.expose(webSetGtaRunning);
 

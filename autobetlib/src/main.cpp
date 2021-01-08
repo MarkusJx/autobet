@@ -10,7 +10,7 @@
 
 #include "main.hpp"
 #include "utils.hpp"
-#include "debug.hpp"
+#include "debug/debug.hpp"
 #include "autostop.hpp"
 #include "settings.hpp"
 #include "autobetException.hpp"

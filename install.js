@@ -153,11 +153,6 @@ function deleteIfExists(p) {
 function cleanUp() {
     const dist_dir = path.join(__dirname, "dist");
     const bin_dir = path.join(__dirname, "autobetlib", "bin");
-    const ext_dir = path.join(__dirname, "autobetlib", "external");
-    const inc_dir = path.join(__dirname, "autobetlib", "include");
-    const lib_lib_dir = path.join(__dirname, "autobetlib", "lib");
-    const CppJsLib_dir = path.join(__dirname, "autobetlib", "src", "CppJsLib");
-    const zip_dir = path.join(__dirname, "autobetlib", "src", "zip");
     const conanbuildinfo_cmake = path.join(__dirname, "autobetlib", "conanbuildinfo.cmake");
     const conanbuildinfo_txt = path.join(__dirname, "autobetlib", "conanbuildinfo.txt");
     const conaninfo_txt = path.join(__dirname, "autobetlib", "conaninfo.txt");
@@ -165,11 +160,6 @@ function cleanUp() {
 
     deleteIfExists(dist_dir);
     deleteIfExists(bin_dir);
-    deleteIfExists(ext_dir);
-    deleteIfExists(inc_dir);
-    deleteIfExists(lib_lib_dir);
-    deleteIfExists(CppJsLib_dir);
-    deleteIfExists(zip_dir);
 
     deleteIfExists(conanbuildinfo_cmake);
     deleteIfExists(conanbuildinfo_txt);
