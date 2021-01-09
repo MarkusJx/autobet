@@ -1,9 +1,9 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
+const {app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const path = require('path');
-const { autoUpdater } = require("electron-updater");
+const {autoUpdater} = require("electron-updater");
 let autobetLib = null, autobetLibError = null;
 try {
     autobetLib = require('@autobet/autobetlib');
@@ -20,7 +20,7 @@ let enableDevTools;
     const version = require('./package.json').version;
     const rel_ver_regex = /^([0-9]+\.?)+$/;
 
-    enableDevTools = !rel_ver_regex.test(version) || (process.argv.length >= 3 && process.argv[2] == "--enableDevTools");
+    enableDevTools = !rel_ver_regex.test(version) || (process.argv.length >= 3 && process.argv[2] === "--enableDevTools");
 
     console.log(`Starting with devTools ${enableDevTools ? "enabled" : "disabled"}`);
 }
@@ -62,11 +62,11 @@ function createWindow() {
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');
     const contextMenu = Menu.buildFromTemplate([
-        { label: 'Autobet', type: 'normal', enabled: false },
-        { type: 'separator' },
-        { label: 'Show UI', type: 'checkbox', checked: true, id: 'show-ui' },
-        { type: 'separator' },
-        { label: 'Quit', type: 'normal', id: 'quit' }
+        {label: 'Autobet', type: 'normal', enabled: false},
+        {type: 'separator'},
+        {label: 'Show UI', type: 'checkbox', checked: true, id: 'show-ui'},
+        {type: 'separator'},
+        {label: 'Quit', type: 'normal', id: 'quit'}
     ]);
     tray.setToolTip("Autobet");
     tray.setContextMenu(contextMenu);
@@ -142,44 +142,6 @@ function createErrorWindow() {
     });
 
     errorWindowState.manage(errorWindow);
-}
-
-function createAlreadyRunningWindow() {
-    const runningWindowState = windowStateKeeper({
-        defaultWidth: 705,
-        defaultHeight: 830
-    });
-
-    const runningWindow = new BrowserWindow({
-        x: runningWindowState.x,
-        y: runningWindowState.y,
-        width: 750,
-        height: 440,
-        minWidth: 750,
-        minHeight: 440,
-        frame: true,
-        resizable: true,
-        icon: "icon.png",
-        webPreferences: {
-            //preload: path.join(__dirname, 'scripts', 'preload_err.js'),
-            contextIsolation: true,
-            worldSafeExecuteJavaScript: true,
-            nodeIntegration: false,
-            webSecurity: true,
-            enableRemoteModule: true,
-            devTools: enableDevTools
-        }
-    });
-
-    if (!enableDevTools) {
-        runningWindow.removeMenu();
-    }
-
-    runningWindow.loadFile(path.join(__dirname, 'ui', 'err', 'index.html')).then(() => {
-        console.log("Error window loaded");
-    });
-
-    runningWindowState.manage(runningWindow);
 }
 
 app.whenReady().then(() => {

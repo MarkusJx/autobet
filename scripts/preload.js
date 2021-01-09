@@ -7,6 +7,7 @@ const Store = require('electron-store');
 const isolate = require('./isolatedFunction/isolatedFunction');
 const {functionStore} = require('./functionStore/functionStore');
 const fs = require('fs');
+const path = require('path');
 
 // Get the current autobet version
 const autobet_version = require('../package.json').version;
@@ -15,7 +16,8 @@ contextBridge.exposeInMainWorld('autobet_info', {
     version: autobet_version,
     getLicense: function () {
         return new Promise((resolve, reject) => {
-            fs.readFile('./LICENSE', 'utf8', (err, data) => {
+            const license_path = path.join(__dirname, '..', 'LICENSE');
+            fs.readFile(license_path, 'utf8', (err, data) => {
                 if (err) {
                     reject(err);
                 } else {

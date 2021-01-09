@@ -121,7 +121,7 @@ jobs:
         path: dist/autobet-v${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}}.exe
 
   analyze-js:
-    name: Analyze javascript
+    #name: Analyze javascript
     runs-on: windows-latest
     steps:
       - name: Checkout repository

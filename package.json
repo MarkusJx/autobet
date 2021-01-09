@@ -61,6 +61,7 @@
             "scripts/**",
             "icon.png",
             "package.json",
+            "LICENSE",
             "!**/unused/**",
             "!**.md",
             "!**/autobetlib/prelaunch.js",
