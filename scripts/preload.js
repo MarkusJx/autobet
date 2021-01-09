@@ -6,12 +6,24 @@ const {Titlebar, Color} = require('custom-electron-titlebar');
 const Store = require('electron-store');
 const isolate = require('./isolatedFunction/isolatedFunction');
 const {functionStore} = require('./functionStore/functionStore');
+const fs = require('fs');
 
 // Get the current autobet version
 const autobet_version = require('../package.json').version;
 
 contextBridge.exposeInMainWorld('autobet_info', {
-    version: autobet_version
+    version: autobet_version,
+    getLicense: function () {
+        return new Promise((resolve, reject) => {
+            fs.readFile('./LICENSE', 'utf8', (err, data) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        });
+    }
 });
 
 // Expose autobetLib

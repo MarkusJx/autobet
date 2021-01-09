@@ -25,7 +25,7 @@
             <p id="autobet">Welcome to Autobet.</p>
             <p id="name-desc">A GTA Online Horseracing betting bot.</p>
             <p id="autobet-version">Version undefined</p>
-            <p id="copyright">© MarkusJx 2020. Licensed under the MIT License.</p>
+            <p id="copyright">© MarkusJx 2021. <span id="copyright-opener">Licensed under the MIT License.</span></p>
         </div>
 
         <div class="subcontainer" id="status">
@@ -84,8 +84,7 @@
                     <div class="mdc-switch__track"></div>
                     <div class="mdc-switch__thumb-underlay">
                         <div class="mdc-switch__thumb"></div>
-                        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch"
-                            aria-checked="false">
+                        <input type="checkbox" class="mdc-switch__native-control" role="switch" aria-checked="false">
                     </div>
                 </div>
                 <button class="mdc-button" id="showqrbutton" title="Show the QR Code pointing to the web site">Show
@@ -144,8 +143,7 @@
                     <div class="mdc-switch__track"></div>
                     <div class="mdc-switch__thumb-underlay">
                         <div class="mdc-switch__thumb"></div>
-                        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch"
-                            aria-checked="false">
+                        <input type="checkbox" class="mdc-switch__native-control" role="switch" aria-checked="false">
                     </div>
                 </div>
             </div>
@@ -253,7 +251,7 @@
                         <div class="mdc-switch__track"></div>
                         <div class="mdc-switch__thumb-underlay">
                             <div class="mdc-switch__thumb"></div>
-                            <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch"
+                            <input type="checkbox" class="mdc-switch__native-control" role="switch"
                                 aria-checked="false">
                         </div>
                     </div>
@@ -266,7 +264,7 @@
                         <div class="mdc-switch__track"></div>
                         <div class="mdc-switch__thumb-underlay">
                             <div class="mdc-switch__thumb"></div>
-                            <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch"
+                            <input type="checkbox" class="mdc-switch__native-control" role="switch"
                                 aria-checked="false">
                         </div>
                     </div>
@@ -413,12 +411,34 @@
     <div class="mdc-dialog" id="betting-error-dialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="betting-error-dialog-surface"
-                aria-describedby="editor-error-dialog-content" aria-labelledby="betting-error-dialog-title">
+                aria-describedby="betting-error-dialog-content" aria-labelledby="betting-error-dialog-title">
                 <h2 class="mdc-dialog__title" id="betting-error-dialog-title">
                     Betting stopped
                 </h2>
                 <div class="mdc-dialog__content" id="betting-error-dialog-content">
                     No message available
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="ok">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Ok</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <!-- License dialog -->
+    <div class="mdc-dialog" id="license-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="license-dialog-surface"
+                aria-describedby="license-dialog-content" aria-labelledby="license-dialog-title">
+                <h2 class="mdc-dialog__title" id="license-dialog-title">
+                    Autobet license
+                </h2>
+                <div class="mdc-dialog__content" id="license-dialog-content">
+                    Not available
                 </div>
                 <div class="mdc-dialog__actions">
                     <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="ok">

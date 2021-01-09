@@ -52,7 +52,16 @@ try {
     const bettingErrorDialog = new mdc.dialog.MDCDialog(document.getElementById('betting-error-dialog'));
 
     // The game running info text
-    const game_running = document.getElementById("game-running");
+    const game_running = document.getElementById('game-running');
+
+    // The dialog displaying the license
+    const license_dialog = new mdc.dialog.MDCDialog(document.getElementById('license-dialog'));
+
+    // Add a click listener to the 'Licensed under the MIT License' text
+    // to open the license dialog when clicked on
+    document.getElementById('copyright-opener').addEventListener('click', () => {
+        license_dialog.open();
+    });
 
     /**
      * Set the quit callback
@@ -302,7 +311,14 @@ try {
             startstop.disabled = false;
         } else {
             autobetLib.logging.error("main.js", "Could not initialize");
+            return;
         }
+
+        autobet_info.getLicense().then(res => {
+            document.getElementById('license-dialog-content').innerText = res;
+        }, rej => {
+            autobetLib.logging.error("main.js", "Could not get the license: " + rej);
+        });
 
         // Load the winnings
         await autobetLib.loadWinnings();

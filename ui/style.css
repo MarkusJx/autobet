@@ -101,6 +101,28 @@ body {
     margin: 10px 0;
 }
 
+#copyright-opener {
+    cursor: pointer;
+}
+
+#license-dialog {
+    margin-top: 30px;
+    height: calc(100vh - 30px);
+}
+
+#license-dialog-surface {
+    max-height: 90%;
+    width: 90%;
+    max-width: 935px;
+    --mdc-theme-primary: #086bff;
+}
+
+@media (max-width: 692px) {
+    #license-dialog-surface {
+        max-width: calc(100vw - 32px);
+    }
+}
+
 .subcontainer:hover {
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 }
