@@ -75,6 +75,7 @@ jobs:
     # Cache conan
     - name: Cache conan
       uses: actions/cache@v2
+      id: cache-conan
       env:
         cache-name: cache-conan-modules
       with:
@@ -84,6 +85,7 @@ jobs:
     # Add https://api.bintray.com/conan/markusjx/CppJsLib to conan remotes
     - name: Add CppJsLib conan remote
       run: conan remote add CppJsLib https://api.bintray.com/conan/markusjx/CppJsLib
+      if: steps.cache-conan.outputs.cache-hit != 'true'
 
     # Set the autobet package version using npm
     - name: Set autobet version
