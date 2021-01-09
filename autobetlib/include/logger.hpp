@@ -27,8 +27,6 @@
 #include <string>
 #include <functional>
 #include <sstream>
-#include <ctime>
-#include <memory>
 #include "main.hpp"
 
 #define debug(message) _debug(::logger::LoggerUtils::removeSlash(__FILE__).c_str(), __LINE__, message)
@@ -108,22 +106,7 @@ namespace logger {
         *
         * @return The current time and date as a string
         */
-        inline std::string currentDateTime() {
-            time_t now = time(nullptr);
-            struct tm tm{};
-
-            std::string buf;
-            buf.resize(LoggerOptions::time_fmt.sizeInBytes);
-#ifdef LOGGER_WINDOWS
-            localtime_s(&tm, &now);
-#else
-            tm = *localtime(&now);
-#endif
-            strftime(buf.data(), LoggerOptions::time_fmt.sizeInBytes, LoggerOptions::time_fmt.format, &tm);
-
-            buf.resize(buf.size() - 1);
-            return buf;
-        }
+        std::string currentDateTime();
 
         /**
          * Remove everything but the file name from a string.
@@ -131,27 +114,16 @@ namespace logger {
          * @param str the input string
          * @return the file name
          */
-        inline std::string removeSlash(const std::string &str) {
-            return str.substr(str.rfind(slash) + 1);
-        }
+        std::string removeSlash(const std::string &str);
 
         /**
          * A stream for logging
          */
         class LoggerStream : public std::stringstream {
         public:
-            explicit LoggerStream(std::function<void(std::string)> callback, LoggerMode mode, bool disabled)
-                    : _callback(std::move(callback)), _mode(mode), _disabled(disabled) {
-                if (mode == LoggerMode::MODE_NONE || disabled) {
-                    this->setstate(std::ios_base::failbit); // Discard any input
-                }
-            }
+            explicit LoggerStream(std::function<void(std::string)> callback, LoggerMode mode, bool disabled);
 
-            ~LoggerStream() override {
-                if (_mode != LoggerMode::MODE_NONE && !_disabled) {
-                    _callback(this->str());
-                }
-            }
+            ~LoggerStream() override;
 
         private:
             std::function<void(std::string)> _callback;
@@ -207,13 +179,7 @@ namespace logger {
          */
         explicit Logger(LoggerMode mode = MODE_BOTH, LogLevel lvl = LogLevel::debug,
                         const char *fileName = "autobet.log",
-                        const char *fileMode = "at") {
-            _mode = mode;
-            level = lvl;
-            file = nullptr;
-
-            init(fileName, fileMode);
-        }
+                        const char *fileMode = "at");
 
         /**
          * Write a debug message.
@@ -227,49 +193,14 @@ namespace logger {
          * @param line the line number
          * @param message the message
          */
-        inline void _debug(const char *_file, int line, const std::string &message) {
-            std::string _time;
-            if (_mode != LoggerMode::MODE_NONE && level == LogLevel::debug) {
-                _time = LoggerUtils::currentDateTime();
-            }
-
-            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level == LogLevel::debug &&
-                logToFile()) {
-                fprintf(this->file, "[%s] [%s:%d] [DEBUG] %s\n", _time.c_str(), _file, line, message.c_str());
-                fflush(this->file);
-            }
-
-            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level == LogLevel::debug && logToConsole()) {
-                std::string s = "[";
-                s.append(_time).append("] [").append(_file).append(":").append(std::to_string(line)).append(
-                        "] [DEBUG] ").append(message).append("\n");
-                node_log(s);
-            }
-        }
+        void _debug(const char *_file, int line, const std::string &message);
 
         /**
          * Just print a debug message with a timestamp
          *
          * @param message the message to log
          */
-        inline void simpleDebug(const std::string &message) {
-            std::string _time;
-            if (_mode != LoggerMode::MODE_NONE && level == LogLevel::debug) {
-                _time = LoggerUtils::currentDateTime();
-            }
-
-            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level == LogLevel::debug &&
-                logToFile()) {
-                fprintf(this->file, "[%s] %s\n", _time.c_str(), message.c_str());
-                fflush(this->file);
-            }
-
-            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level == LogLevel::debug && logToConsole()) {
-                std::string s = "[";
-                s.append(_time).append("] ").append(message).append("\n");
-                node_log(s);
-            }
-        }
+        void simpleDebug(const std::string &message);
 
         /**
          * Write an error message.
@@ -283,49 +214,14 @@ namespace logger {
          * @param line the line number
          * @param message the message
          */
-        inline void _error(const char *_file, int line, const std::string &message) {
-            std::string _time;
-            if (_mode != MODE_NONE && level != LogLevel::none) {
-                _time = LoggerUtils::currentDateTime();
-            }
-
-            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level != LogLevel::none &&
-                logToFile()) {
-                fprintf(this->file, "[%s] [%s:%d] [ERROR] %s\n", _time.c_str(), _file, line, message.c_str());
-                fflush(this->file);
-            }
-
-            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level != LogLevel::none && logToConsole()) {
-                std::string s = "[";
-                s.append(_time).append("] [").append(_file).append(":").append(std::to_string(line)).append(
-                        "] [ERROR] ").append(message).append("\n");
-                node_log(s);
-            }
-        }
+        void _error(const char *_file, int line, const std::string &message);
 
         /**
          * Just print a error message with a timestamp
          *
          * @param message the message to log
          */
-        inline void simpleError(const std::string &message) {
-            std::string _time;
-            if (_mode != MODE_NONE && level != LogLevel::none) {
-                _time = LoggerUtils::currentDateTime();
-            }
-
-            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) && level != LogLevel::none &&
-                logToFile()) {
-                fprintf(this->file, "[%s] %s\n", _time.c_str(), message.c_str());
-                fflush(this->file);
-            }
-
-            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) && level != LogLevel::none && logToConsole()) {
-                std::string s = "[";
-                s.append(_time).append("] ").append(message).append("\n");
-                node_log(s);
-            }
-        }
+        void simpleError(const std::string &message);
 
         /**
          * Write a warning message.
@@ -339,26 +235,7 @@ namespace logger {
          * @param line the line number
          * @param message the message
          */
-        inline void _warning(const char *_file, int line, const std::string &message) {
-            std::string _time;
-            if (_mode != MODE_NONE && (level == LogLevel::debug || level == LogLevel::warning)) {
-                _time = LoggerUtils::currentDateTime();
-            }
-
-            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) &&
-                (level == LogLevel::debug || level == LogLevel::warning) && logToFile()) {
-                fprintf(this->file, "[%s] [%s:%d] [WARN] %s\n", _time.c_str(), _file, line, message.c_str());
-                fflush(this->file);
-            }
-
-            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) &&
-                (level == LogLevel::debug || level == LogLevel::warning) && logToConsole()) {
-                std::string s = "[";
-                s.append(_time).append("] [").append(_file).append(":").append(std::to_string(line)).append(
-                        "] [WARN] ").append(message).append("\n");
-                node_log(s);
-            }
-        }
+        void _warning(const char *_file, int line, const std::string &message);
 
         /**
          * Write a message that something is not implemented.
@@ -372,32 +249,7 @@ namespace logger {
          * @param line the line number
          * @param message the message
          */
-        inline void _unimplemented(const char *_file, int line, const char *function, const std::string &message = "") {
-            std::string _time;
-            if (_mode != MODE_NONE && (level == LogLevel::debug || level == LogLevel::warning)) {
-                _time = LoggerUtils::currentDateTime();
-            }
-
-            const char *pattern;
-
-            if (!message.empty()) {
-                pattern = "[%s] [%s:%d] [WARN_NOT_IMPLEMENTED] Function %s is currently not implemented: %s\n";
-            } else {
-                pattern = "[%s] [%s:%d] [WARN_NOT_IMPLEMENTED] Function %s is currently not implemented\n";
-            }
-
-
-            if (file != nullptr && (_mode == MODE_FILE || _mode == MODE_BOTH) &&
-                (level == LogLevel::debug || level == LogLevel::warning) && logToFile()) {
-                fprintf(this->file, pattern, _time.c_str(), _file, line, function, message.c_str());
-                fflush(this->file);
-            }
-
-            if ((_mode == MODE_BOTH || _mode == MODE_CONSOLE) &&
-                (level == LogLevel::debug || level == LogLevel::warning) && logToConsole()) {
-                fprintf(stderr, pattern, _time.c_str(), _file, line, function, message.c_str());
-            }
-        }
+        void _unimplemented(const char *_file, int line, const char *function, const std::string &message = "");
 
         /**
          * Get the debug stream.
@@ -411,11 +263,7 @@ namespace logger {
          * @param line the line number
          * @return the debug stream
          */
-        inline LoggerUtils::LoggerStream _debugStream(const char *_file, int line) {
-            return LoggerUtils::LoggerStream([this, _file, line](const std::string &buf) {
-                this->_debug(_file, line, buf);
-            }, _mode, level != LogLevel::debug);
-        }
+        LoggerUtils::LoggerStream _debugStream(const char *_file, int line);
 
         /**
          * Get the warning stream.
@@ -429,11 +277,7 @@ namespace logger {
          * @param line the line number
          * @return the warning stream
          */
-        inline LoggerUtils::LoggerStream _warningStream(const char *_file, int line) {
-            return LoggerUtils::LoggerStream([this, _file, line](const std::string &buf) {
-                this->_warning(_file, line, buf);
-            }, _mode, level != LogLevel::debug || level != LogLevel::warning);
-        }
+        LoggerUtils::LoggerStream _warningStream(const char *_file, int line);
 
         /**
          * Get the error stream.
@@ -447,60 +291,20 @@ namespace logger {
          * @param line the line number
          * @return the error stream
          */
-        inline LoggerUtils::LoggerStream _errorStream(const char *_file, int line) {
-            return LoggerUtils::LoggerStream([this, _file, line](const std::string &buf) {
-                this->_error(_file, line, buf);
-            }, _mode, level == LogLevel::none);
-        }
+        LoggerUtils::LoggerStream _errorStream(const char *_file, int line);
 
         /**
          * The logger destructor
          */
-        ~Logger() {
-            this->debug("Closing logger");
-
-            if (file && (_mode == MODE_BOTH || _mode == MODE_FILE)) {
-                this->debug("Closing logger file stream");
-
-                errno_t err = fclose(this->file);
-                if (err) {
-                    perror("Could not close logger file stream!");
-                }
-            }
-        }
+        ~Logger();
 
     private:
         FILE *file;
         LoggerMode _mode;
         LogLevel level;
 
-        inline void init(const char *fileName, const char *fileMode) {
-            if (_mode == MODE_BOTH || _mode == MODE_FILE) {
-#ifdef LOGGER_WINDOWS
-                errno_t err = fopen_s(&file, fileName, fileMode);
-
-                if (err) {
-                    perror("Could not open out.log file!");
-                    file = nullptr;
-                } else {
-                    setvbuf(file, nullptr, _IONBF, 0);
-                }
-#else
-                file = fopen("out.log", fileMode);
-                if (file == nullptr) {
-                    std::cerr << "Could not open out.log file!" << std::endl;
-                }
-#endif
-            }
-        }
+        void init(const char *fileName, const char *fileMode);
     };
-
-    /**
-     * A namespace for the Logger instance of the static logger
-     */
-    /*namespace StaticLogger_instance {
-        static Logger *instance;
-    }*/
 
     /**
      * A static logger class
@@ -521,10 +325,7 @@ namespace logger {
          */
         LOGGER_MAYBE_UNUSED static void
         create(LoggerMode mode = LoggerMode::MODE_BOTH, LogLevel lvl = LogLevel::debug,
-               const char *fileName = "autobet.log", const char *fileMode = "at") {
-            if (getLogger()) getLogger().reset();
-            setLogger(new Logger(mode, lvl, fileName, fileMode));
-        }
+               const char *fileName = "autobet.log", const char *fileMode = "at");
 
         /**
          * Write a debug message.
@@ -538,20 +339,14 @@ namespace logger {
          * @param line the line number
          * @param message the message
          */
-        LOGGER_MAYBE_UNUSED static void _debug(const char *_file, int line, const std::string &message) {
-            if (getLogger())
-                getLogger()->_debug(_file, line, message);
-        }
+        LOGGER_MAYBE_UNUSED static void _debug(const char *_file, int line, const std::string &message);
 
         /**
          * Just print a debug message with a timestamp
          *
          * @param message the message to log
          */
-        static void simpleDebug(const std::string &message) {
-            if (getLogger())
-                getLogger()->simpleDebug(message);
-        }
+        static void simpleDebug(const std::string &message);
 
         /**
          * Write a error message.
@@ -565,20 +360,14 @@ namespace logger {
          * @param line the line number
          * @param message the message
          */
-        LOGGER_MAYBE_UNUSED static void _error(const char *_file, int line, const std::string &message) {
-            if (getLogger())
-                getLogger()->_error(_file, line, message);
-        }
+        LOGGER_MAYBE_UNUSED static void _error(const char *_file, int line, const std::string &message);
 
         /**
          * Just print a error message with a timestamp
          *
          * @param message the message to log
          */
-        static void simpleError(const std::string &message) {
-            if (getLogger())
-                getLogger()->simpleError(message);
-        }
+        static void simpleError(const std::string &message);
 
         /**
          * Write a warning message.
@@ -592,10 +381,7 @@ namespace logger {
          * @param line the line number
          * @param message the message
          */
-        LOGGER_MAYBE_UNUSED static void _warning(const char *_file, int line, const std::string &message) {
-            if (getLogger())
-                getLogger()->_warning(_file, line, message);
-        }
+        LOGGER_MAYBE_UNUSED static void _warning(const char *_file, int line, const std::string &message);
 
         /**
          * Write a message that something is not implemented.
@@ -610,10 +396,7 @@ namespace logger {
          * @param message the message
          */
         LOGGER_MAYBE_UNUSED static void
-        _unimplemented(const char *file, int line, const char *function, const std::string &message = "") {
-            if (getLogger())
-                getLogger()->_unimplemented(file, line, function, message);
-        }
+        _unimplemented(const char *file, int line, const char *function, const std::string &message = "");
 
         /**
          * Get the debug stream.
@@ -627,9 +410,7 @@ namespace logger {
          * @param line the line number
          * @return the debug stream
          */
-        LOGGER_MAYBE_UNUSED static LoggerUtils::LoggerStream _debugStream(const char *_file, int line) {
-            return getLogger()->_debugStream(_file, line);
-        }
+        LOGGER_MAYBE_UNUSED static LoggerUtils::LoggerStream _debugStream(const char *_file, int line);
 
         /**
          * Get the warning stream.
@@ -643,9 +424,7 @@ namespace logger {
          * @param line the line number
          * @return the warning stream
          */
-        LOGGER_MAYBE_UNUSED static LoggerUtils::LoggerStream _warningStream(const char *_file, int line) {
-            return getLogger()->_warningStream(_file, line);
-        }
+        LOGGER_MAYBE_UNUSED static LoggerUtils::LoggerStream _warningStream(const char *_file, int line);
 
         /**
          * Get the error stream.
@@ -659,16 +438,12 @@ namespace logger {
          * @param line the line number
          * @return the error stream
          */
-        LOGGER_MAYBE_UNUSED static LoggerUtils::LoggerStream _errorStream(const char *_file, int line) {
-            return getLogger()->_errorStream(_file, line);
-        }
+        LOGGER_MAYBE_UNUSED static LoggerUtils::LoggerStream _errorStream(const char *_file, int line);
 
         /**
          * Destroy the logger instance
          */
-        LOGGER_MAYBE_UNUSED static void destroy() {
-            getLogger().reset();
-        }
+        LOGGER_MAYBE_UNUSED static void destroy();
 
     private:
         /**
@@ -687,12 +462,14 @@ namespace logger {
     };
 }
 
-#ifdef LOGGER_WINDOWS
-#   undef printf
-#   undef fprintf
-#   undef LOGGER_WINDOWS
-#endif
+#ifndef LOGGER_NO_UNDEF
+#   ifdef LOGGER_WINDOWS
+#       undef printf
+#       undef fprintf
+#       undef LOGGER_WINDOWS
+#   endif
 
-#undef slash
+#   undef slash
+#endif //LOGGER_NO_UNDEF
 
 #endif //LOGGER_LOGGER_HPP

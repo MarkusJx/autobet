@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "utils.hpp"
+#include "util/utils.hpp"
 
 #ifdef AUTOBET_WINDOWS
 
@@ -33,9 +33,22 @@ std::string utils::IPv4::to_string() const {
     return stringstream.str();
 }
 
-bool WINAPI
+std::string utils::getIP() {
+    utils::IPv4 iPv4;
+    if (!utils::getOwnIP(iPv4)) {
+        StaticLogger::error("Could not retrieve own IP!");
+        return "";
+    }
 
-CtrlHandler(unsigned long fdwCtrlType) {
+    return iPv4.to_string();
+}
+
+bool utils::openWebsite(const std::string &address) {
+    HINSTANCE hst = ShellExecuteA(nullptr, TEXT("open"), TEXT(address.c_str()), nullptr, nullptr, 0);
+    return reinterpret_cast<intptr_t>(hst) > 32;
+}
+
+bool WINAPI CtrlHandler(unsigned long fdwCtrlType) {
     if (fdwCtrlType == 0 || fdwCtrlType == 2) {
         clbk();
         return true;

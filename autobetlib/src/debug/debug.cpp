@@ -1,15 +1,13 @@
-#include "debug.hpp"
-
-#include <mutex>
 #include <filesystem>
 #include <chrono>
 #include <ctime>
 #include <memory>
 
-#include "zip.hpp"
-#include "shared_releaser.hpp"
-#include "../logger.hpp"
-#include "../utils.hpp"
+#include "debug/debug.hpp"
+#include "debug/zip.hpp"
+#include "util/shared_releaser.hpp"
+#include "logger.hpp"
+#include "util/utils.hpp"
 
 using namespace logger;
 
@@ -20,7 +18,6 @@ void _finish();
 
 minizip::zip zip = nullptr;
 shared_releaser debug_finisher = nullptr;
-//std::shared_ptr<int> debug_finisher = nullptr;
 
 using namespace debug;
 namespace fs = std::filesystem;

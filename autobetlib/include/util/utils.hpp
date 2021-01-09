@@ -65,6 +65,21 @@ namespace utils {
     bool getOwnIP(IPv4 &ownIP);
 
     /**
+     * Get this PCs IP address
+     *
+     * @return this PCs IP address was a string in the IPv4 format, e.g. xxx.xxx.xxx.xxx
+     */
+    std::string getIP();
+
+    /**
+     * Open a web page in a browser
+     *
+     * @param address the address of the web page to open
+     * @return whether the website could be opened in a browser
+     */
+    bool openWebsite(const std::string &address);
+
+    /**
      * Set this process DPI aware
      */
     void setDpiAware();

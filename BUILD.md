@@ -1,21 +1,11 @@
 # Build autobet
 
 ## Prerequisites
-* [Node.js](https://nodejs.org/en/) version >= 12.14.0
+* [Node.js](https://nodejs.org/en/) version >= 12.14.0 with npm
 * [Git](https://git-scm.com/)
 * [CMake](https://cmake.org/download/) version >= 3.15
 * [Npm](https://www.npmjs.com/get-npm) version >= 6.14 (Some older versions may also work)
-* [electron-builder](https://www.electron.build/) installed globally
-(run ``npm install -g electron-builder``) version = 22.9.1
-(this one for sure works, any other versions may work as well)
-* [cmake-js](https://www.npmjs.com/package/cmake-js) installed globally
-(run ``npm install -g cmake-js``) version = 6.1.0
-(this one for sure works, any other versions may work as well)
-* [chocolatey](https://chocolatey.org/install) for installing boost
-* [Boost](https://chocolatey.org/packages/boost-msvc-14.1) installed using chocolatey
-(run ``choco install -y boost-msvc-14.1 --version 1.67.0`` in an elevated cmd) version >= 1.67.0
-* [OpenCV](https://opencv.org/releases/) any version greater than 4.0.0
-(The ``OpenCV_DIR`` environment variable must be set to the OpenCV directory)
+* [conan](https://conan.io/downloads.html)
 
 ## Build steps
 For newer versions of autobet, run these steps in a command line with 

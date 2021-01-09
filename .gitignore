@@ -207,7 +207,6 @@ $RECYCLE.BIN/
 *.lnk
 
 extern/
-include/
 /.vs
 /unused/v1.1.0/ui/favicon.ico
 /unused/v1.1.0/ui/qrcode.js
@@ -220,6 +219,7 @@ include/
 node_modules
 /winnings.dat
 /autobet.log
+/autobet_debug.log
 /autobet.conf
 /resources/data/model.*
 /dist
@@ -234,8 +234,6 @@ test/ai/data
 test/ai/img
 test/ai/external
 test/ai/lib
-/autobetLib/src/CppJsLib
-/autobetLib/src/zip
 /autobetlib/conanbuildinfo.cmake
 /autobetlib/conanbuildinfo.txt
 /autobetlib/conaninfo.txt

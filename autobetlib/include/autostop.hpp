@@ -8,16 +8,6 @@
  */
 namespace autostop {
     /**
-     * Init Autostop
-     * 
-     * @param winnings a pointer to the winnings variable
-     * @param time_running a pointer to the time_running variable
-     * @param webSetAutostopMoney a reference to the webSetAutostopMoney function
-     * @param webSetAutostopTime a reference to the webSetAutostopTime function
-     */
-    void init(int *winnings, unsigned int *time_running, void(*webSetAutostopMoney)(int), void(*webSetAutostopTime)(int));
-
-    /**
      * Check if one (or more) of the stop conditions are met
      * 
      * @return true, if one or more stop conditions are met

@@ -175,11 +175,13 @@ function full_clean() {
     const lib_node_modules = path.join(__dirname, "autobetlib", "node_modules");
     const autobet_conf = path.join(__dirname, "autobet.conf");
     const autobet_log = path.join(__dirname, "autobet.log");
+    const autobet_debug_log = path.join(__dirname, "autobet_debug.log");
     const winnings_dat = path.join(__dirname, "winnings.dat");
 
     deleteIfExists(model_yml);
     deleteIfExists(autobet_conf);
     deleteIfExists(autobet_log);
+    deleteIfExists(autobet_debug_log);
     deleteIfExists(winnings_dat);
 
     deleteIfExists(node_modules);

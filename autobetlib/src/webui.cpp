@@ -12,7 +12,7 @@
 
 #include "webui.hpp"
 #include "logger.hpp"
-#include "utils.hpp"
+#include "util/utils.hpp"
 #include "autostop.hpp"
 
 std::unique_ptr<markusjx::cppJsLib::Server> webUi = nullptr;

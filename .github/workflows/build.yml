@@ -31,12 +31,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    #env:
-    #  OPENCV_VERSION: 4.1.2
-    #  OpenCV_DIR: C:/tools/opencv/build
-    #  BOOST_VERSION: 1.69.0
-    #  BOOST_TOOLSET: msvc14.1
-    #  BOOST_PATH: D:\boost\boost-1.69.0-win32-msvc14.1-x86_64
 
     steps:
     - uses: actions/checkout@v2
@@ -63,6 +57,8 @@ jobs:
     # Retrieve caches
     - name: Cache npm
       uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
       with:
         path: |
           ~\AppData\Roaming\npm-cache
@@ -71,25 +67,19 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-    #- name: Cache boost
-    #  uses: actions/cache@v2
-    #  id: cache-boost
-    #  with:
-    #    path: ${{env.BOOST_PATH}}
-    #    key: boost-${{env.BOOST_VERSION}}-${{env.BOOST_TOOLSET}}
-
-    # Download and install boost
-    #- name: Install boost
-    #  if: steps.cache-boost.outputs.cache-hit != 'true'
-    #  uses: MarkusJx/install-boost@v1.0
-    #  id: install-boost
-    #  with:
-    #    boost_version: ${{env.BOOST_VERSION}}
-    #    toolset: ${{env.BOOST_TOOLSET}}
 
     # Install conan
     - name: Get Conan
       uses: turtlebrowser/get-conan@v1.0
+
+    # Cache conan
+    - name: cache conan
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-conan-modules
+      with:
+        path: ${{ env.CONAN_USER_HOME }}
+        key: host-${{ runner.os }}-target-${{ runner.os }}-${{ hashFiles('conanfile.py') }}
 
     # Add https://api.bintray.com/conan/markusjx/CppJsLib to conan remotes
     - name: Add CppJsLib conan remote
