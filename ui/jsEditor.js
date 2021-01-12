@@ -703,6 +703,10 @@ setResult(run());
         impl_text_field.value = "";
     });
 } catch (e) {
-    autobetLib.logging.error("jsEditor.js", `Js exception thrown: ${e.message}`);
+    try {
+        autobetLib.logging.error("jsEditor.js", `Js exception thrown: ${e.message}`);
+    } catch (e1) {
+        console.error(`autobetLib.logging.error threw an exception: ${e1}`);
+    }
     exception();
 }

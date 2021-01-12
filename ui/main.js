@@ -16,11 +16,18 @@ const errordialog = new mdc.dialog.MDCDialog(document.getElementById('error-dial
  * A function to be called when a fatal exception is thrown
  */
 function exception() {
-    errordialog.open();
-    errordialog.listen("MDCDialog:closed", () => {
-        autobetLib.shutdown();
-        electron.quit();
-    });
+    try {
+        errordialog.open();
+        errordialog.listen("MDCDialog:closed", () => {
+            // autobetLib.shutdown() may throw
+            try {
+                autobetLib.shutdown();
+            } catch (ignored) { }
+            electron.quit();
+        });
+    } catch (e) {
+        console.error(`Error in function exception: ${e}`);
+    }
 }
 
 try {
@@ -231,7 +238,8 @@ try {
      * @param {string} ip the ip address to display in the qr code
      */
     function setQRCode(ip) {
-        // console.log("Got own IP: " + ip);
+        // Empty the element
+        document.getElementById("qrcode").innerHTML = "";
         new QRCode(document.getElementById("qrcode"), {
             text: "http://" + ip + ":8027",
             width: 352,
@@ -300,6 +308,7 @@ try {
         titlebar.create();
 
         enable_webserver.disabled = true;
+        showqrbutton.disabled = true;
 
         // Initialize
         let initialized = await autobetLib.init();
@@ -335,25 +344,27 @@ try {
         // Check the web server activated and start it if activated
         enable_webserver.checked = autobetLib.settings.webServerActivated();
         if (autobetLib.settings.webServerActivated()) {
-            initialized = await autobetLib.startWebServer();
-            enable_webserver.checked = initialized;
-            if (initialized) {
-                autobetLib.logging.debug("main.js", "Web server started.");
-                weblink.disabled = false;
-                showqrbutton.disabled = false;
-                setIPs();
-            } else {
-                autobetLib.logging.error("main.js", "Could not start web server");
-                weblink.disabled = true;
-                weblink.innerText = "not running";
-                showqrbutton.disabled = true;
-            }
+            autobetLib.startWebServer().then(initialized => {
+                enable_webserver.checked = initialized;
+                if (initialized) {
+                    autobetLib.logging.debug("main.js", "Web server started.");
+                    weblink.disabled = false;
+                    showqrbutton.disabled = false;
+                    setIPs();
+                } else {
+                    autobetLib.logging.error("main.js", "Could not start web server");
+                    weblink.disabled = true;
+                    weblink.innerText = "not running";
+                    showqrbutton.disabled = true;
+                }
+                enable_webserver.disabled = false;
+            });
         } else {
             weblink.disabled = true;
             weblink.innerText = "not running";
             showqrbutton.disabled = true;
+            enable_webserver.disabled = false;
         }
-        enable_webserver.disabled = false;
 
         autobetLib.setOddTranslations();
 
@@ -546,6 +557,10 @@ try {
             "Program will fall back to the native implementation.");
     });
 } catch (e) {
-    autobetLib.logging.error("main.js", `Js exception thrown: ${e.message}`);
+    try {
+        autobetLib.logging.error("main.js", `Js exception thrown: ${e.message}`);
+    } catch (e1) {
+        console.error(`autobetLib.logging.error threw an exception: ${e1}`);
+    }
     exception();
 }

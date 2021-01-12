@@ -12,8 +12,18 @@ const path = require('path');
 // Get the current autobet version
 const autobet_version = require('../package.json').version;
 
+// Expose various functions to retrieve
+// information about the program
 contextBridge.exposeInMainWorld('autobet_info', {
+    /**
+     * The autobet version
+     */
     version: autobet_version,
+    /**
+     * Get the License string
+     *
+     * @return {Promise<String>} the license as a string
+     */
     getLicense: function () {
         return new Promise((resolve, reject) => {
             const license_path = path.join(__dirname, '..', 'LICENSE');
@@ -33,12 +43,21 @@ contextBridge.exposeInMainWorld('autobetLib', autobetLib);
 
 // Expose hide and close actions
 contextBridge.exposeInMainWorld('electron', {
+    /**
+     * Quit the app
+     */
     quit: () => ipcRenderer.send('close-window'),
+    /**
+     * Hide the electron window
+     */
     hide: () => ipcRenderer.send('hide-window')
 });
 
 // Expose the title bar options
 contextBridge.exposeInMainWorld('titlebar', {
+    /**
+     * Create the title bar
+     */
     create: () => {
         new Titlebar({
             backgroundColor: Color.fromHex('#151515'),

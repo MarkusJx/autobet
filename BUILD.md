@@ -7,6 +7,10 @@
 * [Npm](https://www.npmjs.com/get-npm) version >= 6.14 (Some older versions may also work)
 * [conan](https://conan.io/downloads.html)
 
+## First steps
+* Clone the repository: ``git clone https://github.com/MarkusJx/autobet``
+* Add the CppJsLib remote to conan: ``conan remote add CppJsLib https://api.bintray.com/conan/markusjx/CppJsLib``
+
 ## Build steps
 For newer versions of autobet, run these steps in a command line with 
 *node.js, npm, git, cmake and electron-builder* enabled:
