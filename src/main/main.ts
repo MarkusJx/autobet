@@ -1,68 +1,50 @@
 'use strict';
 
-// The start/stop betting button
-const startstop = document.getElementById('startstop');
-mdc.ripple.MDCRipple.attachTo(startstop);
+import { MDCRipple } from "@material/ripple";
+import { MDCDialog } from "@material/dialog";
+import { MDCSwitch } from "@material/switch";
+import { MDCSnackbar } from "@material/snackbar";
+import { MDCTextField } from "@material/textfield";
+import { Titlebar, Color } from "custom-electron-titlebar";
+import path from "path";
 
-/**
- * Whether GTA is running
- */
-let gta_running = false;
+import { variables } from "./variables";
+import { setQRCode } from "./qrcode/qrcode_wrapper";
+import autobetLib from "@autobet/autobetlib";
+import * as utils from "./utils";
+import * as autobet_info from "./autobetInfo";
 
-// The error dialog container
-const errordialog = new mdc.dialog.MDCDialog(document.getElementById('error-dialog-container'));
+export function init(): void {
+    const showqrbutton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('showqrbutton'); // The 'show qr code' button
+    MDCRipple.attachTo(showqrbutton);
 
-/**
- * A function to be called when a fatal exception is thrown
- */
-function exception() {
-    try {
-        errordialog.open();
-        errordialog.listen("MDCDialog:closed", () => {
-            // autobetLib.shutdown() may throw
-            try {
-                autobetLib.shutdown();
-            } catch (ignored) { }
-            electron.quit();
-        });
-    } catch (e) {
-        console.error(`Error in function exception: ${e}`);
-    }
-}
+    const moneythishour: HTMLElement = document.getElementById('moneythishour'); // The money this hour text
+    const raceswon: HTMLElement = document.getElementById('raceswon'); // The races won text
+    const winprobability: HTMLElement = document.getElementById('winprobability'); // The win probability text
+    const moneyall: HTMLElement = document.getElementById('moneyall'); // The money all made text
+    const namecontainter: HTMLElement = document.getElementById('namecontainer'); // The autobet name container
 
-try {
-    const showqrbutton = document.getElementById('showqrbutton'); // The 'show qr code' button
-    mdc.ripple.MDCRipple.attachTo(showqrbutton);
-
-    const moneythishour = document.getElementById('moneythishour'); // The money this hour text
-    const raceswon = document.getElementById('raceswon'); // The races won text
-    const winprobability = document.getElementById('winprobability'); // The win probability text
-    const moneyall = document.getElementById('moneyall'); // The money all made text
-    const namecontainter = document.getElementById('namecontainer'); // The autobet name container
-
-    const weblink = document.getElementById('weblink'); // The web interface open button
-    mdc.ripple.MDCRipple.attachTo(weblink);
-
-    mdc.autoInit();
+    const weblink: HTMLButtonElement = <HTMLButtonElement>document.getElementById('weblink'); // The web interface open button
+    MDCRipple.attachTo(weblink);
 
     // The qr code dialog
-    const qrdialog = new mdc.dialog.MDCDialog(document.getElementById('qrdialog'));
+    const qrdialog: MDCDialog = new MDCDialog(document.getElementById('qrdialog'));
 
     //The enable webserver switch
-    const enable_webserver = new mdc.switchControl.MDCSwitch(document.getElementById('enable-webserver-switch'));
+    const enable_webserver: MDCSwitch = new MDCSwitch(document.getElementById('enable-webserver-switch'));
 
     // The settings saved message snackbar
-    const settings_saved_msg = new mdc.snackbar.MDCSnackbar(document.getElementById('settings-saved-message'));
+    const settings_saved_msg: MDCSnackbar = new MDCSnackbar(document.getElementById('settings-saved-message'));
     settings_saved_msg.timeoutMs = 4000;
 
     // The betting error dialog
-    const bettingErrorDialog = new mdc.dialog.MDCDialog(document.getElementById('betting-error-dialog'));
+    const bettingErrorDialog: MDCDialog = new MDCDialog(document.getElementById('betting-error-dialog'));
 
     // The game running info text
-    const game_running = document.getElementById('game-running');
+    const game_running: HTMLElement = document.getElementById('game-running');
 
     // The dialog displaying the license
-    const license_dialog = new mdc.dialog.MDCDialog(document.getElementById('license-dialog'));
+    const license_dialog: MDCDialog = new MDCDialog(document.getElementById('license-dialog'));
 
     // Add a click listener to the 'Licensed under the MIT License' text
     // to open the license dialog when clicked on
@@ -75,7 +57,7 @@ try {
      */
     async function setQuitCallback() {
         autobetLib.callbacks.setQuitCallback(() => {
-            electron.quit();
+            utils.quit();
         });
     }
 
@@ -94,15 +76,15 @@ try {
 
     // Show the copyright on hovered over the name container
     namecontainter.onmouseenter = () => {
-        namecontainter.classList = "hovered subcontainer";
-        document.getElementById("copyright").classList = "hovered";
-        document.getElementById("autobet-version").classList = "hovered";
+        namecontainter.className = "hovered subcontainer";
+        document.getElementById("copyright").className = "hovered";
+        document.getElementById("autobet-version").className = "hovered";
     };
 
     namecontainter.onmouseleave = () => {
-        namecontainter.classList = "subcontainer";
-        document.getElementById("copyright").classList = "";
-        document.getElementById("autobet-version").classList = "";
+        namecontainter.className = "subcontainer";
+        document.getElementById("copyright").className = "";
+        document.getElementById("autobet-version").className = "";
     };
 
     let moneyMade = 0;
@@ -114,13 +96,13 @@ try {
      */
     function showQRCode() {
         qrdialog.open();
-        startstop.disabled = true;
+        variables.startstop.disabled = true;
         showqrbutton.disabled = true;
     }
 
     // Listen for the qr dialog to close
     qrdialog.listen('MDCDialog:closing', function () {
-        startstop.disabled = false;
+        variables.startstop.disabled = false;
         showqrbutton.disabled = false;
     });
 
@@ -130,17 +112,17 @@ try {
     });
 
     // Set the exception callback
-    autobetLib.callbacks.setExceptionCallback(exception);
+    autobetLib.callbacks.setExceptionCallback(utils.exception);
 
     /**
      * Make sums more readable by adding 'K' for thousand
      * or 'M' for million to the end of the sum
      *
-     * @param {number} sum the sum to make pretty
-     * @param {boolean} k whether to replace thousand by 'K'
-     * @returns {string} the resulting value in the format [-]$<0-999>.<0-99><B|M|K>
+     * @param sum the sum to make pretty
+     * @param k whether to replace thousand by 'K'
+     * @returns the resulting value in the format [-]$<0-999>.<0-99><B|M|K>
      */
-    function makeSumsDisplayable(sum, k = false) {
+    function makeSumsDisplayable(sum: number, k: boolean = false): string {
         const negative = sum < 0;
         sum = Math.abs(sum);
 
@@ -171,9 +153,9 @@ try {
     /**
      * Add some money that was made
      *
-     * @param {number} value the amount of money to add/subtract
+     * @param value the amount of money to add/subtract
      */
-    function addMoney(value) {
+    function addMoney(value: number): void {
         if (value !== 0) {
             moneyMade += value;
             if (value > 0) won++;
@@ -189,28 +171,28 @@ try {
     /**
      * Set all money made
      *
-     * @param {number} value the overall amount of money made all time
+     * @param value the overall amount of money made all time
      */
-    function setAllMoneyMade(value) {
+    function setAllMoneyMade(value: number): void {
         moneyall.innerText = makeSumsDisplayable(value);
     }
 
     /**
      * Update the money this hour, races won and win probability texts
      */
-    function updateValues() {
+    function updateValues(): void {
         moneythishour.innerText = makeSumsDisplayable(getMoneyPerHour(), true) + "/hr";
-        raceswon.innerText = won;
+        raceswon.innerText = String(won);
         winprobability.innerText = Math.round((won / (won + lost)) * 1000) / 10 + "%";
     }
 
     /**
      * Get the money made per hour
      *
-     * @returns {number} the amount of money made this hour
+     * @returns the amount of money made this hour
      */
-    function getMoneyPerHour() {
-        return moneyMade * (3600 / time);
+    function getMoneyPerHour(): number {
+        return moneyMade * (3600 / variables.time);
     }
 
     // Set the 'set gta running' callback
@@ -222,8 +204,8 @@ try {
      * @param {boolean} val whether GTA V is running
      */
     function set_gta_running(val) {
-        gta_running = val;
-        if (gta_running) {
+        variables.gta_running = val;
+        if (variables.gta_running) {
             game_running.innerText = "Yes";
             game_running.className = "text status_running maintext";
         } else {
@@ -235,9 +217,9 @@ try {
     /**
      * Set the qr code with an ip address
      *
-     * @param {string} ip the ip address to display in the qr code
+     * @param ip the ip address to display in the qr code
      */
-    function setQRCode(ip) {
+    /*function setQRCode(ip: string): void {
         // Empty the element
         document.getElementById("qrcode").innerHTML = "";
         new QRCode(document.getElementById("qrcode"), {
@@ -247,7 +229,7 @@ try {
             colorDark: "#000000",
             colorLight: "#ffffff"
         });
-    }
+    }*/
 
     /**
      * Set the ips
@@ -293,37 +275,42 @@ try {
     });
 
     // when the window unloads, quit electron
-    window.onbeforeunload = function () {
+    window.onbeforeunload = function (): void {
         autobetLib.shutdown().then(() => {
-            electron.quit();
+            utils.quit();
         });
     }
 
     /**
      * The main function
      */
-    async function main() {
-        startstop.disabled = true;
+    async function main(): Promise<void> {
+        variables.startstop.disabled = true;
         // Create the title bar
-        titlebar.create();
+        new Titlebar({
+            backgroundColor: Color.fromHex('#151515'),
+            icon: path.join(__dirname, '..', '..', 'icon.png'),
+            menu: null,
+            titleHorizontalAlignment: 'left'
+        });
 
         enable_webserver.disabled = true;
         showqrbutton.disabled = true;
 
         // Initialize
-        let initialized = await autobetLib.init();
+        let initialized: boolean = await autobetLib.init();
         if (initialized) {
-            statusinfo.classList.remove("status_init");
-            statusinfo.classList.add("status_stopped");
-            statusinfo.innerText = "Stopped";
+            variables.statusinfo.classList.remove("status_init");
+            variables.statusinfo.classList.add("status_stopped");
+            variables.statusinfo.innerText = "Stopped";
             autobetLib.logging.debug("main.js", "autobetlib initialized.");
-            startstop.disabled = false;
+            variables.startstop.disabled = false;
         } else {
             autobetLib.logging.error("main.js", "Could not initialize");
             return;
         }
 
-        autobet_info.getLicense().then(res => {
+        autobet_info.getLicense().then((res: string) => {
             document.getElementById('license-dialog-content').innerText = res;
         }, rej => {
             autobetLib.logging.error("main.js", "Could not get the license: " + rej);
@@ -333,7 +320,7 @@ try {
         await autobetLib.loadWinnings();
 
         // Set switches checked
-        time_sleep_field.value = autobetLib.settings.getTimeSleep();
+        time_sleep_field.value = String(autobetLib.settings.getTimeSleep());
         log_to_file_switch.checked = autobetLib.logging.isLoggingToFile();
         log_to_console_switch.checked = autobetLib.logging.isLoggingToConsole();
         // Resize the "console" if logging to console is enabled
@@ -376,24 +363,24 @@ try {
         autobetLib.logging.debug("main.js", "JS main function finished");
     }, () => {
         // main failed
-        errordialog.open();
-        errordialog.listen("MDCDialog:closed", function () {
+        utils.errordialog.open();
+        utils.errordialog.listen("MDCDialog:closed", function () {
             autobetLib.shutdown();
-            electron.quit();
+            utils.quit();
         });
     });
 
     // Settings ================================================
 
     // MDC init
-    const description_dialog = new mdc.dialog.MDCDialog(document.getElementById("description-dialog")); // The description dialog
-    const time_sleep_field = new mdc.textField.MDCTextField(document.getElementById("time-sleep-field")); // The time-sleep text field
-    const full_debug = new mdc.switchControl.MDCSwitch(document.getElementById("full-debug-switch")); // The full debug switch
-    const log_to_file_switch = new mdc.switchControl.MDCSwitch(document.getElementById("log-to-file-switch")); // The log to file switch
-    const log_to_console_switch = new mdc.switchControl.MDCSwitch(document.getElementById("log-to-console-switch")); // The log to console switch
-    const log_textfield = new mdc.textField.MDCTextField(document.getElementById("log-textfield")); // The fake console
+    const description_dialog: any = new MDCDialog(document.getElementById("description-dialog")); // The description dialog
+    const time_sleep_field: any = new MDCTextField(document.getElementById("time-sleep-field")); // The time-sleep text field
+    const full_debug: MDCSwitch = new MDCSwitch(document.getElementById("full-debug-switch")); // The full debug switch
+    const log_to_file_switch: MDCSwitch = new MDCSwitch(document.getElementById("log-to-file-switch")); // The log to file switch
+    const log_to_console_switch: MDCSwitch = new MDCSwitch(document.getElementById("log-to-console-switch")); // The log to console switch
+    const log_textfield: any = new MDCTextField(document.getElementById("log-textfield")); // The fake console
 
-    const log_textfield_resizer = document.getElementById("log-textfield-resizer"); // The console resizer
+    const log_textfield_resizer: HTMLElement = document.getElementById("log-textfield-resizer"); // The console resizer
 
     /**
      * Show the description
@@ -401,7 +388,7 @@ try {
      * @param {String} title the title
      * @param {String} description the description
      */
-    function showDescription(title, description) {
+    function showDescription(title: string, description: string): void {
         document.getElementById("description-dialog-title").innerText = title;
         description_dialog.content_.innerText = description;
 
@@ -556,11 +543,4 @@ try {
             "the setResult() function. If no bet should be placed, pass null to setResult(). If you don't pass anythin, the result will be interpreted as invalid and the " +
             "Program will fall back to the native implementation.");
     });
-} catch (e) {
-    try {
-        autobetLib.logging.error("main.js", `Js exception thrown: ${e.message}`);
-    } catch (e1) {
-        console.error(`autobetLib.logging.error threw an exception: ${e1}`);
-    }
-    exception();
 }

@@ -88,7 +88,7 @@ export namespace callbacks {
      *
      * @param callback the callback function
      */
-    function setAddMoneyCallback(callback: (money: boolean) => void): void;
+    function setAddMoneyCallback(callback: (money: number) => void): void;
 
     /**
      * Set the callback function to set all money made

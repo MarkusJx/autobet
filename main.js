@@ -1,9 +1,9 @@
 'use strict';
 
-const {app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const path = require('path');
-const {autoUpdater} = require("electron-updater");
+const { autoUpdater } = require("electron-updater");
 let autobetLib = null, autobetLibError = null;
 try {
     autobetLib = require('@autobet/autobetlib');
@@ -11,9 +11,7 @@ try {
     autobetLibError = e;
 }
 
-/**
- * @type {boolean}
- */
+
 let enableDevTools;
 
 {
@@ -45,7 +43,7 @@ function createWindow() {
         resizable: true,
         icon: "icon.png",
         webPreferences: {
-            preload: path.join(__dirname, 'scripts', 'preload.js'),
+            preload: path.join(__dirname, 'out', 'preload.js'),
             contextIsolation: true,
             worldSafeExecuteJavaScript: true,
             nodeIntegration: false,
@@ -62,11 +60,11 @@ function createWindow() {
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');
     const contextMenu = Menu.buildFromTemplate([
-        {label: 'Autobet', type: 'normal', enabled: false},
-        {type: 'separator'},
-        {label: 'Show UI', type: 'checkbox', checked: true, id: 'show-ui'},
-        {type: 'separator'},
-        {label: 'Quit', type: 'normal', id: 'quit'}
+        { label: 'Autobet', type: 'normal', enabled: false },
+        { type: 'separator' },
+        { label: 'Show UI', type: 'checkbox', checked: true, id: 'show-ui' },
+        { type: 'separator' },
+        { label: 'Quit', type: 'normal', id: 'quit' }
     ]);
     tray.setToolTip("Autobet");
     tray.setContextMenu(contextMenu);
@@ -119,7 +117,7 @@ function createErrorWindow() {
         resizable: true,
         icon: "icon.png",
         webPreferences: {
-            preload: path.join(__dirname, 'scripts', 'preload_err.js'),
+            preload: path.join(__dirname, 'out', 'preload_err.js'),
             contextIsolation: true,
             worldSafeExecuteJavaScript: true,
             nodeIntegration: false,

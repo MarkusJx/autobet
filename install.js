@@ -157,9 +157,11 @@ function cleanUp() {
     const conanbuildinfo_txt = path.join(__dirname, "autobetlib", "conanbuildinfo.txt");
     const conaninfo_txt = path.join(__dirname, "autobetlib", "conaninfo.txt");
     const graph_info_json = path.join(__dirname, "autobetlib", "graph_info.json");
+    const out_dir = path.join(__dirname, 'out');
 
     deleteIfExists(dist_dir);
     deleteIfExists(bin_dir);
+    deleteIfExists(out_dir);
 
     deleteIfExists(conanbuildinfo_cmake);
     deleteIfExists(conanbuildinfo_txt);
@@ -203,12 +205,57 @@ async function downloadModel() {
     console.log("\x1b[92mSuccessfully downloaded the model\x1b[0m");
 }
 
+function postbuild() {
+    // Source: https://stackoverflow.com/a/26038979
+    function copyFileSync(source, target) {
+        var targetFile = target;
+
+        // If target is a directory, a new file with the same name will be created
+        if (fs.existsSync(target)) {
+            if (fs.lstatSync(target).isDirectory()) {
+                targetFile = path.join(target, path.basename(source));
+            }
+        }
+        fs.writeFileSync(targetFile, fs.readFileSync(source));
+    }
+
+    function copyFolderRecursiveSync(source, target) {
+        var files = [];
+
+        // Check if folder needs to be created or integrated
+        var targetFolder = path.join(target, path.basename(source));
+        if (!fs.existsSync(targetFolder)) {
+            fs.mkdirSync(targetFolder);
+        }
+
+        // Copy
+        if (fs.lstatSync(source).isDirectory()) {
+            files = fs.readdirSync(source);
+            files.forEach(function (file) {
+                var curSource = path.join(source, file);
+                if (fs.lstatSync(curSource).isDirectory()) {
+                    copyFolderRecursiveSync(curSource, targetFolder);
+                } else {
+                    copyFileSync(curSource, targetFolder);
+                }
+            });
+        }
+    }
+
+    const src = path.join(__dirname, 'src', 'main', 'qrcode');
+    const dest = path.join(__dirname, 'out', 'main');
+    copyFolderRecursiveSync(src, dest);
+}
+
 if (process.argv.length !== 3) {
     throw new Error("install.js called with invalid amount of arguments");
 } else {
     switch (process.argv[2]) {
         case "--downloadModel":
             downloadModel();
+            break;
+        case "--postbuild":
+            postbuild();
             break;
         case "--clean":
             cleanUp();

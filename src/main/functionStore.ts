@@ -35,5 +35,12 @@ export class functionStore {
      * @param name the function name
      * @param fnString the function string
      */
-    constructor(name: string, fnString: string, id: string);
+    constructor(name: string, fnString: string, id: string) {
+        this.name = name;
+        this.functionString = fnString;
+        this.ok = false;
+        this.active = false;
+        this.lastError = "";
+        this.id = id;
+    }
 }

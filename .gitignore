@@ -238,3 +238,4 @@ test/ai/lib
 /autobetlib/conanbuildinfo.txt
 /autobetlib/conaninfo.txt
 /autobetlib/graph_info.json
+out/**
