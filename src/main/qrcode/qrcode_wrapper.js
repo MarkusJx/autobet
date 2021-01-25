@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-// file is included here:
+// Get the qrcode.min.js path
 const qrcode_path = path.join(__dirname, 'qrcode.min.js');
+
+// Evaluate the file
 eval(String(fs.readFileSync(qrcode_path)));
 
 module.exports = {

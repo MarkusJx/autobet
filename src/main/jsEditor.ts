@@ -57,7 +57,7 @@ export function init(): void {
 
     // Set ace options
     constants.editor.session.setMode("ace/mode/javascript");
-    //editor.setTheme("ace/theme/TextMate");
+    constants.editor.setTheme("ace/theme/chrome");
     // enable autocompletion and snippets
     constants.editor.setOptions({
         enableBasicAutocompletion: true,
@@ -66,8 +66,10 @@ export function init(): void {
     });
 
     // On changes made in the editor,
-    // disable the check and set default buttons
-    constants.editor.getSession().on('change', () => {
+    // disable the check and set default buttons.
+    // Cast the editor to any as ace.editor.getSession().on()
+    // can't listen to 'change' by default
+    (constants.editor as any).getSession().on('change', () => {
         if (variables.current_selected_impl != null) {
             constants.save_impl_button.disabled = variables.current_selected_impl.waiting;
             constants.check_impl_button.disabled = true;
@@ -152,7 +154,7 @@ setResult(run());
     });
 
     // Set the default button
-    const default_button = new sidebarButton(document.getElementById("default-impl-button"), default_fn, "default", null, true);
+    const default_button: sidebarButton = new sidebarButton(document.getElementById("default-impl-button"), default_fn, "default", null, true);
     constants.buttons.push(default_button);
 
     // Set current_default_button and current_selected_impl to the default button
@@ -345,11 +347,4 @@ setResult(run());
         // Empty the impl name text field
         constants.impl_text_field.value = "";
     });
-} /*catch (e) {
-    try {
-        autobetLib.logging.error("jsEditor.js", `Js exception thrown: ${e.message}`);
-    } catch (e1) {
-        console.error(`autobetLib.logging.error threw an exception: ${e1}`);
-    }
-    exception();
-}*/
+}

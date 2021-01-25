@@ -50,7 +50,8 @@ export function syntaxHighlight(json: string | object): string {
  */
 export function setEditorDisabled(val: boolean): void {
     constants.editor.setReadOnly(val);
-    constants.editor.textInput.getElement().disabled = val;
+    // Cast the editor to any as ace.editor by default has no 'textInput' property
+    (constants.editor as any).textInput.getElement().disabled = val;
 }
 
 /**

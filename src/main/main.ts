@@ -6,7 +6,6 @@ import { MDCSwitch } from "@material/switch";
 import { MDCSnackbar } from "@material/snackbar";
 import { MDCTextField } from "@material/textfield";
 import { Titlebar, Color } from "custom-electron-titlebar";
-import path from "path";
 
 import { variables } from "./variables";
 import { setQRCode } from "./qrcode/qrcode_wrapper";
@@ -87,9 +86,9 @@ export function init(): void {
         document.getElementById("autobet-version").className = "";
     };
 
-    let moneyMade = 0;
-    let won = 0;
-    let lost = 0;
+    let moneyMade: number = 0;
+    let won: number = 0;
+    let lost: number = 0;
 
     /**
      * Show the qr code
@@ -123,10 +122,10 @@ export function init(): void {
      * @returns the resulting value in the format [-]$<0-999>.<0-99><B|M|K>
      */
     function makeSumsDisplayable(sum: number, k: boolean = false): string {
-        const negative = sum < 0;
+        const negative: boolean = sum < 0;
         sum = Math.abs(sum);
 
-        let res;
+        let res: string;
 
         if (sum >= 1000000000) { // One billion
             res = (sum / 1000000000).toFixed(2) + "B";
@@ -135,7 +134,7 @@ export function init(): void {
         } else if (k && sum >= 1000) { // One thousand
             res = (sum / 1000).toFixed(2) + "K";
         } else {
-            res = sum;
+            res = String(sum);
         }
 
         // Optional: Convert gazillions
@@ -201,9 +200,9 @@ export function init(): void {
     /**
      * Set whether GTA V is running
      *
-     * @param {boolean} val whether GTA V is running
+     * @param val whether GTA V is running
      */
-    function set_gta_running(val) {
+    function set_gta_running(val: boolean): void {
         variables.gta_running = val;
         if (variables.gta_running) {
             game_running.innerText = "Yes";
@@ -215,27 +214,10 @@ export function init(): void {
     }
 
     /**
-     * Set the qr code with an ip address
-     *
-     * @param ip the ip address to display in the qr code
-     */
-    /*function setQRCode(ip: string): void {
-        // Empty the element
-        document.getElementById("qrcode").innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), {
-            text: "http://" + ip + ":8027",
-            width: 352,
-            height: 352,
-            colorDark: "#000000",
-            colorLight: "#ffffff"
-        });
-    }*/
-
-    /**
      * Set the ips
      */
     function setIPs() {
-        let ip = autobetLib.getIP();
+        let ip: string = autobetLib.getIP();
         weblink.innerText = "http://" + ip + ":8027";
         setQRCode(ip);
     }
@@ -248,7 +230,7 @@ export function init(): void {
     // Listen for change on the enable webserver switch
     enable_webserver.listen('change', () => {
         enable_webserver.disabled = true;
-        autobetLib.settings.setWebServer(enable_webserver.checked).then((res) => {
+        autobetLib.settings.setWebServer(enable_webserver.checked).then((res: boolean) => {
             if (!res) {
                 // If the call failed, set the switch to the web servers current state
                 enable_webserver.checked = autobetLib.settings.webServerRunning();
@@ -289,7 +271,7 @@ export function init(): void {
         // Create the title bar
         new Titlebar({
             backgroundColor: Color.fromHex('#151515'),
-            icon: path.join(__dirname, '..', '..', 'icon.png'),
+            icon: "../icon.png",
             menu: null,
             titleHorizontalAlignment: 'left'
         });
@@ -303,17 +285,17 @@ export function init(): void {
             variables.statusinfo.classList.remove("status_init");
             variables.statusinfo.classList.add("status_stopped");
             variables.statusinfo.innerText = "Stopped";
-            autobetLib.logging.debug("main.js", "autobetlib initialized.");
+            autobetLib.logging.debug("main.ts", "autobetlib initialized.");
             variables.startstop.disabled = false;
         } else {
-            autobetLib.logging.error("main.js", "Could not initialize");
+            autobetLib.logging.error("main.ts", "Could not initialize");
             return;
         }
 
         autobet_info.getLicense().then((res: string) => {
             document.getElementById('license-dialog-content').innerText = res;
         }, rej => {
-            autobetLib.logging.error("main.js", "Could not get the license: " + rej);
+            autobetLib.logging.error("main.ts", "Could not get the license: " + rej);
         });
 
         // Load the winnings
@@ -334,12 +316,12 @@ export function init(): void {
             autobetLib.startWebServer().then(initialized => {
                 enable_webserver.checked = initialized;
                 if (initialized) {
-                    autobetLib.logging.debug("main.js", "Web server started.");
+                    autobetLib.logging.debug("main.ts", "Web server started.");
                     weblink.disabled = false;
                     showqrbutton.disabled = false;
                     setIPs();
                 } else {
-                    autobetLib.logging.error("main.js", "Could not start web server");
+                    autobetLib.logging.error("main.ts", "Could not start web server");
                     weblink.disabled = true;
                     weblink.innerText = "not running";
                     showqrbutton.disabled = true;
@@ -360,7 +342,7 @@ export function init(): void {
 
     // Run the main function
     main().then(() => {
-        autobetLib.logging.debug("main.js", "JS main function finished");
+        autobetLib.logging.debug("main.ts", "JS main function finished");
     }, () => {
         // main failed
         utils.errordialog.open();
@@ -385,8 +367,8 @@ export function init(): void {
     /**
      * Show the description
      *
-     * @param {String} title the title
-     * @param {String} description the description
+     * @param title the title
+     * @param description the description
      */
     function showDescription(title: string, description: string): void {
         document.getElementById("description-dialog-title").innerText = title;
@@ -396,7 +378,7 @@ export function init(): void {
     }
 
     // Listen for keyup events on the input of the time_sleep text field
-    time_sleep_field.input_.addEventListener('keyup', (event) => {
+    time_sleep_field.input_.addEventListener('keyup', (event: KeyboardEvent) => {
         // Only do this if the key pressed was 'enter'
         if (event.keyCode === 13) {
             event.preventDefault();
@@ -439,7 +421,7 @@ export function init(): void {
         }
 
         // Set debug:full
-        autobetLib.settings.setDebugFull(full_debug.checked).then((res) => {
+        autobetLib.settings.setDebugFull(full_debug.checked).then((res: boolean) => {
             full_debug.disabled = false;
             if (!res) { // If the call failed, do some stuff
                 full_debug.checked = false;
@@ -503,7 +485,7 @@ export function init(): void {
     });
 
     // Set a callback for logging to "console"
-    autobetLib.logging.setLogCallback((msg) => {
+    autobetLib.logging.setLogCallback((msg: string) => {
         // Only do this if the text field is scrolled all the way down
         if ((log_textfield.input_.scrollTop + log_textfield.input_.clientHeight) >= (log_textfield.input_.scrollHeight - 20)) {
             // Append the message

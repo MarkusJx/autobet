@@ -355,6 +355,10 @@ body {
     color: rgb(0, 60, 255);
 }
 
+#time-sleep-field.mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
+    color: rgb(0, 60, 255);
+}
+
 #description-dialog {
     --mdc-theme-primary: rgb(0, 60, 255);
 }

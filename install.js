@@ -242,9 +242,9 @@ function postbuild() {
         }
     }
 
-    const src = path.join(__dirname, 'src', 'main', 'qrcode');
+    const qrcode_src = path.join(__dirname, 'src', 'main', 'qrcode');
     const dest = path.join(__dirname, 'out', 'main');
-    copyFolderRecursiveSync(src, dest);
+    copyFolderRecursiveSync(qrcode_src, dest);
 }
 
 if (process.argv.length !== 3) {

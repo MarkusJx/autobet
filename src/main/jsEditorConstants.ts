@@ -3,8 +3,7 @@
 import { MDCDialog } from "@material/dialog";
 import { MDCTextField } from "@material/textfield";
 import { MDCSnackbar } from "@material/snackbar";
-import ace from "ace-builds";
-import path from "path";
+import { editor } from "./ace_wrapper";
 
 import { sidebarButton } from "./sidebarButton";
 
@@ -22,10 +21,6 @@ const error_dialog_text = document.getElementById('editor-error-dialog-content')
 
 const editor_title = document.getElementById("editor-title"); // The editor title
 const add_button = document.getElementById("add-impl-button"); // The 'add implementation' button
-
-ace.config.set('basePath', path.join(__dirname, '..', '..'));
-ace.require("ace/ext/language_tools");
-const editor: any = ace.edit("editor");
 
 const buttons: sidebarButton[] = [];
 

@@ -80,20 +80,23 @@ autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
     } else if (typeof res === "string") {
         let res_index: number = odds.indexOf(res);
         if (res_index < 0) {
-            autobetLib.logging.error("preload.js", `The odds did not contain the result by the custom betting function: '${res}'`);
+            autobetLib.logging.error("preload.ts", `The odds did not contain the result by the custom betting function: '${res}'`);
             return -2;
         } else {
             // Return the result
             return res_index;
         }
     } else {
-        autobetLib.logging.error("preload.js", "The result from the custom betting function was neither null or a string");
+        autobetLib.logging.error("preload.ts", "The result from the custom betting function was neither null or a string");
         bettingFunctionError();
         // Again, return -2 on error
         return -2;
     }
 });
 
+/**
+ * Initialize all javascript
+ */
 async function init(): Promise<void> {
     const main = await import("./main/main");
     main.init();
@@ -105,6 +108,7 @@ async function init(): Promise<void> {
     jsEditor.init();
 }
 
+// Run init() on window load finished
 window.addEventListener('DOMContentLoaded', () => {
     init().then(() => {
         autobetLib.logging.debug("preload.ts", "init() finished");

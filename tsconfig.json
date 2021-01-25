@@ -2,9 +2,20 @@
     "compilerOptions": {
         "target": "es6",
         "module": "commonjs",
-        "sourceMap": true,
         "esModuleInterop": true,
         "outDir": "out",
-        "lib": ["ESNext", "DOM"]
-    }
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "inlineSourceMap": true
+    },
+    "exclude": [
+        "node_modules",
+        "autobetlib",
+        "ui",
+        "web",
+        "docs",
+        ".github"
+    ]
 }

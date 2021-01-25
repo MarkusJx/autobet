@@ -1,3 +1,5 @@
+// A wrapper for the qrcode.min.js file
+
 /**
  * Set the qr code with an ip address
  *
