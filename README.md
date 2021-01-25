@@ -14,6 +14,7 @@ Table of contents
    * [Feedback](#feedback)
      * [Not what you expected?](#this-is-not-what-you-expected)
      * [Like it?](#like-it)
+     * [Actual feedback](#Actual-feedback)
    * **[Download](#download)**
 <!--te-->
 
@@ -51,16 +52,7 @@ Stranger Danger. You've heard this right? Yeah, No. Me neither. But if you don't
 ### This is not what you expected?
 Well, I'm not amazon or similar, so I can't give you a refund on a already free product, but if you don't like it, uninstalling is free.
 
-If something does not work on the other hand, feel free to leave a Github issue in the [issues section](https://github.com/MarkusJx/GTA-Online-Autobet/issues), it's free. But make sure to include at least a description of the error and a log file. This can be created when starting the program through command line with the flag ```--debug```
-
-You can also create a full debugging zip with the included debug.bat, which can be found at
-```C:\Users\{Username}\AppData\Local\Programs\GTA Online Autobet\```
-
-**Important notices on the debugging zip**
-* This will create a autobet_debug.zip file on your desktop
-* It will include screenshots, **make sure to hide any personal/sensitive data or to delete screenshots from the .zip showing these information**
-* If no out.log is included, it will be located at the program's install location
-* You can send this .zip in
+If something does not work on the other hand, feel free to leave a Github issue in the [issues section](https://github.com/MarkusJx/GTA-Online-Autobet/issues), it's free. But make sure to include at least a description of the error and a log file. Take a look at the [wiki pages on debugging](https://github.com/MarkusJx/autobet/wiki/Debugging) for further information.
 
 Chances of getting a response are somewhat high, so just give it a try. Again, it's free.
 
@@ -72,6 +64,10 @@ Great to hear!
 
 ### Live it?
 No, you don't.
+
+### Actual feedback
+You can now use the [Github discussions](https://github.com/MarkusJx/autobet/discussions) feature to
+give feedback or ask questions, if you want to.
 
 # Download
 

@@ -1,12 +1,26 @@
+'use strict';
+
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const path = require('path');
 const { autoUpdater } = require("electron-updater");
 let autobetLib = null, autobetLibError = null;
 try {
-    autobetLib = require('./autobetLib');
+    autobetLib = require('@autobet/autobetlib');
 } catch (e) {
     autobetLibError = e;
+}
+
+
+let enableDevTools;
+
+{
+    const version = require('./package.json').version;
+    const rel_ver_regex = /^([0-9]+\.?)+$/;
+
+    enableDevTools = !rel_ver_regex.test(version) || (process.argv.length >= 3 && process.argv[2] === "--enableDevTools");
+
+    console.log(`Starting with devTools ${enableDevTools ? "enabled" : "disabled"}`);
 }
 
 let tray = null;
@@ -29,17 +43,19 @@ function createWindow() {
         resizable: true,
         icon: "icon.png",
         webPreferences: {
-            preload: path.join(__dirname, 'scripts', 'preload.js'),
+            preload: path.join(__dirname, 'out', 'preload.js'),
             contextIsolation: true,
             worldSafeExecuteJavaScript: true,
             nodeIntegration: false,
             webSecurity: true,
             enableRemoteModule: true,
-            devTools: false
+            devTools: enableDevTools
         }
     });
 
-    mainWindow.removeMenu();
+    if (!enableDevTools) {
+        mainWindow.removeMenu();
+    }
 
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');
@@ -101,17 +117,19 @@ function createErrorWindow() {
         resizable: true,
         icon: "icon.png",
         webPreferences: {
-            preload: path.join(__dirname, 'scripts', 'preload_err.js'),
+            preload: path.join(__dirname, 'out', 'preload_err.js'),
             contextIsolation: true,
             worldSafeExecuteJavaScript: true,
             nodeIntegration: false,
             webSecurity: true,
             enableRemoteModule: true,
-            devTools: false
+            devTools: enableDevTools
         }
     });
 
-    errorWindow.removeMenu();
+    if (!enableDevTools) {
+        errorWindow.removeMenu();
+    }
 
     errorWindow.loadFile(path.join(__dirname, 'ui', 'err', 'index.html')).then(() => {
         console.log("Error window loaded");
@@ -126,7 +144,13 @@ function createErrorWindow() {
 
 app.whenReady().then(() => {
     if (autobetLib != null) {
-        createWindow();
+        if (autobetLib.programIsRunning()) {
+            autobetLib.callbacks.setQuitCallback(() => {
+                app.quit();
+            });
+        } else {
+            createWindow();
+        }
     } else {
         createErrorWindow();
     }

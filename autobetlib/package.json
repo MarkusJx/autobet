@@ -1,0 +1,40 @@
+{
+    "name": "@autobet/autobetlib",
+    "version": "1.3.0-beta.1",
+    "description": "The autobet native library module",
+    "main": "index.js",
+    "scripts": {
+        "test": "node test.js",
+        "pretest": "npm run-script build",
+        "test:dev": "node test.js",
+        "pretest:dev": "npm run-script build:dev",
+        "build": "cmake-js build",
+        "build:dev": "cmake-js configure --release && cmake --build build --config RelWithDebInfo",
+        "postbuild:dev": "node prelaunch.js --dev",
+        "postbuild": "node prelaunch.js",
+        "clean": "cmake-js clean",
+        "preinstall": "conan install .",
+        "conan_install:dev": "conan install . -s build_type=Debug",
+        "conan_install": "conan install ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MarkusJx/GTA-Online-Autobet.git"
+    },
+    "author": "MarkusJx",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/MarkusJx/GTA-Online-Autobet/issues"
+    },
+    "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
+    "cmake-js": {
+        "runtime": "electron",
+        "arch": "x64",
+        "runtimeVersion": "9.2.1"
+    },
+    "devDependencies": {
+        "cmake-js": "^6.1.0",
+        "node-addon-api": "^3.0.2",
+        "segfault-handler": "^1.3.0"
+    }
+}

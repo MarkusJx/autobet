@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src-elem https://unpkg.com 'self'; style-src 'unsafe-inline';
            style-src-elem https://unpkg.com https://fonts.googleapis.com 'unsafe-inline' 'self'; font-src https://fonts.gstatic.com;
-            img-src 'self' data:">
+            img-src 'self' data:; worker-src 'self' blob:">
 
     <meta charset="UTF-8">
     <title>Autobet</title>
@@ -24,7 +24,8 @@
         <div id="namecontainer" class="subcontainer">
             <p id="autobet">Welcome to Autobet.</p>
             <p id="name-desc">A GTA Online Horseracing betting bot.</p>
-            <p id="copyright">© MarkusJx 2020. Licensed under the MIT License.</p>
+            <p id="autobet-version">Version undefined</p>
+            <p id="copyright">© MarkusJx 2021. <span id="copyright-opener">Licensed under the MIT License.</span></p>
         </div>
 
         <div class="subcontainer" id="status">
@@ -73,19 +74,21 @@
             <div class="textalign">
                 <h1 class="text subheading">Webserver</h1>
                 <h1 class="text maintext-maincolor" id="webinfotext">Webserver running on:</h1>
-                <button class="mdc-button mdc-ripple-upgraded" id="weblink">http://localhost:8027</button>
+                <button class="mdc-button mdc-ripple-upgraded" id="weblink"
+                    title="Open the web site">http://localhost:8027</button>
             </div>
 
             <div class="textalign">
                 <h1 class="text maintext-maincolor" id="enable-disable">Enable/Disable</h1>
-                <div class="mdc-switch" id="enable-webserver-switch">
+                <div class="mdc-switch" id="enable-webserver-switch" title="Enable/Disable the web server">
                     <div class="mdc-switch__track"></div>
                     <div class="mdc-switch__thumb-underlay">
                         <div class="mdc-switch__thumb"></div>
-                        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                        <input type="checkbox" class="mdc-switch__native-control" role="switch" aria-checked="false">
                     </div>
                 </div>
-                <button class="mdc-button" id="showqrbutton">Show QR-Code</button>
+                <button class="mdc-button" id="showqrbutton" title="Show the QR Code pointing to the web site">Show
+                    QR-Code</button>
             </div>
         </div>
 
@@ -99,14 +102,18 @@
         <div class="subcontainer" id="controlscontainer">
             <div class="textalign">
                 <h1 class="text subheading">Controls</h1>
-                <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
+                <button class="mdc-button mdc-button--raised" id="startstop"
+                    title="Start/Stop the betting">Start</button>
             </div>
         </div>
 
+        <!-- Settings divider -->
         <div class="subcontainer" id="settingsdivider">
             <h1 class="text subheading" id="settingsdivider-text">Settings</h1>
         </div>
+        <!-- Settings divider end -->
 
+        <!-- Time-sleep setting container -->
         <div class="subcontainer setting-container">
             <div class="textalign">
                 <div class="infoalign">
@@ -122,7 +129,9 @@
                 </label>
             </div>
         </div>
+        <!-- Time-sleep setting container end -->
 
+        <!-- Full debug container -->
         <div class="subcontainer setting-container">
             <div class="textalign">
                 <div class="infoalign">
@@ -134,12 +143,100 @@
                     <div class="mdc-switch__track"></div>
                     <div class="mdc-switch__thumb-underlay">
                         <div class="mdc-switch__thumb"></div>
-                        <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                        <input type="checkbox" class="mdc-switch__native-control" role="switch" aria-checked="false">
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Full debug container end -->
 
+        <!-- Custom betting function container -->
+        <div class="subcontainer setting-container" id="custom-betting-function-container">
+            <div class="infoalign" id="custom-betting-function-heading-container">
+                <h1 class="text subheading">Custom betting function</h1>
+                <i class="material-icons infoicon" id="custom-betting-function-info">info</i>
+            </div>
+
+            <!-- The show/hide the editor button -->
+            <button class="mdc-button mdc-button--outlined" id="open-editor" title="Show/hide the editor">
+                <div class="mdc-button__ripple"></div>
+                <span class="mdc-button__label" id="open-editor-button-label">Show editor</span>
+            </button>
+
+            <!-- The editor side bar -->
+            <div id="editor-container">
+                <aside class="mdc-drawer mdc-drawer--dismissible" id="editor-menu-drawer">
+                    <div class="mdc-drawer__content">
+                        <div class="mdc-list">
+                            <div class="mdc-drawer__header">
+                                <h3 class="mdc-drawer__title">Implementations</h3>
+                                <h6 class="mdc-drawer__subtitle">Select your definition here</h6>
+                            </div>
+                            <a class="mdc-list-item mdc-list-item--activated" aria-current="page"
+                                id="default-impl-button">
+                                <span class="mdc-list-item__ripple"></span>
+                                <i class="material-icons mdc-list-item__graphic editor-icon-ok"
+                                    aria-hidden="true">check_circle_outline</i>
+                                <span class="mdc-list-item__text">Default</span>
+                            </a>
+                            <hr class="mdc-list-divider">
+                            <div id="editor-sidebar-buttons">
+                                <!-- New buttons go in here -->
+                            </div>
+                            <hr class="mdc-list-divider" id="to-hide-divider">
+                            <a class="mdc-list-item mdc-list-item" aria-current="page" id="add-impl-button">
+                                <span class="mdc-list-item__ripple"></span>
+                                <i class="material-icons mdc-list-item__graphic" aria-hidden="true">add</i>
+                                <span class="mdc-list-item__text">Add</span>
+                            </a>
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="mdc-drawer-app-content" id="editor-drawer-main-content">
+                    <header class="mdc-top-app-bar mdc-top-app-bar--dense app-bar" id="editor-top-bar">
+                        <div class="mdc-top-app-bar__row">
+                            <!-- The sidebar open button -->
+                            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                                <button
+                                    class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button">menu</button>
+                                <span class="mdc-top-app-bar__title" id="editor-title">Code editor</span>
+                            </section>
+                            <!-- The editor action buttons -->
+                            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar"
+                                id="editor-action-bar">
+                                <button
+                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                    aria-label="Test" title="Run tests on this implementation" id="check-impl-button"
+                                    disabled>cached</button>
+                                <button
+                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                    aria-label="SetDefault" title="Set this as your default implementation"
+                                    id="set-default-button" disabled>done</button>
+                                <button
+                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                    aria-label="Save" title="Save the current state and test it" id="save-impl-button"
+                                    disabled>save</button>
+                                <button
+                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                    aria-label="Delete" title="Delete this implementation" id="delete-impl-button"
+                                    disabled>delete_forever</button>
+                            </section>
+                        </div>
+                    </header>
+
+                    <!-- The actual code editor is in here -->
+                    <main class="main-content" id="editor-main-content">
+                        <div class="mdc-top-app-bar--fixed-adjust" id="editor-top-app-bar">
+                            <pre id="editor"></pre>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+        <!-- Custom betting function container end -->
+
+        <!-- Debug container -->
         <div class="subcontainer setting-container" id="debug-container">
             <div class="infoalign" id="debug-heading-container">
                 <h1 class="text subheading">Debugging and logging</h1>
@@ -147,30 +244,36 @@
             </div>
 
             <div class="textalign" id="log-switches-container">
+                <!-- The log to file text & switch -->
                 <div class="infoalign logging">
                     <p class="text subheading"> Log to File</p>
                     <div class="mdc-switch" id="log-to-file-switch">
                         <div class="mdc-switch__track"></div>
                         <div class="mdc-switch__thumb-underlay">
                             <div class="mdc-switch__thumb"></div>
-                            <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                            <input type="checkbox" class="mdc-switch__native-control" role="switch"
+                                aria-checked="false">
                         </div>
                     </div>
                 </div>
 
+                <!-- The log to console text & switch-->
                 <div class="infoalign logging">
                     <p class="text subheading"> Log to Console</p>
                     <div class="mdc-switch" id="log-to-console-switch">
                         <div class="mdc-switch__track"></div>
                         <div class="mdc-switch__thumb-underlay">
                             <div class="mdc-switch__thumb"></div>
-                            <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                            <input type="checkbox" class="mdc-switch__native-control" role="switch"
+                                aria-checked="false">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <label class="mdc-text-field mdc-text-field--outlined mdc-text-field--textarea mdc-text-field--fullwidth" id="log-textfield">
+            <!-- The fake console displaying logs -->
+            <label class="mdc-text-field mdc-text-field--outlined mdc-text-field--textarea mdc-text-field--fullwidth"
+                id="log-textfield">
                 <span class="mdc-text-field__resizer" style="height: 56px;" id="log-textfield-resizer">
                     <textarea class="mdc-text-field__input" rows="8" cols="40" aria-labelledby="view-log-label-id"
                         id="log-textfield-input" disabled></textarea>
@@ -184,12 +287,15 @@
                 </span>
             </label>
         </div>
-        <!-- Container end -->
+        <!-- Debug container end -->
     </div>
+    <!-- Container end -->
 
+    <!-- Dialogues -->
     <div class="mdc-dialog" id="description-dialog">
         <div class="mdc-dialog__container">
-            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" aria-labelledby="description-dialog-title" aria-describedby="description-dialog-content">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true"
+                aria-labelledby="description-dialog-title" aria-describedby="description-dialog-content">
                 <h2 class="mdc-dialog__title" id="description-dialog-title"></h2>
                 <div class="mdc-dialog__content" id="description-dialog-content"></div>
                 <div class="mdc-dialog__actions">
@@ -203,7 +309,8 @@
         <div class="mdc-dialog__scrim"></div>
     </div>
 
-    <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog" id="qrdialog" role="alertdialog">
+    <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog"
+        id="qrdialog" role="alertdialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface">
                 <h2 class="mdc-dialog__title" id="my-dialog-title">
@@ -213,7 +320,8 @@
                     <div id="qrcode"></div>
                 </div>
                 <footer class="mdc-dialog__actions">
-                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="qrdonebutton" type="button">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="qrdonebutton"
+                        type="button">
                         <span class="mdc-button__label">Done</span>
                     </button>
                 </footer>
@@ -222,7 +330,8 @@
         <div class="mdc-dialog__scrim"></div>
     </div>
 
-    <div aria-describedby="error-dialog-content" aria-labelledby="error-dialog" aria-modal="true" class="mdc-dialog" id="error-dialog-container" role="alertdialog">
+    <div aria-describedby="error-dialog-content" aria-labelledby="error-dialog" aria-modal="true" class="mdc-dialog"
+        id="error-dialog-container" role="alertdialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface">
                 <h2 class="mdc-dialog__title" id="error-dialog">Error</h2>
@@ -230,7 +339,8 @@
                     An Error occurred. The Program will now exit.
                 </div>
                 <footer class="mdc-dialog__actions">
-                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no" id="errordialogbutton" type="button">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no" id="errordialogbutton"
+                        type="button">
                         <span class="mdc-button__label">ok</span>
                     </button>
                 </footer>
@@ -239,8 +349,132 @@
         <div class="mdc-dialog__scrim"></div>
     </div>
 
+    <!-- Select name dialog -->
+    <div class="mdc-dialog" id="select-name-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true"
+                aria-describedby="select-name-dialog-content" aria-labelledby="select-name-dialog-title">
+                <h2 class="mdc-dialog__title" id="select-name-dialog-title">
+                    Select a name
+                </h2>
+                <div class="mdc-dialog__content" id="select-name-dialog-content">
+                    <label class="mdc-text-field mdc-text-field--outlined" id="impl-name-text-field">
+                        <span class="mdc-notched-outline">
+                            <span class="mdc-notched-outline__leading"></span>
+                            <span class="mdc-notched-outline__notch">
+                                <span class="mdc-floating-label" id="impl-name-text-field-label">Implementation
+                                    name</span>
+                            </span>
+                            <span class="mdc-notched-outline__trailing"></span>
+                        </span>
+                        <input type="text" class="mdc-text-field__input" aria-labelledby="impl-name-text-field-label">
+                    </label>
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Cancel</span>
+                    </button>
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="save">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <!-- Editor error message dialog -->
+    <div class="mdc-dialog" id="editor-error-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="editor-error-dialog-surface"
+                aria-describedby="editor-error-dialog-content" aria-labelledby="editor-error-dialog-title">
+                <h2 class="mdc-dialog__title" id="editor-error-dialog-title">
+                    Last message
+                </h2>
+                <div class="mdc-dialog__content" id="editor-error-dialog-content">
+                    None available
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="ok">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Ok</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <!-- betting error message dialog -->
+    <div class="mdc-dialog" id="betting-error-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="betting-error-dialog-surface"
+                aria-describedby="betting-error-dialog-content" aria-labelledby="betting-error-dialog-title">
+                <h2 class="mdc-dialog__title" id="betting-error-dialog-title">
+                    Betting stopped
+                </h2>
+                <div class="mdc-dialog__content" id="betting-error-dialog-content">
+                    No message available
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="ok">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Ok</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <!-- License dialog -->
+    <div class="mdc-dialog" id="license-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="license-dialog-surface"
+                aria-describedby="license-dialog-content" aria-labelledby="license-dialog-title">
+                <h2 class="mdc-dialog__title" id="license-dialog-title">
+                    Autobet license
+                </h2>
+                <div class="mdc-dialog__content" id="license-dialog-content">
+                    Not available
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="ok">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Ok</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
     <!-- Snackbars -->
 
+    <!-- Editor message snackbar -->
+    <div class="mdc-snackbar" id="editor-message-snackbar">
+        <div class="mdc-snackbar__surface" role="status" aria-relevant="additions">
+            <div class="mdc-snackbar__label" aria-atomic="false" id="editor-message-label">
+                Message
+            </div>
+            <div class="mdc-snackbar__actions" aria-atomic="true">
+                <button type="button" class="mdc-button mdc-snackbar__action editor-message-snackbar-action">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">Ok</span>
+                </button>
+
+                <button type="button" class="mdc-button mdc-snackbar__action editor-message-snackbar-action"
+                    id="editor-message-snackbar-show-info">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">View info</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings saved message snackbar -->
     <div class="mdc-snackbar" id="settings-saved-message">
         <div class="mdc-snackbar__surface">
             <div class="mdc-snackbar__label" role="status" aria-live="polite">
@@ -249,22 +483,20 @@
         </div>
     </div>
 
+    <!-- GTA ont running message snackbar -->
     <div class="mdc-snackbar noselect" id="gta-not-running-message">
         <div class="mdc-snackbar__surface">
             <div aria-live="polite" class="mdc-snackbar__label" role="status">
                 GTA V is not running on this machine. Please start GTA V and retry
             </div>
             <div class="mdc-snackbar__actions">
-                <button class="mdc-button mdc-snackbar__action" type="button">Ok</button>
+                <button class="mdc-button mdc-snackbar__action" id="gta-not-running-message-ok"
+                    type="button">Ok</button>
             </div>
         </div>
     </div>
 
-    <script src="qrcode.min.js" type="text/javascript"></script>
-    <script src="../node_modules/material-components-web/dist/material-components-web.min.js"></script>
-    <script src="main.min.js" type="text/javascript"></script>
-    <script src="startstop.min.js" type="text/javascript"></script>
-
+    <!-- load open sans -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap" rel="stylesheet">
 </body>
 
