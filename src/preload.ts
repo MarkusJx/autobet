@@ -1,7 +1,8 @@
-'use strict';
-
 import autobetLib from "@autobet/autobetlib";
-import { store, functions, activeFunction, setActiveFunctionId, isolatedFunction, revertToDefaultCallback } from "./main/isolatedFunctions";
+import {
+    store, functions, activeFunction, setActiveFunctionId,
+    isolatedFunction, revertToDefaultCallback
+} from "./main/isolatedFunctions";
 
 // Set whether to use the custom betting function
 if (activeFunction >= 0 && activeFunction < functions.length && functions[activeFunction].active) {

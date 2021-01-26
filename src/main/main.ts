@@ -1,5 +1,3 @@
-'use strict';
-
 import { MDCRipple } from "@material/ripple";
 import { MDCDialog } from "@material/dialog";
 import { MDCSwitch } from "@material/switch";

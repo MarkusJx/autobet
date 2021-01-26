@@ -1,5 +1,3 @@
-'use strict';
-
 import { functionStore } from "./functionStore";
 import autobetLib from "@autobet/autobetlib";
 import Store from "electron-store";

@@ -1,5 +1,3 @@
-'use strict';
-
 import { MDCDrawer } from "@material/drawer";
 
 import { functionStore } from "./functionStore";

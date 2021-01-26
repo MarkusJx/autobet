@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+// NOTE: This file must not be in strict mode as it uses eval()
+
 // Get the qrcode.min.js path
 const qrcode_path = path.join(__dirname, 'qrcode.min.js');
 

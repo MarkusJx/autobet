@@ -1,5 +1,3 @@
-'use strict';
-
 import { MDCRipple } from "@material/ripple";
 import { MDCTopAppBar } from "@material/top-app-bar";
 

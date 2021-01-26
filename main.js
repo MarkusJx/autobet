@@ -1,16 +1,17 @@
 'use strict';
 
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
-const windowStateKeeper = require('electron-window-state');
-const path = require('path');
 const { autoUpdater } = require("electron-updater");
+const windowStateKeeper = require('electron-window-state');
+const Store = require('electron-store');
+const path = require('path');
+
 let autobetLib = null, autobetLibError = null;
 try {
     autobetLib = require('@autobet/autobetlib');
 } catch (e) {
     autobetLibError = e;
 }
-
 
 let enableDevTools;
 
@@ -26,6 +27,7 @@ let enableDevTools;
 let tray = null;
 
 function createWindow() {
+    Store.initRenderer();
     autoUpdater.checkForUpdatesAndNotify().then(r => console.log(r));
     const mainWindowState = windowStateKeeper({
         defaultWidth: 705,

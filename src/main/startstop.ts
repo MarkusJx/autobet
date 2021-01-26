@@ -1,5 +1,3 @@
-'use strict';
-
 import { MDCSnackbar } from "@material/snackbar";
 
 import { variables } from "./variables";

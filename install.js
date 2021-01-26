@@ -153,20 +153,11 @@ function deleteIfExists(p) {
 function cleanUp() {
     const dist_dir = path.join(__dirname, "dist");
     const bin_dir = path.join(__dirname, "autobetlib", "bin");
-    const conanbuildinfo_cmake = path.join(__dirname, "autobetlib", "conanbuildinfo.cmake");
-    const conanbuildinfo_txt = path.join(__dirname, "autobetlib", "conanbuildinfo.txt");
-    const conaninfo_txt = path.join(__dirname, "autobetlib", "conaninfo.txt");
-    const graph_info_json = path.join(__dirname, "autobetlib", "graph_info.json");
     const out_dir = path.join(__dirname, 'out');
 
     deleteIfExists(dist_dir);
     deleteIfExists(bin_dir);
     deleteIfExists(out_dir);
-
-    deleteIfExists(conanbuildinfo_cmake);
-    deleteIfExists(conanbuildinfo_txt);
-    deleteIfExists(conaninfo_txt);
-    deleteIfExists(graph_info_json);
 }
 
 function full_clean() {
@@ -179,6 +170,16 @@ function full_clean() {
     const autobet_log = path.join(__dirname, "autobet.log");
     const autobet_debug_log = path.join(__dirname, "autobet_debug.log");
     const winnings_dat = path.join(__dirname, "winnings.dat");
+
+    const conanbuildinfo_cmake = path.join(__dirname, "autobetlib", "conanbuildinfo.cmake");
+    const conanbuildinfo_txt = path.join(__dirname, "autobetlib", "conanbuildinfo.txt");
+    const conaninfo_txt = path.join(__dirname, "autobetlib", "conaninfo.txt");
+    const graph_info_json = path.join(__dirname, "autobetlib", "graph_info.json");
+
+    deleteIfExists(conanbuildinfo_cmake);
+    deleteIfExists(conanbuildinfo_txt);
+    deleteIfExists(conaninfo_txt);
+    deleteIfExists(graph_info_json);
 
     deleteIfExists(model_yml);
     deleteIfExists(autobet_conf);
