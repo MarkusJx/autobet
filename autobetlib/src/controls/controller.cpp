@@ -20,6 +20,13 @@
 #include "controls/vXboxInterface.h"
 #include "logger.hpp"
 
+// The time to sleep after a button press
+#define PRESS_SLEEP 200
+// The time to sleep after the button was released
+#define RELEASE_SLEEP 100
+
+using namespace logger;
+
 controller::GameController::GameController() {
     unsigned char nEmpty;
 
@@ -66,64 +73,123 @@ controller::GameController::GameController() {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
-bool controller::GameController::pressDPadUp() const {
-    if (!SetDpadUp(index)) return false;
+void controller::GameController::pressDPadUp() const {
+    if (!SetDpadUp(index)) {
+        StaticLogger::error("Could not press the d-pad up");
+        return;
+    }
+
     // Sleep some time before releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    if (!SetDpadOff(index)) return false;
+    std::this_thread::sleep_for(std::chrono::milliseconds(PRESS_SLEEP));
+    if (!SetDpadOff(index)) {
+        StaticLogger::error("Could not release the d-pad up");
+        return;
+    }
+
     // Sleep some time after releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    return true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(RELEASE_SLEEP));
 }
 
-bool controller::GameController::pressDPadRight() const {
-    if (!SetDpadRight(index)) return false;
+void controller::GameController::pressDPadRight() const {
+    if (!SetDpadRight(index)) {
+        StaticLogger::error("Could not press the d-pad right");
+        return;
+    }
+
     // Sleep some time before releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    if (!SetDpadOff(index)) return false;
+    std::this_thread::sleep_for(std::chrono::milliseconds(PRESS_SLEEP));
+    if (!SetDpadOff(index)) {
+        StaticLogger::error("Could not release the d-pad right");
+        return;
+    }
+
     // Sleep some time after releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    return true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(RELEASE_SLEEP));
 }
 
-bool controller::GameController::pressDPadDown() const {
-    if (!SetDpadDown(index)) return false;
+void controller::GameController::pressDPadDown() const {
+    if (!SetDpadDown(index)) {
+        StaticLogger::error("Could not press the d-pad down");
+        return;
+    }
+
     // Sleep some time before releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    if (!SetDpadOff(index)) return false;
+    std::this_thread::sleep_for(std::chrono::milliseconds(PRESS_SLEEP));
+    if (!SetDpadOff(index)) {
+        StaticLogger::error("Could not release the d-pad down");
+        return;
+    }
+
     // Sleep some time after releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    return true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(RELEASE_SLEEP));
 }
 
-bool controller::GameController::pressDPadLeft() const {
-    if (!SetDpadLeft(index)) return false;
+void controller::GameController::pressDPadLeft() const {
+    if (!SetDpadLeft(index)) {
+        StaticLogger::error("Could not press the d-pad left");
+        return;
+    }
+
     // Sleep some time before releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    if (!SetDpadOff(index)) return false;
+    std::this_thread::sleep_for(std::chrono::milliseconds(PRESS_SLEEP));
+    if (!SetDpadOff(index)) {
+        StaticLogger::error("Could not release the d-pad left");
+        return;
+    }
+
     // Sleep some time after releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    return true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(RELEASE_SLEEP));
 }
 
-bool controller::GameController::pressA() const {
-    if (!SetBtnA(index, true)) return false;
+void controller::GameController::pressA() const {
+    if (!SetBtnA(index, true)) {
+        StaticLogger::error("Could not press the 'A' button");
+        return;
+    }
+
     // Sleep some time before releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    if (!SetBtnA(index, false)) return false;
+    std::this_thread::sleep_for(std::chrono::milliseconds(PRESS_SLEEP));
+    if (!SetBtnA(index, false)) {
+        StaticLogger::error("Could not release the 'A' button");
+        return;
+    }
+
     // Sleep some time after releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    return true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(RELEASE_SLEEP));
 }
 
-bool controller::GameController::pressY() const {
-    if (!SetBtnY(index, true)) return false;
+void controller::GameController::pressY() const {
+    if (!SetBtnY(index, true)) {
+        StaticLogger::error("Could not press the 'Y' button");
+        return;
+    }
+
     // Sleep some time before releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    if (!SetBtnY(index, false)) return false;
+    std::this_thread::sleep_for(std::chrono::milliseconds(PRESS_SLEEP));
+    if (!SetBtnY(index, false)) {
+        StaticLogger::error("Could not release the 'Y' button");
+        return;
+    }
+
     // Sleep some time after releasing the button
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    return true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(RELEASE_SLEEP));
+}
+
+void controller::GameController::pressB() const {
+    if (!SetBtnB(index, true)) {
+        StaticLogger::error("Could not press the 'B' button");
+        return;
+    }
+
+    // Sleep some time before releasing the button
+    std::this_thread::sleep_for(std::chrono::milliseconds(PRESS_SLEEP));
+    if (!SetBtnB(index, false)) {
+        StaticLogger::error("Could not release the 'B' button");
+        return;
+    }
+
+    // Sleep some time after releasing the button
+    std::this_thread::sleep_for(std::chrono::milliseconds(RELEASE_SLEEP));
 }
 
 controller::GameController::~GameController() {

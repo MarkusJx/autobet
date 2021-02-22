@@ -27,7 +27,8 @@ include_directories(${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_IN
 set(src ${CMAKE_SOURCE_DIR}/src)
 set(AUTOBETLIB_SRC ${src}/debug/debug.cpp ${src}/autostop.cpp ${src}/logger.cpp ${src}/betting.cpp
         ${src}/opencv_link.cpp ${src}/settings.cpp ${src}/utils.cpp ${src}/webui.cpp ${src}/napi_exported.cpp
-        ${src}/variables.cpp ${src}/control.cpp ${src}/windowUtils.cpp ${src}/controls/controller.cpp)
+        ${src}/variables.cpp ${src}/control.cpp ${src}/windowUtils.cpp ${src}/controls/controller.cpp
+        ${src}/controls/navigationStrategies.cpp)
 
 # Add the library
 add_library(${PROJECT_NAME} SHARED ${AUTOBETLIB_SRC} ${CMAKE_JS_SRC})

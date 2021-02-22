@@ -41,45 +41,38 @@ namespace controller {
 
         /**
          * Press the dPad up once
-         *
-         * @return if the dPad could be pressed
          */
-        [[nodiscard]] bool pressDPadUp() const;
+        void pressDPadUp() const;
 
         /**
          * Press the right dPad once
-         *
-         * @return if the dPad could be pressed
          */
-        [[nodiscard]] bool pressDPadRight() const;
+        void pressDPadRight() const;
 
         /**
          * Press the dPad down once
-         *
-         * @return if the dPad could be pressed
          */
-        [[nodiscard]] bool pressDPadDown() const;
+        void pressDPadDown() const;
 
         /**
          * Press the dPad left once
-         *
-         * @return if the dPad could be pressed
          */
-        [[nodiscard]] bool pressDPadLeft() const;
+        void pressDPadLeft() const;
 
         /**
          * Click the 'A' button
-         *
-         * @return if the button could be pressed
          */
-        [[nodiscard]] bool pressA() const;
+        void pressA() const;
 
         /**
          * Click the 'Y' button
-         *
-         * @return if the button could be pressed
          */
-        [[nodiscard]] bool pressY() const;
+        void pressY() const;
+
+        /**
+         * Click the 'B' button
+         */
+        void pressB() const;
 
         /**
          * Unplug the controller and destroy it

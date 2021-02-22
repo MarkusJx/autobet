@@ -29,3 +29,10 @@ void variables::setProcessName(const std::string &name) {
     memset(process_name_buffer, '\0', sizeof(process_name_buffer));
     strcpy_s(process_name_buffer, name.c_str());
 }
+
+const uint16_t variables::yLocations[6] = {452, 616, 778, 940, 1102, 1264};
+
+std::atomic<float> variables::multiplierW = 0;
+std::atomic<float> variables::multiplierH = 0;
+std::atomic<int32_t> variables::xPos = 0;
+std::atomic<int32_t> variables::yPos = 0;
