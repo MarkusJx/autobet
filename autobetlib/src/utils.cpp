@@ -4,26 +4,50 @@
 #include <iomanip>
 #include <sstream>
 
-#include "util/utils.hpp"
-
-#ifdef AUTOBET_WINDOWS
-
 #include <Windows.h>
 #include <TlHelp32.h>
 #include <atlimage.h>
 #include <iostream>
 #include <shlobj.h>
 
+#include "variables.hpp"
 #include "logger.hpp"
-
-RECT rect;
-#define GTA5_EXE L"GTA5.exe"
-#define GTA5_NAME L"Grand Theft Auto V"
-#endif
+#include "util/utils.hpp"
+#include "windowUtils.hpp"
 
 std::function<void()> clbk = {};
+std::unique_ptr<windowUtils::processInfo> processInfo = nullptr;
 
 using namespace logger;
+
+/**
+ * Generate a processInfo class for the game
+ *
+ * @return whether the game could be found and the info was generated
+ */
+bool generateProcessInfo() {
+    try {
+        std::string program_name = variables::game_program_name.load();
+        std::string process_name = variables::game_process_name.load();
+        if (processInfo && processInfo->getProgramName() == program_name && processInfo->getWindowName() == process_name && processInfo->isValid()) {
+            return true;
+        }
+
+        windowUtils::windowsProgramInfo info(program_name);
+        for (auto &&p : info.getProcesses()) {
+            if (p->getWindowName() == process_name) {
+                processInfo = std::move(p);
+                return true;
+            }
+        }
+
+        processInfo = nullptr;
+        return false;
+    } catch (...) {
+        processInfo = nullptr;
+        return false;
+    }
+}
 
 std::string utils::IPv4::to_string() const {
     std::stringstream stringstream;
@@ -222,83 +246,12 @@ void *utils::TakeScreenShot(int x, int y, int width, int height) {
 #endif
 }
 
-#ifdef AUTOBET_WINDOWS
-
-bool isGTA(const PROCESSENTRY32W &entry) {
-    return std::wstring(entry.szExeFile) == GTA5_EXE;
-}
-
-BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
-    const auto &pids = *reinterpret_cast<std::vector<DWORD> *>(lParam);
-
-    DWORD winId;
-    GetWindowThreadProcessId(hwnd, &winId);
-
-    for (DWORD pid : pids) {
-        if (winId == pid) {
-            std::wstring title(GetWindowTextLength(hwnd) + 1, L'\0');
-            GetWindowTextW(hwnd, &title[0], static_cast<int>(title.size())); //note: C++11 only
-
-            if (wcscmp(title.c_str(), GTA5_NAME) == 0) {
-                GetWindowRect(hwnd, &rect);
-                RECT r;
-                GetClientRect(hwnd, &r);
-
-                int h = r.bottom - r.top;
-                int w = r.right - r.left;
-
-                rect.top = rect.bottom - h;
-                rect.left = rect.right - w;
-
-                return TRUE;
-            }
-        }
+windowUtils::windowSize utils::getWindowSize() {
+    if (generateProcessInfo()) {
+        return processInfo->getSize();
+    } else {
+        return windowUtils::windowSize{0, 0, 0, 0};
     }
-
-    return TRUE;
-}
-
-#endif
-
-void utils::getWindowSize(utils::windowSize &ws) {
-#ifdef AUTOBET_WINDOWS
-    std::vector<DWORD> pids;
-
-    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-
-    PROCESSENTRY32W entry;
-    entry.dwSize = sizeof entry;
-
-    if (!Process32FirstW(snap, &entry)) {
-        ws.xPos = ws.yPos = ws.width = ws.height = 0;
-        return;
-    }
-
-    do {
-        if (isGTA(entry)) {
-            pids.emplace_back(entry.th32ProcessID);
-        }
-    } while (Process32NextW(snap, &entry));
-
-    EnumWindows(enumWindowsProc, reinterpret_cast<LPARAM>(&pids));
-
-    // If all values of rect are set to 0 the window is considered not existing
-    if (!(rect.left + rect.top + rect.bottom + rect.right)) {
-        ws.xPos = ws.yPos = ws.width = ws.height = 0;
-        return;
-    }
-
-    ws.xPos = rect.left;
-    ws.yPos = rect.top;
-    ws.width = rect.right - rect.left;
-    ws.height = rect.bottom - rect.top;
-
-    // Set all values of rect to zero
-    rect.left = rect.top = rect.right = rect.bottom = 0;
-#else
-    ulogger->Unimplemented();
-    return nullptr;
-#endif
 }
 
 #ifdef AUTOBET_WINDOWS
@@ -376,30 +329,8 @@ bool utils::leftClick(int x, int y, bool move) {
     }
 }
 
-bool utils::isProcessRunning(const char *processName) {
-#ifdef AUTOBET_WINDOWS
-    PROCESSENTRY32 entry;
-    entry.dwSize = sizeof(PROCESSENTRY32);
-
-    const auto snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-
-    if (!Process32First(snapshot, &entry)) {
-        CloseHandle(snapshot);
-        return false;
-    }
-
-    do {
-        if (!_tcsicmp(entry.szExeFile, processName)) {
-            CloseHandle(snapshot);
-            return true;
-        }
-    } while (Process32Next(snapshot, &entry));
-
-    CloseHandle(snapshot);
-    return false;
-#else
-    ulogger->Unimplemented();
-#endif
+bool utils::gameIsRunning() {
+    return generateProcessInfo();
 }
 
 int utils::displayError(const std::string &error, const std::function<void()> &callback) {
@@ -488,7 +419,7 @@ bool utils::fileExists(const std::string &name) {
     return (stat(name.c_str(), &buffer) == 0);
 }
 
-void utils::getActiveScreen(unsigned int xPos, unsigned int yPos, utils::windowSize &ws) {
+windowUtils::windowSize utils::getActiveScreen(unsigned int xPos, unsigned int yPos) {
     MONITORINFO target;
     target.cbSize = sizeof(MONITORINFO);
     POINT p;
@@ -498,10 +429,12 @@ void utils::getActiveScreen(unsigned int xPos, unsigned int yPos, utils::windowS
     HMONITOR hMon = MonitorFromPoint(p, MONITOR_DEFAULTTONEAREST);
     GetMonitorInfo(hMon, &target);
 
-    ws.height = abs(target.rcMonitor.top - target.rcMonitor.bottom);
-    ws.width = abs(target.rcMonitor.right - target.rcMonitor.left);
-    ws.xPos = target.rcMonitor.left;
-    ws.yPos = target.rcMonitor.bottom;
+    long height = abs(target.rcMonitor.top - target.rcMonitor.bottom);
+    long width = abs(target.rcMonitor.right - target.rcMonitor.left);
+    long _xPos = target.rcMonitor.left;
+    long _yPos = target.rcMonitor.bottom;
+
+    return windowUtils::windowSize{_xPos, _yPos, width, height};
 }
 
 bool utils::isAlreadyRunning(const std::string &programName) {

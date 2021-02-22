@@ -38,6 +38,7 @@
         "electron-updater": "^4.3.5",
         "electron-window-state": "^5.0.3",
         "material-components-web": "^9.0.0",
+        "open-sans-fonts": "^1.6.2",
         "vm2": "^3.9.2"
     },
     "build": {

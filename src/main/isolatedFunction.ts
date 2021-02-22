@@ -15,7 +15,7 @@ export type odds_type = {
 };
 
 /**
- * Every odd in existance
+ * Every odd in existence
  */
 const odds: odds_type = {
     lower: ["evens", "2/1", "3/1", "4/1", "5/1"],
@@ -96,7 +96,7 @@ export class isolatedFunction {
     /**
      * The function to run in a vm
      */
-    function: string;
+    func: string;
 
     /**
      * The vm to use
@@ -111,7 +111,7 @@ export class isolatedFunction {
     constructor(loggingFunction: (msg: string) => void = console.log) {
         this.running = false;
         this.result = null;
-        this.function = null;
+        this.func = null;
         this.vm = new VM({
             timeout: 5000,
             compiler: "javascript",
@@ -120,7 +120,7 @@ export class isolatedFunction {
             fixAsync: true,
             sandbox: {
                 log: loggingFunction,
-                setResult: (res) => {
+                setResult: (res: string) => {
                     this.result = res;
                 }
             }
@@ -133,7 +133,7 @@ export class isolatedFunction {
      * @param func a script
      */
     setFunction(func: string): void {
-        this.function = func;
+        this.func = func;
     }
 
     /**
@@ -143,12 +143,12 @@ export class isolatedFunction {
      * @returns the result of the operation or nothing if no bet should be placed
      */
     run(odds: string[]): string | null | undefined {
-        if (typeof this.function !== "string") {
+        if (typeof this.func !== "string") {
             throw new Error("The function is not set");
         }
 
         // Basic synchronization
-        while (this.running);
+        while (this.running) {}
         this.running = true;
 
         // Initialize the result
@@ -156,7 +156,7 @@ export class isolatedFunction {
 
         // Set the odds and run the function
         this.vm.setGlobal("odds", odds);
-        this.vm.run(this.function);
+        this.vm.run(this.func);
 
         // Get the result and set this.result to null
         const res: string = this.result;
@@ -257,7 +257,7 @@ export class isolatedFunction {
         /**
          * The values array
          */
-        const vals: test_res_arr = [];
+        const values: test_res_arr = [];
 
         // Run the test maxTests times
         for (let i: number = 0; i < maxTests; i++) {
@@ -273,7 +273,7 @@ export class isolatedFunction {
                 }
 
                 // Push the result of the call to vals
-                vals.push({
+                values.push({
                     odds: o,
                     result: r
                 });
@@ -294,7 +294,7 @@ export class isolatedFunction {
                     res: {
                         error: e.toString(),
                         stack: e.stack,
-                        data: vals
+                        data: values
                     }
                 };
             }
@@ -303,7 +303,7 @@ export class isolatedFunction {
         // Return the result
         return {
             ok: true,
-            res: vals
+            res: values
         };
     }
 }

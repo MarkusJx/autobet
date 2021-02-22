@@ -27,16 +27,19 @@ include_directories(${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_IN
 set(src ${CMAKE_SOURCE_DIR}/src)
 set(AUTOBETLIB_SRC ${src}/debug/debug.cpp ${src}/autostop.cpp ${src}/logger.cpp ${src}/betting.cpp
         ${src}/opencv_link.cpp ${src}/settings.cpp ${src}/utils.cpp ${src}/webui.cpp ${src}/napi_exported.cpp
-        ${src}/variables.cpp ${src}/control.cpp)
+        ${src}/variables.cpp ${src}/control.cpp ${src}/windowUtils.cpp ${src}/controls/controller.cpp)
 
 # Add the library
 add_library(${PROJECT_NAME} SHARED ${AUTOBETLIB_SRC} ${CMAKE_JS_SRC})
+
+# Set the library directory
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
 target_link_directories(${PROJECT_NAME} PRIVATE ${zip_dir}/lib)
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CONAN_LIBS} zip)
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CONAN_LIBS} zip vXboxInterface)
 
 # Include N-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"

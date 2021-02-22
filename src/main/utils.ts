@@ -3,7 +3,7 @@ import { ipcRenderer } from "electron";
 import autobetLib from "@autobet/autobetlib";
 
 // The error dialog container
-export const errordialog = new MDCDialog(document.getElementById('error-dialog-container'));
+export const errordialog: MDCDialog = new MDCDialog(document.getElementById('error-dialog-container'));
 
 /**
  * A function to be called when a fatal exception is thrown
@@ -11,10 +11,10 @@ export const errordialog = new MDCDialog(document.getElementById('error-dialog-c
 export function exception(): void {
     try {
         errordialog.open();
-        errordialog.listen("MDCDialog:closed", () => {
+        errordialog.listen("MDCDialog:closed", async () => {
             // autobetLib.shutdown() may throw
             try {
-                autobetLib.shutdown();
+                await autobetLib.shutdown();
             } catch (ignored) { }
             quit();
         });

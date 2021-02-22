@@ -10,13 +10,17 @@ import * as isolatedFunctions from "./isolatedFunctions";
 
 // Isolate the code in brackets, so names can be reused later, if needed
 export function init(): void {
-    const open_editor: HTMLElement = document.getElementById('open-editor'); // The show/hide editor button
-    const editor_container: HTMLElement = document.getElementById('editor-container'); // The editor container
-    const sidebar_buttons: HTMLElement = document.getElementById('editor-sidebar-buttons'); // The editor sidebar button container
+    // The show/hide editor button
+    const open_editor: HTMLElement = document.getElementById('open-editor');
+    // The editor container
+    const editor_container: HTMLElement = document.getElementById('editor-container');
+    // The editor sidebar button container
+    const sidebar_buttons: HTMLElement = document.getElementById('editor-sidebar-buttons');
     // The divider in the sidebar that should be hidden,
     // when there are no custom implementations saved
     const to_hide_divider: HTMLElement = document.getElementById('to-hide-divider');
-    const editor_action_bar: HTMLElement = document.getElementById('editor-action-bar'); // The editor action bar
+    // The editor action bar
+    const editor_action_bar: HTMLElement = document.getElementById('editor-action-bar');
 
     // Attach a ripple to the open editor button
     MDCRipple.attachTo(open_editor);
@@ -143,7 +147,7 @@ setResult(run());
         if (variables.current_default_button != null && variables.current_default_button.default) {
             variables.current_default_button.setDefault(false);
         } else {
-            for (let i = 0; i < constants.buttons.length; i++) {
+            for (let i: number = 0; i < constants.buttons.length; i++) {
                 constants.buttons[i].setDefault(false);
             }
         }
@@ -152,7 +156,8 @@ setResult(run());
     });
 
     // Set the default button
-    const default_button: sidebarButton = new sidebarButton(document.getElementById("default-impl-button"), default_fn, "default", null, true);
+    const default_button: sidebarButton = new sidebarButton(document.getElementById("default-impl-button"),
+        default_fn, "default", null, true);
     constants.buttons.push(default_button);
 
     // Set current_default_button and current_selected_impl to the default button
@@ -170,7 +175,7 @@ setResult(run());
 
         // Iterate over the stored functions and add them to the ui
         let functions: functionStore[] = isolatedFunctions.getFunctions();
-        for (let i = 0; i < functions.length; i++) {
+        for (let i: number = 0; i < functions.length; i++) {
             // Create a new sidebarButton
             let fn: sidebarButton = new sidebarButton(sidebar_buttons, functions[i].functionString, functions[i].name, functions[i]);
             fn.setOk(functions[i].ok);
@@ -273,11 +278,11 @@ setResult(run());
 
     /**
      * Check if the current implementations contain a function name
-     * 
+     *
      * @param name the function name to search
      */
     function buttonsContainName(name: string): boolean {
-        for (let i = 0; i < constants.buttons.length; i++) {
+        for (let i: number = 0; i < constants.buttons.length; i++) {
             if (constants.buttons[i].name == name) {
                 return true;
             }
@@ -287,9 +292,9 @@ setResult(run());
     }
 
     // Add a close listener to the select name dialog
-    constants.select_name_dialog.listen('MDCDialog:closed', (e: any) => {
+    constants.select_name_dialog.listen('MDCDialog:closed', (e: CustomEvent<Event>) => {
         // If the close action is 'save', actually save the function
-        if (e.detail.action == "save") {
+        if ((e.detail as any).action == "save") {
             // Check if the text field is empty.
             // If it is, set the field to valid
             // and re-open the select name dialog
@@ -320,7 +325,7 @@ setResult(run());
             }
 
             // Check name characters
-            const name_regex = /^([a-zA-Z]*[0-9]*_{0,1})*$/g;
+            const name_regex: RegExp = /^([a-zA-Z]*[0-9]*_?)*$/g;
             if (!name_regex.test(constants.impl_text_field.value)) {
                 constants.impl_text_field.valid = false;
                 constants.select_name_dialog.open();
@@ -334,7 +339,7 @@ setResult(run());
             // as function string and the name text field value as name.
             // Check the function if it is valid, push it to the buttons
             // array, empty the editor and show the second divider
-            let b = new sidebarButton(sidebar_buttons, constants.editor.getValue(), constants.impl_text_field.value);
+            let b: sidebarButton = new sidebarButton(sidebar_buttons, constants.editor.getValue(), constants.impl_text_field.value);
             b.checkFn();
             constants.buttons.push(b);
             constants.editor.setValue("");

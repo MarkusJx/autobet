@@ -139,6 +139,14 @@ module.exports = {
             await autobetLib_native.lib_saveSettings();
         }
     },
+    windows: {
+        getOpenWindows: async function() {
+            return await autobetLib_native.lib_getAllOpenWindows();
+        },
+        setGameWindowName: function(programName, processName) {
+            autobetLib_native.lib_setGameWindow(programName, processName);
+        }
+    },
     quit: function () {
         autobetLib_native.lib_napi_quit();
     },

@@ -4,12 +4,16 @@ import { variables } from "./variables";
 import autobetLib from "@autobet/autobetlib";
 
 export function init(): void {
-    const timeDisp: HTMLElement = document.getElementById("time"); // The time text field
+    // The time text field
+    const timeDisp: HTMLElement = document.getElementById("time");
+    // The 'GTA is not running' message snackbar
     const gtanotrunningmessage: MDCSnackbar = new MDCSnackbar(document.getElementById("gta-not-running-message"));
     gtanotrunningmessage.timeoutMs = 10000;
 
-    const open_editor: HTMLButtonElement = <HTMLButtonElement>document.getElementById('open-editor'); // The show/hide editor button
-    const editor_container: HTMLElement = document.getElementById('editor-container'); // The editor container
+    // The show/hide editor button
+    const open_editor: HTMLButtonElement = <HTMLButtonElement>document.getElementById('open-editor');
+    // The editor container
+    const editor_container: HTMLElement = document.getElementById('editor-container');
 
     let paused: number = 0;
     let running: number = 0;
@@ -81,8 +85,8 @@ export function init(): void {
         disableEditor();
         variables.startstop.disabled = true;
         autobetLib.setStarting(true);
-        let time = 15;
-        var x = setInterval(function () {
+        let time: number = 15;
+        const x: NodeJS.Timeout = setInterval(() => {
             variables.startstop.innerText = "Starting in " + time + "s";
             time--;
             if (time < 0) {
@@ -116,17 +120,17 @@ export function init(): void {
     /**
      * Start pausing
      * 
-     * @param nstoppy whether to stop the actual betting in the backend
+     * @param stop_betting whether to stop the actual betting in the backend
      */
-    function pause(nstoppy: boolean): void {
-        if (!nstoppy)
+    function pause(stop_betting: boolean): void {
+        if (!stop_betting)
             autobetLib.stopBetting();
         pausing = 1;
         variables.statusinfo.innerText = "Stopping";
         variables.statusinfo.className = "text status_init maintext";
         variables.startstop.disabled = true;
-        var x = setInterval(() => {
-            let value = autobetLib.stopped();
+        const x: NodeJS.Timeout = setInterval(() => {
+            let value: boolean = autobetLib.stopped();
             if (value) {
                 clearInterval(x);
                 is_paused();

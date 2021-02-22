@@ -270,6 +270,25 @@ export namespace settings {
     function saveSettings(): Promise<void>;
 }
 
+export namespace windows {
+    /**
+     * Get all open windows.
+     * Returns an object with the program names as keys and
+     * their open window names in an array as values.
+     *
+     * @return the open windows
+     */
+    function getOpenWindows(): Promise<object>;
+
+    /**
+     * Set the game window name
+     *
+     * @param programName the program name
+     * @param processName the process name
+     */
+    function setGameWindowName(programName: string, processName: string): void;
+}
+
 /**
  * Quit
  */

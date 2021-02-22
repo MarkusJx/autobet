@@ -1,12 +1,12 @@
-import { MDCRipple } from "@material/ripple";
-import { MDCDialog } from "@material/dialog";
-import { MDCSwitch } from "@material/switch";
-import { MDCSnackbar } from "@material/snackbar";
-import { MDCTextField } from "@material/textfield";
-import { Titlebar, Color } from "custom-electron-titlebar";
+import {MDCRipple} from "@material/ripple";
+import {MDCDialog} from "@material/dialog";
+import {MDCSwitch} from "@material/switch";
+import {MDCSnackbar} from "@material/snackbar";
+import {MDCTextField} from "@material/textfield";
+import {Titlebar, Color} from "custom-electron-titlebar";
 
-import { variables } from "./variables";
-import { setQRCode } from "./qrcode/qrcode_wrapper";
+import {variables} from "./variables";
+import {setQRCode} from "./qrcode/qrcode_wrapper";
 import autobetLib from "@autobet/autobetlib";
 import * as utils from "./utils";
 import * as autobet_info from "./autobetInfo";
@@ -52,7 +52,7 @@ export function init(): void {
     /**
      * Set the quit callback
      */
-    async function setQuitCallback() {
+    async function setQuitCallback(): Promise<void> {
         autobetLib.callbacks.setQuitCallback(() => {
             utils.quit();
         });
@@ -61,7 +61,7 @@ export function init(): void {
     setQuitCallback();
 
     // Set the betting exception callback function
-    autobetLib.callbacks.setBettingExceptionCallback((err) => {
+    autobetLib.callbacks.setBettingExceptionCallback((err: string) => {
         document.getElementById('betting-error-dialog-content').innerText = "The betting was stopped due to an " +
             "exception thrown in the native module. This may be caused by a program error or the game being " +
             "stuck on a screen. Error message: " + err;
@@ -91,7 +91,7 @@ export function init(): void {
     /**
      * Show the qr code
      */
-    function showQRCode() {
+    function showQRCode(): void {
         qrdialog.open();
         variables.startstop.disabled = true;
         showqrbutton.disabled = true;
@@ -214,9 +214,9 @@ export function init(): void {
     /**
      * Set the ips
      */
-    function setIPs() {
+    function setIPs(): void {
         let ip: string = autobetLib.getIP();
-        weblink.innerText = "http://" + ip + ":8027";
+        weblink.innerText = `http://${ip}:8027`;
         setQRCode(ip);
     }
 
@@ -333,9 +333,8 @@ export function init(): void {
             enable_webserver.disabled = false;
         }
 
-        autobetLib.setOddTranslations();
-
-        autobetLib.start();
+        await autobetLib.setOddTranslations();
+        await autobetLib.start();
     }
 
     // Run the main function
@@ -344,8 +343,11 @@ export function init(): void {
     }, () => {
         // main failed
         utils.errordialog.open();
-        utils.errordialog.listen("MDCDialog:closed", function () {
-            autobetLib.shutdown();
+        utils.errordialog.listen("MDCDialog:closed", async function () {
+            try {
+                await autobetLib.shutdown();
+            } catch (ignored) {
+            }
             utils.quit();
         });
     });
@@ -353,12 +355,12 @@ export function init(): void {
     // Settings ================================================
 
     // MDC init
-    const description_dialog: any = new MDCDialog(document.getElementById("description-dialog")); // The description dialog
-    const time_sleep_field: any = new MDCTextField(document.getElementById("time-sleep-field")); // The time-sleep text field
+    const description_dialog: MDCDialog = new MDCDialog(document.getElementById("description-dialog")); // The description dialog
+    const time_sleep_field: MDCTextField = new MDCTextField(document.getElementById("time-sleep-field")); // The time-sleep text field
     const full_debug: MDCSwitch = new MDCSwitch(document.getElementById("full-debug-switch")); // The full debug switch
     const log_to_file_switch: MDCSwitch = new MDCSwitch(document.getElementById("log-to-file-switch")); // The log to file switch
     const log_to_console_switch: MDCSwitch = new MDCSwitch(document.getElementById("log-to-console-switch")); // The log to console switch
-    const log_textfield: any = new MDCTextField(document.getElementById("log-textfield")); // The fake console
+    const log_textfield: MDCTextField = new MDCTextField(document.getElementById("log-textfield")); // The fake console
 
     const log_textfield_resizer: HTMLElement = document.getElementById("log-textfield-resizer"); // The console resizer
 
@@ -370,13 +372,13 @@ export function init(): void {
      */
     function showDescription(title: string, description: string): void {
         document.getElementById("description-dialog-title").innerText = title;
-        description_dialog.content_.innerText = description;
+        (description_dialog as any).content_.innerText = description;
 
         description_dialog.open();
     }
 
     // Listen for keyup events on the input of the time_sleep text field
-    time_sleep_field.input_.addEventListener('keyup', (event: KeyboardEvent) => {
+    (time_sleep_field as any).input_.addEventListener('keyup', (event: KeyboardEvent) => {
         // Only do this if the key pressed was 'enter'
         if (event.keyCode === 13) {
             event.preventDefault();
@@ -485,14 +487,15 @@ export function init(): void {
     // Set a callback for logging to "console"
     autobetLib.logging.setLogCallback((msg: string) => {
         // Only do this if the text field is scrolled all the way down
-        if ((log_textfield.input_.scrollTop + log_textfield.input_.clientHeight) >= (log_textfield.input_.scrollHeight - 20)) {
+        if (((log_textfield as any).input_.scrollTop + (log_textfield as any).input_.clientHeight) >=
+            ((log_textfield as any).input_.scrollHeight - 20)) {
             // Append the message
             log_textfield.value += msg;
 
             // The text field was scrolled down, scroll all the way down,
             // so new messages will always be on the bottom of the text field
-            log_textfield.input_.scroll({
-                top: log_textfield.input_.scrollHeight,
+            (log_textfield as any).input_.scroll({
+                top: (log_textfield as any).input_.scrollHeight,
                 left: 0
             });
         } else {

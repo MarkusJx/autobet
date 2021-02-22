@@ -12,6 +12,7 @@
 #include "control.hpp"
 #include "betting.hpp"
 #include "logger.hpp"
+#include "windowUtils.hpp"
 
 #define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
 #include "n_api/napi_tools.hpp"
@@ -712,6 +713,42 @@ Napi::Boolean programIsRunning(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
+Napi::Promise getAllOpenWindows(const Napi::CallbackInfo &info) {
+    using map_type = std::map<std::u16string, std::vector<std::string>>;
+    return promises::promise<map_type>(info.Env(), [] {
+        map_type res;
+        for (const auto &w : windowUtils::getAllOpenWindows()) {
+            std::wstring w_program_name = w->getProgramName();
+            std::u16string program_name(w_program_name.begin(), w_program_name.end());
+            for (const auto &p : w->getProcesses()) {
+                if (res.contains(program_name)) {
+                    res.at(program_name).push_back(p->getWindowName());
+                } else {
+                    std::vector<std::string> to_insert;
+                    to_insert.push_back(p->getWindowName());
+
+                    res.insert_or_assign(program_name, to_insert);
+                }
+            }
+        }
+
+        return res;
+    });
+}
+
+void setGameWindow(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(string, string);
+    try {
+        std::string program_name = info[0].ToString();
+        std::string process_name = info[1].ToString();
+
+        variables::setProgramName(program_name);
+        variables::setProcessName(process_name);
+    } catch (const std::exception &e) {
+        StaticLogger::errorStream() << e.what();
+    }
+}
+
 #define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
 
 /**
@@ -768,8 +805,13 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setOddTranslations);
     export(programIsRunning);
 
+    export(getAllOpenWindows);
+    export(setGameWindow);
+
     try {
         betting::setWebUiFunctions();
+        variables::setProgramName("GTA5.exe");
+        variables::setProcessName("Grand Theft Auto V");
 
         quit = [] {
             try {

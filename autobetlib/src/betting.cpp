@@ -35,8 +35,7 @@ float multiplierW, multiplierH;
 void set_positions() {
     StaticLogger::debug("Getting positions of GTA V window");
     // Definition of width, height, x, y pos of window and multiplier of positions
-    utils::windowSize ws;
-    utils::getWindowSize(ws);
+    windowUtils::windowSize ws = utils::getWindowSize();
     xPos = ws.xPos;
     yPos = ws.yPos;
     width = ws.width;
@@ -44,8 +43,7 @@ void set_positions() {
     StaticLogger::debugStream() << "Got positions: {x: " << xPos << ", y: " << yPos << ", w: " << width << ", h: "
                                 << height << "}";
 
-    utils::windowSize screenSize;
-    utils::getActiveScreen(xPos + (width / 2), yPos + (height / 2), screenSize);
+    windowUtils::windowSize screenSize = utils::getActiveScreen(xPos + (width / 2), yPos + (height / 2));
 
     StaticLogger::debugStream() << "Got active screen width: " << screenSize.width << " and height: "
                                 << screenSize.height;
@@ -364,13 +362,12 @@ void betting::mainLoop() {
     };
 
     // Check if the game is running
-    if (utils::isProcessRunning("GTA5.exe")) {
+    if (utils::gameIsRunning()) {
         StaticLogger::debug("GTA V running");
         setGtaVRunning(true);
 
         // Set the game's positions
         set_positions();
-        utils::windowSize ws;
 
         // A note to my C Professor: I've learned my lesson,
         // this is not a while(TRUE) loop. It never was, honestly.
@@ -478,8 +475,8 @@ void betting::mainLoop() {
             }
 
             // Check if the game is still opened
-            utils::getWindowSize(ws);
-            if ((ws.width == 0 && ws.height == 0) || !utils::isProcessRunning("GTA5.exe")) {
+            windowUtils::windowSize ws = utils::getWindowSize();
+            if ((ws.width == 0 && ws.height == 0) || !utils::gameIsRunning()) {
                 StaticLogger::debug("The game seems to be closed, stopping betting");
                 stopBetting();
             }

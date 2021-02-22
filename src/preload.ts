@@ -14,6 +14,10 @@ if (activeFunction >= 0 && activeFunction < functions.length && functions[active
     autobetLib.customBettingFunction.setUseBettingFunction(false);
 }
 
+autobetLib.windows.getOpenWindows().then(res => {
+    console.log("Open windows" + JSON.stringify(res, null, 4));
+})
+
 /**
  * Convert an odd to a number
  *

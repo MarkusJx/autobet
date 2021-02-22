@@ -1,25 +1,16 @@
 #ifndef GTA_ONLINE_AUTOBET_DEV_UTILS_HPP
 #define GTA_ONLINE_AUTOBET_DEV_UTILS_HPP
 
-#include "main.hpp"
-
 #include <functional>
 #include <vector>
+
+#include "main.hpp"
+#include "windowUtils.hpp"
 
 /**
  * Utility namespace
  */
 namespace utils {
-    /**
-     * A struct for storing window sizes and positions
-     */
-    typedef struct windowSize_s {
-        int xPos; // The x-position of the window
-        int yPos; // The y-position of the window
-        int width; // The width of the window
-        int height; // The height of the window
-    } windowSize;
-
     /**
      * A struct for storing IPv4 addresses in human-readable form
      */
@@ -98,10 +89,8 @@ namespace utils {
 
     /**
      * Get the window size for the GTA 5 window
-     * 
-     * @param ws the windowSize struct to be filled
      */
-    void getWindowSize(windowSize &ws);
+    windowUtils::windowSize getWindowSize();
 
     /**
      * Crop a screenshot taken with TakeScreenShot(4)
@@ -133,12 +122,11 @@ namespace utils {
     bool leftClick(int x, int y, bool move = true);
 
     /**
-     * Check if a process is running
-     * 
-     * @param processName the name of the process
+     * Check if the game is running
+     *
      * @return true, if the process is running
      */
-    bool isProcessRunning(const char *processName);
+    bool gameIsRunning();
 
     /**
      * Display an error dialogue
@@ -181,7 +169,7 @@ namespace utils {
      * @param yPos the y position
      * @param ws the screen position and size to be set
      */
-    void getActiveScreen(unsigned int xPos, unsigned int yPos, windowSize &ws);
+    windowUtils::windowSize getActiveScreen(unsigned int xPos, unsigned int yPos);
 
     /**
      * Check if GTA 5 is in foreground

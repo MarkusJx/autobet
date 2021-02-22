@@ -27,3 +27,4 @@ fs.copyFileSync("./build/bin/autobetLib.node", bin_dir + "/autobetLib.node");
 if (process.argv.length === 3 && process.argv[2] === "--dev") {
     fs.copyFileSync("./build/bin/autobetLib.pdb", bin_dir + "/autobetLib.pdb");
 }
+fs.copyFileSync("./external/vXboxInterface.dll", bin_dir + "/vXboxInterface.dll");

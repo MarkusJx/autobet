@@ -21,6 +21,12 @@ public:
     static std::atomic<int> winnings;
     static std::atomic<int64_t> winnings_all;
     static opencv_link::knn knn;
+
+    static const std::atomic<char *> game_program_name;
+    static const std::atomic<char *> game_process_name;
+
+    static void setProgramName(const std::string &name);
+    static void setProcessName(const std::string &name);
 };
 
 #endif //AUTOBETLIB_VARIABLES_HPP

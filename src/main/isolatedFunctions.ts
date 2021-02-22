@@ -46,7 +46,7 @@ export function setActiveFunctionId(newId: number): void {
     activeFunction = newId;
 }
 
-export const isolatedFunction: isolate.isolatedFunction = new isolate.isolatedFunction((msg) => {
+export const isolatedFunction: isolate.isolatedFunction = new isolate.isolatedFunction((msg: string) => {
     autobetLib.logging.debug(`activeBettingFunction`, msg);
 });
 
@@ -92,14 +92,14 @@ export function addFunction(name: string, fnString: string): functionStore {
  * @param fnString the function string to test
  * @param fnId the function id
  */
-export function checkFunction(fnString: string, fnId: string = "null") {
-    let isolatedFn = new isolate.isolatedFunction((msg) => {
+export function checkFunction(fnString: string, fnId: string = "null"): isolate.testResult {
+    let isolatedFn: isolate.isolatedFunction = new isolate.isolatedFunction((msg: string) => {
         if (typeof msg == "string")
             autobetLib.logging.debug(`isolatedFunction-${fnId}`, msg);
     });
 
     isolatedFn.setFunction(fnString);
-    let result;
+    let result: isolate.testResult;
     try {
         result = isolatedFn.testFunction(25);
     } catch (e) {
@@ -133,8 +133,8 @@ export function getFunctions(): functionStore[] {
  */
 export function setActiveFunction(fnStore: functionStore): void {
     // Get the index of the fnStore function
-    let index = -1;
-    for (let i = 0; i < functions.length; i++) {
+    let index: number = -1;
+    for (let i: number = 0; i < functions.length; i++) {
         if (functions[i].id === fnStore.id) {
             index = i;
             break;
