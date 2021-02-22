@@ -206,7 +206,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-extern/
 /.vs
 /unused/v1.1.0/ui/favicon.ico
 /unused/v1.1.0/ui/qrcode.js
@@ -225,15 +224,10 @@ node_modules
 /dist
 /autobetLib/bin/
 /autobetLib/build/
-/autobetLib/external/
-/autobetLib/lib/
+!/autobetLib/external/vXboxInterface.dll
+!/autobetLib/lib/vXboxInterface.lib
 .DS_Store
 .vscode
-test/ai/build
-test/ai/data
-test/ai/img
-test/ai/external
-test/ai/lib
 /autobetlib/conanbuildinfo.cmake
 /autobetlib/conanbuildinfo.txt
 /autobetlib/conaninfo.txt
