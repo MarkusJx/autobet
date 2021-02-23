@@ -5,6 +5,7 @@
 #include <atomic>
 
 #include "opencv_link.hpp"
+#include "controls/navigationStrategies.hpp"
 
 class variables {
 public:
@@ -37,6 +38,8 @@ public:
     static std::atomic<float> multiplierH;
     static std::atomic<int32_t> xPos;
     static std::atomic<int32_t> yPos;
+
+    static std::shared_ptr<uiNavigationStrategies::navigationStrategy> navigationStrategy;
 };
 
 #endif //AUTOBETLIB_VARIABLES_HPP

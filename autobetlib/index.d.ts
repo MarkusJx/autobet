@@ -289,6 +289,23 @@ export namespace windows {
     function setGameWindowName(programName: string, processName: string): void;
 }
 
+export namespace uiNavigation {
+    /**
+     * Ui navigation strategies
+     */
+    enum navigationStrategy {
+        MOUSE = 0,
+        CONTROLLER = 1
+    }
+
+    /**
+     * Set the ui navigation strategy
+     *
+     * @param strategy the navigation strategy
+     */
+    function setNavigationStrategy(strategy: navigationStrategy);
+}
+
 /**
  * Quit
  */

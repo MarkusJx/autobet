@@ -36,3 +36,5 @@ std::atomic<float> variables::multiplierW = 0;
 std::atomic<float> variables::multiplierH = 0;
 std::atomic<int32_t> variables::xPos = 0;
 std::atomic<int32_t> variables::yPos = 0;
+
+std::shared_ptr<uiNavigationStrategies::navigationStrategy> variables::navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();

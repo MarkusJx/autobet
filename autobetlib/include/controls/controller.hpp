@@ -19,6 +19,7 @@
 #define AUTOBETLIB_CONTROLLER_HPP
 
 #include <exception>
+#include "util/shared_releaser.hpp"
 
 namespace controller {
     /**
@@ -80,6 +81,8 @@ namespace controller {
         ~GameController();
 
     private:
+        shared_releaser releaser;
+
         /**
          * The index of the controller created
          */

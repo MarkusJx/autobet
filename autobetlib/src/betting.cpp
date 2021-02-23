@@ -17,27 +17,35 @@
 #include "napi_exported.hpp"
 #include "control.hpp"
 #include "betting.hpp"
-#include "controls/navigationStrategies.hpp"
 #include "logger.hpp"
 
 using namespace logger;
 
 int32_t width = 0, height = 0, racesWon = 0, racesLost = 0;
-std::unique_ptr<uiNavigationStrategies::navigationStrategy> navigationStrategy(
-        std::make_unique<uiNavigationStrategies::mouseNavigationStrategy>());
 
 /**
  * Get GTA V window positions and size and write them to their variables
  */
 void set_positions() {
     StaticLogger::debug("Getting positions of GTA V window");
-    // Definition of width, height, x, y pos of window and multiplier of positions
-    windowUtils::windowSize ws = utils::getWindowSize();
-    variables::xPos = ws.xPos;
-    variables::yPos = ws.yPos;
-    width = ws.width;
-    height = ws.height;
-    StaticLogger::debugStream() << "Got positions: " << ws.toString();
+
+    try {
+        // Definition of width, height, x, y pos of window and multiplier of positions
+        windowUtils::windowSize ws = utils::getWindowSize();
+        variables::xPos = ws.xPos;
+        variables::yPos = ws.yPos;
+        width = ws.width;
+        height = ws.height;
+
+        StaticLogger::debugStream() << "Got positions: " << ws.toString();
+    } catch (const std::exception &e) {
+        StaticLogger::warningStream() << "utils::getWindowSize threw an exception: " << e.what()
+                                      << ". Therefore, setting all window info values to zero";
+        variables::xPos = 0;
+        variables::yPos = 0;
+        width = 0;
+        height = 0;
+    }
 
     windowUtils::windowSize screenSize = utils::getActiveScreen(variables::xPos + (width / 2),
                                                                 variables::yPos + (height / 2));
@@ -292,8 +300,10 @@ void betting::mainLoop() {
         // Set the game's positions
         set_positions();
 
-        // Run the first reset on the navigation strategy
-        navigationStrategy->firstBet();
+        if (variables::running) {
+            // Run the first reset on the navigation strategy
+            variables::navigationStrategy->firstBet();
+        }
 
         // A note to my C Professor: I've learned my lesson,
         // this is not a while(TRUE) loop. It never was, honestly.
@@ -319,7 +329,7 @@ void betting::mainLoop() {
 
                     StaticLogger::errorStream() << lastError;
                     StaticLogger::debug("Assuming the game is stuck, resetting...");
-                    navigationStrategy->reset();
+                    variables::navigationStrategy->reset();
 
                     StaticLogger::debug("Sleeping for 5 seconds");
                     std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -341,7 +351,7 @@ void betting::mainLoop() {
 
                 // Plot twist: pos is actually the y-position
                 // of the button of the horse to bet on
-                navigationStrategy->placeBet(pos);
+                variables::navigationStrategy->placeBet(pos);
                 StaticLogger::debugStream() << "Running: " << std::boolalpha << variables::running;
 
                 // Updating winnings by -10000 since betting costs 100000
@@ -367,14 +377,14 @@ void betting::mainLoop() {
                 getWinnings();
 
                 if (!variables::running) continue;
-                navigationStrategy->reset();
+                variables::navigationStrategy->reset();
                 if (autostop::checkStopConditions()) {
                     stopBetting();
                     break;
                 }
             } else {
                 // Should not bet, skip
-                navigationStrategy->skipBet();
+                variables::navigationStrategy->skipBet();
                 updateWinnings(-100);
                 StaticLogger::debugStream() << "Sleeping for " << variables::time_sleep << " seconds";
                 std::this_thread::sleep_for(std::chrono::seconds(variables::time_sleep / 2));
@@ -384,7 +394,7 @@ void betting::mainLoop() {
 
                 // Update the winnings and return to the betting screen
                 getWinnings();
-                navigationStrategy->reset();
+                variables::navigationStrategy->reset();
             }
 
             // Check if the game is in focus

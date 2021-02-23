@@ -15,6 +15,7 @@
 #include "windowUtils.hpp"
 
 #define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
+
 #include "n_api/napi_tools.hpp"
 
 using namespace logger;
@@ -168,6 +169,7 @@ Napi::Promise start(const Napi::CallbackInfo &info) {
             try {
                 betting::mainLoop();
             } catch (const autobetException &e) {
+                StaticLogger::errorStream() << "Exception thrown in the main loop: " << e.what();
                 napi_exported::exception();
                 utils::displayError(e.what(), [] {
                     quit();
@@ -749,7 +751,24 @@ void setGameWindow(const Napi::CallbackInfo &info) {
     }
 }
 
-#define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
+void setNavigationStrategy(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(number);
+    TRY
+        int n = info[0].ToNumber();
+        switch (n) {
+            case 0:
+                variables::navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
+                break;
+            case 1:
+                variables::navigationStrategy = std::make_shared<uiNavigationStrategies::controllerNavigationStrategy>();
+                break;
+            default:
+                throw std::runtime_error("Invalid number supplied");
+        }
+    CATCH_EXCEPTIONS
+}
+
+#define export(func) exports.Set("lib_" #func, Napi::Function::New(env, func))
 
 /**
  * Export all functions
@@ -807,6 +826,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 
     export(getAllOpenWindows);
     export(setGameWindow);
+    export(setNavigationStrategy);
 
     try {
         betting::setWebUiFunctions();

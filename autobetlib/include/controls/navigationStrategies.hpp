@@ -77,6 +77,7 @@ namespace uiNavigationStrategies {
         void skipBet() const override;
 
         void firstBet() const override;
+
     private:
         // A GameController instance
         controller::GameController impl;

@@ -27,7 +27,7 @@
 
 using namespace logger;
 
-controller::GameController::GameController() {
+controller::GameController::GameController() : releaser(nullptr) {
     unsigned char nEmpty;
 
     // Test if bus exists
@@ -42,7 +42,7 @@ controller::GameController::GameController() {
         throw controllerUnavailableException("Not enough empty bus slots available");
     }
 
-    logger::StaticLogger::debugStream() << "Determined number of empty controller slots: " << nEmpty;
+    logger::StaticLogger::debugStream() << "Determined number of empty controller slots: " << static_cast<int>(nEmpty);
 
     bool success = false;
 
@@ -71,6 +71,17 @@ controller::GameController::GameController() {
 
     // Sleep for 50 millis so the device can be used
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // Copy the index and create the releaser
+    int index_cpy = this->index;
+    releaser = shared_releaser([index_cpy] {
+        if (!UnPlug(index_cpy)) {
+            // Try to force unplug
+            if (!UnPlugForce(index_cpy)) {
+                logger::StaticLogger::error("Could not unplug virtual controller");
+            }
+        }
+    });
 }
 
 void controller::GameController::pressDPadUp() const {
@@ -192,14 +203,7 @@ void controller::GameController::pressB() const {
     std::this_thread::sleep_for(std::chrono::milliseconds(RELEASE_SLEEP));
 }
 
-controller::GameController::~GameController() {
-    if (!UnPlug(index)) {
-        // Try to force unplug
-        if (!UnPlugForce(index)) {
-            logger::StaticLogger::error("Could not unplug virtual controller");
-        }
-    }
-}
+controller::GameController::~GameController() = default;
 
 bool controller::scpVBusInstalled() {
     return isVBusExists();

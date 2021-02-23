@@ -147,6 +147,25 @@ module.exports = {
             autobetLib_native.lib_setGameWindow(programName, processName);
         }
     },
+    uiNavigation: {
+        navigationStrategy: {
+            MOUSE: 0,
+            CONTROLLER: 1
+        },
+        setNavigationStrategy: function(strategy) {
+            let n = -1;
+            switch (strategy) {
+                case this.navigationStrategy.MOUSE:
+                    n = 0;
+                    break;
+                case this.navigationStrategy.CONTROLLER:
+                    n = 1;
+                    break;
+            }
+
+            autobetLib_native.lib_setNavigationStrategy(n);
+        }
+    },
     quit: function () {
         autobetLib_native.lib_napi_quit();
     },
