@@ -2,6 +2,8 @@ import { MDCSnackbar } from "@material/snackbar";
 
 import { variables } from "./variables";
 import autobetLib from "@autobet/autobetlib";
+import * as navigationStrategySelect from "./navigationStrategySelect";
+import * as gameSelector from "./gameSelector";
 
 export function init(): void {
     // The time text field
@@ -21,9 +23,9 @@ export function init(): void {
     let timer: NodeJS.Timeout = null;
 
     /**
-     * Close and disable the code editor
+     * Close and disable any UI buttons
      */
-    function disableEditor(): void {
+    function disableButtons(): void {
         // If the editor container is already opened, close it
         if (editor_container.classList.contains("opened")) {
             editor_container.classList.remove("opened");
@@ -31,13 +33,27 @@ export function init(): void {
 
         document.getElementById('open-editor-button-label').innerText = "SHOW EDITOR";
         open_editor.disabled = true;
+
+        if (navigationStrategySelect.menu.open) {
+            navigationStrategySelect.menu.open = false;
+        }
+
+        navigationStrategySelect.open_button.disabled = true;
+
+        if (gameSelector.menu.open) {
+            gameSelector.menu.open = false;
+        }
+
+        gameSelector.open_button.disabled = true;
     }
 
     /**
-     * Re-enable the code editor
+     * Re-enable any UI buttons
      */
-    function enableEditor(): void {
+    function enableButtons(): void {
         open_editor.disabled = false;
+        navigationStrategySelect.open_button.disabled = false;
+        gameSelector.open_button.disabled = false;
     }
 
     // Start/stop on click on the start/stop button
@@ -55,7 +71,7 @@ export function init(): void {
      * Start betting from a key combination
      */
     function ui_keycomb_start(): void {
-        disableEditor();
+        disableButtons();
         variables.startstop.disabled = true;
         startTimer();
         variables.startstop.disabled = false;
@@ -82,7 +98,7 @@ export function init(): void {
             return;
         }
 
-        disableEditor();
+        disableButtons();
         variables.startstop.disabled = true;
         autobetLib.setStarting(true);
         let time: number = 15;
@@ -113,7 +129,7 @@ export function init(): void {
             variables.startstop.innerText = "start";
             variables.statusinfo.innerText = "Stopped";
             variables.statusinfo.className = "text status_stopped maintext";
-            enableEditor();
+            enableButtons();
         }
     }
 
@@ -161,7 +177,7 @@ export function init(): void {
     }
 
     /**
-     * Conver time in seconds to more readable time in the format HH:mm:ss
+     * Convert time in seconds to more readable time in the format HH:mm:ss
      * 
      * @param secs the seconds to convert
      * @returns the time in a readable format

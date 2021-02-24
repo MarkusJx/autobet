@@ -80,7 +80,7 @@ void mouseNavigationStrategy::skipBet() const {
 // to get to horse 6, one click to get to horse 5...
 // So we can get the clicks using controllerClicks[0]
 // to get the amount of clicks needed to get to the first horse.
-const uint16_t controllerClicks[6] = {5, 4, 3, 2, 1, 0};
+const uint16_t controllerNavigationStrategy::controllerClicks[6] = {5, 4, 3, 2, 1, 0};
 
 controllerNavigationStrategy::controllerNavigationStrategy() = default;
 
@@ -100,12 +100,14 @@ void controllerNavigationStrategy::placeBet(short y) const {
     // Go to the 'increase bet' button.
     // This is needed to ensure subsequent
     // steps always produce the same result.
-    for (int i = 0; i < 2; i++) impl.pressDPadRight();
+    for (int i = 0; i < 3; i++) impl.pressDPadRight();
 
     // Set the max bet using Y, go down to the
     // 'place bet' button and place the bet
     impl.pressY();
     impl.pressDPadDown();
+    impl.pressA();
+    // For some reason, we have to press 'A' twice
     impl.pressA();
 }
 
@@ -115,11 +117,11 @@ void controllerNavigationStrategy::reset() const {
     // Press a to confirm the choice.
     impl.pressB();
     impl.pressDPadRight();
+    impl.pressDPadRight();
     impl.pressA();
 }
 
 void controllerNavigationStrategy::skipBet() const {
-    // TODO: Test this
     // Press a to select the last horse;
     // Press d-pad right to select the 'cancel' button;
     // Press d-pad up to select the 'place bet' button;
@@ -131,6 +133,6 @@ void controllerNavigationStrategy::skipBet() const {
 }
 
 void controllerNavigationStrategy::firstBet() const {
-    // Simulate a bet skip
-    skipBet();
+    // Run reset once
+    reset();
 }

@@ -81,6 +81,8 @@ namespace uiNavigationStrategies {
     private:
         // A GameController instance
         controller::GameController impl;
+
+        static const uint16_t controllerClicks[6];
     };
 }
 

@@ -301,6 +301,7 @@ void betting::mainLoop() {
         set_positions();
 
         if (variables::running) {
+            StaticLogger::debug("Running first bet");
             // Run the first reset on the navigation strategy
             variables::navigationStrategy->firstBet();
         }

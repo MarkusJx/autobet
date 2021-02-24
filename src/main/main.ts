@@ -355,7 +355,6 @@ export function init(): void {
     // Settings ================================================
 
     // MDC init
-    const description_dialog: MDCDialog = new MDCDialog(document.getElementById("description-dialog")); // The description dialog
     const time_sleep_field: MDCTextField = new MDCTextField(document.getElementById("time-sleep-field")); // The time-sleep text field
     const full_debug: MDCSwitch = new MDCSwitch(document.getElementById("full-debug-switch")); // The full debug switch
     const log_to_file_switch: MDCSwitch = new MDCSwitch(document.getElementById("log-to-file-switch")); // The log to file switch
@@ -363,19 +362,6 @@ export function init(): void {
     const log_textfield: MDCTextField = new MDCTextField(document.getElementById("log-textfield")); // The fake console
 
     const log_textfield_resizer: HTMLElement = document.getElementById("log-textfield-resizer"); // The console resizer
-
-    /**
-     * Show the description
-     *
-     * @param title the title
-     * @param description the description
-     */
-    function showDescription(title: string, description: string): void {
-        document.getElementById("description-dialog-title").innerText = title;
-        (description_dialog as any).content_.innerText = description;
-
-        description_dialog.open();
-    }
 
     // Listen for keyup events on the input of the time_sleep text field
     (time_sleep_field as any).input_.addEventListener('keyup', (event: KeyboardEvent) => {
@@ -506,22 +492,22 @@ export function init(): void {
 
     // Add some info texts
     document.getElementById("time-sleep-info").addEventListener('click', () => {
-        showDescription("Time-sleep", "Set the time to sleep after a bet has started. Use this option, when the program did not immediately start a new bet when the " +
+        utils.showDescription("Time-sleep", "Set the time to sleep after a bet has started. Use this option, when the program did not immediately start a new bet when the " +
             "race has finished. Press enter to save, the default value is 36.");
     });
 
     document.getElementById("full-debug-info").addEventListener('click', () => {
-        showDescription("Full Debug", "This option will create a zip file called 'autobet_debug.zip' on you Desktop. This File will contain a log and screenshots for " +
+        utils.showDescription("Full Debug", "This option will create a zip file called 'autobet_debug.zip' on you Desktop. This File will contain a log and screenshots for " +
             "debugging purposes. IMPORTANT: If you submit this file anywhere, make sure to delete any personal information from the zip file.");
     });
 
     document.getElementById("debug-info").addEventListener('click', () => {
-        showDescription("Debugging and logging", "Log to File: Set if the program should log to a file. This option will automatically activated, when the full debug " +
+        utils.showDescription("Debugging and logging", "Log to File: Set if the program should log to a file. This option will automatically activated, when the full debug " +
             "option is activated. Log to Console: This option will display logging information in the 'View log' text field.");
     });
 
     document.getElementById("custom-betting-function-info").addEventListener('click', () => {
-        showDescription("Custom betting function", "In here you can set a custom function to be called in order to determine whether (an where) a bet should be placed." +
+        utils.showDescription("Custom betting function", "In here you can set a custom function to be called in order to determine whether (an where) a bet should be placed." +
             "The function should be written in JavaScript, the odds are stored in the odds variable and at the end, you should pass the odd for a bet to be placed on to " +
             "the setResult() function. If no bet should be placed, pass null to setResult(). If you don't pass anythin, the result will be interpreted as invalid and the " +
             "Program will fall back to the native implementation.");
