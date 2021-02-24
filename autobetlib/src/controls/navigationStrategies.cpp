@@ -94,7 +94,8 @@ void controllerNavigationStrategy::placeBet(short y) const {
         impl.pressDPadUp();
     }
 
-    // Select it
+    // Select it. Twice.
+    impl.pressA();
     impl.pressA();
 
     // Go to the 'increase bet' button.
@@ -119,6 +120,7 @@ void controllerNavigationStrategy::reset() const {
     impl.pressDPadRight();
     impl.pressDPadRight();
     impl.pressA();
+    impl.pressA();
 }
 
 void controllerNavigationStrategy::skipBet() const {
@@ -127,8 +129,10 @@ void controllerNavigationStrategy::skipBet() const {
     // Press d-pad up to select the 'place bet' button;
     // Press 'A' to confirm the choice.
     impl.pressA();
+    impl.pressA();
     impl.pressDPadRight();
     impl.pressDPadUp();
+    impl.pressA();
     impl.pressA();
 }
 
