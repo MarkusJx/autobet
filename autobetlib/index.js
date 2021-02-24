@@ -178,7 +178,7 @@ module.exports = {
             const translations_file = require('./odd_translations.json');
             for (let lang in translations_file) {
                 if (translations_file.hasOwnProperty(lang)) {
-                    translations.push(translations_file[lang]);
+                    translations.push(...translations_file[lang]);
                 }
             }
 

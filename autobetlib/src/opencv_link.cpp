@@ -1,7 +1,5 @@
 #include "opencv_link.hpp"
 
-#include <opencv2/core.hpp>
-#include <opencv2/ml.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -211,7 +209,7 @@ int opencv_link::knn::winningToInt(const std::string &pred) {
     char *out = nullptr;
     errno = 0;
 
-    // Get the result strich and check for errors
+    // Get the result string and check for errors
     int res = (int) std::strtol(pred.c_str(), &out, 10);
     if ((out != nullptr && std::strlen(out) > 0) || res < 0 || errno == ERANGE) {
         throw std::runtime_error("The prediction could not be parsed");
