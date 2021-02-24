@@ -140,7 +140,8 @@ short get_pos(const std::shared_ptr<void> &src) {
         yCoord = static_cast<uint16_t>(std::round((float) variables::yLocations[i] * variables::multiplierH));
         _height = static_cast<uint16_t>(std::round((float) 60 * variables::multiplierH));
         xCoord = static_cast<uint16_t>(std::round(230 * variables::multiplierW));
-        _width = static_cast<uint16_t>(std::round(120 * variables::multiplierW));
+        // Edit 24-02-2021: Extend with of the single images from 120 to 220 pixels
+        _width = static_cast<uint16_t>(std::round(220 * variables::multiplierW));
 
         // Crop the screenshot
         utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src.get());
