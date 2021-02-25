@@ -21,9 +21,9 @@
 #include "logger.hpp"
 
 // The time to sleep after a button press
-#define PRESS_SLEEP 200
+#define PRESS_SLEEP 300
 // The time to sleep after the button was released
-#define RELEASE_SLEEP 300
+#define RELEASE_SLEEP 600
 
 using namespace logger;
 
