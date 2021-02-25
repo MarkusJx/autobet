@@ -169,9 +169,9 @@ bool utils::getOwnIP(utils::IPv4 &myIP) {
 errno_t utils::isForeground(bool &res) {
     HWND h = GetForegroundWindow();
     if (h != nullptr) {
-        std::wstring title(GetWindowTextLength(h) + 1, L'\0');
-        GetWindowTextW(h, &title[0], static_cast<int>(title.size())); //note: C++11 only
-        res = wcscmp(title.c_str(), L"Grand Theft Auto V") == 0;
+        std::string title(GetWindowTextLength(h), '\0');
+        GetWindowTextA(h, title.data(), static_cast<int>(title.size())); //note: C++11 only
+        res = strcmp(title.c_str(), variables::game_process_name) == 0;
 
         return 0;
     } else {
