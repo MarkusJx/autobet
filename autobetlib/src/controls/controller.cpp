@@ -23,7 +23,7 @@
 // The time to sleep after a button press
 #define PRESS_SLEEP 200
 // The time to sleep after the button was released
-#define RELEASE_SLEEP 150
+#define RELEASE_SLEEP 300
 
 using namespace logger;
 
