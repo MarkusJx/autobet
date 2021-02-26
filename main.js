@@ -17,7 +17,7 @@ let enableDevTools;
 
 {
     const version = require('./package.json').version;
-    const rel_ver_regex = /^([0-9]+\.?)+$/;
+    const rel_ver_regex = /^([0-9]+\.)*[0-9]*$/;
 
     enableDevTools = !rel_ver_regex.test(version) || (process.argv.length >= 3 && process.argv[2] === "--enableDevTools");
 
