@@ -192,7 +192,7 @@ function full_clean() {
 }
 
 async function downloadModel() {
-    const dl_addr = "https://www.dropbox.com/s/wjmimum2lzmfdb2/model.yml?dl=1";
+    const dl_addr = "https://www.dropbox.com/s/6g0gdas5oall71w/model.yml?dl=1";
     const modelPath = path.join(__dirname, 'resources', 'data', 'model.yml');
 
     if (fs.existsSync(modelPath)) {

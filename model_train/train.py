@@ -16,7 +16,7 @@ def train_file(path):
     elif expect != "evens" and expect != "0":
         expect = "+" + expect
 
-    #print("Expecting: " + expect)
+    print("Expecting: " + expect)
     im = cv2.imread(path)
 
     #im3 = im.copy()
