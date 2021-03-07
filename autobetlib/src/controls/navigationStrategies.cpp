@@ -84,7 +84,8 @@ void mouseNavigationStrategy::skipBet() const {
 // to get the amount of clicks needed to get to the first horse.
 const uint16_t controllerNavigationStrategy::controllerClicks[6] = {5, 4, 3, 2, 1, 0};
 
-controllerNavigationStrategy::controllerNavigationStrategy() noexcept = default;
+// NOTE: This must not be noexcept, as the controller impl may throw
+controllerNavigationStrategy::controllerNavigationStrategy() = default;
 
 void controllerNavigationStrategy::placeBet(short y) const {
     // Get to the last horse
@@ -132,8 +133,8 @@ void controllerNavigationStrategy::skipBet() const {
     // Press 'A' to confirm the choice.
     impl.pressA();
     impl.pressA();
-    impl.pressDPadRight();
-    impl.pressDPadUp();
+    for (int i = 0; i < 4; i++) impl.pressDPadRight();
+    impl.pressDPadDown();
     impl.pressA();
     impl.pressA();
 }

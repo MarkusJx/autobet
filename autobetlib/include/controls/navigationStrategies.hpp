@@ -70,7 +70,7 @@ namespace uiNavigationStrategies {
      */
     class controllerNavigationStrategy : public navigationStrategy {
     public:
-        controllerNavigationStrategy() noexcept;
+        controllerNavigationStrategy();
 
         void placeBet(short y) const override;
 
