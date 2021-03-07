@@ -127,13 +127,16 @@ void controllerNavigationStrategy::reset() const {
 }
 
 void controllerNavigationStrategy::skipBet() const {
-    // Press a to select the last horse;
-    // Press d-pad right to select the 'cancel' button;
-    // Press d-pad up to select the 'place bet' button;
-    // Press 'A' to confirm the choice.
+    // Press d-pad left 2 times to select the last horse,
+    // press A to actually select it, press d-pad right
+    // three times to move over the 'increase bet' button,
+    // press d-pad down to select the 'place bet' button
+    // and confirm the choice using the A button
+    impl.pressDPadLeft();
+    impl.pressDPadLeft();
     impl.pressA();
     impl.pressA();
-    for (int i = 0; i < 4; i++) impl.pressDPadRight();
+    for (int i = 0; i < 3; i++) impl.pressDPadRight();
     impl.pressDPadDown();
     impl.pressA();
     impl.pressA();
