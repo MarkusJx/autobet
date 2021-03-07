@@ -38,3 +38,7 @@ std::atomic<int32_t> variables::xPos = 0;
 std::atomic<int32_t> variables::yPos = 0;
 
 std::shared_ptr<uiNavigationStrategies::navigationStrategy> variables::navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
+
+bool variables::isDefaultGameApplication() {
+    return strcmp("GTA5.exe", game_program_name) == 0 && strcmp("Grand Theft Auto V", game_process_name) == 0;
+}

@@ -15,7 +15,7 @@ namespace uiNavigationStrategies {
         /**
          * Create a clickStrategy instance
          */
-        navigationStrategy();
+        navigationStrategy() noexcept;
 
     public:
         /**
@@ -56,6 +56,8 @@ namespace uiNavigationStrategies {
      */
     class mouseNavigationStrategy : public navigationStrategy {
     public:
+        mouseNavigationStrategy() noexcept;
+
         void placeBet(short y) const override;
 
         void reset() const override;
@@ -68,7 +70,7 @@ namespace uiNavigationStrategies {
      */
     class controllerNavigationStrategy : public navigationStrategy {
     public:
-        controllerNavigationStrategy();
+        controllerNavigationStrategy() noexcept;
 
         void placeBet(short y) const override;
 

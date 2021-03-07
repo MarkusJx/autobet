@@ -8,7 +8,7 @@
 using namespace logger;
 using namespace uiNavigationStrategies;
 
-navigationStrategy::navigationStrategy() = default;
+navigationStrategy::navigationStrategy() noexcept = default;
 
 void navigationStrategy::firstBet() const {}
 
@@ -34,6 +34,8 @@ void leftClick(unsigned int x, unsigned int y, bool move = true) {
         StaticLogger::debug("Should click now but the program is about to stop, doing nothing");
     }
 }
+
+mouseNavigationStrategy::mouseNavigationStrategy() noexcept = default;
 
 void mouseNavigationStrategy::placeBet(short y) const {
     StaticLogger::debug("Placing bet");
@@ -82,7 +84,7 @@ void mouseNavigationStrategy::skipBet() const {
 // to get the amount of clicks needed to get to the first horse.
 const uint16_t controllerNavigationStrategy::controllerClicks[6] = {5, 4, 3, 2, 1, 0};
 
-controllerNavigationStrategy::controllerNavigationStrategy() = default;
+controllerNavigationStrategy::controllerNavigationStrategy() noexcept = default;
 
 void controllerNavigationStrategy::placeBet(short y) const {
     // Get to the last horse

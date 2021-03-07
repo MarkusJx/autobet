@@ -23,7 +23,9 @@ public:
     static std::atomic<int64_t> winnings_all;
     static opencv_link::knn knn;
 
+    // The name of the game executable, e.g. "GTA5.exe"
     static const std::atomic<char *> game_program_name;
+    // The name of the game window process, e.g. "Grand Theft Auto V"
     static const std::atomic<char *> game_process_name;
 
     static void setProgramName(const std::string &name);
@@ -40,6 +42,13 @@ public:
     static std::atomic<int32_t> yPos;
 
     static std::shared_ptr<uiNavigationStrategies::navigationStrategy> navigationStrategy;
+
+    /**
+     * Check if the game program and process names are set to their default values
+     *
+     * @return true if the selected game program is GTA5.exe
+     */
+    static bool isDefaultGameApplication();
 };
 
 #endif //AUTOBETLIB_VARIABLES_HPP

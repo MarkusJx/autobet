@@ -181,7 +181,7 @@ short get_pos(const std::shared_ptr<void> &src) {
                 return getBasicBettingPosition(odds);
             } else {
                 // Return the result
-                return res;
+                return static_cast<short>(res);
             }
         } else {
             StaticLogger::warning(
@@ -403,11 +403,19 @@ void betting::mainLoop() {
             bool foreground;
             errno_t err = utils::isForeground(foreground);
             if (err == 0) {
-                if (!foreground) {
-                    StaticLogger::debug("GTA V is not the currently focused window. Betting will be stopped");
+                // Stop the betting if the game application is not the focused window.
+                // Only stop the betting if the selected game application is the default one.
+                // If it is not, just issue a warning and continue as usual.
+                // The problem is related to this: https://github.com/MarkusJx/autobet/issues/20#issuecomment-792301392
+                if (!foreground && variables::isDefaultGameApplication()) {
+                    StaticLogger::error("GTA V is not the currently focused window. Betting will be stopped");
                     napi_exported::bettingException("GTA V is not the currently focused window.");
                     stopBetting();
                     break;
+                } else if (!foreground) {
+                    StaticLogger::warning("GTA V is not the currently focused window. "
+                                          "Ignoring this event as the currently selected game application "
+                                          "is not the default one");
                 }
             } else {
                 StaticLogger::warning("Could not get foreground window. Assuming GTA V is in foreground");
@@ -416,7 +424,7 @@ void betting::mainLoop() {
             // Check if the game is still opened
             windowUtils::windowSize ws = utils::getWindowSize();
             if ((ws.width == 0 && ws.height == 0) || !utils::gameIsRunning()) {
-                StaticLogger::debug("The game seems to be closed, stopping betting");
+                StaticLogger::error("The game seems to be closed, stopping betting");
                 stopBetting();
             }
         }
