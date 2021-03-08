@@ -10,6 +10,9 @@ import {setQRCode} from "./qrcode/qrcode_wrapper";
 import autobetLib from "@autobet/autobetlib";
 import * as utils from "./utils";
 import * as autobet_info from "./autobetInfo";
+import * as clickSleep from"./clickSleep";
+import {loadNavigationStrategy} from "./navigationStrategySelect";
+import {getCurrentlySelectedGameWindow} from "./gameSelector";
 
 export function init(): void {
     const showqrbutton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('showqrbutton'); // The 'show qr code' button
@@ -289,6 +292,10 @@ export function init(): void {
             autobetLib.logging.error("main.ts", "Could not initialize");
             return;
         }
+
+        loadNavigationStrategy();
+        getCurrentlySelectedGameWindow();
+        clickSleep.loadSleepTimes();
 
         autobet_info.getLicense().then((res: string) => {
             document.getElementById('license-dialog-content').innerText = res;

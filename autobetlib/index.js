@@ -145,6 +145,9 @@ module.exports = {
         },
         setGameWindowName: function(programName, processName) {
             autobetLib_native.lib_setGameWindow(programName, processName);
+        },
+        getGameWindowName: function() {
+            return autobetLib_native.lib_getGameWindow();
         }
     },
     uiNavigation: {
@@ -164,6 +167,29 @@ module.exports = {
             }
 
             autobetLib_native.lib_setNavigationStrategy(n);
+        },
+        getNavigationStrategy: function() {
+            const strategy = autobetLib_native.lib_getNavigationStrategy();
+            console.log("Strategy: " + strategy);
+            if (strategy < 0) {
+                return this.navigationStrategy.MOUSE;
+            } else {
+                return strategy;
+            }
+        },
+        clicks: {
+            setClickSleep: async function(time) {
+                await autobetLib_native.lib_setClickSleep(time);
+            },
+            setAfterClickSleep: async function (time) {
+                await autobetLib_native.lib_setAfterClickSleep(time);
+            },
+            getClickSleep: function () {
+                return autobetLib_native.lib_getClickSleep();
+            },
+            getAfterClickSleep: function () {
+                return autobetLib_native.lib_getAfterClickSleep();
+            }
         }
     },
     quit: function () {

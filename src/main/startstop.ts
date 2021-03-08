@@ -4,6 +4,7 @@ import { variables } from "./variables";
 import autobetLib from "@autobet/autobetlib";
 import * as navigationStrategySelect from "./navigationStrategySelect";
 import * as gameSelector from "./gameSelector";
+import * as clickSleep from"./clickSleep";
 
 export function init(): void {
     // The time text field
@@ -45,6 +46,8 @@ export function init(): void {
         }
 
         gameSelector.open_button.disabled = true;
+        clickSleep.click_sleep_textField.disabled = true;
+        clickSleep.afterClick_sleep_textField.disabled = true;
     }
 
     /**
@@ -54,6 +57,9 @@ export function init(): void {
         open_editor.disabled = false;
         navigationStrategySelect.open_button.disabled = false;
         gameSelector.open_button.disabled = false;
+
+        clickSleep.click_sleep_textField.disabled = false;
+        clickSleep.afterClick_sleep_textField.disabled = false;
     }
 
     // Start/stop on click on the start/stop button

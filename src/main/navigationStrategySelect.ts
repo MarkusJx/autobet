@@ -2,6 +2,7 @@ import autobetLib from "@autobet/autobetlib";
 import {MDCMenu} from "@material/menu";
 import {MDCRipple} from "@material/ripple";
 import {showSnackbar, addDescriptionTo} from "./utils";
+import * as clickSleep from"./clickSleep";
 
 // The menu
 export const menu: MDCMenu = new MDCMenu(document.getElementById("navigation-strategy-selector"));
@@ -68,8 +69,6 @@ const mouse_menu_item = new NavigationStrategyMenuItem('navigation-strategy-mous
 // The controller strategy menu item
 const controller_menu_item = new NavigationStrategyMenuItem('navigation-strategy-controller',
     autobetLib.uiNavigation.navigationStrategy.CONTROLLER);
-// Enable the mouse strategy by default
-mouse_menu_item.enableNavigationStrategy(false);
 
 /**
  * Set the navigation strategy
@@ -101,9 +100,24 @@ function setNavigationStrategy(strategy: autobetLib.uiNavigation.navigationStrat
             open_button_label.innerText = "CONTROLLER";
             if (show_snackbar) showSnackbar("Controller connected");
             break;
+        default:
+            return false;
     }
 
+    clickSleep.loadSleepTimes();
+
     return true;
+}
+
+export function loadNavigationStrategy(): void {
+    const strategy = autobetLib.uiNavigation.getNavigationStrategy();
+    switch (strategy) {
+        case autobetLib.uiNavigation.navigationStrategy.CONTROLLER:
+            controller_menu_item.enableNavigationStrategy(false);
+            break;
+        default:
+            mouse_menu_item.enableNavigationStrategy(false);
+    }
 }
 
 // Open the menu on open button click

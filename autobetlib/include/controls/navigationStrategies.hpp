@@ -29,6 +29,14 @@ namespace uiNavigationStrategies {
         navigationStrategy(navigationStrategy &&) = delete;
 
         /**
+         * Get the navigation strategy by their name
+         *
+         * @param name
+         * @return
+         */
+        static std::shared_ptr<navigationStrategy> fromName(const std::string &name);
+
+        /**
          * Place a bet on a horse
          *
          * @param y the y position index where to click. Should be between -1 and 6
@@ -49,6 +57,35 @@ namespace uiNavigationStrategies {
          * Optionally reset before the first bet is placed
          */
         virtual void firstBet() const;
+
+        /**
+         * Get the name of the strategy
+         *
+         * @return the strategy name
+         */
+        [[nodiscard]] virtual std::string getName() const = 0;
+
+        /**
+         * Set the time to sleep between a button is pressed and then released
+         *
+         * @param time the time to sleep
+         */
+        virtual void setClickSleep(int time) = 0;
+
+        /**
+         * Set the time to sleep after a button click
+         *
+         * @param time the time to sleep
+         */
+        virtual void setAfterClickSleep(int time) = 0;
+
+        [[nodiscard]] int getClickSleep() const;
+
+        [[nodiscard]] int getAfterClickSleep() const;
+
+    protected:
+        int click_sleep;
+        int afterClick_sleep;
     };
 
     /**
@@ -63,6 +100,17 @@ namespace uiNavigationStrategies {
         void reset() const override;
 
         void skipBet() const override;
+
+        [[nodiscard]] std::string getName() const override;
+
+        void setClickSleep(int time) override;
+
+        void setAfterClickSleep(int time) override;
+
+    private:
+        static const int afterClick_sleep_default;
+
+        static const int click_sleep_default;
     };
 
     /**
@@ -80,9 +128,19 @@ namespace uiNavigationStrategies {
 
         void firstBet() const override;
 
+        [[nodiscard]] std::string getName() const override;
+
+        void setClickSleep(int time) override;
+
+        void setAfterClickSleep(int time) override;
+
     private:
         // A GameController instance
         controller::GameController impl;
+
+        static const int afterClick_sleep_default;
+
+        static const int click_sleep_default;
 
         static const uint16_t controllerClicks[6];
     };

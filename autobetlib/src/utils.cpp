@@ -2,10 +2,8 @@
 #include <vector>
 #include <thread>
 #include <iomanip>
-#include <sstream>
 
 #include <Windows.h>
-#include <TlHelp32.h>
 #include <atlimage.h>
 #include <iostream>
 #include <shlobj.h>
@@ -169,8 +167,11 @@ bool utils::getOwnIP(utils::IPv4 &myIP) {
 errno_t utils::isForeground(bool &res) {
     HWND h = GetForegroundWindow();
     if (h != nullptr) {
-        std::string title(GetWindowTextLength(h), '\0');
+        std::string title(GetWindowTextLengthA(h) + 1, '\0');
         GetWindowTextA(h, title.data(), static_cast<int>(title.size())); //note: C++11 only
+        title.resize(strlen(title.c_str()));
+
+        logger::StaticLogger::debugStream() << "Currently focused window: " << title;
         res = strcmp(title.c_str(), variables::game_process_name) == 0;
 
         return 0;
@@ -268,7 +269,7 @@ void moveMouse(int x, int y, INPUT *inputs) {
 
 #endif
 
-bool utils::pressTab() {
+bool utils::pressTab(int sleep) {
     INPUT input;
     WORD v_key = VK_TAB;
     input.type = INPUT_KEYBOARD;
@@ -279,14 +280,14 @@ bool utils::pressTab() {
     input.ki.dwFlags = 0;
     errno_t err = SendInput(1, &input, sizeof(INPUT));
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 
     input.ki.dwFlags = KEYEVENTF_KEYUP;
     err += SendInput(1, &input, sizeof(INPUT));
     return err == 2;
 }
 
-bool utils::leftClick(int x, int y, bool move) {
+bool utils::leftClick(int x, int y, int sleep, bool move) {
     if (move) {
 #ifdef AUTOBET_WINDOWS
         INPUT inputs[2] = {0};
@@ -297,7 +298,7 @@ bool utils::leftClick(int x, int y, bool move) {
 
         int err = SendInput(2, inputs, sizeof(INPUT));
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 
         INPUT _inputs[1] = {0};
         _inputs[0].type = INPUT_MOUSE;
@@ -316,7 +317,7 @@ bool utils::leftClick(int x, int y, bool move) {
 
         int err = SendInput(1, inputs, sizeof(INPUT));
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 
         INPUT _inputs[1] = {0};
         _inputs[0].type = INPUT_MOUSE;
@@ -380,12 +381,12 @@ void utils::printSystemInformation() {
 
 #ifdef AUTOBET_WINDOWS
     int CPUInfo[4] = {-1};
-    unsigned nExIds, i = 0;
+    unsigned int nExIds;
     char CPUBrandString[0x40];
     // Get the information associated with each extended ID.
     __cpuid(CPUInfo, (signed int) 0x80000000);
     nExIds = CPUInfo[0];
-    for (i = 0x80000000; i <= nExIds; ++i) {
+    for (unsigned int i = 0x80000000; i <= nExIds; ++i) {
         __cpuid(CPUInfo, (signed int) i);
         // Interpret CPU brand string
         if (i == 0x80000002)

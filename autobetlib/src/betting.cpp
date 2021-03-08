@@ -23,21 +23,35 @@ using namespace logger;
 
 int32_t width = 0, height = 0, racesWon = 0, racesLost = 0;
 
+// The previous status of the game window,
+// with -1 being unset, 0 being closed
+// and 1 being opened
+int previous_game_status = -1;
+
+// Whether the betting was running previously
+bool was_running = true;
+
 /**
  * Get GTA V window positions and size and write them to their variables
  */
 void set_positions() {
-    StaticLogger::debug("Getting positions of GTA V window");
+    //StaticLogger::debug("Getting positions of GTA V window");
 
+    bool shouldLog = true;
     try {
         // Definition of width, height, x, y pos of window and multiplier of positions
         windowUtils::windowSize ws = utils::getWindowSize();
+        shouldLog = variables::xPos != ws.xPos || variables::yPos != ws.yPos || width != ws.width ||
+                    height != ws.height;
+
         variables::xPos = ws.xPos;
         variables::yPos = ws.yPos;
         width = ws.width;
         height = ws.height;
 
-        StaticLogger::debugStream() << "Got positions: " << ws.toString();
+        if (shouldLog) {
+            StaticLogger::debugStream() << "Got positions: " << ws.toString();
+        }
     } catch (const std::exception &e) {
         StaticLogger::warningStream() << "utils::getWindowSize threw an exception: " << e.what()
                                       << ". Therefore, setting all window info values to zero";
@@ -50,8 +64,10 @@ void set_positions() {
     windowUtils::windowSize screenSize = utils::getActiveScreen(variables::xPos + (width / 2),
                                                                 variables::yPos + (height / 2));
 
-    StaticLogger::debugStream() << "Got active screen width: " << screenSize.width << " and height: "
-                                << screenSize.height;
+    if (shouldLog) {
+        StaticLogger::debugStream() << "Got active screen width: " << screenSize.width << " and height: "
+                                    << screenSize.height;
+    }
 
     variables::multiplierW = (float) width / 2560.0f;
     variables::multiplierH = (float) height / 1440.0f;
@@ -295,7 +311,11 @@ void betting::mainLoop() {
 
     // Check if the game is running
     if (utils::gameIsRunning()) {
-        StaticLogger::debug("GTA V running");
+        if (previous_game_status != 1) {
+            StaticLogger::debug("GTA V running");
+            previous_game_status = 1;
+        }
+
         setGtaVRunning(true);
 
         // Set the game's positions
@@ -310,6 +330,8 @@ void betting::mainLoop() {
         // A note to my C Professor: I've learned my lesson,
         // this is not a while(TRUE) loop. It never was, honestly.
         while (variables::running) {
+            was_running = true;
+
             // Get the position to bet on
             short pos = -2;
             std::string lastError;
@@ -432,10 +454,17 @@ void betting::mainLoop() {
         // Set stopped
         variables::stopping = false;
         webui::setStopped();
-        StaticLogger::debug("Betting is now paused");
+        if (was_running) {
+            StaticLogger::debug("Betting is now paused");
+            was_running = false;
+        }
     } else {
         // The Game is not running, tell it everyone and sleep some time
-        StaticLogger::debug("GTA V not running");
+        if (previous_game_status != 0) {
+            StaticLogger::debug("GTA V not running");
+            previous_game_status = 0;
+        }
+
         if (variables::running && variables::stopping) {
             variables::stopping = false;
             variables::running = false;

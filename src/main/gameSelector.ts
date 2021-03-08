@@ -108,6 +108,21 @@ class Program {
     }
 }
 
+export function getCurrentlySelectedGameWindow(): void {
+    const windowName = autobetLib.windows.getGameWindowName();
+
+    // Limit the button label length to 17 chars
+    let new_label: string = windowName.programName;
+    if (new_label.length >= 18) {
+        new_label = new_label.slice(0, 17);
+    }
+
+    // Set the button label
+    open_button_label.innerText = new_label;
+
+    currentSelected = new Program(windowName.processName, windowName.programName);
+}
+
 /**
  * Generate the GTA 5 menu item
  */

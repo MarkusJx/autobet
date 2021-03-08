@@ -36,9 +36,17 @@ namespace controller {
     class GameController {
     public:
         /**
-         * Create a new controller and plug it in
+         * Create a null game controller
+         * NOTE: DO NOT USE THIS
          */
-        GameController();
+        explicit GameController(std::nullptr_t);
+
+        /**
+         * Create a new controller and plug it in
+         *
+         * @param click_sleep the time to sleep between the button was pressed and released
+         */
+        explicit GameController(int click_sleep);
 
         /**
          * Press the dPad up once
@@ -80,6 +88,11 @@ namespace controller {
          */
         ~GameController();
 
+        /**
+         * The time to sleep between a button is pressed and released
+         */
+        int click_sleep;
+
     private:
         shared_releaser releaser;
 
@@ -90,12 +103,6 @@ namespace controller {
     };
 
     bool scpVBusInstalled();
-
-/*#if defined(AUTOBET_BUILD_UPDATER) && defined(AUTOBET_ENABLE_FULL_DEBUG)
-    bool downloadAndInstallScpVBus();
-
-    bool downloadAndUninstallScpVBus();
-#endif // AUTOBET_BUILD_UPDATER*/
 }
 
 #endif //AUTOBETLIB_CONTROLLER_HPP

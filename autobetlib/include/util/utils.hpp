@@ -106,20 +106,22 @@ namespace utils {
 
     /**
      * Press the tab button
-     * 
+     *
+     * @param sleep the time to sleep between each action
      * @return true, if the operation was successful
      */
-    bool pressTab();
+    bool pressTab(int sleep);
 
     /**
      * Left click onto a position
      * 
      * @param x the x-position to click on
      * @param y the y-position to clock on
+     * @param sleep the time to sleep between each action
      * @param move whether to move the mouse. If set to false, the params x and y are ignored
      * @return true, if the operation was successful
      */
-    bool leftClick(int x, int y, bool move = true);
+    bool leftClick(int x, int y, int sleep, bool move = true);
 
     /**
      * Check if the game is running

@@ -233,3 +233,4 @@ node_modules
 /autobetlib/conaninfo.txt
 /autobetlib/graph_info.json
 out/**
+autobet.config.json
