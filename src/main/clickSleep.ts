@@ -31,6 +31,14 @@ export function loadSleepTimes() {
     }
 });
 
+// Discard the setting on focus loss
+(click_sleep_textField as any).input_.addEventListener('focusout', () => {
+    if (!click_sleep_textField.disabled) {
+        click_sleep_textField.value = String(autobetLib.uiNavigation.clicks.getClickSleep());
+        showSnackbar("Settings discarded.");
+    }
+});
+
 // Listen for keyup events on the input of the afterClick_sleep_textField
 (afterClick_sleep_textField as any).input_.addEventListener('keyup', (event: KeyboardEvent) => {
     // Only do this if the key pressed was 'enter'
@@ -45,6 +53,14 @@ export function loadSleepTimes() {
                 showSnackbar("Settings saved.");
             });
         }
+    }
+});
+
+// Discard the setting on focus loss
+(afterClick_sleep_textField as any).input_.addEventListener('focusout', () => {
+    if (!afterClick_sleep_textField.disabled) {
+        afterClick_sleep_textField.value = String(autobetLib.uiNavigation.clicks.getAfterClickSleep());
+        showSnackbar("Settings discarded.");
     }
 });
 

@@ -13,6 +13,7 @@ import * as autobet_info from "./autobetInfo";
 import * as clickSleep from"./clickSleep";
 import {loadNavigationStrategy} from "./navigationStrategySelect";
 import {getCurrentlySelectedGameWindow} from "./gameSelector";
+import {showSnackbar} from "./utils";
 
 export function init(): void {
     const showqrbutton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('showqrbutton'); // The 'show qr code' button
@@ -388,6 +389,14 @@ export function init(): void {
                     settings_saved_msg.open();
                 });
             }
+        }
+    });
+
+    // Discard the setting on focus loss
+    (time_sleep_field as any).input_.addEventListener('focusout', () => {
+        if (!time_sleep_field.disabled) {
+            time_sleep_field.value = String(autobetLib.settings.getTimeSleep());
+            showSnackbar("Settings discarded.");
         }
     });
 
