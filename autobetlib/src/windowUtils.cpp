@@ -318,7 +318,7 @@ std::shared_ptr<windowsProgramInfo::programHandles> windowsProgramInfo::getHandl
                     } else {
                         // Get the window name
                         std::string windowName(text_len + 1, '\0');
-                        GetWindowTextA(hwnd, windowName.data(), windowName.size());
+                        GetWindowTextA(hwnd, windowName.data(), static_cast<int>(windowName.size()));
 
                         // Calculate the rect of the window
                         rect = calculateWindowRect(FindWindowA(nullptr, windowName.c_str()));
@@ -402,7 +402,7 @@ program_vector windowUtils::getAllOpenWindows() {
             if (!try_insert(rect, hwnd)) {
                 // Get the window size by its window name
                 std::string windowName(text_len + 1, '\0');
-                GetWindowTextA(hwnd, windowName.data(), windowName.size());
+                GetWindowTextA(hwnd, windowName.data(), static_cast<int>(windowName.size()));
                 rect = calculateWindowRect(FindWindowA(nullptr, windowName.c_str()));
 
                 // Try to insert the hwnd into the result map
