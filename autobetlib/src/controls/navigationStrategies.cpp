@@ -139,9 +139,9 @@ void mouseNavigationStrategy::setAfterClickSleep(int time) {
 // to get the amount of clicks needed to get to the first horse.
 const uint16_t controllerNavigationStrategy::controllerClicks[6] = {5, 4, 3, 2, 1, 0};
 
-const int controllerNavigationStrategy::afterClick_sleep_default = 600;
+const int controllerNavigationStrategy::afterClick_sleep_default = 350;
 
-const int controllerNavigationStrategy::click_sleep_default = 300;
+const int controllerNavigationStrategy::click_sleep_default = 50;
 
 // NOTE: This must not be noexcept, as the controller impl may throw
 controllerNavigationStrategy::controllerNavigationStrategy() : impl(nullptr) {
