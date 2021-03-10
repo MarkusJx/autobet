@@ -248,8 +248,12 @@ export class sidebarButton {
             utils.showMessageSnackbar(`The test of function '${this.name}' was ok`, '<pre style="width: 65vw;">Test results:<br>' +
                 utils.syntaxHighlight(JSON.stringify(res.res, null, 6)) + "</pre>");
         } else {
+            // Use ts-ignore to ignore all errors as there are none
+            // @ts-ignore
             utils.showMessageSnackbar(`The test of function '${this.name}' returned an error`, "Error: " + res.res.error +
+                // @ts-ignore
                 "<br>Stack:<br>" + res.res.stack.replaceAll("\n", "<br>") + "<br><pre style='width: 65vw;'>Data:<br>" +
+                // @ts-ignore
                 utils.syntaxHighlight(JSON.stringify(res.res.data, null, 6)) + "</pre>");
         }
 
@@ -291,4 +295,4 @@ export class sidebarButton {
     getFunctionString(): string {
         return this.fnString;
     }
-};
+}

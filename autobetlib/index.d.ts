@@ -270,6 +270,77 @@ export namespace settings {
     function saveSettings(): Promise<void>;
 }
 
+export namespace windows {
+    /**
+     * Get all open windows.
+     * Returns an object with the program names as keys and
+     * their open window names in an array as values.
+     *
+     * @return the open windows
+     */
+    function getOpenWindows(): Promise<object>;
+
+    /**
+     * Set the game window name
+     *
+     * @param programName the program name
+     * @param processName the process name
+     */
+    function setGameWindowName(programName: string, processName: string): void;
+
+    /**
+     * A combination of the game executable
+     * and the game window process name
+     */
+    type gameWindowName_t = {
+        // The name of the game executable, e.g. "GTA5.exe"
+        programName: string,
+        // The name of the game window process, e.g. "Grand Theft Auto V"
+        processName: string
+    };
+
+    /**
+     * Get the game window name combination
+     *
+     * @return the game program process name combination
+     */
+    function getGameWindowName(): gameWindowName_t;
+}
+
+export namespace uiNavigation {
+    /**
+     * Ui navigation strategies
+     */
+    enum navigationStrategy {
+        MOUSE = 0,
+        CONTROLLER = 1
+    }
+
+    /**
+     * Set the ui navigation strategy
+     *
+     * @param strategy the navigation strategy
+     */
+    function setNavigationStrategy(strategy: navigationStrategy): void;
+
+    /**
+     * Get the currently active navigation strategy
+     *
+     * @return the strategy
+     */
+    function getNavigationStrategy(): navigationStrategy;
+
+    namespace clicks {
+        function setClickSleep(time: number): Promise<void>;
+
+        function setAfterClickSleep(time: number): Promise<void>;
+
+        function getClickSleep(): number;
+
+        function getAfterClickSleep(): number;
+    }
+}
+
 /**
  * Quit
  */

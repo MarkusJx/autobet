@@ -2,14 +2,21 @@ import { MDCSnackbar } from "@material/snackbar";
 
 import { variables } from "./variables";
 import autobetLib from "@autobet/autobetlib";
+import * as navigationStrategySelect from "./navigationStrategySelect";
+import * as gameSelector from "./gameSelector";
+import * as clickSleep from"./clickSleep";
 
 export function init(): void {
-    const timeDisp: HTMLElement = document.getElementById("time"); // The time text field
+    // The time text field
+    const timeDisp: HTMLElement = document.getElementById("time");
+    // The 'GTA is not running' message snackbar
     const gtanotrunningmessage: MDCSnackbar = new MDCSnackbar(document.getElementById("gta-not-running-message"));
     gtanotrunningmessage.timeoutMs = 10000;
 
-    const open_editor: HTMLButtonElement = <HTMLButtonElement>document.getElementById('open-editor'); // The show/hide editor button
-    const editor_container: HTMLElement = document.getElementById('editor-container'); // The editor container
+    // The show/hide editor button
+    const open_editor: HTMLButtonElement = <HTMLButtonElement>document.getElementById('open-editor');
+    // The editor container
+    const editor_container: HTMLElement = document.getElementById('editor-container');
 
     let paused: number = 0;
     let running: number = 0;
@@ -17,9 +24,9 @@ export function init(): void {
     let timer: NodeJS.Timeout = null;
 
     /**
-     * Close and disable the code editor
+     * Close and disable any UI buttons
      */
-    function disableEditor(): void {
+    function disableButtons(): void {
         // If the editor container is already opened, close it
         if (editor_container.classList.contains("opened")) {
             editor_container.classList.remove("opened");
@@ -27,13 +34,32 @@ export function init(): void {
 
         document.getElementById('open-editor-button-label').innerText = "SHOW EDITOR";
         open_editor.disabled = true;
+
+        if (navigationStrategySelect.menu.open) {
+            navigationStrategySelect.menu.open = false;
+        }
+
+        navigationStrategySelect.open_button.disabled = true;
+
+        if (gameSelector.menu.open) {
+            gameSelector.menu.open = false;
+        }
+
+        gameSelector.open_button.disabled = true;
+        clickSleep.click_sleep_textField.disabled = true;
+        clickSleep.afterClick_sleep_textField.disabled = true;
     }
 
     /**
-     * Re-enable the code editor
+     * Re-enable any UI buttons
      */
-    function enableEditor(): void {
+    function enableButtons(): void {
         open_editor.disabled = false;
+        navigationStrategySelect.open_button.disabled = false;
+        gameSelector.open_button.disabled = false;
+
+        clickSleep.click_sleep_textField.disabled = false;
+        clickSleep.afterClick_sleep_textField.disabled = false;
     }
 
     // Start/stop on click on the start/stop button
@@ -51,7 +77,7 @@ export function init(): void {
      * Start betting from a key combination
      */
     function ui_keycomb_start(): void {
-        disableEditor();
+        disableButtons();
         variables.startstop.disabled = true;
         startTimer();
         variables.startstop.disabled = false;
@@ -78,11 +104,11 @@ export function init(): void {
             return;
         }
 
-        disableEditor();
+        disableButtons();
         variables.startstop.disabled = true;
         autobetLib.setStarting(true);
-        let time = 15;
-        var x = setInterval(function () {
+        let time: number = 15;
+        const x: NodeJS.Timeout = setInterval(() => {
             variables.startstop.innerText = "Starting in " + time + "s";
             time--;
             if (time < 0) {
@@ -109,24 +135,24 @@ export function init(): void {
             variables.startstop.innerText = "start";
             variables.statusinfo.innerText = "Stopped";
             variables.statusinfo.className = "text status_stopped maintext";
-            enableEditor();
+            enableButtons();
         }
     }
 
     /**
      * Start pausing
      * 
-     * @param nstoppy whether to stop the actual betting in the backend
+     * @param stop_betting whether to stop the actual betting in the backend
      */
-    function pause(nstoppy: boolean): void {
-        if (!nstoppy)
+    function pause(stop_betting: boolean): void {
+        if (!stop_betting)
             autobetLib.stopBetting();
         pausing = 1;
         variables.statusinfo.innerText = "Stopping";
         variables.statusinfo.className = "text status_init maintext";
         variables.startstop.disabled = true;
-        var x = setInterval(() => {
-            let value = autobetLib.stopped();
+        const x: NodeJS.Timeout = setInterval(() => {
+            let value: boolean = autobetLib.stopped();
             if (value) {
                 clearInterval(x);
                 is_paused();
@@ -157,7 +183,7 @@ export function init(): void {
     }
 
     /**
-     * Conver time in seconds to more readable time in the format HH:mm:ss
+     * Convert time in seconds to more readable time in the format HH:mm:ss
      * 
      * @param secs the seconds to convert
      * @returns the time in a readable format

@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src-elem https://unpkg.com 'self'; style-src 'unsafe-inline';
-           style-src-elem https://unpkg.com https://fonts.googleapis.com 'unsafe-inline' 'self'; font-src https://fonts.gstatic.com;
+           style-src-elem https://unpkg.com https://fonts.googleapis.com 'unsafe-inline' 'self'; font-src https://fonts.gstatic.com 'self';
             img-src 'self' data:; worker-src 'self' blob:">
 
     <meta charset="UTF-8">
@@ -112,6 +112,101 @@
             <h1 class="text subheading" id="settingsdivider-text">Settings</h1>
         </div>
         <!-- Settings divider end -->
+
+        <!-- Navigation strategy container -->
+        <div class="subcontainer setting-container" style="overflow: visible">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Navigation Strategy</h1>
+                    <i class="material-icons infoicon" id="navigation-strategy-info">info</i>
+                </div>
+
+                <div id="navigation-strategy-selector-surface" class="mdc-menu-surface--anchor">
+                    <button class="mdc-button mdc-button--outlined" id="navigation-strategy-selector-open-menu-button">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label" id="navigation-strategy-selector-open-menu-button-label">Mouse</span>
+                        <i class="material-icons mdc-button__icon" aria-hidden="true" style="margin-left: auto">arrow_drop_down</i>
+                    </button>
+
+                    <div class="mdc-menu mdc-menu-surface" id="navigation-strategy-selector">
+                        <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical" tabindex="-1">
+                            <li class="mdc-list-item" role="menuitem" id="navigation-strategy-mouse">
+                                <span class="mdc-list-item__ripple"></span>
+                                <span class="mdc-list-item__text">Mouse</span>
+                                <i class="material-icons mdc-button__icon navigation-strategy-menu-item" aria-hidden="true">check</i>
+                            </li>
+                            <li class="mdc-list-item" role="menuitem" id="navigation-strategy-controller">
+                                <span class="mdc-list-item__ripple"></span>
+                                <span class="mdc-list-item__text">Controller</span>
+                                <i class="material-icons mdc-button__icon navigation-strategy-menu-item" aria-hidden="true">check</i>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Navigation strategy container end -->
+
+        <!-- Game selector container -->
+        <div class="subcontainer setting-container" style="overflow: visible">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Select Game</h1>
+                    <i class="material-icons infoicon" id="game-selector-info">info</i>
+                </div>
+
+                <div id="game-selector-surface" class="mdc-menu-surface--anchor">
+                    <button class="mdc-button mdc-button--outlined" id="game-selector-open-menu-button">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label" id="game-selector-open-menu-button-label">GTA5.exe</span>
+                        <i class="material-icons mdc-button__icon" aria-hidden="true" style="margin-left: auto">arrow_drop_down</i>
+                    </button>
+
+                    <div class="mdc-menu mdc-menu-surface" id="game-selector">
+                        <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical" tabindex="-1" id="game-selector-menu-items-container">
+                            <!-- The menu items will be generated in here --->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Game selector container end -->
+
+        <!-- Click sleep container -->
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">Click sleep</h1>
+                    <i class="material-icons infoicon" id="click-sleep-info">info</i>
+                </div>
+
+                <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="click-sleep-field">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input class="mdc-text-field__input" type="number" min="0" aria-labelledby="click-sleep-label-id">
+                    <span class="mdc-floating-label" id="click-sleep-label-id">Time</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+            </div>
+        </div>
+        <!-- Click sleep container end -->
+
+        <!-- After click sleep container -->
+        <div class="subcontainer setting-container">
+            <div class="textalign">
+                <div class="infoalign">
+                    <h1 class="text subheading">After click sleep</h1>
+                    <i class="material-icons infoicon" id="after-click-sleep-info">info</i>
+                </div>
+
+                <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="after-click-sleep-field">
+                    <span class="mdc-text-field__ripple"></span>
+                    <input class="mdc-text-field__input" type="number" min="0" aria-labelledby="after-click-sleep-label-id">
+                    <span class="mdc-floating-label" id="after-click-sleep-label-id">Time</span>
+                    <span class="mdc-line-ripple"></span>
+                </label>
+            </div>
+        </div>
+        <!-- After click sleep container end -->
 
         <!-- Time-sleep setting container -->
         <div class="subcontainer setting-container">
@@ -496,8 +591,17 @@
         </div>
     </div>
 
+    <!-- Strategy select snackbar --->
+    <div class="mdc-snackbar noselect" id="strategy-select-snackbar">
+        <div class="mdc-snackbar__surface">
+            <div aria-live="polite" class="mdc-snackbar__label" role="status" id="strategy-select-snackbar-label">
+                Unavailable
+            </div>
+        </div>
+    </div>
+
     <!-- load open sans -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap" rel="stylesheet">
+    <link href="../node_modules/open-sans-fonts/open-sans-ng.css" rel="stylesheet">
 </body>
 
 </html>

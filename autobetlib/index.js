@@ -139,6 +139,59 @@ module.exports = {
             await autobetLib_native.lib_saveSettings();
         }
     },
+    windows: {
+        getOpenWindows: async function() {
+            return await autobetLib_native.lib_getAllOpenWindows();
+        },
+        setGameWindowName: function(programName, processName) {
+            autobetLib_native.lib_setGameWindow(programName, processName);
+        },
+        getGameWindowName: function() {
+            return autobetLib_native.lib_getGameWindow();
+        }
+    },
+    uiNavigation: {
+        navigationStrategy: {
+            MOUSE: 0,
+            CONTROLLER: 1
+        },
+        setNavigationStrategy: function(strategy) {
+            let n = -1;
+            switch (strategy) {
+                case this.navigationStrategy.MOUSE:
+                    n = 0;
+                    break;
+                case this.navigationStrategy.CONTROLLER:
+                    n = 1;
+                    break;
+            }
+
+            autobetLib_native.lib_setNavigationStrategy(n);
+        },
+        getNavigationStrategy: function() {
+            const strategy = autobetLib_native.lib_getNavigationStrategy();
+            console.log("Strategy: " + strategy);
+            if (strategy < 0) {
+                return this.navigationStrategy.MOUSE;
+            } else {
+                return strategy;
+            }
+        },
+        clicks: {
+            setClickSleep: async function(time) {
+                await autobetLib_native.lib_setClickSleep(time);
+            },
+            setAfterClickSleep: async function (time) {
+                await autobetLib_native.lib_setAfterClickSleep(time);
+            },
+            getClickSleep: function () {
+                return autobetLib_native.lib_getClickSleep();
+            },
+            getAfterClickSleep: function () {
+                return autobetLib_native.lib_getAfterClickSleep();
+            }
+        }
+    },
     quit: function () {
         autobetLib_native.lib_napi_quit();
     },
@@ -151,7 +204,7 @@ module.exports = {
             const translations_file = require('./odd_translations.json');
             for (let lang in translations_file) {
                 if (translations_file.hasOwnProperty(lang)) {
-                    translations.push(translations_file[lang]);
+                    translations.push(...translations_file[lang]);
                 }
             }
 

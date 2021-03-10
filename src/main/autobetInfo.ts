@@ -4,9 +4,7 @@ import fs from "fs";
 /**
  * The current autobet version
  */
-const version: string = require(path.join(__dirname, '..', '..', 'package.json')).version;
-
-export { version };
+export const version: string = require(path.join(__dirname, '..', '..', 'package.json')).version;
 
 /**
  * Get the License string

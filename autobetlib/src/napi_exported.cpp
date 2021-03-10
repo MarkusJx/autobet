@@ -12,8 +12,10 @@
 #include "control.hpp"
 #include "betting.hpp"
 #include "logger.hpp"
+#include "windowUtils.hpp"
 
 #define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
+
 #include "n_api/napi_tools.hpp"
 
 using namespace logger;
@@ -77,16 +79,35 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         // Read the config if it exists
-        if (utils::fileExists("autobet.conf")) {
+        if (utils::fileExists(SETTINGS_FILE_NAME)) {
             StaticLogger::debug("Settings file exists. Loading it");
-            bool debug, log, web_server;
-            uint32_t time_sleep;
-            settings::load(debug, log, web_server, time_sleep);
-            variables::webServer = web_server;
-            variables::time_sleep = time_sleep;
+            try {
+                variables::webServer = settings::read<bool>("webServer");
+            } catch (...) {}
+            try {
+                variables::time_sleep = settings::read<uint32_t>("timeSleep");
+            } catch (...) {}
 
-            logger::setLogToFile(debug);
-            logger::setLogToConsole(log);
+            try {
+                logger::setLogToFile(settings::read<bool>("logToFile"));
+            } catch (...) {}
+            try {
+                logger::setLogToConsole(settings::read<bool>("logToConsole"));
+            } catch (...) {}
+
+            try {
+                variables::setProcessName(settings::read<std::string>("processName"));
+                variables::setProgramName(settings::read<std::string>("programName"));
+            } catch (...) {}
+
+            try {
+                variables::navigationStrategy = uiNavigationStrategies::navigationStrategy::fromName(
+                        settings::read<std::string>("navigationStrategy"));
+                logger::StaticLogger::debugStream() << "Read navigation strategy: "
+                                                    << variables::navigationStrategy->getName();
+            } catch (...) {
+                logger::StaticLogger::error("Could not read the navigation strategy");
+            }
         }
 
         // Log the current version
@@ -167,6 +188,7 @@ Napi::Promise start(const Napi::CallbackInfo &info) {
             try {
                 betting::mainLoop();
             } catch (const autobetException &e) {
+                StaticLogger::errorStream() << "Exception thrown in the main loop: " << e.what();
                 napi_exported::exception();
                 utils::displayError(e.what(), [] {
                     quit();
@@ -176,7 +198,7 @@ Napi::Promise start(const Napi::CallbackInfo &info) {
             // Sleep until the betting is started.
             // Will still call the mainLoop() every 10 seconds
             // to see if the game is running
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 10; i++) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 if (variables::running) {
                     break;
@@ -594,7 +616,14 @@ Napi::Number getTimeSleep(const Napi::CallbackInfo &info) {
  */
 Napi::Promise saveSettings(const Napi::CallbackInfo &info) {
     return promises::promise<void>(info.Env(), [] {
-        settings::save(logger::logToFile(), logger::logToConsole(), variables::webServer, variables::time_sleep);
+        try {
+            settings::write("webServer", variables::webServer.load());
+            settings::write("timeSleep", variables::time_sleep.load());
+            settings::write("logToFile", logger::logToFile());
+            settings::write("logToConsole", logger::logToConsole());
+        } catch (const std::exception &e) {
+            logger::StaticLogger::errorStream() << "Could not write the settings. Error: " << e.what();
+        }
     });
 }
 
@@ -712,7 +741,121 @@ Napi::Boolean programIsRunning(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
-#define export(func) exports.Set(std::string("lib_") + #func, Napi::Function::New(env, func))
+Napi::Promise getAllOpenWindows(const Napi::CallbackInfo &info) {
+    using map_type = std::map<std::u16string, std::vector<std::string>>;
+    return promises::promise<map_type>(info.Env(), [] {
+        map_type res;
+        for (const auto &w : windowUtils::getAllOpenWindows()) {
+            std::wstring w_program_name = w->getProgramName();
+            std::u16string program_name(w_program_name.begin(), w_program_name.end());
+            for (const auto &p : w->getProcesses()) {
+                if (res.contains(program_name)) {
+                    res.at(program_name).push_back(p->getWindowName());
+                } else {
+                    std::vector<std::string> to_insert;
+                    to_insert.push_back(p->getWindowName());
+
+                    res.insert_or_assign(program_name, to_insert);
+                }
+            }
+        }
+
+        return res;
+    });
+}
+
+void setGameWindow(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(string, string);
+    try {
+        std::string program_name = info[0].ToString();
+        std::string process_name = info[1].ToString();
+
+        settings::write("processName", process_name);
+        settings::write("programName", program_name);
+
+        variables::setProgramName(program_name);
+        variables::setProcessName(process_name);
+    } catch (const std::exception &e) {
+        StaticLogger::errorStream() << e.what();
+    }
+}
+
+Napi::Object getGameWindow(const Napi::CallbackInfo &info) {
+    TRY
+        Napi::Object result = Napi::Object::New(info.Env());
+        result.Set("processName", Napi::String::New(info.Env(), variables::game_process_name));
+        result.Set("programName", Napi::String::New(info.Env(), variables::game_program_name));
+
+        return result;
+    CATCH_EXCEPTIONS
+}
+
+void setNavigationStrategy(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(number);
+    TRY
+        int n = info[0].ToNumber();
+        switch (n) {
+            case 0:
+                variables::navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
+                break;
+            case 1:
+                variables::navigationStrategy = std::make_shared<uiNavigationStrategies::controllerNavigationStrategy>();
+                break;
+            default:
+                throw std::runtime_error("Invalid number supplied");
+        }
+
+        settings::write("navigationStrategy", variables::navigationStrategy->getName());
+    CATCH_EXCEPTIONS
+}
+
+Napi::Number getNavigationStrategy(const Napi::CallbackInfo &info) {
+    try {
+        const std::string name = settings::read<std::string>("navigationStrategy");
+        int res;
+        if (name == "mouse") {
+            res = 0;
+        } else if (name == "controller") {
+            res = 1;
+        } else {
+            res = -1;
+        }
+
+        return Napi::Number::New(info.Env(), res);
+    } catch (...) {
+        return Napi::Number::New(info.Env(), -1);
+    }
+}
+
+Napi::Promise setClickSleep(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(number);
+    const int sleep = info[0].ToNumber();
+    return promises::promise<void>(info.Env(), [sleep] {
+        variables::navigationStrategy->setClickSleep(sleep);
+    });
+}
+
+Napi::Promise setAfterClickSleep(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(number);
+    const int sleep = info[0].ToNumber();
+    return promises::promise<void>(info.Env(), [sleep] {
+        variables::navigationStrategy->setAfterClickSleep(sleep);
+    });
+}
+
+Napi::Number getClickSleep(const Napi::CallbackInfo &info) {
+    TRY
+        return Napi::Number::New(info.Env(), variables::navigationStrategy->getClickSleep());
+    CATCH_EXCEPTIONS
+}
+
+Napi::Number getAfterClickSleep(const Napi::CallbackInfo &info) {
+    TRY
+        return Napi::Number::New(info.Env(), variables::navigationStrategy->getAfterClickSleep());
+    CATCH_EXCEPTIONS
+}
+
+#define export(func) exports.Set("lib_" #func, Napi::Function::New(env, func))
 
 /**
  * Export all functions
@@ -768,8 +911,22 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setOddTranslations);
     export(programIsRunning);
 
+    export(getAllOpenWindows);
+    export(setGameWindow);
+    export(getGameWindow);
+
+    export(setNavigationStrategy);
+    export(getNavigationStrategy);
+
+    export(setClickSleep);
+    export(setAfterClickSleep);
+    export(getClickSleep);
+    export(getAfterClickSleep);
+
     try {
         betting::setWebUiFunctions();
+        variables::setProgramName("GTA5.exe");
+        variables::setProcessName("Grand Theft Auto V");
 
         quit = [] {
             try {

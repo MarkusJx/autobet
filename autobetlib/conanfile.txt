@@ -1,6 +1,7 @@
 [requires]
 opencv/4.5.1
 CppJsLib/0.8
+nlohmann_json/3.9.1
 
 [generators]
 cmake

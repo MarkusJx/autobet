@@ -1,7 +1,7 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
-const { autoUpdater } = require("electron-updater");
+const {app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
+const {autoUpdater} = require("electron-updater");
 const windowStateKeeper = require('electron-window-state');
 const Store = require('electron-store');
 const path = require('path');
@@ -28,7 +28,11 @@ let tray = null;
 
 function createWindow() {
     Store.initRenderer();
-    autoUpdater.checkForUpdatesAndNotify().then(r => console.log(r));
+    autoUpdater.checkForUpdatesAndNotify().then(r => {
+        if (r != null)
+            console.log(r);
+    });
+
     const mainWindowState = windowStateKeeper({
         defaultWidth: 705,
         defaultHeight: 830
@@ -62,11 +66,11 @@ function createWindow() {
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');
     const contextMenu = Menu.buildFromTemplate([
-        { label: 'Autobet', type: 'normal', enabled: false },
-        { type: 'separator' },
-        { label: 'Show UI', type: 'checkbox', checked: true, id: 'show-ui' },
-        { type: 'separator' },
-        { label: 'Quit', type: 'normal', id: 'quit' }
+        {label: 'Autobet', type: 'normal', enabled: false},
+        {type: 'separator'},
+        {label: 'Show UI', type: 'checkbox', checked: true, id: 'show-ui'},
+        {type: 'separator'},
+        {label: 'Quit', type: 'normal', id: 'quit'}
     ]);
     tray.setToolTip("Autobet");
     tray.setContextMenu(contextMenu);
@@ -82,12 +86,19 @@ function createWindow() {
         }
     };
 
-    contextMenu.getMenuItemById('quit').click = () => {
-        autobetLib.shutdown();
-        app.quit();
+    const quitItem = contextMenu.getMenuItemById('quit');
+    quitItem.click = () => {
+        const quit = () => {
+            tray.destroy();
+            app.quit();
+        };
+
+        quitItem.enabled = false;
+        autobetLib.shutdown().then(quit, quit);
     };
 
     ipcMain.on('close-window', () => {
+        tray.destroy();
         app.quit();
     });
 

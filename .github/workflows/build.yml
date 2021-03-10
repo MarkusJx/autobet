@@ -14,6 +14,7 @@ on:
       - "main.js"
       - "scripts/**"
       - "install.js"
+      - "src/**"
   pull_request:
     paths: 
       - ".github/workflows/build.yml"
@@ -27,6 +28,7 @@ on:
       - "main.js"
       - "scripts/**"
       - "install.js"
+      - "src/**"
 
 jobs:
   build:

@@ -2,10 +2,11 @@
  "graph_lock": {
   "nodes": {
    "0": {
-    "options": "jasper:shared=False\njasper:with_libjpeg=libjpeg\njbig:build_executables=True\njbig:shared=False\nlibjpeg:shared=False\nlibpng:api_prefix=None\nlibpng:shared=False\nlibtiff:cxx=True\nlibtiff:jbig=True\nlibtiff:jpeg=libjpeg\nlibtiff:lzma=True\nlibtiff:shared=False\nlibtiff:webp=True\nlibtiff:zlib=True\nlibtiff:zstd=True\nlibwebp:near_lossless=True\nlibwebp:shared=False\nlibwebp:swap_16bit_csp=False\nlibwebp:with_simd=True\nopencv:contrib=False\nopencv:parallel=False\nopencv:shared=False\nopencv:with_eigen=True\nopencv:with_jpeg=libjpeg\nopencv:with_jpeg2000=jasper\nopencv:with_openexr=True\nopencv:with_png=True\nopencv:with_quirc=True\nopencv:with_tiff=True\nopencv:with_webp=True\nopenexr:shared=False\nquirc:max_regions=254\nquirc:shared=False\nxz_utils:shared=False\nzlib:minizip=False\nzlib:shared=False\nzstd:shared=False",
+    "options": "jasper:shared=False\njasper:with_libjpeg=libjpeg\njbig:build_executables=True\njbig:shared=False\nlibjpeg:shared=False\nlibpng:api_prefix=None\nlibpng:shared=False\nlibtiff:cxx=True\nlibtiff:jbig=True\nlibtiff:jpeg=libjpeg\nlibtiff:lzma=True\nlibtiff:shared=False\nlibtiff:webp=True\nlibtiff:zlib=True\nlibtiff:zstd=True\nlibwebp:near_lossless=True\nlibwebp:shared=False\nlibwebp:swap_16bit_csp=False\nlibwebp:with_simd=True\nnlohmann_json:implicit_conversions=True\nnlohmann_json:multiple_headers=False\nopencv:contrib=False\nopencv:parallel=False\nopencv:shared=False\nopencv:with_eigen=True\nopencv:with_jpeg=libjpeg\nopencv:with_jpeg2000=jasper\nopencv:with_openexr=True\nopencv:with_png=True\nopencv:with_quirc=True\nopencv:with_tiff=True\nopencv:with_webp=True\nopenexr:shared=False\nquirc:max_regions=254\nquirc:shared=False\nxz_utils:shared=False\nzlib:minizip=False\nzlib:shared=False\nzstd:shared=False",
     "requires": [
      "1",
-     "14"
+     "14",
+     "15"
     ],
     "path": "conanfile.txt",
     "context": "host"

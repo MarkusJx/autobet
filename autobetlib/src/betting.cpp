@@ -21,94 +21,56 @@
 
 using namespace logger;
 
-// Every location to a horse to bet on.
-// These also double as the upper y-location of the image
-// to crop to extract the odd of the horse
-const uint16_t yLocations[6] = {452, 616, 778, 940, 1102, 1264};
+int32_t width = 0, height = 0, racesWon = 0, racesLost = 0;
 
-int32_t xPos = 0, yPos = 0, width = 0, height = 0, racesWon = 0, racesLost = 0;
-float multiplierW, multiplierH;
+// The previous status of the game window,
+// with -1 being unset, 0 being closed
+// and 1 being opened
+int previous_game_status = -1;
+
+// Whether the betting was running previously
+bool was_running = true;
 
 /**
  * Get GTA V window positions and size and write them to their variables
  */
 void set_positions() {
-    StaticLogger::debug("Getting positions of GTA V window");
-    // Definition of width, height, x, y pos of window and multiplier of positions
-    utils::windowSize ws;
-    utils::getWindowSize(ws);
-    xPos = ws.xPos;
-    yPos = ws.yPos;
-    width = ws.width;
-    height = ws.height;
-    StaticLogger::debugStream() << "Got positions: {x: " << xPos << ", y: " << yPos << ", w: " << width << ", h: "
-                                << height << "}";
+    //StaticLogger::debug("Getting positions of GTA V window");
 
-    utils::windowSize screenSize;
-    utils::getActiveScreen(xPos + (width / 2), yPos + (height / 2), screenSize);
+    bool shouldLog = true;
+    try {
+        // Definition of width, height, x, y pos of window and multiplier of positions
+        windowUtils::windowSize ws = utils::getWindowSize();
+        shouldLog = variables::xPos != ws.xPos || variables::yPos != ws.yPos || width != ws.width ||
+                    height != ws.height;
 
-    StaticLogger::debugStream() << "Got active screen width: " << screenSize.width << " and height: "
-                                << screenSize.height;
+        variables::xPos = ws.xPos;
+        variables::yPos = ws.yPos;
+        width = ws.width;
+        height = ws.height;
 
-    multiplierW = (float) width / 2560.0f;
-    multiplierH = (float) height / 1440.0f;
-}
-
-/**
- * Emulate a mouse left click
- *
- * @param x the x-coordinate of the mouse pointer
- * @param y the y-coordinate of the mouse pointer
- * @param move if the mouse should be moved
- */
-void leftClick(unsigned int x, unsigned int y, bool move = true) {
-    // Only click if the program is running and not trying to stop or the user paused the betting
-    // so the mouse is not moved while the user is using it
-    if (variables::runLoops) {
-        // Apply the multipliers to the x and y coords so they fit to any window size
-        // because the built-in values are for a 1440p config
-        x = (int) round((float) x * multiplierW) + xPos;
-        y = (int) round((float) y * multiplierH) + yPos;
-        if (!utils::leftClick((int) x, (int) y, move)) {
-            StaticLogger::error("utils::leftClick returned abnormal signal");
+        if (shouldLog) {
+            StaticLogger::debugStream() << "Got positions: " << ws.toString();
         }
-    } else {
-        StaticLogger::debug("Should click now but the program is about to stop, doing nothing");
-    }
-}
-
-/**
- * Place a bet on a horse
- *
- * @param y the y position where to click
- */
-void place_bet(int y) {
-    StaticLogger::debug("Placing bet");
-    leftClick(634, y);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-    // 25/08/2020: Today I found out, you could just press tab to place a max bet. Now, that I have invested
-    // many hours into setting positions for the 'increase bet' button, this is not very nice. I've even used
-    // vXbox to simulate a xBox controller, which is now completely useless. I will not include this fact in any
-    // changelog or commit message, this is the only place where anyone can find this shit. If you just found it:
-    // good for you, keep it a secret, I don't want anyone to know how dumb I really am. Have a nice day.
-    // I am definitely not having a nice day at this point. F*ck.
-    if (!utils::pressTab()) {
-        StaticLogger::error("Could not press the tab key");
+    } catch (const std::exception &e) {
+        StaticLogger::warningStream() << "utils::getWindowSize threw an exception: " << e.what()
+                                      << ". Therefore, setting all window info values to zero";
+        variables::xPos = 0;
+        variables::yPos = 0;
+        width = 0;
+        height = 0;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    leftClick(1765, 1050);
-}
+    windowUtils::windowSize screenSize = utils::getActiveScreen(variables::xPos + (width / 2),
+                                                                variables::yPos + (height / 2));
 
-/**
- * Go back from the winnings screen to the betting screen
- */
-void reset() {
-    leftClick(1286, 1304);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    leftClick(1905, 1187);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    if (shouldLog) {
+        StaticLogger::debugStream() << "Got active screen width: " << screenSize.width << " and height: "
+                                    << screenSize.height;
+    }
+
+    variables::multiplierW = (float) width / 2560.0f;
+    variables::multiplierH = (float) height / 1440.0f;
 }
 
 /**
@@ -172,7 +134,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
         }
     }
 
-    return (short) yLocations[lowest[1]];
+    return (short) lowest[1];
 }
 
 /**
@@ -191,10 +153,11 @@ short get_pos(const std::shared_ptr<void> &src) {
     std::vector<std::string> odds(6);
     uint16_t yCoord, xCoord, _width, _height;
     for (int i = 0; i < 6; i++) {
-        yCoord = static_cast<uint16_t>(std::round((float) yLocations[i] * multiplierH));
-        _height = static_cast<uint16_t>(std::round((float) 60 * multiplierH));
-        xCoord = static_cast<uint16_t>(std::round(230 * multiplierW));
-        _width = static_cast<uint16_t>(std::round(120 * multiplierW));
+        yCoord = static_cast<uint16_t>(std::round((float) variables::yLocations[i] * variables::multiplierH));
+        _height = static_cast<uint16_t>(std::round((float) 60 * variables::multiplierH));
+        xCoord = static_cast<uint16_t>(std::round(230 * variables::multiplierW));
+        // Edit 24-02-2021: Extend with of the single images from 120 to 220 pixels
+        _width = static_cast<uint16_t>(std::round(220 * variables::multiplierW));
 
         // Crop the screenshot
         utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src.get());
@@ -204,7 +167,7 @@ short get_pos(const std::shared_ptr<void> &src) {
             debug::writeImage(b);
         }
 
-        odds[i] = variables::knn.predict(b, multiplierW, multiplierH);
+        odds[i] = variables::knn.predict(b, variables::multiplierW, variables::multiplierH);
         if (!opencv_link::knn::isOdd(odds[i])) {
             StaticLogger::errorStream() << "Knn did not return an odd: " << (odds[i].empty() ? "[empty]" : odds[i]);
             throw autobetException("Knn did not return an odd: " + (odds[i].empty() ? "[empty]" : odds[i]));
@@ -228,13 +191,13 @@ short get_pos(const std::shared_ptr<void> &src) {
             const int res = future.get();
             StaticLogger::debugStream() << "The custom betting function returned: " << res;
 
-            if (res < -1) {
+            if (res < -1 || res >= (sizeof(variables::yLocations) / sizeof(uint16_t))) {
                 StaticLogger::warning(
                         "The custom betting function returned a result < -1, falling back to the default implementation");
                 return getBasicBettingPosition(odds);
             } else {
-                // Return the yLocation at res
-                return yLocations[res];
+                // Return the result
+                return static_cast<short>(res);
             }
         } else {
             StaticLogger::warning(
@@ -292,13 +255,13 @@ void getWinnings() {
     // They are then scaled to the current game resulution and rounded.
     // If the images cropped are too small/big/wrong placed,
     // these values probably should be changed.
-    auto yCoord = static_cast<short>(std::round(1060.0f * multiplierH));
-    auto _height = static_cast<short>(std::round(86.0f * multiplierH));
-    auto xCoord = static_cast<short>(std::round(1286.0f * multiplierW));
-    auto _width = static_cast<short>(std::round(304.0f * multiplierW));
+    auto yCoord = static_cast<short>(std::round(1060.0f * variables::multiplierH));
+    auto _height = static_cast<short>(std::round(86.0f * variables::multiplierH));
+    auto xCoord = static_cast<short>(std::round(1286.0f * variables::multiplierW));
+    auto _width = static_cast<short>(std::round(304.0f * variables::multiplierW));
 
     // Take a screenshot and crop the image
-    std::shared_ptr<void> src(utils::TakeScreenShot(xPos, yPos, width, height), DeleteObject);
+    std::shared_ptr<void> src(utils::TakeScreenShot(variables::xPos, variables::yPos, width, height), DeleteObject);
     utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src.get());
 
     if (variables::debug_full) {
@@ -315,7 +278,7 @@ void getWinnings() {
     // take a look at the implementation of opencv_link::knn::isWinning(1)
     std::string pred;
     try {
-        pred = variables::knn.predict(bmp, multiplierW, multiplierH);
+        pred = variables::knn.predict(bmp, variables::multiplierW, variables::multiplierH);
     } catch (std::exception &e) {
         StaticLogger::errorStream() << "Could not predict the winnings. Error: " << e.what();
         return;
@@ -334,23 +297,6 @@ void getWinnings() {
     updateWinnings(res);
 }
 
-/**
- * Skip this bet
- */
-void skipBet() {
-    StaticLogger::debug("Should not bet on this one, skipping...");
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    leftClick(633, 448);
-
-    // Sleep between clicks as the game cannot accept so many clicks in quick succession
-    // Also, this helps making our clicks seem more human.
-    // Just so we going the safer route as of not getting banned.
-    // Rockstar would probably not ban anyone for using this,
-    // since they are incompetent as fuck, despite having billions of dollars.
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    leftClick(1720, 1036);
-}
-
 void betting::mainLoop() {
     // Stop the betting as a lambda
     const auto stopBetting = [] {
@@ -364,17 +310,28 @@ void betting::mainLoop() {
     };
 
     // Check if the game is running
-    if (utils::isProcessRunning("GTA5.exe")) {
-        StaticLogger::debug("GTA V running");
+    if (utils::gameIsRunning()) {
+        if (previous_game_status != 1) {
+            StaticLogger::debug("GTA V running");
+            previous_game_status = 1;
+        }
+
         setGtaVRunning(true);
 
         // Set the game's positions
         set_positions();
-        utils::windowSize ws;
+
+        if (variables::running) {
+            StaticLogger::debug("Running first bet");
+            // Run the first reset on the navigation strategy
+            variables::navigationStrategy->firstBet();
+        }
 
         // A note to my C Professor: I've learned my lesson,
         // this is not a while(TRUE) loop. It never was, honestly.
         while (variables::running) {
+            was_running = true;
+
             // Get the position to bet on
             short pos = -2;
             std::string lastError;
@@ -386,7 +343,8 @@ void betting::mainLoop() {
             for (int i = 0; i < 3; i++) {
                 try {
                     // Take a screen shot
-                    std::shared_ptr<void> src(utils::TakeScreenShot(xPos, yPos, width, height), DeleteObject);
+                    std::shared_ptr<void> src(utils::TakeScreenShot(variables::xPos, variables::yPos, width, height),
+                                              DeleteObject);
                     pos = get_pos(src);
                     break;
                 } catch (const std::exception &e) {
@@ -395,7 +353,7 @@ void betting::mainLoop() {
 
                     StaticLogger::errorStream() << lastError;
                     StaticLogger::debug("Assuming the game is stuck, resetting...");
-                    reset();
+                    variables::navigationStrategy->reset();
 
                     StaticLogger::debug("Sleeping for 5 seconds");
                     std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -417,7 +375,7 @@ void betting::mainLoop() {
 
                 // Plot twist: pos is actually the y-position
                 // of the button of the horse to bet on
-                place_bet(pos);
+                variables::navigationStrategy->placeBet(pos);
                 StaticLogger::debugStream() << "Running: " << std::boolalpha << variables::running;
 
                 // Updating winnings by -10000 since betting costs 100000
@@ -443,14 +401,14 @@ void betting::mainLoop() {
                 getWinnings();
 
                 if (!variables::running) continue;
-                reset();
+                variables::navigationStrategy->reset();
                 if (autostop::checkStopConditions()) {
                     stopBetting();
                     break;
                 }
             } else {
                 // Should not bet, skip
-                skipBet();
+                variables::navigationStrategy->skipBet();
                 updateWinnings(-100);
                 StaticLogger::debugStream() << "Sleeping for " << variables::time_sleep << " seconds";
                 std::this_thread::sleep_for(std::chrono::seconds(variables::time_sleep / 2));
@@ -460,27 +418,35 @@ void betting::mainLoop() {
 
                 // Update the winnings and return to the betting screen
                 getWinnings();
-                reset();
+                variables::navigationStrategy->reset();
             }
 
             // Check if the game is in focus
             bool foreground;
             errno_t err = utils::isForeground(foreground);
             if (err == 0) {
-                if (!foreground) {
-                    StaticLogger::debug("GTA V is not the currently focused window. Betting will be stopped");
+                // Stop the betting if the game application is not the focused window.
+                // Only stop the betting if the selected game application is the default one.
+                // If it is not, just issue a warning and continue as usual.
+                // The problem is related to this: https://github.com/MarkusJx/autobet/issues/20#issuecomment-792301392
+                if (!foreground && variables::isDefaultGameApplication()) {
+                    StaticLogger::error("GTA V is not the currently focused window. Betting will be stopped");
                     napi_exported::bettingException("GTA V is not the currently focused window.");
                     stopBetting();
                     break;
+                } else if (!foreground) {
+                    StaticLogger::warning("GTA V is not the currently focused window. "
+                                          "Ignoring this event as the currently selected game application "
+                                          "is not the default one");
                 }
             } else {
                 StaticLogger::warning("Could not get foreground window. Assuming GTA V is in foreground");
             }
 
             // Check if the game is still opened
-            utils::getWindowSize(ws);
-            if ((ws.width == 0 && ws.height == 0) || !utils::isProcessRunning("GTA5.exe")) {
-                StaticLogger::debug("The game seems to be closed, stopping betting");
+            windowUtils::windowSize ws = utils::getWindowSize();
+            if ((ws.width == 0 && ws.height == 0) || !utils::gameIsRunning()) {
+                StaticLogger::error("The game seems to be closed, stopping betting");
                 stopBetting();
             }
         }
@@ -488,10 +454,17 @@ void betting::mainLoop() {
         // Set stopped
         variables::stopping = false;
         webui::setStopped();
-        StaticLogger::debug("Betting is now paused");
+        if (was_running) {
+            StaticLogger::debug("Betting is now paused");
+            was_running = false;
+        }
     } else {
         // The Game is not running, tell it everyone and sleep some time
-        StaticLogger::debug("GTA V not running");
+        if (previous_game_status != 0) {
+            StaticLogger::debug("GTA V not running");
+            previous_game_status = 0;
+        }
+
         if (variables::running && variables::stopping) {
             variables::stopping = false;
             variables::running = false;

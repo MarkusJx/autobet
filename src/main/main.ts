@@ -1,15 +1,19 @@
-import { MDCRipple } from "@material/ripple";
-import { MDCDialog } from "@material/dialog";
-import { MDCSwitch } from "@material/switch";
-import { MDCSnackbar } from "@material/snackbar";
-import { MDCTextField } from "@material/textfield";
-import { Titlebar, Color } from "custom-electron-titlebar";
+import {MDCRipple} from "@material/ripple";
+import {MDCDialog} from "@material/dialog";
+import {MDCSwitch} from "@material/switch";
+import {MDCSnackbar} from "@material/snackbar";
+import {MDCTextField} from "@material/textfield";
+import {Titlebar, Color} from "custom-electron-titlebar";
 
-import { variables } from "./variables";
-import { setQRCode } from "./qrcode/qrcode_wrapper";
+import {variables} from "./variables";
+import {setQRCode} from "./qrcode/qrcode_wrapper";
 import autobetLib from "@autobet/autobetlib";
 import * as utils from "./utils";
 import * as autobet_info from "./autobetInfo";
+import * as clickSleep from"./clickSleep";
+import {loadNavigationStrategy} from "./navigationStrategySelect";
+import {getCurrentlySelectedGameWindow} from "./gameSelector";
+import {showSnackbar} from "./utils";
 
 export function init(): void {
     const showqrbutton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('showqrbutton'); // The 'show qr code' button
@@ -52,7 +56,7 @@ export function init(): void {
     /**
      * Set the quit callback
      */
-    async function setQuitCallback() {
+    async function setQuitCallback(): Promise<void> {
         autobetLib.callbacks.setQuitCallback(() => {
             utils.quit();
         });
@@ -61,7 +65,7 @@ export function init(): void {
     setQuitCallback();
 
     // Set the betting exception callback function
-    autobetLib.callbacks.setBettingExceptionCallback((err) => {
+    autobetLib.callbacks.setBettingExceptionCallback((err: string) => {
         document.getElementById('betting-error-dialog-content').innerText = "The betting was stopped due to an " +
             "exception thrown in the native module. This may be caused by a program error or the game being " +
             "stuck on a screen. Error message: " + err;
@@ -91,7 +95,7 @@ export function init(): void {
     /**
      * Show the qr code
      */
-    function showQRCode() {
+    function showQRCode(): void {
         qrdialog.open();
         variables.startstop.disabled = true;
         showqrbutton.disabled = true;
@@ -214,9 +218,9 @@ export function init(): void {
     /**
      * Set the ips
      */
-    function setIPs() {
+    function setIPs(): void {
         let ip: string = autobetLib.getIP();
-        weblink.innerText = "http://" + ip + ":8027";
+        weblink.innerText = `http://${ip}:8027`;
         setQRCode(ip);
     }
 
@@ -290,6 +294,10 @@ export function init(): void {
             return;
         }
 
+        loadNavigationStrategy();
+        getCurrentlySelectedGameWindow();
+        clickSleep.loadSleepTimes();
+
         autobet_info.getLicense().then((res: string) => {
             document.getElementById('license-dialog-content').innerText = res;
         }, rej => {
@@ -333,9 +341,8 @@ export function init(): void {
             enable_webserver.disabled = false;
         }
 
-        autobetLib.setOddTranslations();
-
-        autobetLib.start();
+        await autobetLib.setOddTranslations();
+        await autobetLib.start();
     }
 
     // Run the main function
@@ -344,8 +351,11 @@ export function init(): void {
     }, () => {
         // main failed
         utils.errordialog.open();
-        utils.errordialog.listen("MDCDialog:closed", function () {
-            autobetLib.shutdown();
+        utils.errordialog.listen("MDCDialog:closed", async function () {
+            try {
+                await autobetLib.shutdown();
+            } catch (ignored) {
+            }
             utils.quit();
         });
     });
@@ -353,30 +363,16 @@ export function init(): void {
     // Settings ================================================
 
     // MDC init
-    const description_dialog: any = new MDCDialog(document.getElementById("description-dialog")); // The description dialog
-    const time_sleep_field: any = new MDCTextField(document.getElementById("time-sleep-field")); // The time-sleep text field
+    const time_sleep_field: MDCTextField = new MDCTextField(document.getElementById("time-sleep-field")); // The time-sleep text field
     const full_debug: MDCSwitch = new MDCSwitch(document.getElementById("full-debug-switch")); // The full debug switch
     const log_to_file_switch: MDCSwitch = new MDCSwitch(document.getElementById("log-to-file-switch")); // The log to file switch
     const log_to_console_switch: MDCSwitch = new MDCSwitch(document.getElementById("log-to-console-switch")); // The log to console switch
-    const log_textfield: any = new MDCTextField(document.getElementById("log-textfield")); // The fake console
+    const log_textfield: MDCTextField = new MDCTextField(document.getElementById("log-textfield")); // The fake console
 
     const log_textfield_resizer: HTMLElement = document.getElementById("log-textfield-resizer"); // The console resizer
 
-    /**
-     * Show the description
-     *
-     * @param title the title
-     * @param description the description
-     */
-    function showDescription(title: string, description: string): void {
-        document.getElementById("description-dialog-title").innerText = title;
-        description_dialog.content_.innerText = description;
-
-        description_dialog.open();
-    }
-
     // Listen for keyup events on the input of the time_sleep text field
-    time_sleep_field.input_.addEventListener('keyup', (event: KeyboardEvent) => {
+    (time_sleep_field as any).input_.addEventListener('keyup', (event: KeyboardEvent) => {
         // Only do this if the key pressed was 'enter'
         if (event.keyCode === 13) {
             event.preventDefault();
@@ -393,6 +389,14 @@ export function init(): void {
                     settings_saved_msg.open();
                 });
             }
+        }
+    });
+
+    // Discard the setting on focus loss
+    (time_sleep_field as any).input_.addEventListener('focusout', () => {
+        if (!time_sleep_field.disabled) {
+            time_sleep_field.value = String(autobetLib.settings.getTimeSleep());
+            showSnackbar("Settings discarded.");
         }
     });
 
@@ -485,14 +489,15 @@ export function init(): void {
     // Set a callback for logging to "console"
     autobetLib.logging.setLogCallback((msg: string) => {
         // Only do this if the text field is scrolled all the way down
-        if ((log_textfield.input_.scrollTop + log_textfield.input_.clientHeight) >= (log_textfield.input_.scrollHeight - 20)) {
+        if (((log_textfield as any).input_.scrollTop + (log_textfield as any).input_.clientHeight) >=
+            ((log_textfield as any).input_.scrollHeight - 20)) {
             // Append the message
             log_textfield.value += msg;
 
             // The text field was scrolled down, scroll all the way down,
             // so new messages will always be on the bottom of the text field
-            log_textfield.input_.scroll({
-                top: log_textfield.input_.scrollHeight,
+            (log_textfield as any).input_.scroll({
+                top: (log_textfield as any).input_.scrollHeight,
                 left: 0
             });
         } else {
@@ -503,22 +508,22 @@ export function init(): void {
 
     // Add some info texts
     document.getElementById("time-sleep-info").addEventListener('click', () => {
-        showDescription("Time-sleep", "Set the time to sleep after a bet has started. Use this option, when the program did not immediately start a new bet when the " +
+        utils.showDescription("Time-sleep", "Set the time to sleep after a bet has started. Use this option, when the program did not immediately start a new bet when the " +
             "race has finished. Press enter to save, the default value is 36.");
     });
 
     document.getElementById("full-debug-info").addEventListener('click', () => {
-        showDescription("Full Debug", "This option will create a zip file called 'autobet_debug.zip' on you Desktop. This File will contain a log and screenshots for " +
+        utils.showDescription("Full Debug", "This option will create a zip file called 'autobet_debug.zip' on you Desktop. This File will contain a log and screenshots for " +
             "debugging purposes. IMPORTANT: If you submit this file anywhere, make sure to delete any personal information from the zip file.");
     });
 
     document.getElementById("debug-info").addEventListener('click', () => {
-        showDescription("Debugging and logging", "Log to File: Set if the program should log to a file. This option will automatically activated, when the full debug " +
+        utils.showDescription("Debugging and logging", "Log to File: Set if the program should log to a file. This option will automatically activated, when the full debug " +
             "option is activated. Log to Console: This option will display logging information in the 'View log' text field.");
     });
 
     document.getElementById("custom-betting-function-info").addEventListener('click', () => {
-        showDescription("Custom betting function", "In here you can set a custom function to be called in order to determine whether (an where) a bet should be placed." +
+        utils.showDescription("Custom betting function", "In here you can set a custom function to be called in order to determine whether (an where) a bet should be placed." +
             "The function should be written in JavaScript, the odds are stored in the odds variable and at the end, you should pass the odd for a bet to be placed on to " +
             "the setResult() function. If no bet should be placed, pass null to setResult(). If you don't pass anythin, the result will be interpreted as invalid and the " +
             "Program will fall back to the native implementation.");

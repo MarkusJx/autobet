@@ -107,6 +107,9 @@ async function init(): Promise<void> {
 
     const jsEditor = await import("./main/jsEditor");
     jsEditor.init();
+
+    await import("./main/navigationStrategySelect");
+    await import("./main/gameSelector");
 }
 
 // Run init() on window load finished

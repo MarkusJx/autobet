@@ -31,9 +31,10 @@ export class functionStore {
 
     /**
      * Construct a functionStore
-     * 
+     *
      * @param name the function name
      * @param fnString the function string
+     * @param id the function id
      */
     constructor(name: string, fnString: string, id: string) {
         this.name = name;

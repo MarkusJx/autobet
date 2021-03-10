@@ -594,6 +594,52 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
 .null { color: magenta; }
 .key { color: red; }
 
+/* Navigation strategy stuff ================================================== */
+#navigation-strategy-selector {
+    width: 200px;
+}
+
+.navigation-strategy-menu-item {
+    margin-left: auto;
+    visibility: hidden;
+}
+
+#navigation-strategy-selector-open-menu-button {
+    --mdc-theme-primary: white;
+    width: 200px;
+    border-color: #ffffff78;
+}
+
+#navigation-strategy-selector-surface {
+    margin-top: 19.5px;
+    width: 200px;
+    left: 50%;
+    margin-left: -100px;
+}
+
+/* Game selector stuff ======================================================== */
+#game-selector-open-menu-button {
+    --mdc-theme-primary: white;
+    width: 200px;
+    border-color: #ffffff78;
+}
+
+#game-selector-surface {
+    margin-top: 19.5px;
+    width: 200px;
+    left: 50%;
+    margin-left: -100px;
+}
+
+#game-selector {
+    width: 400px;
+}
+
+.game-selector-menu-item {
+    margin-left: auto;
+    visibility: hidden;
+}
+
 /* 
 Hide the editor action buttons when the sidebar is open
 and there is not enough space left
