@@ -325,7 +325,7 @@ setResult(run());
             }
 
             // Check name characters
-            const name_regex: RegExp = /^([a-zA-Z]*[0-9]*_?)*$/g;
+            const name_regex: RegExp = /^[a-zA-Z0-9_]+$/g;
             if (!name_regex.test(constants.impl_text_field.value)) {
                 constants.impl_text_field.valid = false;
                 constants.select_name_dialog.open();
