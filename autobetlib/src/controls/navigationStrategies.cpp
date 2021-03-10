@@ -9,6 +9,12 @@
 using namespace logger;
 using namespace uiNavigationStrategies;
 
+/**
+ * Sleep for some time. Just an alias for
+ * std::this_thread::sleep_for(std::chrono::milliseconds())
+ *
+ * @param millis the number of milliseconds to sleep
+ */
 void sleepMs(long long millis) {
     std::this_thread::sleep_for(std::chrono::milliseconds(millis));
 }
@@ -131,6 +137,13 @@ void mouseNavigationStrategy::setAfterClickSleep(int time) {
     this->afterClick_sleep = time;
     settings::write("mouseAfterClickSleep", time);
 }
+
+// controllerNavigationStrategy class ===============================
+// This was mainly created to support streaming from an xbox,
+// requested by github user Max-ES. This feature was made in
+// collaboration with them as there was no way for me to test
+// this feature, so thank you for your time and effort to make
+// this possible.
 
 // The number of clicks required for the controller.
 // As we start from the last horse, we'll need 0 clicks

@@ -17,14 +17,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/MarkusJx/GTA-Online-Autobet.git"
+        "url": "git+https://github.com/MarkusJx/autobet.git"
     },
     "author": "MarkusJx",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/MarkusJx/GTA-Online-Autobet/issues"
+        "url": "https://github.com/MarkusJx/autobet/issues"
     },
-    "homepage": "https://github.com/MarkusJx/GTA-Online-Autobet#readme",
+    "homepage": "https://github.com/MarkusJx/autobet#readme",
     "devDependencies": {
         "electron": "^11.1.1",
         "electron-builder": "^22.9.1",

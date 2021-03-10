@@ -109,6 +109,9 @@ function setNavigationStrategy(strategy: autobetLib.uiNavigation.navigationStrat
     return true;
 }
 
+/**
+ * Get the currently selected navigation strategy from the native addon
+ */
 export function loadNavigationStrategy(): void {
     const strategy = autobetLib.uiNavigation.getNavigationStrategy();
     switch (strategy) {
