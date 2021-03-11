@@ -237,7 +237,6 @@ export class sidebarButton {
         }
 
         // Wait for the check to finish (NOTE: This should be in a promise)
-        autobetLib.logging.warn("jsEditor.js", "TODO: This should return a promise");
         let res = isolatedFunctions.checkFunction(this.fnString, this.fn == null ? "default" : this.fn.id);
         // Set whether this is ok and set waiting to false
         this.setOk(res.ok);

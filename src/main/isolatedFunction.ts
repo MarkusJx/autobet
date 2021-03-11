@@ -85,23 +85,27 @@ export type testResult = {
 export class isolatedFunction {
     /**
      * Set to true, if a vm is already running
+     * @private
      */
-    running: boolean;
+    private running: boolean;
 
     /**
      * The result of an vm run
+     * @private
      */
-    result: string;
+    private result: string;
 
     /**
      * The function to run in a vm
+     * @private
      */
-    func: string;
+    private func: string;
 
     /**
      * The vm to use
+     * @private
      */
-    vm: VM;
+    private vm: VM;
 
     /**
      * Create an isolated function
@@ -272,7 +276,7 @@ export class isolatedFunction {
                     r = r.replaceAll(/</g, "&lt;").replaceAll(/>/g, "&gt;").replace(/'/g, "&#39;").replace(/"/g, "&#34;");
                 }
 
-                // Push the result of the call to vals
+                // Push the result of the call to values
                 values.push({
                     odds: o,
                     result: r
