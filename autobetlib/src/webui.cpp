@@ -290,6 +290,9 @@ bool webui::startWebUi(const std::string &ip) {
 }
 
 bool webui::reset() {
+    // Set all imported functions to nullptr
+    destroyImportedWebFunctions();
+
     // Stop the web servers, so they don't occupy the ports they use
     if (webUi) {
         std::promise<void> stopPromise;
@@ -305,9 +308,7 @@ bool webui::reset() {
         webUi.reset();
         return true;
     } else {
-        logger::StaticLogger::warning("Could not stop web ui web server");
+        logger::StaticLogger::debug("Could not stop web ui web server since it was not running");
         return false;
     }
-
-    destroyImportedWebFunctions();
 }

@@ -1,10 +1,13 @@
 #include <iostream>
 #include <ctime>
 #include <memory>
+#include <filesystem>
 
 #include "napi_exported.hpp"
+#include "util/utils.hpp"
 
 #define LOGGER_NO_UNDEF
+
 #include "logger.hpp"
 
 #ifdef LOGGER_WINDOWS
@@ -245,18 +248,31 @@ Logger::~Logger() {
 }
 
 void Logger::init(const char *fileName, const char *fileMode) {
+    const std::string documents = utils::getDocumentsFolder();
+    std::string out_file;
+    if (!documents.empty()) {
+        const std::string autobet_dir = documents + "\\autobet";
+        if (!utils::fileExists(autobet_dir) && !std::filesystem::create_directory(autobet_dir)) {
+            out_file = fileName;
+        } else {
+            out_file = autobet_dir + "\\" + fileName;
+        }
+    } else {
+        out_file = fileName;
+    }
+
     if (_mode == MODE_BOTH || _mode == MODE_FILE) {
 #ifdef LOGGER_WINDOWS
-        errno_t err = fopen_s(&file, fileName, fileMode);
+        errno_t err = fopen_s(&file, out_file.c_str(), fileMode);
 
-                if (err) {
-                    perror("Could not open out.log file!");
-                    file = nullptr;
-                } else {
-                    setvbuf(file, nullptr, _IONBF, 0);
-                }
+        if (err) {
+            perror("Could not open out.log file!");
+            file = nullptr;
+        } else {
+            setvbuf(file, nullptr, _IONBF, 0);
+        }
 #else
-        file = fopen("out.log", fileMode);
+        file = fopen(out_file.c_str(), fileMode);
         if (file == nullptr) {
             std::cerr << "Could not open out.log file!" << std::endl;
         }
