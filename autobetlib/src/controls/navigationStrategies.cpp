@@ -150,7 +150,7 @@ void mouseNavigationStrategy::setAfterClickSleep(int time) {
 // to get to horse 6, one click to get to horse 5...
 // So we can get the clicks using controllerClicks[0]
 // to get the amount of clicks needed to get to the first horse.
-const uint16_t controllerNavigationStrategy::controllerClicks[6] = {5, 4, 3, 2, 1, 0};
+const std::array<uint16_t, 6> controllerNavigationStrategy::controllerClicks = {5, 4, 3, 2, 1, 0};
 
 const int controllerNavigationStrategy::afterClick_sleep_default = 350;
 

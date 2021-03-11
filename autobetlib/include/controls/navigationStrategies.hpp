@@ -142,7 +142,7 @@ namespace uiNavigationStrategies {
 
         static const int click_sleep_default;
 
-        static const uint16_t controllerClicks[6];
+        static const std::array<uint16_t, 6> controllerClicks;
     };
 }
 

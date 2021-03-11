@@ -191,7 +191,8 @@ namespace utils {
     bool isAlreadyRunning(const std::string &programName);
 
     /**
-     * Get the documents folder
+     * Get the documents folder.
+     * Source: https://stackoverflow.com/a/2414852
      *
      * @return the documents folder path
      */

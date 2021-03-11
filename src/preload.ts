@@ -15,27 +15,6 @@ if (activeFunction >= 0 && activeFunction < functions.length && functions[active
 }
 
 /**
- * Convert an odd to a number
- *
- * @param val the value to convert
- * @returns the odd as a number
- */
-function oddToNumber(val: string): number | null {
-    const oddRegex: RegExp = /^(([2-9]|([1-2][0-9])|(3[0-1]))\/1)|(evens)$/g;
-    if (val == null) {
-        return null;
-    } else if (oddRegex.test(val)) {
-        if (val === "evens") {
-            return 1;
-        } else {
-            return Number(val.split('/')[0]);
-        }
-    } else {
-        throw new Error("The returned value is no odd");
-    }
-}
-
-/**
  * A function to be called when the custom betting function failed
  */
 function bettingFunctionError(): void {
@@ -55,16 +34,15 @@ function bettingFunctionError(): void {
 }
 
 // Set the custom betting function callback
-autobetLib.customBettingFunction.setBettingPositionCallback((odds) => {
+autobetLib.customBettingFunction.setBettingPositionCallback((odds: string[]) => {
     if (activeFunction < 0 || activeFunction >= functions.length) {
         return -2;
     }
 
-    let res: number | string | null = null;
+    let res: string = null;
     try {
         let odds_cpy: string[] = Array.from(odds);
         res = isolatedFunction.run(odds_cpy);
-        res = oddToNumber(res);
     } catch (e) {
         autobetLib.logging.error("preload.js", `The custom betting function threw: ${e.message}`);
         functions[activeFunction].ok = false;

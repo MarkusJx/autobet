@@ -34,7 +34,7 @@ public:
     // Every location to a horse to bet on.
     // These also double as the upper y-location of the image
     // to crop to extract the odd of the horse
-    static const uint16_t yLocations[6];
+    static const std::array<uint16_t, 6> yLocations;
 
     static std::atomic<float> multiplierW;
     static std::atomic<float> multiplierH;

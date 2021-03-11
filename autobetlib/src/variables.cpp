@@ -30,7 +30,7 @@ void variables::setProcessName(const std::string &name) {
     strcpy_s(process_name_buffer, name.c_str());
 }
 
-const uint16_t variables::yLocations[6] = {452, 616, 778, 940, 1102, 1264};
+const std::array<uint16_t, 6> variables::yLocations = {452, 616, 778, 940, 1102, 1264};
 
 std::atomic<float> variables::multiplierW = 0;
 std::atomic<float> variables::multiplierH = 0;

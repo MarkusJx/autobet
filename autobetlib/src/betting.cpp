@@ -93,14 +93,14 @@ void setGtaVRunning(bool val) {
 short getBasicBettingPosition(const std::vector<std::string> &odds) {
     // Results to fill in, every number in the array can be between 1 and 10,
     // 1 represents evens, 2 represents 2/1 etc. 10 represents 10/1 and lower
-    short res[6] = {-1, -1, -1, -1, -1, -1};
+    std::array<short, 6> res = {-1, -1, -1, -1, -1, -1};
     for (unsigned short i = 0; i < 6; i++) {
         // Get the odd as a short
         const short b_res = opencv_link::knn::oddToShort(odds[i]);
 
         // Check if the current result already exist, so there are not multiple >10/1 odds ore there is a evens
         // if one of this occurs, bet not on this one
-        short *s = std::find(std::begin(res), std::end(res), b_res);
+        auto s = std::find(std::begin(res), std::end(res), b_res);
         if (b_res <= 5 && s != std::end(res)) { // If this is 5/1 or higher (%!) and exists multiple times, skip
             return -1;
         }
@@ -126,7 +126,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
     }
 
     // Return the y-position of the lowest chance to bet on
-    short lowest[2] = {res[0], 0};
+    std::array<short, 2> lowest = {res[0], 0};
     for (short i = 1; i < 6; i++) {
         if (lowest[0] > res[i]) {
             lowest[0] = res[i];
@@ -134,7 +134,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
         }
     }
 
-    return (short) lowest[1];
+    return static_cast<short>(lowest[1]);
 }
 
 /**
@@ -191,7 +191,7 @@ short get_pos(const std::shared_ptr<void> &src) {
             const int res = future.get();
             StaticLogger::debugStream() << "The custom betting function returned: " << res;
 
-            if (res < -1 || res >= (sizeof(variables::yLocations) / sizeof(uint16_t))) {
+            if (res < -1 || res >= static_cast<signed>(variables::yLocations.size())) {
                 StaticLogger::warning(
                         "The custom betting function returned a result < -1, falling back to the default implementation");
                 return getBasicBettingPosition(odds);
@@ -394,7 +394,8 @@ void betting::mainLoop() {
                 }
 
                 // Sleep through the last half
-                std::this_thread::sleep_for(std::chrono::seconds((int) ceil((double) variables::time_sleep / 2.0)));
+                std::this_thread::sleep_for(
+                        std::chrono::seconds(static_cast<int>(ceil(static_cast<double>(variables::time_sleep / 2.0)))));
 
                 StaticLogger::debug("Getting winnings");
                 // Update the winnings and return to the betting screen
