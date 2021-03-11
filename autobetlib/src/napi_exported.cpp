@@ -79,34 +79,45 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         // Read the config if it exists
-        if (utils::fileExists(SETTINGS_FILE_NAME)) {
+        if (settings::settingsFileExists()) {
             StaticLogger::debug("Settings file exists. Loading it");
             try {
                 variables::webServer = settings::read<bool>("webServer");
-            } catch (...) {}
+            } catch (const std::exception &e) {
+                StaticLogger::warningStream() << "Could not read the webServer setting: " << e.what();
+            }
+
             try {
                 variables::time_sleep = settings::read<uint32_t>("timeSleep");
-            } catch (...) {}
+            } catch (const std::exception &e) {
+                StaticLogger::warningStream() << "Could not read the timeSleep setting: " << e.what();
+            }
 
             try {
                 logger::setLogToFile(settings::read<bool>("logToFile"));
-            } catch (...) {}
+            } catch (const std::exception &e) {
+                StaticLogger::warningStream() << "Could not read the logToFile setting: " << e.what();
+            }
+
             try {
                 logger::setLogToConsole(settings::read<bool>("logToConsole"));
-            } catch (...) {}
+            } catch (const std::exception &e) {
+                StaticLogger::warningStream() << "Could not read the logToConsole setting: " << e.what();
+            }
 
             try {
                 variables::setProcessName(settings::read<std::string>("processName"));
                 variables::setProgramName(settings::read<std::string>("programName"));
-            } catch (...) {}
+            } catch (const std::exception &e) {
+                StaticLogger::warningStream() << "Could not read the processName and programName settings: "
+                                              << e.what();
+            }
 
             try {
                 variables::navigationStrategy = uiNavigationStrategies::navigationStrategy::fromName(
                         settings::read<std::string>("navigationStrategy"));
-                logger::StaticLogger::debugStream() << "Read navigation strategy: "
-                                                    << variables::navigationStrategy->getName();
-            } catch (...) {
-                logger::StaticLogger::error("Could not read the navigation strategy");
+            } catch (const std::exception &e) {
+                StaticLogger::warningStream() << "Could not read the navigationStrategy setting: " << e.what();
             }
         }
 
@@ -261,42 +272,14 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
     return promises::promise<void>(info.Env(), [] {
         StaticLogger::debug("Loading winnings from file");
 
-        // If the file does not exist, write a new one
-        if (!utils::fileExists("winnings.dat")) {
-            StaticLogger::debug("Winnings file does not exist, creating it");
-            writeWinnings:
+        try {
+            variables::winnings_all = settings::read<int64_t>("winningsAll");
+        } catch (const std::exception &e) {
+            StaticLogger::warningStream() << "Could not read the winnings: " << e.what();
             variables::winnings_all = 0;
-            control::writeWinnings();
-            return;
+            settings::write("winningsAll", variables::winnings_all.load());
         }
 
-        // Initialize the ifstream
-        std::ifstream ifs("winnings.dat", std::ios::in | std::ios::binary);
-        if (!ifs.good()) {
-            StaticLogger::error("Unable to open winnings file. Flags: " + std::to_string(ifs.flags()));
-            goto writeWinnings;
-        }
-
-        // Read the file
-        int64_t winnings_all;
-        ifs.read((char *) &winnings_all, sizeof(int64_t));
-        if (ifs.fail()) {
-            StaticLogger::warning("File stream fail bit was set, rewriting file");
-            goto writeWinnings;
-        }
-
-        if (ifs.eof()) {
-            StaticLogger::warning("Winnings file end has been reached, rewriting file");
-            goto writeWinnings;
-        }
-
-        // Finish up
-        ifs.close();
-        if (ifs.is_open()) {
-            StaticLogger::error("Unable to close winnings file");
-        }
-
-        variables::winnings_all = winnings_all;
         StaticLogger::debugStream() << "Read winnings: " << variables::winnings_all;
         napi_exported::setAllMoneyMade(static_cast<int>(variables::winnings_all));
     });

@@ -27,7 +27,8 @@ bool generateProcessInfo() {
     try {
         std::string program_name = variables::game_program_name.load();
         std::string process_name = variables::game_process_name.load();
-        if (processInfo && processInfo->getProgramName() == program_name && processInfo->getWindowName() == process_name && processInfo->isValid()) {
+        if (processInfo && processInfo->getProgramName() == program_name &&
+            processInfo->getWindowName() == process_name && processInfo->isValid()) {
             return true;
         }
 
@@ -443,4 +444,16 @@ bool utils::isAlreadyRunning(const std::string &programName) {
     addr.append(programName);
     CreateMutexA(nullptr, false, addr.c_str());
     return GetLastError() == ERROR_ALREADY_EXISTS;
+}
+
+std::string utils::getDocumentsFolder() {
+    std::string res(MAX_PATH, '\0');
+    HRESULT result = SHGetFolderPathA(nullptr, CSIDL_MYDOCUMENTS, nullptr, SHGFP_TYPE_CURRENT, res.data());
+
+    if (result != S_OK) {
+        return std::string();
+    } else {
+        res.resize(strlen(res.c_str()));
+        return res;
+    }
 }

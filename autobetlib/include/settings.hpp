@@ -3,8 +3,6 @@
 
 #include <nlohmann/json.hpp>
 
-#define SETTINGS_FILE_NAME "autobet.config.json"
-
 /**
  * The settings namespace
  */
@@ -34,6 +32,13 @@ namespace settings {
          */
         void log(const std::string &message);
     }
+
+    /**
+     * Check if the settings file exists
+     *
+     * @return true if the file exists
+     */
+    bool settingsFileExists();
 
     /**
      * Read a setting from the settings file. Throws on error

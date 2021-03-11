@@ -6,6 +6,7 @@
 #include "variables.hpp"
 #include "webui.hpp"
 #include "debug/debug.hpp"
+#include "settings.hpp"
 #include "logger.hpp"
 
 using namespace logger;
@@ -83,24 +84,11 @@ void control::stop_script() {
 
 void control::writeWinnings() {
     StaticLogger::debug("Writing winnings");
-    std::ofstream ofs("winnings.dat", std::ios::out | std::ios::binary);
-    if (!ofs.good()) {
-        StaticLogger::error("Unable to open winnings file. Flags: " + std::to_string(ofs.flags()));
-        return;
-    }
 
-    int64_t winnings_all = variables::winnings_all;
-    ofs.write((char *) &winnings_all, sizeof(int64_t));
-    if (ofs.fail()) {
-        StaticLogger::warning("Winnings file stream fail bit was set, this is not good");
-    }
-    ofs.flush();
-
-    ofs.close();
-    if (ofs.is_open()) {
-        StaticLogger::error("Unable to close winnings file");
-    } else {
-        StaticLogger::debug("Wrote winnings");
+    try {
+        settings::write("winningsAll", variables::winnings_all.load());
+    } catch (const std::exception &e) {
+        StaticLogger::errorStream() << "Could not write the winnings: " << e.what();
     }
 }
 

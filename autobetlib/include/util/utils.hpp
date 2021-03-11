@@ -189,6 +189,13 @@ namespace utils {
      * @return true, if this program is already running
      */
     bool isAlreadyRunning(const std::string &programName);
+
+    /**
+     * Get the documents folder
+     *
+     * @return the documents folder path
+     */
+    std::string getDocumentsFolder();
 }
 
 #endif //GTA_ONLINE_AUTOBET_DEV_UTILS_HPP

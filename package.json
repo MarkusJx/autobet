@@ -52,7 +52,8 @@
             "installerLanguages": [
                 "en_US"
             ],
-            "installerIcon": "pack/icon.ico"
+            "installerIcon": "pack/icon.ico",
+            "include": "pack/installer.nsh"
         },
         "files": [
             "ui/index.html",
