@@ -640,6 +640,32 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     visibility: hidden;
 }
 
+/* Beta feature info ========================================================== */
+
+.beta-feature-container {
+    color: #13b529;
+    border-style: solid;
+    border-radius: 50px;
+    border-color: rgb(46, 160, 67, 0.4);
+    border-width: 1px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    margin: auto auto;
+}
+
+.beta-feature-text {
+    height: min-content;
+    width: min-content;
+    margin: 0 5px 1px 5px;
+}
+
+.heading-beta-info-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-column-gap: 7px;
+}
+
 /* 
 Hide the editor action buttons when the sidebar is open
 and there is not enough space left
