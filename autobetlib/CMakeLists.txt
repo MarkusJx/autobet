@@ -21,8 +21,9 @@ ExternalProject_Add(zip_proj
 ExternalProject_Get_Property(zip_proj install_dir)
 set(zip_dir ${install_dir})
 
-# Include zip
-include_directories(${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_INC})
+# Include everything
+include_directories(${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_INC}
+                    ${CMAKE_SOURCE_DIR}/external/CppJsLib)
 
 set(src ${CMAKE_SOURCE_DIR}/src)
 set(AUTOBETLIB_SRC ${src}/debug/debug.cpp ${src}/autostop.cpp ${src}/logger.cpp ${src}/betting.cpp

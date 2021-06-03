@@ -9,7 +9,8 @@
 
 ## First steps
 * Clone the repository: ``git clone https://github.com/MarkusJx/autobet``
-* Add the CppJsLib remote to conan: ``conan remote add CppJsLib https://api.bintray.com/conan/markusjx/CppJsLib``
+* Initialize all submodules: ``git submodule init``
+* Update all submodules: ``git submodule update``
 
 ## Build steps
 For newer versions of autobet, run these steps in a command line with 
