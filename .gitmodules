@@ -1,0 +1,3 @@
+[submodule "autobetlib/external/CppJsLib"]
+	path = autobetlib/external/CppJsLib
+	url = https://github.com/MarkusJx/CppJsLib
