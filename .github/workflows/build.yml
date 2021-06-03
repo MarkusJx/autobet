@@ -90,11 +90,6 @@ jobs:
         path: C:\Users\runneradmin\.conan
         key: host-${{ runner.os }}-target-${{ runner.os }}-${{ hashFiles('autobetlib/conanfile.txt') }}
 
-    # Add https://api.bintray.com/conan/markusjx/CppJsLib to conan remotes
-    - name: Add CppJsLib conan remote
-      run: conan remote add CppJsLib https://api.bintray.com/conan/markusjx/CppJsLib
-      if: steps.cache-conan.outputs.cache-hit != 'true'
-
     # Set the autobet package version using npm
     - name: Set autobet version
       run: npm version --no-git-tag-version ${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}} -f

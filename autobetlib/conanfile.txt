@@ -1,7 +1,8 @@
 [requires]
 opencv/4.5.1
-CppJsLib/0.8
 nlohmann_json/3.9.1
+cpp-httplib/0.8.8
+websocketpp/0.8.2
 
 [generators]
 cmake
