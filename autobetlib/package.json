@@ -34,7 +34,7 @@
     },
     "devDependencies": {
         "cmake-js": "^6.1.0",
-        "node-addon-api": "^3.0.2",
+        "node-addon-api": "^3.2.1",
         "segfault-handler": "^1.3.0"
     }
 }
