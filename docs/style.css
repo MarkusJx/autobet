@@ -1,741 +1,511 @@
-/* Stylesheet
-Custom poperties:
---main-background-color
---container-background-color
---desc-text-color
---heading-color
-*/
-
-
-/* Hide scrollbar on Firefox */
-
 html {
-    scrollbar-width: none;
+    /* scrollbar-width: none; */
     scroll-behavior: smooth;
 }
 
 body {
-    background-color: black;
     margin: 0;
-    overflow-x: hidden;
-    overflow-y: hidden;
+    background-color: black;
     -ms-overflow-style: none;
-    width: 100%;
-}
-
-body.darktheme {
-    --main-background-color: #141414;
-    --container-background-color: #212121;
-    --desc-text-color: lightgrey;
-    --heading-color: white;
-    --disabled-button-color: rgb(129, 129, 129);
-}
-
-body::-webkit-scrollbar {
-    display: none;
-}
-
-.noselect {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    /* TODO: Uncomment this */
+    /* overflow-y: hidden; */
+    overflow-x: hidden;
 }
 
-#change-theme {
-    right: 15px;
-    bottom: -60px;
-    z-index: 999;
-    position: fixed;
-    background: linear-gradient(90deg, #257bf9, #00d0ff);
-    width: 50px;
-    transition: all .3s ease-in-out;
+/* Make the body scrollable */
+
+body.scrollable {
+    overflow-y: auto;
 }
 
-#change-theme.shown {
-    bottom: 15px;
-    animation-name: show-change-theme;
-    animation-duration: .3s;
-}
+/* Hide the scrollbar on webkit */
 
-#change-theme.hovered {
-    width: 210px;
-}
-
-@keyframes show-change-theme {
-    0% {
-        bottom: -60px;
-    }
-    100% {
-        bottom: 15px;
-    }
-}
-
-#theme-change-icon {
-    font-size: 35px;
-    transition: all .3s ease-in-out;
-    /*color: black;*/
-    color: white;
-}
-
-/*#theme-change-icon.darktheme {
-    color: white;
-}*/
-
-#change-theme.darktheme {
-    background: linear-gradient(90deg, #00a1ff, #002eff);
-}
-
-#main-heading {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 500;
-    color: rgb(227, 227, 227);
-    display: block;
-    text-align: center;
-    z-index: 4;
-    margin: auto;
-    height: min-content;
-    grid-row: 1;
-    grid-column: 1;
-    margin-top: 28px;
-    transition: all .5s ease-in-out;
-}
-
-#download-button {
-    z-index: 4;
-    --mdc-theme-primary: #fc3b3b;
-    display: block;
-    opacity: 0;
-    grid-row: 2;
-    grid-column: 1;
-    width: min-content;
-    margin: auto;
-    margin-top: 0px;
-    transition: all .5s ease-in-out;
-}
-
-#download-button.scrolled {
-    opacity: 1;
-    margin-top: 16px;
-}
-
-#heading-download-container {
-    width: 400px;
-    height: 100px;
-    z-index: 3;
-    position: absolute;
-    display: grid;
-    grid-template-rows: 75px 25px;
-    grid-template-columns: 100%;
-    left: 50%;
-    top: 50%;
-    margin-top: -50px;
-    margin-left: -200px;
-    transition: all .5s ease-in-out;
-}
-
-#heading-download-container.scrolled {
-    height: 150px;
-    margin-top: -75px;
-    grid-template-rows: 75px 75px;
-}
-
-#heading-download-background {
-    grid-row: 1 / 3;
-    grid-column: 1;
-    width: 100%;
-    height: 100px;
-    background-color: #1a1a1a;
-    opacity: .5;
-    border-radius: 6px;
-    transition: all .5s ease-in-out;
-}
-
-#heading-download-background.scrolled {
-    height: 150px;
-}
-
-#main-grid {
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: 100vh auto;
-}
-
-#header-background {
-    background-image: url('20190803152458_1.webp');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    margin: 0;
-    -webkit-filter: blur(30px);
-    -moz-filter: blur(30px);
-    -o-filter: blur(30px);
-    -ms-filter: blur(30px);
-    filter: blur(30px);
-    background-position-y: -50px;
-    height: 120%;
-    margin-left: -70px;
-    margin-top: -70px;
-    z-index: -1;
-    -ms-transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-}
-
-#header-container {
-    height: 100%;
-    width: 100%;
-    grid-row: 1;
-    grid-column: 1;
-}
-
-#desc-container {
-    grid-row: 2;
-    grid-column: 1;
-    background-color: var(--main-background-color, rgb(238, 238, 238));
-    width: 100%;
-    z-index: 1;
-    transition: all .2s ease-in-out;
-}
-
-.container {
-    width: 90%;
-    max-width: 310px;
-    min-width: 310px;
-    height: auto;
-    background: var(--container-background-color, white);
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
-    margin: 10px 0 10px 0;
-    display: block;
-}
-
-.smallcontainer {
-    max-width: unset;
-    width: 100%;
-}
-
-.container:hover {
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-}
-
-.desc-text {
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    margin-left: 15px;
-    margin-right: 15px;
-    margin-top: 0px;
-    color: var(--desc-text-color, #747474);
-    padding-bottom: 8px;
-    margin-top: 10px;
-    transition: all .3s ease-in-out;
-}
-
-li.desc-text {
-    margin: 0;
-    padding: 0;
-    text-align: left;
-    margin-right: 20px;
-    margin-top: 0;
-}
-
-.code-background {
-    border-radius: 3px;
-    padding: 0 0.4em;
-    background-color: rgba(27, 31, 35, 0.1);
-}
-
-.code-background.darktheme {
-    background-color: #4b4b4b;
-}
-
-#goto-issues {
-    margin: 0 auto 20px calc(50% - 115px);
-    --mdc-theme-primary: #0072ff;
-}
-
-#betting-img {
-    margin: 5px 4%;
-    width: 92%;
-}
-
-#break {
-    height: 3px;
-    background: linear-gradient(90deg, #25f9c4, #2426ca);
-}
-
-#main-desc-container {
-    max-width: 1000px;
-    min-height: 160px;
-    width: 90%;
-    margin-left: auto;
-    margin-right: auto;
-    float: none;
-    background: linear-gradient(90deg, #257bf9, #2426ca);
-}
-
-#what-it-is {
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
-    color: white;
-    padding-top: 10px;
-    margin-bottom: 15px;
-}
-
-#main-desc-text {
-    color: rgb(240, 240, 240);
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    margin-left: 10px;
-    margin-right: 10px;
-    padding-bottom: 15px;
-}
-
-#more-desc-container {
-    z-index: 2;
-    width: 90%;
-    margin: 0 auto;
-    max-width: 1000px;
-    display: grid;
-    grid-template-columns: 49% 49%;
-    grid-template-rows: auto;
-    column-gap: 2%;
-}
-
-.heading-important {
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    font-size: 23px;
-    color: #3c78ff;
-    margin-top: 10px;
-    margin-bottom: 0px;
-}
-
-.heading {
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    font-size: 23px;
-    color: var(--heading-color, black);
-    margin-top: 10px;
-    margin-bottom: 0px;
-}
-
-#ui-grid {
-    margin-top: 5px;
-    display: grid;
-    grid-template-columns: 60% 40%;
-    grid-template-rows: auto;
-}
-
-#ui-png {
-    width: 98%;
-    margin: 0 auto 10px 2%;
-}
-
-@media only screen and (max-width: 768px) {
-    #ui-grid {
-        grid-template-columns: auto;
-        grid-template-rows: auto auto;
-    }
-    #ui-png {
-        max-height: 500px;
-        max-width: 96%;
-        width: unset;
-        grid-row: 2;
-        margin: -5px auto 10px auto;
-    }
-}
-
-#license-dialog-surface {
-    max-width: 1000px;
-    width: 90%;
-    height: 80vh;
-}
-
-#demo-video-container-container {
-    width: 90%;
-    /*height: 90%;*/
-    margin: auto;
-    padding: 20px 0;
-}
-
-#demo-video-container {
-    position: relative;
-    padding-bottom: 56.25%;
-}
-
-#demo-video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-
-/* Footer */
-
-#footer {
-    display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: auto auto auto;
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.footer-icon {
-    height: 26px;
-}
-
-.footer-icon.material-icons {
-    font-size: 28px;
-    color: white;
-    height: max-content;
-    width: max-content;
-    margin: 0 auto;
-}
-
-.footer-icon-grid {
-    margin: 0 auto;
-    display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: 26px max-content;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.footer-text {
-    margin: auto 0 auto 5px;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    color: white;
-}
-
-#copyright-icon {
-    font-size: 21px;
-    margin: auto 0 auto auto;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    color: white;
-}
-
-
-/* Download not supported */
-
-#download-container {
-    background-color: var(--main-background-color, rgb(238, 238, 238));
-    transition: all .2s ease-in-out;
-}
-
-#main-download-container {
-    max-width: 1000px;
-    min-height: 250px;
-    margin-left: auto;
-    margin-right: auto;
-    float: none;
-    margin-bottom: 25px;
-    overflow: hidden;
-    position: relative;
-}
-
-#main-download-container-unsupported {
-    max-width: 1000px;
-    min-height: 160px;
-    margin-left: auto;
-    margin-right: auto;
-    float: none;
-    background: linear-gradient(90deg, #ff3434, #fb1a1a);
-    visibility: hidden;
-    position: absolute;
-    margin-bottom: 25px;
+body::-webkit-scrollbar {
     display: none;
 }
 
-.unsupported-heading-grid {
-    display: grid;
-    grid-template-columns: min-content max-content;
-    grid-template-rows: auto;
-    margin: 0 auto;
-    padding-top: 5px;
-    width: max-content;
-    max-width: 100%;
+/* Set the background color and attributes */
+
+#background {
+    background: linear-gradient(115deg, rgba(62, 0, 119, 0.85), rgba(154, 0, 201, 0.85), rgba(0, 60, 255, 0.85), rgba(0, 183, 255, 0.85));
+    opacity: 0;
+    z-index: -9999;
+    height: 100%;
+    width: 100%;
+    position: fixed;
 }
 
-#warning-icon {
-    font-size: 33px;
-    margin-top: auto;
-    margin-bottom: auto;
-    grid-column: 1;
-    margin-right: 5px;
+/* Set the welcome screen height and width */
+
+#begin-screen {
+    height: 100%;
+    width: 100%;
+}
+
+/* The welcome text container */
+
+#welcome-container {
     color: white;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    font-family: 'Open Sans light', sans-serif;
+    font-size: 23px;
+    width: 266px;
+    height: 96px;
+    margin-left: -133px;
+    margin-top: -48px;
 }
 
-#not-available-heading {
-    color: white;
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
-    font-size: 22px;
-    margin-top: 15px;
-    grid-column: 2;
-    width: max-content;
-    max-width: 100%;
+/* The welcome text word elements */
+
+.welcome-text-font {
+    opacity: 0;
+    margin-left: -5px;
 }
 
-#unsupported-text {
-    color: rgb(240, 240, 240);
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    margin-left: 10px;
-    margin-right: 10px;
+/* Fade in the welcome text words one by one */
+
+.welcome-text-font.faded-in {
+    animation-name: fade-in-welcome-text;
+    animation-duration: .5s;
+    opacity: 1;
+    margin-left: 0;
 }
 
-#unsupported-actions-bar {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    margin-top: 10px;
-    padding-bottom: 10px;
+@keyframes fade-in-welcome-text {
+    from {
+        opacity: 0;
+        margin-left: -5px;
+    }
+    to {
+        opacity: 1;
+        margin-left: 0;
+    }
 }
 
-#goto-gh-issues {
-    grid-column: 1;
-    --mdc-theme-primary: white;
-    width: max-content;
-    margin-left: auto;
-    margin-right: 15px;
+/* A paragraph in the welcome text */
+
+.welcome-paragraph {
+    margin: auto;
 }
 
-#goto-downloads-unsupported {
-    grid-column: 2;
-    --mdc-theme-primary: #c5c5c5;
-    width: max-content;
-    margin-right: auto;
-    margin-left: 15px;
+#welcome-first-paragraph {
+    width: 176.2px;
 }
 
+/* Set the 'Grand Theft Auto Online' text to semi-bold */
 
-/* Download */
-
-#download-icon {
-    font-size: 33px;
-    margin-top: auto;
-    margin-bottom: auto;
-    grid-column: 1;
-    margin-right: 5px;
-    color: var(--heading-color, black);
+#welcome-GTA-paragraph {
+    font-family: 'Open Sans semi-Bold', sans-serif;
+    width: 250.2px;
 }
 
-.download-latest {
-    color: var(--heading-color, black);
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
-    font-size: 22px;
-    margin-top: 15px;
-    grid-column: 2;
-    width: max-content;
-    margin: 10px auto 15px auto;
+#welcome-third-paragraph {
+    width: 114px;
 }
 
-#lv-paragraph {
-    color: var(--heading-color, black);
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    font-size: 20px;
-    margin: -10px 0 0 0;
-}
+/* Set the 'Online' text color to red */
 
-#latest-version {
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    color: #22de00;
-}
-
-#latest-devel-version {
-    text-align: center;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    color: #ffb300;
-}
-
-#latest-devel-version.notfound {
+#GTA-Online-font {
     color: red;
 }
 
-#download-actions-bar {
-    display: grid;
-    grid-template-columns: max-content max-content;
-    width: max-content;
-    margin-top: 16px;
-    margin-left: auto;
-    margin-right: auto;
-    padding-bottom: 10px;
+/* Set the 'easy' text to bold-ish */
+
+#welcome-text-easy {
+    font-family: 'Open Sans', sans-serif;
 }
 
-#download-now {
-    grid-column: 1;
-    --mdc-theme-primary: #00c324;
-    width: max-content;
-    margin-left: auto;
-    margin-right: 15px;
+/* The owner-name repo-name container on the welcome screen */
+
+#welcome-repo-name-container {
+    font-family: 'Inter', sans-serif;
+    color: white;
+    font-size: 25px;
+    height: 30px;
+    width: 248px;
+    top: 100%;
+    left: 50%;
+    margin: -40px auto 0 -124px;
+    position: absolute;
+    opacity: 0;
 }
 
-#show-tag {
-    grid-column: 2;
-    --mdc-theme-primary: var(--heading-color, black);
+/* Fade in the owner-name repo-name container */
+
+#welcome-repo-name-container.faded-in {
+    opacity: 1;
+    margin-top: -75px;
+    animation: fade-in-welcom-repo-name .5s;
+    text-decoration: none;
+}
+
+/* The keyframes to fade in the container */
+
+@keyframes fade-in-welcom-repo-name {
+    from {
+        margin-top: -40px;
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+        margin-top: -75px;
+    }
+}
+
+/* The 'MarkusJx' text on the welcome screen */
+
+#repo-name-owner {
+    font-weight: 200;
+}
+
+/* The 'autobet' text on the welcome screen */
+
+#repo-name-name {
+    font-weight: 500;
+}
+
+/* The github icon on the welcome screen */
+
+#welcome-repo-gh-icon {
+    width: 25px;
+    margin: auto;
+}
+
+/* The 'down' arrow */
+
+.arrow-down {
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+}
+
+#arrow-scroll-down {
+    top: 100%;
+    left: 50%;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+    margin: 0 0 0 -8px;
+}
+
+/* Fade in the 'scroll down' arrow */
+
+#arrow-scroll-down.faded-in {
+    margin: -42px 0 0 -8px;
+    opacity: 1;
+    animation: arrow-scroll-down-fade-in .5s;
+}
+
+/* Animate the 'scroll down' arraw */
+
+#arrow-scroll-down.animated {
+    animation: arrow-scroll-down-animate 2s ease-in-out 0s infinite;
+}
+
+@keyframes arrow-scroll-down-fade-in {
+    from {
+        margin: 0 0 0 -8px;
+        opacity: 0;
+    }
+    to {
+        margin: -42px 0 0 -8px;
+        opacity: 1;
+    }
+}
+
+@keyframes arrow-scroll-down-animate {
+    0% {
+        margin-top: -42px;
+        opacity: 1;
+    }
+    70% {
+        margin-top: -21px;
+        opacity: 0;
+    }
+    75% {
+        margin-top: -42px;
+        opacity: 0;
+    }
+    100% {
+        margin-top: -42px;
+        opacity: 1;
+    }
+}
+
+/* The main contents ========================================================== */
+
+/* Set the main screen height and width */
+
+#main-screen {
     width: max-content;
-    margin-right: auto;
+    max-width: 1040px;
+    width: 100%;
+    min-height: 100vh;
+    margin: 80px auto auto auto;
+    transition: all ease-in-out .5s;
+}
+
+.container {
+    width: calc(100% - 40px);
+    height: max-content;
+    box-shadow: 0 0 2rem 0 rgba(0, 0, 0, .3);
+    border-radius: 14px;
+    position: relative;
+    z-index: 1;
+    background: inherit;
+    overflow: hidden;
+    margin: 90px 20px;
+    font-family: 'Open Sans', sans-serif;
+    color: white;
+}
+
+.container:before {
+    content: "";
+    position: absolute;
+    background: inherit;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, .3);
+    /* box-shadow: inset 0 0 2000px rgba(255, 255, 255, .5); */
+    filter: blur(20px);
+    margin: -20px;
+}
+
+.subcontainer {
+    width: 480px;
+    height: 20rem;
+    border-radius: 14px;
+    position: relative;
+    z-index: 1;
+    background: inherit;
+    overflow: hidden;
+    /* margin: 30px; */
+    margin: 10px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    color: black;
+    padding: 0 15px 15px 15px;
+    text-align: center;
+}
+
+.subcontainer:before {
+    content: "";
+    position: absolute;
+    background: inherit;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, .3);
+    /* box-shadow: inset 0 0 2000px rgba(255, 255, 255, .5); */
+    filter: blur(20px);
+    margin: -20px;
+}
+
+.container-top-bar {
+    width: 100%;
+    height: 30px;
+    background-color: #000000de;
+    display: flex;
+    align-content: baseline;
+    flex-direction: row;
+}
+
+.top-bar-icons {
+    width: 54px;
+    height: 100%;
+    display: flex;
+    align-content: baseline;
+    flex-direction: row;
     margin-left: 15px;
 }
 
-#download-devel-now {
-    grid-column: 1;
-    --mdc-theme-primary: #00c324;
-    width: max-content;
-    margin-left: auto;
-    margin-right: 15px;
+.top-bar-icon {
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    margin: 9px 3px;
+    background-color: gray;
 }
 
-#show-artifact {
-    grid-column: 2;
-    --mdc-theme-primary: var(--heading-color, black);
-    width: max-content;
-    margin-right: auto;
-    margin-left: 15px;
+.container-top-bar.active .top-bar-icons .top-bar-icon.close {
+    background-color: #f01010;
 }
 
-#select-relese-tab-bar {
-    --mdc-theme-primary: #0072ff;
-    padding: 0 10px;
-    max-width: calc(100% - 20px);
+.container-top-bar.active .top-bar-icons .top-bar-icon.minimize {
+    background-color: #dbdb1a;
 }
 
-.mdc-button--outlined:disabled {
-    border-color: var(--disabled-button-color, rgba(0,0,0,.37));
+.container-top-bar.active .top-bar-icons .top-bar-icon.maximize {
+    background-color: #18d018;
 }
 
-.mdc-button:disabled {
-    color: var(--disabled-button-color, rgba(0,0,0,.37));
+.top-bar-title {
+    font-family: 'Open Sans', sans-serif;
+    color: #ececec;
+    /* ecececececececececece */
+    text-align: left;
+    height: min-content;
+    margin: auto auto auto auto;
+    padding-right: 69px;
+    /* Nice */
+    font-size: 20px;
 }
 
-.tab-ripple-rounded-corners {
-    border-radius: 7px;
+/* @media only screen and (max-width: 1100px) {
+    #main-screen {
+        width: min-content;
+    }
+} */
+
+#features-container {
+    max-width: 1020px;
+    width: 100vw;
 }
 
-.mdc-tab .mdc-tab__text-label {
-    color: var(--heading-color, rgba(0,0,0,.6));
+#definition-container {
+    max-width: 1020px;
+    width: 100vw;
 }
 
-.mdc-tab--active .mdc-tab__text-label {
-    color: var(--mdc-theme-primary, #6200ee);
+#what-it-is-container {
+    width: calc(100% - 50px);
+    height: max-content;
 }
 
-.download-option-container {
+.subcontainer-heading {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    margin: 5px auto;
+    text-align: center;
+}
+
+#what-it-is {
+    background: linear-gradient(90deg, #0111ff, #009168);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Wrap some text nicely */
+
+.text-wrapper {
+    width: calc(100% - 40px);
+    height: max-content;
+    margin: 20px;
+    text-align: center;
+}
+
+/* Wrap a 'sticky-content' element */
+
+.sticky-wrapper {
+    position: relative;
+    height: 140vh;
+}
+
+/* Make some content stick to its place */
+
+.sticky-content {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+/* A subcontainer in a container which is actually a heading */
+
+.subcontainer.heading {
+    color: white;
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    height: max-content;
+    width: 100%;
+    margin: 0 0 5px 0;
+    padding: 5px 0;
+    color: #222;
+}
+
+.multiple-fade-headings {
+    color: white;
+    font-family: 'Open Sans', sans-serif;
+    top: 50%;
+    text-align: center;
+    position: relative;
+    margin: auto;
+    width: auto;
+}
+
+#how-and-why {
     position: absolute;
     width: 100%;
-    height: auto;
-    left: -100%;
-    transition: .5s ease-in-out;
-    visibility: hidden;
+    transition: opacity ease-in-out .25s;
 }
 
-.download-option-container.visible {
-    left: 0;
-    visibility: visible;
+#how-and-why.hovered {
+    opacity: 0;
 }
 
-.download-option-container.invisible {
-    left: 100%;
-    transition: .5s ease-in-out;
+#asking-the-right-questions {
+    position: absolute;
+    width: 100%;
+    opacity: 0;
+    font-weight: 300;
+    transition: opacity ease-in-out .25s;
 }
 
-#get-the-latest-version {
-    margin: 5px auto;
+#asking-the-right-questions.hovered {
+    opacity: 1;
 }
 
-@media only screen and (max-width: 768px) {
-    /* For mobile phones: */
-    #heading-download-container {
-        width: 90%;
-        left: 50%;
-        margin-left: calc(90% *0.5 * (-1));
-    }
-    #header-background {
-        width: auto;
-    }
-    #download-icon {
-        margin: auto;
-    }
-    .smallcontainer {
-        width: 100%;
-        margin-left: 0;
-        margin-right: 0;
-        max-width: unset;
-    }
-    .container:hover {
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    }
-    #more-desc-container {
-        display: block;
-    }
-    #main-download-container {
-        min-height: 325px;
-    }
-    .unsupported-heading-grid {
-        grid-template-columns: auto;
-        grid-template-rows: auto;
-    }
-    #warning-icon {
-        margin: 0 auto;
-        font-size: 26px;
-    }
-    #not-available-heading {
-        grid-column: 1;
-        grid-row: 2;
-        margin: 0 auto;
-        font-size: 18px;
-    }
-    #unsupported-actions-bar {
-        grid-template-columns: auto;
-        grid-template-rows: min-content min-content;
-    }
-    #goto-gh-issues {
-        margin: 0 auto;
-    }
-    #goto-downloads-unsupported {
-        grid-column: 1;
-        grid-row: 2;
-        margin: 10px auto 0 auto;
-    }
-    /* Download */
-    #download-actions-bar {
-        grid-template-columns: auto;
-        grid-template-rows: min-content min-content;
-    }
-    #download-now {
-        margin: 0 auto;
-    }
-    #show-tag {
-        grid-column: 1;
-        grid-row: 2;
-        margin: 10px auto 0 auto;
-    }
-    #footer {
-        grid-template-rows: auto auto auto;
-        grid-template-columns: auto;
-        row-gap: 5px;
-    }
+#how-and-why-container {
+    top: calc(50% - 43px);
+}
+
+#ui-page {
+    width: 100vw;
+    height: max-content;
+    /* background-color: #f3f3f3; */
+}
+
+#ui-image {
+    background: url('ui.webp');
+    height: 80vh;
+    margin-left: 5%;
+    background-repeat: no-repeat;
+    background-size: contain;
+    z-index: -2;
+    position: relative;
+}
+
+#ui-text {
+    /* background-color: #f3f3f3;
+    box-shadow: 0 0 2rem 0 rgba(0, 0, 0, .3);
+    border-radius: 14px; */
+    width: 50vw;
+    height: 300px;
+    left: 45vw;
+    top: -40vh;
+    position: relative;
+    /* position: fixed; */
+}
+
+/* Footer ===================================================================== */
+
+#footer {
+    height: 40px;
+    background-color: black;
 }
