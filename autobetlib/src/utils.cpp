@@ -279,12 +279,12 @@ bool utils::pressTab(int sleep) {
     input.ki.dwExtraInfo = 0;
     input.ki.wVk = v_key;
     input.ki.dwFlags = 0;
-    errno_t err = SendInput(1, &input, sizeof(INPUT));
+    auto err = static_cast<errno_t>(SendInput(1, &input, sizeof(INPUT)));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 
     input.ki.dwFlags = KEYEVENTF_KEYUP;
-    err += SendInput(1, &input, sizeof(INPUT));
+    err += static_cast<errno_t>(SendInput(1, &input, sizeof(INPUT)));
     return err == 2;
 }
 
@@ -297,7 +297,7 @@ bool utils::leftClick(int x, int y, int sleep, bool move) {
         inputs[1].type = INPUT_MOUSE;
         inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
 
-        int err = SendInput(2, inputs, sizeof(INPUT));
+        int err = static_cast<errno_t>(SendInput(2, inputs, sizeof(INPUT)));
 
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 
@@ -316,7 +316,7 @@ bool utils::leftClick(int x, int y, int sleep, bool move) {
         inputs[0].type = INPUT_MOUSE;
         inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
 
-        int err = SendInput(1, inputs, sizeof(INPUT));
+        int err = static_cast<errno_t>(SendInput(1, inputs, sizeof(INPUT)));
 
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 
@@ -425,8 +425,8 @@ windowUtils::windowSize utils::getActiveScreen(unsigned int xPos, unsigned int y
     MONITORINFO target;
     target.cbSize = sizeof(MONITORINFO);
     POINT p;
-    p.x = xPos;
-    p.y = yPos;
+    p.x = static_cast<LONG>(xPos);
+    p.y = static_cast<LONG>(yPos);
 
     HMONITOR hMon = MonitorFromPoint(p, MONITOR_DEFAULTTONEAREST);
     GetMonitorInfo(hMon, &target);

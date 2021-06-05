@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <!-- 
+    <!--
         I actually stole the design idea for this website from someone on the Hacktoberfest discord.
         An they probably stole the concept directly from Apple. Please don't sue me for cross-stealing.
         Just message me if you want some copyright or any other shit. Thank you random person.
@@ -24,19 +24,19 @@
             <!-- The welcome text -->
             <div id="welcome-text">
                 <p class="welcome-paragraph" id="welcome-first-paragraph">
-                    <font class="welcome-text-font">Making</font>
-                    <font class="welcome-text-font">money</font>
-                    <font class="welcome-text-font">in</font><br>
+                    <span class="welcome-text-font">Making</span>
+                    <span class="welcome-text-font">money</span>
+                    <span class="welcome-text-font">in</span><br>
                 </p>
                 <p class="welcome-paragraph" id="welcome-GTA-paragraph">
-                    <font class="welcome-text-font">Grand</font>
-                    <font class="welcome-text-font">Theft</font>
-                    <font class="welcome-text-font">Auto</font>
-                    <font class="welcome-text-font" id="GTA-Online-font">Online</font>
+                    <span class="welcome-text-font">Grand</span>
+                    <span class="welcome-text-font">Theft</span>
+                    <span class="welcome-text-font">Auto</span>
+                    <span class="welcome-text-font" id="GTA-Online-font">Online</span>
                 </p>
                 <p class="welcome-paragraph" id="welcome-third-paragraph">
-                    <font class="welcome-text-font">made</font>
-                    <font class="welcome-text-font" id="welcome-text-easy">easy</font>
+                    <span class="welcome-text-font">made</span>
+                    <span class="welcome-text-font" id="welcome-text-easy">easy</span>
                 </p>
             </div>
         </div>
@@ -53,23 +53,80 @@
 
     <!-- Our main content -->
     <div id="main-screen">
-        <!-- The sticky 'How and why?' text -->
-        <div class="sticky-wrapper">
-            <div class="sticky-content">
-                <div class="multiple-fade-headings" id="how-and-why-container">
-                    <h1 id="how-and-why">How <font style="font-weight: 300;">and</font> why?</h1>
-                    <h1 id="asking-the-right-questions">
-                        Asking the
-                        <font style="font-weight: 400;">right</font>
-                        questions.
-                    </h1>
-                </div>
+        <h1 id="features-heading">Features</h1>
+
+        <div class="container right">
+            <div class="text-container">
+                <h2 class="heading">It's fast</h2>
+                <p>
+                    Since over 50% of the code is written in C++, all image operations are done in less than
+                    10 milliseconds to place as many bets in the shortest amount of time as possible.
+                </p>
+            </div>
+            <div class="image" id="image-code"></div>
+        </div>
+
+        <div class="container left">
+            <div class="image" id="image-stats"></div>
+            <div class="text-container">
+                <h2 class="heading">Stats</h2>
+                <p>
+                    The program provides various stats such as the current status, the time it is running since it was
+                    last started, the money made all time, the money made this session and the current probability of
+                    winning a bet.
+                </p>
             </div>
         </div>
 
-        <!-- The text containers describing what autobet is -->
-        <div style="margin-top: calc(-50vh - 43px);">
-            <!-- The container describing that autobet is -->
+        <div class="container right">
+            <div class="text-container">
+                <h2 class="heading">Web interface</h2>
+                <p>
+                    Autobet also ships with a web server for viewing stats on a different device (or even access
+                    the stats from outside your network if you are willing to open the required port on your firewall).
+                    From that web interface, you are able to see all stats as displayed in the program's ui.
+                </p>
+            </div>
+            <div class="image" id="image-web"></div>
+        </div>
+
+        <div class="container left">
+            <div class="image" id="image-controller"></div>
+            <div class="text-container">
+                <h2 class="heading">Controller support & Game selector</h2>
+                <p>
+                    Autobet is able to simulate a controller using vXbox if navigating the ui using the mouse is
+                    not possible. You are also able to select the name of the executable to run the betting algorithms
+                    of. These options exist to <a href="https://github.com/MarkusJx/autobet/issues/20" class="link">
+                        support game streaming.
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <div class="container right">
+            <div class="text-container">
+                <h2 class="heading">Configuration options</h2>
+                <p>
+                    There are several options provided to customize the betting operation such as the time to sleep
+                    between the button is pressed and released again or the time to sleep between mouse click.
+                    These times can be configured independent for each the mouse and controller navigation strategies.
+                </p>
+            </div>
+            <div class="image" id="image-options"></div>
+        </div>
+
+        <div class="container left dark">
+            <div class="image" id="image-editor"></div>
+            <div class="text-container">
+                <h2 class="heading">Custom betting function</h2>
+                <p>
+
+                </p>
+            </div>
+        </div>
+
+        <!--<div style="margin-top: calc(-50vh - 43px);">
             <div class="container">
                 <h2 class="subcontainer heading">
                     What it is
@@ -82,7 +139,6 @@
                 </div>
             </div>
 
-            <!-- The container describing how autobet works -->
             <div class="container">
                 <h2 class="subcontainer heading">
                     How it works
@@ -99,54 +155,7 @@
                     <br> <br> After ~34 seconds the race should be finished and the process starts again.
                 </div>
             </div>
-        </div>
-
-        <!-- <div class="container">
-            <div class="container-top-bar">
-                <div class="top-bar-icons">
-                    <div class="top-bar-icon close"></div>
-                    <div class="top-bar-icon minimize"></div>
-                    <div class="top-bar-icon maximize"></div>
-                </div>
-                <div class="top-bar-title">
-                    Features
-                </div>
-            </div>
-            <div class="subcontainer">
-                abd def ghi jkl
-            </div>
-        </div> -->
-    </div>
-
-    <div id="ui-page" style="margin-top: -50vh;">
-        <div class="sticky-wrapper">
-            <div class="sticky-content">
-                <h1 id="how-and-why_"
-                    style="top: calc(50% - 43px);position: relative;font-family: 'Open Sans';color: white;text-align: center;">
-                    Features
-                </h1>
-            </div>
-        </div>
-
-        <div class="sticky-wrapper" style="margin-top: -100vh;">
-            <div class="sticky-content">
-                <h1 id="how-and-why__"
-                    style="top: calc(50% - 43px);position: relative;font-family: 'Open Sans';color: white;text-align: center;">
-                    User interface
-                </h1>
-            </div>
-        </div>
-
-        <div class="sticky-wrapper" style="height: 300vh; margin-bottom: 80vh;">
-            <!-- <div class="sticky-content" style="padding-top: 1px;"> -->
-            <div id="ui-image"></div>
-            <div id="ui-text" class="container">
-                The program ships with a user interface displaying the current status and some stats.
-                <br> It also comes with a web server displaying the same stats and a few more to be
-                viewed from other devices.
-            </div>
-            <!-- </div> -->
-        </div>
+        </div>-->
     </div>
 
     <div id="footer">

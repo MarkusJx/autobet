@@ -55,7 +55,7 @@ namespace windowUtils {
  */
     class processInfo {
     public:
-        explicit processInfo(std::wstring programName);
+        explicit processInfo(const std::wstring& programName);
 
         /**
          * Get the window size
@@ -112,7 +112,7 @@ namespace windowUtils {
          * @param programName the name of the program
          * @param handle the handle of the process
          */
-        explicit windowsProcessInfo(std::wstring programName, const processHandle &handle);
+        explicit windowsProcessInfo(const std::wstring& programName, const processHandle &handle);
 
         [[nodiscard]] windowSize getSize() const override;
 
