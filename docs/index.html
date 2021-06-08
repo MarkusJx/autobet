@@ -6,168 +6,254 @@
     <title>autobet</title>
 
     <link rel="stylesheet" href="style.css">
+    <link href="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.css" rel="stylesheet">
 </head>
 
 <body>
-    <!--
-        I actually stole the design idea for this website from someone on the Hacktoberfest discord.
-        An they probably stole the concept directly from Apple. Please don't sue me for cross-stealing.
-        Just message me if you want some copyright or any other shit. Thank you random person.
-    -->
-    <div id="background">
+<!--
+    I actually stole the design idea for this website from someone on the Hacktoberfest discord.
+    An they probably stole the concept directly from Apple. Please don't sue me for cross-stealing.
+    Just message me if you want some copyright or any other shit. Thank you random person.
+-->
+<div id="background">
+</div>
+
+<!-- The welcome screen -->
+<div id="begin-screen">
+    <!-- The welcome text container -->
+    <div id="welcome-container">
+        <!-- The welcome text -->
+        <div id="welcome-text">
+            <p class="welcome-paragraph" id="welcome-first-paragraph">
+                <span class="welcome-text-font">Making</span>
+                <span class="welcome-text-font">money</span>
+                <span class="welcome-text-font">in</span><br>
+            </p>
+            <p class="welcome-paragraph" id="welcome-GTA-paragraph">
+                <span class="welcome-text-font">Grand</span>
+                <span class="welcome-text-font">Theft</span>
+                <span class="welcome-text-font">Auto</span>
+                <span class="welcome-text-font" id="GTA-Online-font">Online</span>
+            </p>
+            <p class="welcome-paragraph" id="welcome-third-paragraph">
+                <span class="welcome-text-font">made</span>
+                <span class="welcome-text-font" id="welcome-text-easy">easy</span>
+            </p>
+        </div>
     </div>
 
-    <!-- The welcome screen -->
-    <div id="begin-screen">
-        <!-- The welcome text container -->
-        <div id="welcome-container">
-            <!-- The welcome text -->
-            <div id="welcome-text">
-                <p class="welcome-paragraph" id="welcome-first-paragraph">
-                    <span class="welcome-text-font">Making</span>
-                    <span class="welcome-text-font">money</span>
-                    <span class="welcome-text-font">in</span><br>
-                </p>
-                <p class="welcome-paragraph" id="welcome-GTA-paragraph">
-                    <span class="welcome-text-font">Grand</span>
-                    <span class="welcome-text-font">Theft</span>
-                    <span class="welcome-text-font">Auto</span>
-                    <span class="welcome-text-font" id="GTA-Online-font">Online</span>
-                </p>
-                <p class="welcome-paragraph" id="welcome-third-paragraph">
-                    <span class="welcome-text-font">made</span>
-                    <span class="welcome-text-font" id="welcome-text-easy">easy</span>
-                </p>
-            </div>
+    <!-- The repository name and author -->
+    <a id="welcome-repo-name-container" href="https://github.com/MarkusJx/autobet">
+        <img src="img/GitHub-Mark-Light-64px.png" class="github-icon" id="welcome-repo-gh-icon" alt="GitHub icon">
+        <span id="repo-name-owner">MarkusJx/</span><span id="repo-name-name">autobet</span>
+    </a>
+
+    <!-- The arrow facing downwards displaying there is more to come -->
+    <div class="arrow-down" id="arrow-scroll-down"></div>
+</div>
+
+<!-- Our main content -->
+<div id="main-screen">
+    <!--<h1 class="main-heading-divider">Highlights</h1>-->
+
+    <h1 class="main-heading-divider">Features</h1>
+    <div class="container right">
+        <div class="text-container">
+            <h2 class="heading">It's fast</h2>
+            <p>
+                Since over 50% of the code is written in C++, all image operations are done in less than
+                10 milliseconds to place as many bets in the shortest amount of time as possible, reducing the time
+                to wait while increasing the winnings.
+            </p>
         </div>
-
-        <!-- The repository name and author -->
-        <a id="welcome-repo-name-container" href="https://github.com/MarkusJx/autobet">
-            <img src="GitHub-Mark-Light-64px.png" class="github-icon" id="welcome-repo-gh-icon">
-            <span id="repo-name-owner">MarkusJx/</span><span id="repo-name-name">autobet</span>
-        </a>
-
-        <!-- The arrow facing downwards displaying there is more to come -->
-        <div class="arrow-down" id="arrow-scroll-down"></div>
+        <div class="image" id="image-code"></div>
     </div>
 
-    <!-- Our main content -->
-    <div id="main-screen">
-        <h1 id="features-heading">Features</h1>
+    <div class="container left">
+        <div class="image" id="image-stats"></div>
+        <div class="text-container">
+            <h2 class="heading">Stats</h2>
+            <p>
+                The program provides various stats such as the current status, the time it is running since it was
+                last started, the money made all time, the money made this session and the current probability of
+                winning a bet.
+            </p>
+        </div>
+    </div>
 
-        <div class="container right">
-            <div class="text-container">
-                <h2 class="heading">It's fast</h2>
-                <p>
-                    Since over 50% of the code is written in C++, all image operations are done in less than
-                    10 milliseconds to place as many bets in the shortest amount of time as possible.
-                </p>
+    <div class="container right">
+        <div class="text-container">
+            <h2 class="heading">Web interface</h2>
+            <p>
+                Autobet also ships with a web server for viewing stats on a different device (or even access
+                the stats from outside your network if you are willing to open the required port on your firewall).
+                From that web interface, you are able to see all stats as displayed in the program's ui.
+            </p>
+        </div>
+        <div class="image" id="image-web"></div>
+    </div>
+
+    <div class="container left dark">
+        <div class="image" id="image-editor"></div>
+        <div class="text-container">
+            <h2 class="heading">Custom betting function</h2>
+            <p>
+                If you want to change the behaviour of the program regarding when to place a bet, you can do
+                this by providing a custom betting function. These are written in javascript and can be edited
+                using the code editor from within the program. Using the editor, you can create multiple
+                implementations, name, test and select one of them to be used as the default betting function.
+                To get started, there is a
+                <a href="https://github.com/MarkusJx/autobet/wiki/Custom-betting-functions" class="link">
+                    wiki page on custom betting functions.
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <div class="container right">
+        <div class="text-container">
+            <h2 class="heading">Configuration options</h2>
+            <p>
+                There are several options provided to customize the betting operation such as the time to sleep
+                between the button is pressed and released again or the time to sleep between mouse click.
+                These times can be configured independent for each the mouse and controller navigation strategies.
+            </p>
+        </div>
+        <div class="image" id="image-options"></div>
+    </div>
+
+    <div class="container left">
+        <div class="image" id="image-controller"></div>
+        <div class="text-container">
+            <h2 class="heading">Controller support & Game selector</h2>
+            <p>
+                Autobet is able to simulate a controller using vXbox if navigating the ui using the mouse is
+                not possible. You are also able to select the name of the executable to run the betting algorithms
+                of. These options exist to <a href="https://github.com/MarkusJx/autobet/issues/20" class="link">
+                support game streaming.
+            </a>
+            </p>
+        </div>
+    </div>
+
+    <!--<div style="margin-top: calc(-50vh - 43px);">
+        <div class="container">
+            <h2 class="subcontainer heading">
+                What it is
+            </h2>
+            <div class="text-wrapper">
+                GTA Online Autobet was designed to earn GTA $ in Grand Theft Auto Online without using any glitches
+                or mods. <br> This is accomplished through using the Horse racing mechanics implemented with the
+                Casino DLC (Patch 1.47/1.48) <br> The program will bet on horses, depending if it is likely to win
+                and earn about 270 thousand GTA dollars per hour
             </div>
-            <div class="image" id="image-code"></div>
         </div>
 
-        <div class="container left">
-            <div class="image" id="image-stats"></div>
-            <div class="text-container">
-                <h2 class="heading">Stats</h2>
-                <p>
-                    The program provides various stats such as the current status, the time it is running since it was
-                    last started, the money made all time, the money made this session and the current probability of
-                    winning a bet.
-                </p>
+        <div class="container">
+            <h2 class="subcontainer heading">
+                How it works
+            </h2>
+            <div class="text-wrapper">
+                To achieve its goal, the program will take over your mouse to place bets on a individual
+                horse. For a horse to be betted on, there must be no horses with an even winning
+                probability.
+                <br> Furthermore, there should not be multiple horses with the same winning probability
+                higher than 10/1. If these criteria are met, a bet of 10.000 Chips will be placed and the
+                race will be started. Otherwise, 100 chips will
+                be placed on the first horse, to reload the winning probabilities. This must be done due to
+                changed rules in GTA Online Patch 1.50.
+                <br> <br> After ~34 seconds the race should be finished and the process starts again.
             </div>
         </div>
+    </div>-->
 
-        <div class="container right">
-            <div class="text-container">
-                <h2 class="heading">Web interface</h2>
-                <p>
-                    Autobet also ships with a web server for viewing stats on a different device (or even access
-                    the stats from outside your network if you are willing to open the required port on your firewall).
-                    From that web interface, you are able to see all stats as displayed in the program's ui.
-                </p>
+    <div class="container">
+        <div id="main-download-container">
+            <div id="get-the-latest-version">
+                    <span class="material-icons" id="download-icon">
+                        save_alt
+                    </span>
+                <h1 class="heading">
+                    Get the latest version
+                </h1>
             </div>
-            <div class="image" id="image-web"></div>
-        </div>
 
-        <div class="container left">
-            <div class="image" id="image-controller"></div>
-            <div class="text-container">
-                <h2 class="heading">Controller support & Game selector</h2>
-                <p>
-                    Autobet is able to simulate a controller using vXbox if navigating the ui using the mouse is
-                    not possible. You are also able to select the name of the executable to run the betting algorithms
-                    of. These options exist to <a href="https://github.com/MarkusJx/autobet/issues/20" class="link">
-                        support game streaming.
-                    </a>
+            <div class="download-option-container" id="release-download-container">
+                <h1 class="download-latest">
+                    Download stable version
+                </h1>
+
+                <p class="lv-paragraph">
+                    Latest version:
+                    <span id="latest-version">latest version not found</span>
                 </p>
-            </div>
-        </div>
 
-        <div class="container right">
-            <div class="text-container">
-                <h2 class="heading">Configuration options</h2>
-                <p>
-                    There are several options provided to customize the betting operation such as the time to sleep
-                    between the button is pressed and released again or the time to sleep between mouse click.
-                    These times can be configured independent for each the mouse and controller navigation strategies.
-                </p>
-            </div>
-            <div class="image" id="image-options"></div>
-        </div>
-
-        <div class="container left dark">
-            <div class="image" id="image-editor"></div>
-            <div class="text-container">
-                <h2 class="heading">Custom betting function</h2>
-                <p>
-
-                </p>
-            </div>
-        </div>
-
-        <!--<div style="margin-top: calc(-50vh - 43px);">
-            <div class="container">
-                <h2 class="subcontainer heading">
-                    What it is
-                </h2>
-                <div class="text-wrapper">
-                    GTA Online Autobet was designed to earn GTA $ in Grand Theft Auto Online without using any glitches
-                    or mods. <br> This is accomplished through using the Horse racing mechanics implemented with the
-                    Casino DLC (Patch 1.47/1.48) <br> The program will bet on horses, depending if it is likely to win
-                    and earn about 270 thousand GTA dollars per hour
+                <div class="download-actions-bar">
+                    <button class="mdc-button mdc-button--outlined" id="download-now">
+                        <span class="mdc-button__ripple"></span>
+                        Download
+                    </button>
+                    <button class="mdc-button mdc-button--outlined" id="show-tag">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="material-icons">
+                                launch
+                            </span>
+                        View on GitHub
+                    </button>
                 </div>
             </div>
 
-            <div class="container">
-                <h2 class="subcontainer heading">
-                    How it works
-                </h2>
-                <div class="text-wrapper">
-                    To achieve its goal, the program will take over your mouse to place bets on a individual
-                    horse. For a horse to be betted on, there must be no horses with an even winning
-                    probability.
-                    <br> Furthermore, there should not be multiple horses with the same winning probability
-                    higher than 10/1. If these criteria are met, a bet of 10.000 Chips will be placed and the
-                    race will be started. Otherwise, 100 chips will
-                    be placed on the first horse, to reload the winning probabilities. This must be done due to
-                    changed rules in GTA Online Patch 1.50.
-                    <br> <br> After ~34 seconds the race should be finished and the process starts again.
+            <div class="download-option-container" id="devel-download-container">
+                <h1 class="download-latest">
+                    Download unstable version
+                </h1>
+
+                <p class="lv-paragraph">
+                    Latest version:
+                    <span id="latest-devel-version">not available</span>
+                </p>
+
+                <div class="download-actions-bar">
+                    <button class="mdc-button mdc-button--outlined" id="show-artifact" disabled>
+                        <span class="mdc-button__ripple"></span>
+                        <span class="material-icons">
+                                launch
+                            </span>
+                        View on GitHub
+                    </button>
                 </div>
             </div>
-        </div>-->
+        </div>
     </div>
+</div>
 
-    <div id="footer">
+<div id="footer">
+    <a href="https://github.com/MarkusJx/GTA-Online-Autobet" class="footer-icon-grid">
+        <img src="img/GitHub-Mark-Light-64px.png" class="footer-icon" alt="GitHub icon">
+        <p class="footer-text">View on GitHub</p>
+    </a>
 
-    </div>
+    <a href="https://github.com/MarkusJx/GTA-Online-Autobet/tree/master/docs" class="footer-icon-grid">
+        <span class="material-icons footer-icon">
+            code
+        </span>
+        <p class="footer-text">View Source</p>
+    </a>
 
-    <script src="main.js"></script>
+    <a class="footer-icon-grid" id="copyright-footer" href="https://github.com/MarkusJx/autobet/blob/master/LICENSE">
+        <p id="copyright-icon">©</p>
+        <p class="footer-text">MarkusJx 2020</p>
+    </a>
+</div>
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.js"></script>
+<script src="artifactV2.js"></script>
+<script src="main.js"></script>
+
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;500&display=swap" rel="stylesheet">
 </body>
 
 </html>

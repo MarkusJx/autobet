@@ -1,3 +1,9 @@
+mdc.ripple.MDCRipple.attachTo(document.querySelector('#show-artifact'));
+mdc.ripple.MDCRipple.attachTo(document.querySelector('#download-now'));
+mdc.ripple.MDCRipple.attachTo(document.querySelector('#show-tag'));
+
+const RELEASE_REGEX = /autobet-[\w.]+\.exe/;
+
 // Add a scroll listener to fade in a colored background
 // when the page is scrolled down.
 // Source: https://webdesign.tutsplus.com/tutorials/simple-fade-effect-on-scroll--cms-35166
@@ -15,8 +21,9 @@
 
     window.addEventListener("scroll", () => {
         {
-            // Subtract the scroll offset from the actuall scroll value
+            // Subtract the scroll offset from the actual scroll value
             const currentScroll = window.pageYOffset - scroll_offset;
+            let opacity;
             if (currentScroll <= checkpoint) {
                 // If the currentScroll value is less than or equal to zero,
                 // set the opacity to zero. This is to enforce the scroll offset.
@@ -32,16 +39,6 @@
             // Set the actual opacity
             background.style.opacity = opacity;
         }
-
-        /*{
-            const check = 3500;
-            const thresh = 80 / check;
-            const currentScroll = Math.max(window.pageYOffset - document.body.clientHeight * 1.6, 0);
-            console.log(currentScroll);
-            if (currentScroll <= document.body.clientHeight) {
-                document.getElementById('ui-text').style.top = currentScroll * thresh - 80 + "vh";
-            }
-        }*/
     });
 }
 
@@ -77,3 +74,41 @@
         document.body.classList.add("scrollable");
     }
 }
+
+document.querySelector('#show-tag').addEventListener('click', () => {
+    window.location.href = "https://github.com/MarkusJx/autobet/releases/latest";
+});
+
+setTimeout(() => {
+    window.scrollTo(0, 0);
+
+    const api = new GithubApi("MarkusJx", "autobet");
+    api.getLatestReleaseTag().then(tag => {
+        document.querySelector('#latest-version').innerText = tag;
+        return api.getLatestReleaseDownloadAddress(RELEASE_REGEX);
+    }).then(address => {
+        document.querySelector('#download-now').addEventListener('click', () => {
+            window.location.href = address;
+        });
+    }).catch(e => {
+        document.querySelector("#latest-version").innerText = "not found";
+        document.querySelector('#download-now').disabled = true;
+        console.error("could not get latest version:", e);
+    });
+
+    api.getLatestArtifact('autobet').then(res => {
+        const id = res.id;
+        document.querySelector('#latest-devel-version').innerText = res.name.replace('autobet-', '');
+        return api.getRunByArtifactId(id);
+    }).then(run => {
+        const url = run.html_url;
+        document.querySelector('#show-artifact').addEventListener('click', () => {
+            window.location.href = url;
+        });
+        document.querySelector('#show-artifact').disabled = false;
+    }).catch(e => {
+        document.querySelector('#latest-devel-version').innerText = "not available";
+        document.querySelector('#show-artifact').disabled = true;
+        console.error("Could not get the latest artifact:", e);
+    });
+}, 100);
