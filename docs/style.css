@@ -1,5 +1,5 @@
 html {
-    /* scrollbar-width: none; */
+    scrollbar-width: none;
     scroll-behavior: smooth;
 }
 
@@ -13,8 +13,7 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    /* TODO: Uncomment this */
-    /* overflow-y: hidden; */
+    overflow-y: hidden;
     overflow-x: hidden;
 }
 
@@ -430,13 +429,92 @@ body::-webkit-scrollbar {
     margin: -20px;
 }
 
-/* Wrap some text nicely */
+.description-container {
+    width: 100%;
+    background-color: #ffffffed;
+    backdrop-filter: blur(20px);
+    padding: 60px 0;
+}
 
-.text-wrapper {
-    width: calc(100% - 40px);
+.description-container__content {
+    width: 100%;
     height: max-content;
-    margin: 20px;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: max-content;
+    max-width: 1350px;
+    margin: auto;
+    row-gap: 80px;
+}
+
+.description-element {
+    font-family: 'Open Sans', Roboto, sans-serif;
+    padding: 20px;
+    border: #c5c5c5 solid 1px;
+    border-radius: 10px;
+    max-width: 500px;
+    min-height: calc(100% - 60px);
+    margin: 0 auto;
+    background-color: white;
+    transition: box-shadow ease-in-out .125s;
+}
+
+.description-element:hover {
+    box-shadow: 0 0 2rem 0 rgba(0, 0, 0, .3);
+}
+
+.description-text {
+    font-size: 1.1em;
+    word-break: break-word;
     text-align: center;
+    margin-top: 20px;
+}
+
+.code-background {
+    border-radius: 3px;
+    padding: 0 .4em;
+    background-color: rgba(27,31,35,.1);
+}
+
+@media only screen and (max-width: 1200px) {
+    .description-container__content {
+        grid-template-columns: auto;
+        grid-template-rows: max-content max-content;
+    }
+}
+
+@media only screen and (max-width: 550px) {
+    .description-element {
+        border-radius: 0;
+        max-width: 100%;
+        border-right: none;
+        border-left: none;
+    }
+
+    .description-element:hover {
+        box-shadow: none;
+    }
+}
+
+.description-text.how-to-use-text {
+    text-align: left;
+}
+
+.description-text.how-to-use-text ul {
+    margin-bottom: 0;
+}
+
+.before-space:before {
+    content: " ";
+}
+
+#betting-img {
+    width: 100%;
+}
+
+#goto-issues {
+    margin: 0 auto 20px calc(50% - 115px);
+    --mdc-theme-primary: #0072ff;
 }
 
 /* Wrap a 'sticky-content' element */
@@ -619,6 +697,6 @@ body::-webkit-scrollbar {
     }
 
     .heading {
-        width: auto;
+        max-width: 100%;
     }
 }
