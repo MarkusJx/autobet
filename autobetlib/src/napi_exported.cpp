@@ -794,7 +794,7 @@ void setNavigationStrategy(const Napi::CallbackInfo &info) {
 
 Napi::Number getNavigationStrategy(const Napi::CallbackInfo &info) {
     try {
-        const std::string name = settings::read<std::string>("navigationStrategy");
+        const auto name = settings::read<std::string>("navigationStrategy");
         int res;
         if (name == "mouse") {
             res = 0;

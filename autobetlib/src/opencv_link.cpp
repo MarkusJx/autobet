@@ -35,7 +35,7 @@ static std::string mapToString(const std::map<int, char> &m) {
 }
 
 /**
- * Check if image colums were visited and mark them visited if not.
+ * Check if image columns were visited and mark them visited if not.
  * If any column between x1 and x2 was already visited 'true' is returned
  * and no changes are made to visited. If no column was already visited,
  * 'false' is returned and all indices between x1 and x2 are set to 'true'.
@@ -96,7 +96,7 @@ std::string opencv_link::knn::predict(const std::vector<byte> &image, double sca
 std::string opencv_link::knn::predict(const cv::Mat &m, double scaleX, double scaleY) const {
     cv::Mat blur, thresh, gray, img_blur;
 
-    // Calculate scale^-1, clone m and upscale the cloned map
+    // Calculate scale^-1, clone m and upscale the cloned mat
     const double scale_inverted_x = 1.0 / scaleX;
     const double scale_inverted_y = 1.0 / scaleY;
     cv::Mat m_cpy = m.clone();

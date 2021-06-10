@@ -288,6 +288,7 @@ async function loadData() {
             startstop.innerText = "stop";
             start = false;
             startstop.disabled = false;
+            startTimer();
         } else if (running == -1) { // Stopped
             statusinfo.innerText = "Stopped";
             statusinfo.className = "text status_stopped maintext";
@@ -297,10 +298,12 @@ async function loadData() {
             statusinfo.innerText = "Stopping";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
+            startTimer();
         } else if (running == 2) { // Starting
             statusinfo.innerText = "Starting";
             statusinfo.className = "text status_stopping maintext";
             startstop.disabled = true;
+            startTimer();
         }
     });
 

@@ -1,143 +1,247 @@
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-control" content="public, max-age=31536000">
-    <title>GTA Online Autobet</title>
+    <title>autobet</title>
 
+    <!-- The style sheets -->
+    <link rel="stylesheet" href="style.css">
     <link href="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.min.css">
+
+    <!-- Load all javascript (async) -->
+    <script defer src="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.js"></script>
+    <script defer src="artifactV2.js"></script>
+    <script defer src="main.js"></script>
 </head>
+<body>
+    <!--
+    I actually stole the design idea for this website from someone on the Hacktoberfest discord.
+    An they probably stole the concept directly from Apple. Please don't sue me for cross-stealing.
+    Just message me if you want some copyright or any other shit. Thank you random person.
+    -->
+    <div id="background">
+    </div>
 
-<body class="noselect">
-    <button class="mdc-fab mdc-fab--extended" aria-label="ChangeTheme" id="change-theme">
-        <div class="mdc-fab__ripple"></div>
-        <span class="mdc-fab__icon material-icons" id="theme-change-icon" style="margin: 7.5px;">brightness_medium</span>
-        <span class="mdc-fab__label">Change theme</span>
-    </button>
-
-    <div id="main-grid">
-        <div id="header-container">
-            <div id="heading-download-container">
-                <div id="heading-download-background"></div>
-                <h1 id="main-heading">GTA Online Autobet</h1>
-                <button class="mdc-button mdc-button--unelevated" id="download-button" disabled>
-                    <span class="mdc-button__ripple"></span>
-                    Download
-                </button>
+    <!-- The welcome screen -->
+    <div id="begin-screen">
+        <!-- The welcome text container -->
+        <div id="welcome-container">
+            <!-- The welcome text -->
+            <div id="welcome-text">
+                <p class="welcome-paragraph" id="welcome-first-paragraph">
+                    <span class="welcome-text-font">Making</span>
+                    <span class="welcome-text-font">money</span>
+                    <span class="welcome-text-font">in</span><br>
+                </p>
+                <p class="welcome-paragraph" id="welcome-GTA-paragraph">
+                    <span class="welcome-text-font">Grand</span>
+                    <span class="welcome-text-font">Theft</span>
+                    <span class="welcome-text-font">Auto</span>
+                    <span class="welcome-text-font" id="GTA-Online-font">Online</span>
+                </p>
+                <p class="welcome-paragraph" id="welcome-third-paragraph">
+                    <span class="welcome-text-font">made</span>
+                    <span class="welcome-text-font" id="welcome-text-easy">easy</span>
+                </p>
             </div>
-            <div id="header-background"></div>
         </div>
 
-        <div id="desc-container">
-            <div id="break"></div>
-            <div id="main-desc-container" class="container">
-                <h1 id="what-it-is">
-                    What it is
-                </h1>
-                <div id="main-desc-text">
-                    GTA Online Autobet was designed to earn GTA $ in Grand Theft Auto Online without using any glitches
-                    or mods. <br> This is accomplished through using the Horse racing mechanics implemented with the
-                    Casino DLC (Patch 1.47/1.48) <br> The program will bet on horses, depending if it is likely to win
-                    and earn about 270 thousand GTA dollars per hour
-                </div>
-            </div>
+        <!-- The repository name and author -->
+        <a id="welcome-repo-name-container" href="https://github.com/MarkusJx/autobet">
+            <img src="img/GitHub-Mark-Light-64px.png" class="github-icon" id="welcome-repo-gh-icon" alt="GitHub icon">
+            <span id="repo-name-owner">MarkusJx/</span><span id="repo-name-name">autobet</span>
+        </a>
 
-            <div id="more-desc-container">
-                <!-- Elements on the left -->
-                <div style="grid-column: 1;">
-                    <div class="container smallcontainer" id="how-it-works-container">
-                        <h1 id="how-it-works" class="heading">How it works</h1>
-                        <p class="desc-text">
-                            To achieve its goal, the program will take over your mouse to place bets on a individual
-                            horse. For a horse to be betted on, there must be no horses with an even winning
-                            probability.
-                            <br> Furthermore, there should not be multiple horses with the same winning probability
-                            higher than 10/1. If these criteria are met, a bet of 10.000 Chips will be placed and the
-                            race will be started. Otherwise, 100 chips will
-                            be placed on the first horse, to reload the winning probabilities. This must be done due to
-                            changed rules in GTA Online Patch 1.50.
-                            <br> <br> After ~34 seconds the race should be finished and the process starts again.
-                        </p>
+        <!-- The arrow facing downwards displaying there is more to come -->
+        <div class="arrow-down" id="arrow-scroll-down"></div>
+    </div>
+
+    <!-- Our main content -->
+    <div id="main-screen">
+        <h1 class="main-heading-divider">General information</h1>
+
+        <!-- The container containing general information -->
+        <div class="description-container">
+            <!-- The container's content. Just exists to center everything on the background -->
+            <div class="description-container__content">
+                <div class="description-element">
+                    <h2 class="heading">What it is</h2>
+                    <div class="description-text">
+                        GTA Online Autobet was designed to earn GTA $ in Grand Theft Auto Online without using any
+                        glitches or mods. <br/> This is accomplished through using the Horse racing mechanics
+                        implemented with the Casino DLC (Patch 1.47/1.48)
+                        <br/><br/> The program will bet on horses, depending if it is likely to win and earn
+                        about 270 thousand GTA dollars per hour
                     </div>
+                </div>
 
-                    <div class="container smallcontainer" id="usage-container">
-                        <h1 class="heading-important">Usage</h1>
-                        <ul style="margin-bottom: 0;">
+                <div class="description-element">
+                    <h2 class="heading">How it works</h2>
+                    <div class="description-text">
+                        To achieve its goal, the program will take over your mouse to place bets on a individual horse.
+                        For a horse to be bet on, there must be no horses with an even winning probability. <br/>
+                        Furthermore, there should not be multiple
+                        horses with the same winning probability higher than 10/1. If these criteria are met,
+                        a bet of 10.000 Chips will be placed and the race will be started. Otherwise, 100 chips will be
+                        placed on the first horse, to reload the winning
+                        probabilities. This must be done due to changed rules in GTA Online Patch 1.50.
+                        <br/> <br/> After ~34 seconds the race should be finished and the process starts again.
+                    </div>
+                </div>
+
+                <div class="description-element">
+                    <h2 class="heading">How to use it</h2>
+                    <div class="description-text how-to-use-text">
+                        <ul>
                             <li class="desc-text">First, you will need at least 100.000 chips in-Game</li>
                             <li class="desc-text">Navigate on one of the betting computers to the betting screen:</li>
                         </ul>
-                        <img src="betting.webp" id="betting-img">
-                        <ul style="margin-top: 2px; padding-bottom: 10px;">
-                            <li class="desc-text">
+                        <img src="img/betting.webp" id="betting-img" alt="An image of the betting screen"/>
+                        <ul>
+                            <li>
                                 Press the 'start' button on the UI (a countdown will start, giving you time to head back
                                 into the game) or use the Key combination
-                                <font class="code-background">CTRL+SHIFT+F10</font>. You can also use that combo to stop
-                                the program from doing its thing. Using the combo
-                                <font class="code-background">CTRL+SHIFT+F9</font> you can always kill the program
-                                instantly. Just make sure the game is your active (selected) window (you should
-                                basically be able to move the cursor in-Game on the betting screen)</li>
+                                <span class="code-background">CTRL+SHIFT+F10</span>
+                            <li>You can also use that combo to stop the program from doing its thing.</li>
+                            <li>
+                                Using the combo <span class="code-background">CTRL+SHIFT+F9</span> you can always
+                                kill the program instantly. Just make sure the game is your active (selected) window
+                                (you should basically be able to move the cursor in-Game on the betting screen)
+                            </li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Elements on the right -->
-                <div style="grid-column: 2;">
-                    <div class="container smallcontainer" id="ui-container">
-                        <h1 class="heading-important">User interface</h1>
-                        <div id="ui-grid">
-                            <img src="ui.webp" alt="The values displayed here are fictional" id="ui-png">
-                            <p class="desc-text">
-                                The program ships with a user interface displaying the current status and some stats.
-                                <br> It also comes with a web server displaying the same stats and a few more to be
-                                viewed from other devices.
-                            </p>
-                        </div>
-                    </div>
+                <div class="description-element">
+                    <h2 class="heading">Feedback</h2>
+                    <p class="description-text">
+                        If you encounter any issues using this program or have ideas how to improve it, you can
+                        always open a GitHub issue to report a bug or request a feature. To report a problem, use the
+                        <span class="code-background">debug</span> or the
+                        <span class="code-background">debug:full</span> option in the ui. If debug:full is used,
+                        a debugging zip on your desktop will be created.<br><b>It will include a log and some images,
+                        which may contain personal information, so make sure to delete these images before
+                        putting it into your issue.</b><br><br> There are also plenty of other options available,
+                        such as a live log viewer, where you can see what the program is doing right now.
+                        <br/><br/> If you are looking for logs, those can be found in your documents folder:
+                        <span class="code-background before-space">
+                            C:\Users\${USERNAME}\Documents\autobet\autobet.log
+                        </span>.
+                        <br/><br/>Please note that only one log may be found in that directory as this log will
+                        contain all messages when file logging was enabled. Therefore, it is not recommended to keep
+                        file logging activated as the log file size
+                        is not limited. Also note that the log file will be deleted after 7 days if nothing was written
+                        to it in that last 7 days.
+                    </p>
 
-                    <div class="container smallcontainer" id="issue-container">
-                        <h1 class="heading">Feedback</h1>
-                        <p class="desc-text">
-                            If you encounter any issues using this program or have ideas how to improve it, you can
-                            always open a GitHub issue to report a bug or request a feature. To report a problem, use
-                            the
-                            <font class="code-background">debug</font> or the
-                            <font class="code-background">debug:full</font> option in the ui. If debug:full is used, a
-                            debugging zip on your desktop will be created.<br><b>It will include a log and some images,
-                                which may contain personal information, so make sure to delete these images before
-                                putting it into your issue.</b><br><br>There are also plenty of other options available,
-                            those are available for use in the ui.
-                        </p>
-
-                        <button class="mdc-button mdc-button--outlined" id="goto-issues"
-                            onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/issues';">
-                            <span class="mdc-button__ripple"></span>
-                            <span class="material-icons">
-                                launch
-                            </span>
-                            Open GitHub issues
-                        </button>
-                    </div>
-
-                    <div class="container smallcontainer" id="video-container">
-                        <h1 class="heading-important">Demo</h1>
-                        <div id="demo-video-container-container">
-                            <div id="demo-video-container">
-                                <iframe id="demo-video" width="100%" height="100%"
-                                    src="https://www.youtube.com/embed/SwZiqhdOwnQ" frameborder="0"
-                                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
-                            </div>
-                        </div>
-                    </div>
+                    <button class="mdc-button mdc-button--outlined mdc-ripple-upgraded" id="goto-issues"
+                            onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/issues'">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="material-icons">
+                            launch
+                        </span>
+                        Open GitHub issues
+                    </button>
                 </div>
             </div>
         </div>
+        <!-- End description -->
 
-        <div id="download-container">
-            <div id="main-download-container" class="container">
-                <div class="unsupported-heading-grid" id="get-the-latest-version">
+        <!-- The features follow down here -->
+        <h1 class="main-heading-divider">Features</h1>
+        <!-- Speedy Gonzales -->
+        <div class="container right">
+            <div class="text-container">
+                <h2 class="heading">It's fast</h2>
+                <p>
+                    Since over 50% of the code is written in C++, all image operations are done in less than 10
+                    milliseconds to place as many bets in the shortest amount of time as possible, reducing the time
+                    to wait while increasing the winnings.
+                </p>
+            </div>
+            <div class="image" id="image-code"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="container left">
+            <div class="image" id="image-stats"></div>
+            <div class="text-container">
+                <h2 class="heading">Stats</h2>
+                <p>
+                    The program provides various stats such as the current status, the time it is running since it was
+                    last started, the money made all time, the money made this session and the current probability of
+                    winning a bet.
+                </p>
+            </div>
+        </div>
+
+        <!-- Web UI -->
+        <div class="container right">
+            <div class="text-container">
+                <h2 class="heading">Web interface</h2>
+                <p>
+                    Autobet also ships with a web server for viewing stats on a different device (or even access the
+                    stats from outside your network if you are willing to open the required port on your firewall). From
+                    that web interface, you are able to see all stats as
+                    displayed in the program's ui.
+                </p>
+            </div>
+            <div class="image" id="image-web"></div>
+        </div>
+
+        <!-- Custom betting function -->
+        <div class="container left dark">
+            <div class="image" id="image-editor"></div>
+            <div class="text-container">
+                <h2 class="heading">Custom betting function</h2>
+                <p>
+                    If you want to change the behaviour of the program regarding when to place a bet, you can do this by
+                    providing a custom betting function. These are written in javascript and can be edited using the
+                    code editor from within the program. Using the editor,
+                    you can create multiple implementations, name, test and select one of them to be used as the default
+                    betting function. To get started, there is a
+                    <a href="https://github.com/MarkusJx/autobet/wiki/Custom-betting-functions" class="link">
+                        wiki page on custom betting functions.
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Configuration -->
+        <div class="container right">
+            <div class="text-container">
+                <h2 class="heading">Configuration options</h2>
+                <p>
+                    There are several options provided to customize the betting operation such as the time to sleep
+                    between the button is pressed and released again or the time to sleep between mouse click. These
+                    times can be configured independent for each the mouse and
+                    controller navigation strategies.
+                </p>
+            </div>
+            <div class="image" id="image-options"></div>
+        </div>
+
+        <!-- Controller support -->
+        <div class="container left">
+            <div class="image" id="image-controller"></div>
+            <div class="text-container">
+                <h2 class="heading">Controller support & Game selector</h2>
+                <p>
+                    Autobet is able to simulate a controller using vXbox if navigating the ui using the mouse is not
+                    possible. You are also able to select the name of the executable to run the betting algorithms of.
+                    These options exist to
+                    <a href="https://github.com/MarkusJx/autobet/issues/20" class="link">
+                        support game streaming.
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- The downloads container -->
+        <div class="container">
+            <div id="main-download-container">
+                <!-- Heading -->
+                <div id="get-the-latest-version">
                     <span class="material-icons" id="download-icon">
                         save_alt
                     </span>
@@ -146,53 +250,18 @@
                     </h1>
                 </div>
 
-                <!-- Release type selector tab bar -->
-                <div class="mdc-tab-bar" role="tablist" id="select-relese-tab-bar">
-                    <div class="mdc-tab-scroller">
-                        <div class="mdc-tab-scroller__scroll-area">
-                            <div class="mdc-tab-scroller__scroll-content">
-                                <!-- Stable tab -->
-                                <button class="mdc-tab mdc-tab--active" role="tab" aria-selected="true" tabindex="0"
-                                    id="select-stable-button">
-                                    <span class="mdc-tab__content">
-                                        <span class="release-tab-text-label mdc-tab__text-label">Stable Release</span>
-                                        <span class="mdc-tab-indicator mdc-tab-indicator--active">
-                                            <span
-                                                class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
-                                        </span>
-                                    </span>
-                                    <span class="mdc-tab__ripple tab-ripple-rounded-corners"></span>
-                                </button>
-
-                                <!-- Development tab -->
-                                <button class="mdc-tab" role="tab" aria-selected="false" tabindex="1"
-                                    id="select-dev-button">
-                                    <span class="mdc-tab__content">
-                                        <span class="release-tab-text-label mdc-tab__text-label">Development
-                                            Release</span>
-                                        <span class="mdc-tab-indicator">
-                                            <span
-                                                class="mdc-tab-indicator__content mdc-tab-indicator__content--underline"></span>
-                                        </span>
-                                    </span>
-                                    <span class="mdc-tab__ripple tab-ripple-rounded-corners"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="download-option-container visible" id="release-download-container">
+                <!-- Stable download container -->
+                <div class="download-option-container" id="release-download-container">
                     <h1 class="download-latest">
                         Download stable version
                     </h1>
 
-                    <p id="lv-paragraph">
+                    <p class="lv-paragraph">
                         Latest version:
-                        <font id="latest-version">latest version not found</font>
+                        <span id="latest-version">latest version not found</span>
                     </p>
 
-                    <div id="download-actions-bar">
+                    <div class="download-actions-bar">
                         <button class="mdc-button mdc-button--outlined" id="download-now">
                             <span class="mdc-button__ripple"></span>
                             Download
@@ -207,17 +276,18 @@
                     </div>
                 </div>
 
+                <!-- Unstable download container -->
                 <div class="download-option-container" id="devel-download-container">
                     <h1 class="download-latest">
                         Download unstable version
                     </h1>
 
-                    <p id="lv-paragraph">
+                    <p class="lv-paragraph">
                         Latest version:
-                        <font id="latest-devel-version" class="notfound">not available</font>
+                        <span id="latest-devel-version">not available</span>
                     </p>
 
-                    <div id="download-actions-bar">
+                    <div class="download-actions-bar">
                         <button class="mdc-button mdc-button--outlined" id="show-artifact" disabled>
                             <span class="mdc-button__ripple"></span>
                             <span class="material-icons">
@@ -227,92 +297,39 @@
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <div id="main-download-container-unsupported" class="container">
-                <div class="unsupported-heading-grid">
-                    <span class="material-icons" id="warning-icon">
-                        error_outline
-                    </span>
-                    <h1 id="not-available-heading">
-                        Autobet is not available for this system
-                    </h1>
-                </div>
-
-                <div id="unsupported-text">
-                    Autobet is currently only supported on Windows, but you can create a GitHub issue to
-                    request it for your current operating system.
-                </div>
-                <div id="unsupported-actions-bar">
-                    <button class="mdc-button mdc-button--outlined" id="goto-gh-issues"
-                        onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/issues/new?assignees=&labels=&template=feature_request.md&title=';">
-                        <span class="mdc-button__ripple"></span>
-                        Create new issue
-                    </button>
-
-                    <button class="mdc-button mdc-button--outlined" id="goto-downloads-unsupported"
-                        onclick="location.href='https://github.com/MarkusJx/GTA-Online-Autobet/releases';">
-                        <span class="mdc-button__ripple"></span>
-                        See downloads
-                    </button>
-                </div>
+                <!-- End unstable download -->
             </div>
         </div>
-
-        <div class="mdc-dialog" id="license-dialog">
-            <div class="mdc-dialog__container" style="width: 90%;">
-                <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true"
-                    aria-labelledby="license-dialog-title" aria-describedby="license-dialog-content"
-                    id="license-dialog-surface">
-                    <!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
-                    <h2 class="mdc-dialog__title" id="license-dialog-title">
-                        License
-                    </h2>
-                    <div class="mdc-dialog__content" id="license-dialog-content">
-                        Could not load license!
-                    </div>
-
-                    <footer class="mdc-dialog__actions">
-                        <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="close"
-                            style="--mdc-theme-primary: black;">
-                            <div class="mdc-button__ripple"></div>
-                            <span class="mdc-button__label">Got it</span>
-                        </button>
-                    </footer>
-                </div>
-            </div>
-            <div class="mdc-dialog__scrim"></div>
-        </div>
-
-        <div id="footer">
-            <a href="https://github.com/MarkusJx/GTA-Online-Autobet" class="footer-icon-grid">
-                <img src="GitHub-Mark-Light-64px.png" class="footer-icon">
-                <p class="footer-text">View on GitHub</p>
-            </a>
-
-            <a href="https://github.com/MarkusJx/GTA-Online-Autobet/tree/master/docs" class="footer-icon-grid">
-                <span class="material-icons footer-icon">
-                    code
-                </span>
-                <p class="footer-text">View Source</p>
-            </a>
-
-            <div class="footer-icon-grid" id="copyright-footer">
-                <p id="copyright-icon">©</p>
-                <p class="footer-text">MarkusJx 2020</p>
-            </div>
-        </div>
+        <!-- End downloads -->
     </div>
+    <!-- End main content -->
 
-    <!-- Load most stuff down here to improve load times -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://unpkg.com/material-components-web@v4.0.0/dist/material-components-web.min.js"></script>
+    <!-- The footer -->
+    <div id="footer">
+        <a href="https://github.com/MarkusJx/GTA-Online-Autobet" class="footer-icon-grid">
+            <img src="img/GitHub-Mark-Light-64px.png" class="footer-icon" alt="GitHub icon">
+            <p class="footer-text">View on GitHub</p>
+        </a>
 
-    <script src="artifacts.min.js"></script>
-    <script src="main.min.js"></script>
+        <a href="https://github.com/MarkusJx/GTA-Online-Autobet/tree/master/docs" class="footer-icon-grid">
+            <span class="material-icons footer-icon">
+                code
+            </span>
+            <p class="footer-text">View Source</p>
+        </a>
 
+        <a class="footer-icon-grid" id="copyright-footer"
+           href="https://github.com/MarkusJx/autobet/blob/master/LICENSE">
+            <p id="copyright-icon">©</p>
+            <p class="footer-text">MarkusJx 2020</p>
+        </a>
+    </div>
+    <!-- End footer -->
+
+    <!-- Load all fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;500&display=swap" rel="stylesheet">
 </body>
-
 </html>

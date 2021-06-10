@@ -134,7 +134,7 @@ std::string windowSize::toString() const {
 
 // processInfo class ================================================
 
-processInfo::processInfo(std::wstring programName) : programName(wstring_to_string(std::move(programName))) {}
+processInfo::processInfo(const std::wstring &programName) : programName(wstring_to_string(programName)) {}
 
 std::string processInfo::getProgramName() const {
     return programName;
@@ -149,8 +149,8 @@ public:
     HWND hwnd;
 };
 
-windowsProcessInfo::windowsProcessInfo(std::wstring programName, const processHandle &handle) : processInfo(
-        std::move(programName)), handle(std::make_shared<processHandle>(handle)) {}
+windowsProcessInfo::windowsProcessInfo(const std::wstring &programName, const processHandle &handle) : processInfo(
+        programName), handle(std::make_shared<processHandle>(handle)) {}
 
 windowSize windowsProcessInfo::getSize() const {
     // If the handle isn't valid, throw an error
