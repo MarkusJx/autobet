@@ -3,7 +3,7 @@ name: autobet-build
 on:
   push:
     branches-ignore:
-      - "dependabot"
+      - "dependabot**"
     paths: 
       - ".github/workflows/build.yml"
       - "autobetlib/**"
