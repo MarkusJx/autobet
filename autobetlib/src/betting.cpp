@@ -79,9 +79,11 @@ void set_positions() {
  * @param val the new value
  */
 void setGtaVRunning(bool val) {
+    // Only send data to the web listeners every 10-ish seconds
+    static int count = 0;
+    count = (count + 1) % 10;
     try {
-        // Only tell the web listeners changes, not stuff they already know
-        if (val != variables::gtaVRunning) webui::setGtaRunning(val);
+        if (count == 0) webui::setGtaRunning(val);
 
         variables::gtaVRunning = val;
         napi_exported::setGtaRunning(val);
@@ -454,10 +456,15 @@ void betting::mainLoop() {
 
         // Set stopped
         variables::stopping = false;
-        webui::setStopped();
         if (was_running) {
             StaticLogger::debug("Betting is now paused");
             was_running = false;
+            webui::setStopped();
+        } else {
+            // Only send this message every 10-ish seconds
+            static int count = 0;
+            count = (count + 1 % 10);
+            if (count == 0) webui::setStopped();
         }
     } else {
         // The Game is not running, tell it everyone and sleep some time
