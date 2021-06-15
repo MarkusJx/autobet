@@ -259,13 +259,23 @@ windowUtils::windowSize utils::getWindowSize() {
 #ifdef AUTOBET_WINDOWS
 
 void moveMouse(int x, int y, INPUT *inputs) {
+    // Get all required system metrics
+    const int screenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    const int screenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    const int minX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+    const int minY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+
+    // Source: https://github.com/octalmage/robotjs/blob/c9cbd98ec47378dfae62871f0f2830782322b06d/src/mouse.c#L133
+#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / (width_or_height)) + ((coord) < 0 ? -1 : 1))
     inputs[0].type = INPUT_MOUSE;
     inputs[0].mi.mouseData = 0;
     inputs[0].mi.time = 0;
-    inputs[0].mi.dx = x * (65536 / GetSystemMetrics(SM_CXVIRTUALSCREEN));
-    inputs[0].mi.dy = y * (65536 / GetSystemMetrics(SM_CYVIRTUALSCREEN));
+    inputs[0].mi.dx = MOUSE_COORD_TO_ABS(x - minX, screenWidth);
+    inputs[0].mi.dy = MOUSE_COORD_TO_ABS(y - minY, screenHeight);
+    // We'll cast everything to unsigned to prevent clang-tidy from complaining
     inputs[0].mi.dwFlags =
             unsigned(MOUSEEVENTF_MOVE) | unsigned(MOUSEEVENTF_VIRTUALDESK) | unsigned(MOUSEEVENTF_ABSOLUTE);
+#undef MOUSE_COORD_TO_ABS
 }
 
 #endif
