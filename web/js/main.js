@@ -47,7 +47,8 @@ var autostopMoney = -1;
 
 let gtaRunning = false;
 
-let racesWon = 0, racesLost = 0;
+let racesWon = 0,
+    racesLost = 0;
 
 // Add event listener to start stop button
 startstop.addEventListener('click', () => {
@@ -68,7 +69,7 @@ startstop.addEventListener('click', () => {
 });
 
 // Add event listener to the autostop configure button
-configurebutton.addEventListener('click', function () {
+configurebutton.addEventListener('click', function() {
     if (autostopMoney !== -1) {
         moneyinput.value = autostopMoney;
     } else {
@@ -100,7 +101,7 @@ notconnectedmessage.listen('MDCSnackbar:closing', () => {
 });
 
 // Add an event listener for the settings done button
-settingsdonebutton.addEventListener('click', function () {
+settingsdonebutton.addEventListener('click', function() {
     if (moneyinput.value < 10000 || moneyinput.value === "") { // Trash the values if they are trash
         moneyinput.value = "";
         autostopMoney = -1;
@@ -155,7 +156,7 @@ function showAutostopMessages() {
 /**
  * Set an Interval if the website is disconnected
  */
-let x = setInterval(function () {
+let x = setInterval(function() {
     if (cppJsLib.connected) {
         if (x != null) clearInterval(x);
         x = null;
@@ -169,7 +170,7 @@ let x = setInterval(function () {
 let hasDisconnectListener = false;
 
 // Add a on load listener
-cppJsLib.listen("loaded", function (res) {
+cppJsLib.listen("loaded", function(res) {
     if (res) {
         if (x != null) clearInterval(x);
         x = null;
@@ -361,6 +362,16 @@ async function init() {
      */
     function webSetGtaRunning(val) {
         gtaRunning = val;
+        const el = document.getElementById('game-running-info');
+        el.innerText = val ? "Yes" : "No";
+
+        if (val) {
+            el.classList.remove("status_stopped");
+            el.classList.add("status_running");
+        } else {
+            el.classList.remove("status_running");
+            el.classList.add("status_stopped");
+        }
     }
 
     cppJsLib.expose(webSetWinnings);
@@ -538,7 +549,7 @@ function disconnected() {
     notconnectedlabel.innerText = "Connection lost.";
     notconnectedmessage.open(); // Notify the user about this disconnect
 
-    let x = setInterval(async () => { // Start an Interval to time the retries
+    let x = setInterval(async() => { // Start an Interval to time the retries
         if (timeUntilRetry < 1) {
             notconnectedlabel.innerText = "Trying to reconnect...";
             timeUntilRetry = 5;
