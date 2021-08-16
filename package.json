@@ -26,6 +26,7 @@
     },
     "homepage": "https://github.com/MarkusJx/autobet#readme",
     "devDependencies": {
+        "@types/uuid": "^8.3.1",
         "electron": "^11.4.11",
         "electron-builder": "^22.11.7",
         "typescript": "^4.3.5"
@@ -39,6 +40,7 @@
         "electron-window-state": "^5.0.3",
         "material-components-web": "^10.0.0",
         "open-sans-fonts": "^1.6.2",
+        "uuid": "^8.3.2",
         "vm2": "^3.9.3"
     },
     "build": {

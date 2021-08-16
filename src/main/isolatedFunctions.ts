@@ -1,4 +1,5 @@
 import { functionStore } from "./functionStore";
+import { v4 as uuidV4 } from 'uuid';
 import autobetLib from "@autobet/autobetlib";
 import Store from "electron-store";
 import * as isolate from "./isolatedFunction";
@@ -51,18 +52,17 @@ export const isolatedFunction: isolate.isolatedFunction = new isolate.isolatedFu
 });
 
 /**
- * Generate a unique id.
- * Source: https://learnersbucket.com/examples/javascript/unique-id-generator-in-javascript/
+ * Generate a unique id
  *
- * @returns the uid in the format 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+ * @return a unique id
  */
 function generateUid(): string {
-    const s4 = () => {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
+    let uid: string = uuidV4();
+    while (usedUids.includes(uid)) {
+        uid = uuidV4();
     }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+
+    return uid;
 }
 
 /**
@@ -72,12 +72,10 @@ function generateUid(): string {
  * @param fnString the function string
  */
 export function addFunction(name: string, fnString: string): functionStore {
-    let uid = generateUid();
-    while (usedUids.includes(uid)) uid = generateUid();
-
+    const uid: string = generateUid();
     autobetLib.logging.debug("preload.js", `Creating new custom function with name '${name}' and UID '${uid}'`);
 
-    let fn = new functionStore(name, fnString, uid);
+    let fn: functionStore = new functionStore(name, fnString, uid);
     functions.push(fn);
     usedUids.push(uid);
 
