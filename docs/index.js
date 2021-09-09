@@ -20,25 +20,23 @@ const RELEASE_REGEX = /autobet-[\w.]+\.exe/;
     const background = document.getElementById('background');
 
     window.addEventListener("scroll", () => {
-        {
-            // Subtract the scroll offset from the actual scroll value
-            const currentScroll = window.pageYOffset - scroll_offset;
-            let opacity;
-            if (currentScroll <= checkpoint) {
-                // If the currentScroll value is less than or equal to zero,
-                // set the opacity to zero. This is to enforce the scroll offset.
-                if (currentScroll <= 0) {
-                    opacity = 0;
-                } else {
-                    opacity = currentScroll / checkpoint;
-                }
+        // Subtract the scroll offset from the actual scroll value
+        const currentScroll = window.pageYOffset - scroll_offset;
+        let opacity;
+        if (currentScroll <= checkpoint) {
+            // If the currentScroll value is less than or equal to zero,
+            // set the opacity to zero. This is to enforce the scroll offset.
+            if (currentScroll <= 0) {
+                opacity = 0;
             } else {
-                opacity = 1;
+                opacity = currentScroll / checkpoint;
             }
-
-            // Set the actual opacity
-            background.style.opacity = opacity;
+        } else {
+            opacity = 1;
         }
+
+        // Set the actual opacity
+        background.style.opacity = opacity;
     });
 }
 

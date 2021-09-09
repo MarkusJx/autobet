@@ -265,35 +265,35 @@ body::-webkit-scrollbar {
 
 /* The image elements */
 #image-code {
-    background: url("img/code.webp");
+    background: url("../img/code.webp");
     background-position-y: -66px;
     background-position-x: 85px;
 }
 
 #image-stats {
-    background: url("img/stats.webp") no-repeat;
+    background: url("../img/stats.webp") no-repeat;
     background-size: cover;
 }
 
 #image-web {
-    background: url("img/web.webp") no-repeat;
+    background: url("../img/web.webp") no-repeat;
     background-size: cover;
 }
 
 #image-controller {
-    background: url("img/controller.webp") no-repeat;
+    background: url("../img/controller.webp") no-repeat;
     background-position-y: -80px;
     background-position-x: -100px;
 }
 
 #image-options {
-    background: url("img/options.webp") no-repeat;
+    background: url("../img/options.webp") no-repeat;
     background-position-y: -75px;
     background-position-x: -55px;
 }
 
 #image-editor {
-    background: url("img/editor.webp") white no-repeat;
+    background: url("../img/editor.webp") white no-repeat;
     background-position-y: -72px;
 }
 
