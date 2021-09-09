@@ -1,8 +1,8 @@
-# Autobet [![Version](https://img.shields.io/github/v/release/markusjx/autobet.svg)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest) [![autobet-build](https://github.com/MarkusJx/autobet/workflows/autobet-build/badge.svg)](https://github.com/MarkusJx/autobet/actions?query=workflow%3Aautobet-build) [![ai-build](https://github.com/MarkusJx/autobet/workflows/ai-build/badge.svg)](https://github.com/MarkusJx/autobet/actions?query=workflow%3Aai-build) [![CodeQL](https://github.com/MarkusJx/autobet/workflows/CodeQL/badge.svg)](https://github.com/MarkusJx/autobet/actions?query=workflow%3ACodeQL)
+# Autobet [![Version](https://img.shields.io/github/v/release/markusjx/autobet.svg)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest) [![autobet-build](https://github.com/MarkusJx/autobet/workflows/autobet-build/badge.svg)](https://github.com/MarkusJx/autobet/actions?query=workflow%3Aautobet-build)
 
 A simple GTA Online horseracing-autobetting-bot
 
-[Open project website](https://markusjx.github.io/autobet/)
+[View project website](https://markusjx.github.io/autobet/)
 
 Table of contents
 =================
