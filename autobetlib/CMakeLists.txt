@@ -13,7 +13,7 @@ include(ExternalProject)
 
 # Get and build zip
 ExternalProject_Add(zip_proj
-        URL https://github.com/kuba--/zip/archive/v0.1.21.tar.gz
+        URL https://github.com/kuba--/zip/archive/v0.2.0.tar.gz
         PREFIX ${CMAKE_CURRENT_BINARY_DIR}/zip
         CMAKE_ARGS -DCMAKE_DISABLE_TESTING=ON -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         )
