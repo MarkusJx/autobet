@@ -42,7 +42,7 @@
         "material-components-web": "^10.0.0",
         "open-sans-fonts": "^1.6.2",
         "uuid": "^8.3.2",
-        "vm2": "^3.9.3"
+        "vm2": "^3.9.4"
     },
     "build": {
         "appId": "markusjx.autobet",
