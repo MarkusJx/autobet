@@ -197,6 +197,13 @@ namespace utils {
      * @return the documents folder path
      */
     std::string getDocumentsFolder();
+
+    /**
+     * Get and/or create the folder
+     *
+     * @return the documents folder
+     */
+    std::string get_or_create_documents_folder();
 }
 
 #endif //GTA_ONLINE_AUTOBET_DEV_UTILS_HPP
