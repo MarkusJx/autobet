@@ -34,7 +34,7 @@
     },
     "dependencies": {
         "@autobet/autobetlib": "file:autobetlib",
-        "ace-builds": "^1.4.12",
+        "ace-builds": "^1.4.13",
         "custom-electron-titlebar": "^3.2.7",
         "electron-store": "^8.0.1",
         "electron-updater": "^4.3.9",
