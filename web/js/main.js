@@ -339,8 +339,14 @@ function handleVisibilityChange() {
             if (document[hidden]) {
                 stopTimer();
             } else {
-                console.log("Reloading data");
-                loadData().then(() => console.log("Data reloaded"));
+                console.debug("Reloading data");
+                loadData().then(() => {
+                    console.debug("Data reloaded");
+                    if (scriptRunning != -1) {
+                        console.debug("Restarting timer");
+                        startTimer();
+                    }
+                });
             }
         }, false);
     }
