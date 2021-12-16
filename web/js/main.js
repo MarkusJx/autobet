@@ -15,6 +15,8 @@ gtanotrunningmessage.timeoutMs = 10000;
 const notconnectedmessage = new mdc.snackbar.MDCSnackbar(document.getElementById("notconnectedmessage"));
 notconnectedmessage.timeoutMs = 10000;
 
+const enableNotificationsSwitch = new mdc.switchControl.MDCSwitch(document.getElementById("enable-notifications-switch"));
+
 const notconnectedlabel = document.getElementById("notconnectedlabel");
 
 const settingsdonebutton = document.getElementById("settingsdonebutton");
@@ -50,9 +52,42 @@ let gtaRunning = false;
 let racesWon = 0,
     racesLost = 0;
 
+const logging = {
+    DISPLAY_DEBUG: false,
+    debug: function(...args) {
+        if (logging.DISPLAY_DEBUG)
+            console.debug(...args);
+    },
+    log: function(...args) {
+        if (logging.DISPLAY_DEBUG)
+            console.log(...args);
+    },
+    warn: function(...args) {
+        if (logging.DISPLAY_DEBUG)
+            console.warn(...args);
+    },
+    setDebug(val) {
+        logging.DISPLAY_DEBUG = val;
+        cppJsLib.enableLogging = logging.DISPLAY_DEBUG;
+    }
+};
+
+cppJsLib.enableLogging = logging.DISPLAY_DEBUG;
+
+enableNotificationsSwitch.checked = notificationsEnabled();
+enableNotificationsSwitch.listen('change', async() => {
+    enableNotificationsSwitch.disabled = true;
+    if (enableNotificationsSwitch.checked) {
+        enableNotificationsSwitch.checked = await requestNotificationPermission();
+        enableNotificationsSwitch.disabled = false;
+    } else {
+        localStorage.setItem('notification-permissions', 'denied');
+    }
+});
+
 // Add event listener to start stop button
 startstop.addEventListener('click', () => {
-    console.log("Running: " + gtaRunning);
+    logging.log("Running: " + gtaRunning);
     if (!gtaRunning) {
         gtanotrunningmessage.open();
         startstop.disabled = true;
@@ -160,10 +195,10 @@ let x = setInterval(function() {
     if (cppJsLib.connected) {
         if (x != null) clearInterval(x);
         x = null;
-        console.log("Connected!");
+        logging.log("Connected!");
         main();
     } else {
-        console.log("Still connecting...")
+        logging.log("Still connecting...")
     }
 }, 100);
 
@@ -174,7 +209,7 @@ cppJsLib.listen("loaded", function(res) {
     if (res) {
         if (x != null) clearInterval(x);
         x = null;
-        console.log("Connected!");
+        logging.log("Connected!");
         if (!hasDisconnectListener) {
             cppJsLib.listen("disconnected", disconnected);
             hasDisconnectListener = true;
@@ -219,9 +254,9 @@ function makeSumsDisplayable(sum, k = false, fractionDigits = 2) {
  */
 function main() {
     if (isMobile()) {
-        console.log("Running on a mobile device");
+        logging.log("Running on a mobile device");
     } else {
-        console.log("Running on a desktop device");
+        logging.log("Running on a desktop device");
     }
 
     if (!initialized) init();
@@ -237,7 +272,7 @@ async function loadData() {
     });
 
     cppJsLib.get_all_winnings().then((val) => {
-        console.log("Money earned all time: " + val);
+        logging.log("Money earned all time: " + val);
         moneyall.innerText = makeSumsDisplayable(val);
     });
 
@@ -277,6 +312,10 @@ async function loadData() {
     // Check if the script is already running
     cppJsLib.get_running().then(running => {
         let statusChanged = scriptRunning !== running;
+        if (statusChanged && (scriptRunning == 2 || scriptRunning == 1) && running == -1) {
+            sendNotification("The betting has stopped", "You may want to check your device");
+        }
+
         scriptRunning = running;
 
         if (!statusChanged) return; // If the status has not changed, do nothing
@@ -332,18 +371,18 @@ function handleVisibilityChange() {
 
     // Warn if the browser doesn't support addEventListener or the Page Visibility API
     if (typeof document.addEventListener === "undefined" || hidden === undefined) {
-        console.warn("This browser does not support the PageVisibility API");
+        logging.warn("This browser does not support the PageVisibility API");
     } else {
         // Handle page visibility change
         document.addEventListener(visibilityChange, () => {
             if (document[hidden]) {
                 stopTimer();
             } else {
-                console.debug("Reloading data");
+                logging.debug("Reloading data");
                 loadData().then(() => {
-                    console.debug("Data reloaded");
+                    logging.debug("Data reloaded");
                     if (scriptRunning != -1) {
-                        console.debug("Restarting timer");
+                        logging.debug("Restarting timer");
                         startTimer();
                     }
                 });
@@ -550,7 +589,7 @@ function stopTimer() {
  * A function to be called if this client is disconnected
  */
 function disconnected() {
-    console.log("Connection lost.");
+    logging.log("Connection lost.");
     let timeUntilRetry = 10; // Wait time until retry
     notconnectedlabel.innerText = "Connection lost.";
     notconnectedmessage.open(); // Notify the user about this disconnect
@@ -622,7 +661,38 @@ function isMobile() {
         }
         return false;
     } catch (e) {
-        console.log("Error in isMobile");
+        logging.warn("Error in isMobile");
         return false;
     }
+}
+
+async function requestNotificationPermission() {
+    if (!("Notification" in window)) {
+        alert("Error: This browser does not support desktop notification");
+        return false;
+    } else if (Notification.permission === "granted") {
+        return true;
+    } else {
+        return await Notification.requestPermission() === "granted";
+    }
+}
+
+function sendNotification(title, body) {
+    if (notificationsEnabled()) {
+        const notification = new Notification(title, {
+            body: body
+        });
+
+        notification.addEventListener('show', () => {
+            logging.debug("Displaying the notification now");
+            setTimeout(() => {
+                logging.debug("Closing the notification");
+                notification.close();
+            }, 10000);
+        });
+    }
+}
+
+function notificationsEnabled() {
+    return ("Notification" in window) && Notification.permission === "granted";
 }

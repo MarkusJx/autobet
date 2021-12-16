@@ -10,7 +10,7 @@
 
     <link href="css/style.min.css" rel="stylesheet">
 
-    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/material-components-web@10.0.0/dist/material-components-web.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
@@ -80,13 +80,28 @@
                     <h1 class="text status_stopped maintext" id="game-running-info">No</h1>
                 </div>
             </div>
+
+            <div class="subcontainer">
+                <div class="textalign" style="height: unset">
+                    <h1 class="text subheading">Enable Notifications</h1>
+                </div>
+                <div id="notification-enable-container">
+                    <p class="text maintext-maincolor">Click to enable/disable notifications if the betting is stopped due to an error</p>
+                    <div class="mdc-switch" id="enable-notifications-switch">
+                        <div class="mdc-switch__track"></div>
+                        <div class="mdc-switch__thumb-underlay">
+                            <div class="mdc-switch__thumb"></div>
+                            <input type="checkbox" id="basic-switch" class="mdc-switch__native-control" role="switch" aria-checked="false">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <button class="mdc-button mdc-button--raised" id="startstop">Start</button>
     </div>
 
-    <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true"
-        class="mdc-dialog noselect" id="settingsdialog" role="alertdialog">
+    <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog noselect" id="settingsdialog" role="alertdialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface">
                 <h2 class="mdc-dialog__title" id="my-dialog-title">
@@ -154,13 +169,11 @@
                 </div>
 
                 <footer class="mdc-dialog__actions">
-                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="settingsdonebutton"
-                        type="button">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="settingsdonebutton" type="button">
                         <span class="mdc-button__label">Done</span>
                     </button>
 
-                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel"
-                        id="settingscancelbutton" type="button">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel" id="settingscancelbutton" type="button">
                         <span class="mdc-button__label">Cancel</span>
                     </button>
                 </footer>
@@ -180,13 +193,11 @@
                     It looks like you are running on a mobile device. Would you like to enable Data Saver?
                 </div>
                 <footer class="mdc-dialog__actions">
-                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="yes"
-                        id="enabledatasaverbutton" type="button">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="yes" id="enabledatasaverbutton" type="button">
                         <span class="mdc-button__label">Yes</span>
                     </button>
 
-                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no"
-                        id="closedatasaverpopupbutton" type="button">
+                    <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no" id="closedatasaverpopupbutton" type="button">
                         <span class="mdc-button__label">No</span>
                     </button>
                 </footer>
@@ -220,7 +231,7 @@
         </div>
     </div>
 
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://unpkg.com/material-components-web@10.0.0/dist/material-components-web.min.js"></script>
     <script src="js/main.min.js" type="text/javascript"></script>
 </body>
 

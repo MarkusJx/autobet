@@ -166,6 +166,7 @@ body {
     font-size: 1em;
 }
 
+
 /*#prio {
     grid-row: 1;
     grid-column: 1;
@@ -187,4 +188,18 @@ body {
 
 .item {
     background: white;
+}
+
+#enable-notifications-switch {
+    margin: auto;
+}
+
+#notification-desc {
+    color: white;
+}
+
+#notification-enable-container {
+    display: grid;
+    margin: 0 15px;
+    row-gap: 10px;
 }
