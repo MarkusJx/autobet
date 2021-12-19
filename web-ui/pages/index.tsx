@@ -14,6 +14,8 @@ export default class Home extends React.Component {
     private reloadingAlert: CustomAlert | null = null;
     private loadingBackdrop: LoadingBackdrop | null = null;
 
+    private mainContent: MainContent | null = null;
+
     public override render(): React.ReactNode {
         return (
             <div className={styles.container}>
@@ -24,11 +26,14 @@ export default class Home extends React.Component {
                 </Head>
 
                 <main className={styles.main}>
-                    <MainContent/>
+                    <MainContent ref={e => this.mainContent = e}/>
 
                     <div className={styles.errorContainer}>
                         <CustomAlert ref={e => this.connectionError = e} severity="error">
                             Could not connect to the backend!
+                        </CustomAlert>
+                        <CustomAlert severity="error" ref={e => StaticInstances.gameNotRunningAlert = e} closeable>
+                            The game is not running on the target machine. Start the game and try again.
                         </CustomAlert>
                         <CustomAlert severity="warning" ref={e => this.disconnectedAlert = e} closeable>
                             Disconnected. Retrying to reconnect in 10 seconds.
@@ -38,6 +43,12 @@ export default class Home extends React.Component {
                         </CustomAlert>
                         <CustomAlert severity="success" ref={e => this.connectedAlert = e} closeable>
                             Successfully connected.
+                        </CustomAlert>
+                        <CustomAlert severity="info" closeable ref={e => StaticInstances.bettingStartAlert = e}>
+                            Attempting to start the betting process...
+                        </CustomAlert>
+                        <CustomAlert severity="info" closeable ref={e => StaticInstances.bettingStopAlert = e}>
+                            Attempting to stop the betting process...
                         </CustomAlert>
                     </div>
                 </main>
@@ -62,10 +73,12 @@ export default class Home extends React.Component {
 
     public override componentDidMount(): void {
         this.loadingBackdrop?.setOpen(true);
-        StaticInstances.api.logging = true;
+        StaticInstances.api.logging = false;
 
         const init = () => {
-            StaticInstances.api.init().catch(e => {
+            StaticInstances.api.init().then(async () => {
+                await this.mainContent?.loadData();
+            }).catch(e => {
                 console.error(e);
                 this.connectionError?.show();
                 this.reloadingAlert?.hide();

@@ -3,7 +3,7 @@ import React from "react";
 
 interface StatusTextProps {
     text: string;
-    outline?: boolean;
+    outlined?: boolean;
     underlined?: boolean;
     color?: "red" | "yellow" | "green" | "white"
 }
@@ -14,7 +14,7 @@ export default function StatusText(props: StatusTextProps): JSX.Element {
         color = styles[props.color];
     }
 
-    const classname = `${styles.textBackdrop} ${color} ${props.outline ? styles.outline : ""} 
+    const classname = `${styles.textBackdrop} ${color} ${props.outlined ? styles.outline : ""} 
                         ${props.underlined ? styles.underline : ""}`;
     return (
         <div>

@@ -29,6 +29,10 @@ export default class CustomAlert extends React.Component<CustomAlertProps, Custo
         });
     }
 
+    public get visible(): boolean {
+        return this.state.visible;
+    }
+
     public show(timeout?: number): void {
         this.visible = true;
 

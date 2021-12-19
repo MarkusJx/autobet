@@ -18,4 +18,8 @@ export default abstract class ValueComponent extends React.Component<{}, ValueCo
             value: val
         });
     }
+
+    public getValue(): number {
+        return this.state.value;
+    }
 }

@@ -48,7 +48,7 @@ export default class Status extends React.Component<{}, StatusState> {
     public override render(): React.ReactNode {
         return (
             <Container heading="Status">
-                <StatusText text={this.state.text} color={this.state.color} outline/>
+                <StatusText text={this.state.text} color={this.state.color} outlined/>
             </Container>
         );
     }

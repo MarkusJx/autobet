@@ -1,30 +1,17 @@
 import React from "react";
 import Container from "./util/Container";
 import StatusText from "./util/StatusText";
+import MoneyComponent from "./util/MoneyComponent";
 
-interface MoneyPerHourState {
-    moneyPerHour: number;
-}
-
-export default class MoneyPerHour extends React.Component<{}, MoneyPerHourState> {
+export default class MoneyPerHour extends MoneyComponent {
     public constructor(props: {}) {
-        super(props);
-
-        this.state = {
-            moneyPerHour: 0
-        };
-    }
-
-    public setMoneyPerHour(value: number): void {
-        this.setState({
-            moneyPerHour: value
-        });
+        super(props, true, 0);
     }
 
     public override render(): React.ReactNode {
         return (
             <Container heading="Money earned per hour">
-                <StatusText text={`$${this.state.moneyPerHour}/hr`} color="white" outline/>
+                <StatusText text={`${this.state.value}/hr`} color="white" outlined/>
             </Container>
         );
     }
