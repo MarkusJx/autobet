@@ -190,6 +190,19 @@ bool webui::running() {
     return webUi->running();
 }
 
+std::string &get404Page(const std::string &base_dir) {
+    static std::string page;
+    if (page.empty()) {
+        std::ifstream stream(base_dir + "/404.html");
+        std::stringstream buffer;
+        buffer << stream.rdbuf();
+        stream.close();
+        page = buffer.str();
+    }
+
+    return page;
+}
+
 /**
  * Try to start the web ui
  *
@@ -200,8 +213,8 @@ bool webui::startWebUi(const std::string &ip) {
         // Set the base directory to the appropriate directory
         // depending on whether the program is packed or not
         std::string base_dir;
-        if (utils::fileExists("web")) {
-            base_dir = "web";
+        if (utils::fileExists("web-ui/out")) {
+            base_dir = "web-ui/out";
         } else if (utils::fileExists("resources/web")) {
             base_dir = "resources/web";
         } else {
@@ -216,6 +229,12 @@ bool webui::startWebUi(const std::string &ip) {
 
         webUi->setError([](const std::string &s) {
             logger::StaticLogger::simpleError(s);
+        });
+
+        webUi->getHttpServer()->set_error_handler([base_dir](const auto&, auto& res) {
+            if (res.status == 404) {
+                res.set_content(get404Page(base_dir), "text/html");
+            }
         });
     } catch (const std::exception &e) {
         // This should not happen on a modern system

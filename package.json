@@ -4,16 +4,20 @@
     "description": "A GTA Online horse racing betting bot",
     "main": "main.js",
     "scripts": {
-        "build": "cd autobetlib && npm run-script build && cd .. && tsc",
+        "build": "npm run build:web && npm run build:autobetlib && tsc",
         "postbuild": "node install.js --postbuild",
         "start": "electron .",
         "prestart": "npm run-script build",
         "test": "electron . --enableDevTools",
         "pack": "electron-builder",
         "prepack": "npm run-script build",
-        "postinstall": "node install.js --downloadModel && cd autobetlib && npm install",
+        "postinstall": "node install.js --downloadModel && npm run install:autobetlib && npm run install:web",
         "clean": "node install.js --clean && cd autobetlib && npm run-script clean",
-        "clean_all": "cd autobetlib && npm run-script clean && cd .. && node install.js --clean_all"
+        "clean_all": "cd autobetlib && npm run-script clean && cd .. && node install.js --clean_all",
+        "build:web": "cd web-ui && npm run build",
+        "build:autobetlib": "cd autobetlib && npm run build",
+        "install:web": "cd web-ui && npm install",
+        "install:autobetlib": "cd autobetlib && npm install"
     },
     "repository": {
         "type": "git",
@@ -94,12 +98,10 @@
                 "to": "icon.png"
             },
             {
-                "from": "web",
+                "from": "web-ui/out",
                 "to": "web",
                 "filter": [
-                    "**/*.min.*",
-                    "**/index.html",
-                    "**/favicon.ico"
+                    "**/*"
                 ]
             }
         ],
