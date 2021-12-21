@@ -41,6 +41,9 @@ export default class Home extends React.Component {
                         <CustomAlert severity="error" ref={e => StaticInstances.bettingStopErrorAlert = e} closeable>
                             Could not stop the betting process
                         </CustomAlert>
+                        <CustomAlert severity="error" ref={e => StaticInstances.notificationErrorAlert = e} closeable>
+                            Could not enable notifications: Your browser does not support notifications
+                        </CustomAlert>
                         <CustomAlert severity="warning" ref={e => this.disconnectedAlert = e} closeable>
                             Disconnected. Retrying to reconnect in 10 seconds.
                         </CustomAlert>

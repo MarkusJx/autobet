@@ -11,6 +11,7 @@ import MoneyThisSession from "./MoneyThisSession";
 import GameRunning from "./GameRunning";
 import RacesLost from "./RacesLost";
 import StartStopButton from "./StartStopButton";
+import EnableNotifications from "./EnableNotifications";
 
 export default class MainContent extends React.Component {
     private status: Status | null = null;
@@ -23,6 +24,7 @@ export default class MainContent extends React.Component {
     private moneyThisSession: MoneyThisSession | null = null;
     private gameRunning: GameRunning | null = null;
     private startStopButton: StartStopButton | null = null;
+    private enableNotifications: EnableNotifications | null = null;
 
     public override render(): React.ReactNode {
         return (
@@ -37,6 +39,7 @@ export default class MainContent extends React.Component {
                 <MoneyThisSession ref={e => this.moneyThisSession = e}/>
                 <GameRunning ref={e => this.gameRunning = e}/>
                 <StartStopButton ref={e => this.startStopButton = e}/>
+                <EnableNotifications ref={e => this.enableNotifications = e}/>
             </div>
         );
     }
