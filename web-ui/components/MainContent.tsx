@@ -38,8 +38,8 @@ export default class MainContent extends React.Component {
                 <ProbOfWinning ref={e => this.probOfWinning = e}/>
                 <MoneyThisSession ref={e => this.moneyThisSession = e}/>
                 <GameRunning ref={e => this.gameRunning = e}/>
-                <StartStopButton ref={e => this.startStopButton = e}/>
                 <EnableNotifications ref={e => this.enableNotifications = e}/>
+                <StartStopButton ref={e => this.startStopButton = e}/>
             </div>
         );
     }

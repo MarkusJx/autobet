@@ -21,6 +21,26 @@ ExternalProject_Add(zip_proj
 ExternalProject_Get_Property(zip_proj install_dir)
 set(zip_dir ${install_dir})
 
+set(PUSHA_ROOT "${CMAKE_SOURCE_DIR}/external/pusha")
+find_package(OpenSSL REQUIRED)
+get_filename_component(OPENSSL_ROOT ${OPENSSL_INCLUDE_DIR} DIRECTORY)
+message(STATUS ${OPENSSL_ROOT})
+ExternalProject_Add(pusha_proj
+        #PREFIX "${PUSHA_ROOT}"
+        #DOWNLOAD_COMMAND "" # Disable download step
+        #SOURCE_DIR "${PUSHA_ROOT}" # Source dir for configuration
+        #INSTALL_DIR ${PUSHA_ROOT}
+        GIT_REPOSITORY "https://github.com/rnascunha/pusha"
+        GIT_TAG master
+        #CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env OPENSSL_ROOT_DIR=${OPENSSL_ROOT} ${CMAKE_COMMAND} . -B build
+        #BUILD_IN_SOURCE true
+        #BUILD_COMMAND cmake --build build
+        #CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        CMAKE_ARGS -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT}
+)
+ExternalProject_Get_Property(pusha_proj install_dir)
+set(pusha_dir ${install_dir})
+
 # Include everything
 include_directories(${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_INC}
                     ${CMAKE_SOURCE_DIR}/external/CppJsLib)

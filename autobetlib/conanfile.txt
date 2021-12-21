@@ -3,6 +3,7 @@ opencv/4.5.2
 nlohmann_json/3.9.1
 cpp-httplib/0.8.8
 websocketpp/0.8.2
+openssl/1.1.1h
 
 [generators]
 cmake

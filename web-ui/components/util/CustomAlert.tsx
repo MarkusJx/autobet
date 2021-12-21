@@ -10,6 +10,7 @@ interface CustomAlertProps {
 
 interface CustomAlertState {
     visible: boolean;
+    text?: string | undefined | null;
 }
 
 export default class CustomAlert extends React.Component<CustomAlertProps, CustomAlertState> {
@@ -55,6 +56,12 @@ export default class CustomAlert extends React.Component<CustomAlertProps, Custo
         }
     }
 
+    public setText(text: string | null) {
+        this.setState({
+            text: text
+        });
+    }
+
     public override render() {
         return (
             <Collapse in={this.state.visible}>
@@ -65,7 +72,7 @@ export default class CustomAlert extends React.Component<CustomAlertProps, Custo
                     </IconButton> : undefined
                 } style={{marginTop: '10px'}}>
                     {this.props.title ? <AlertTitle>{this.props.title}</AlertTitle> : undefined}
-                    {this.props.children}
+                    {this.state.text || this.props.children}
                 </Alert>
             </Collapse>
         );
