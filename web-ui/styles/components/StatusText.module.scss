@@ -1,0 +1,39 @@
+.textBackdrop {
+    display: block;
+    padding: 5px;
+    font-weight: 400;
+    width: max-content;
+    font-size: 2em;
+    margin: 5px 0;
+}
+
+.outline {
+    border-radius: 5px;
+    padding: 0 10px 5px 10px;
+}
+
+.underline {
+    border-bottom: 1px solid;
+    padding: 0;
+    margin-left: 5px;
+}
+
+.green {
+    color: #00ff14;
+    background-color: #09ff0047;
+}
+
+.yellow {
+    color: #fbff00;
+    background-color: #bbc30069;
+}
+
+.red {
+    color: #ff0000;
+    background-color: #ff000030;
+}
+
+.white {
+    color: white;
+    background-color: #ffffff30;
+}
