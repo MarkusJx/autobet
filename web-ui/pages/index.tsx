@@ -35,6 +35,12 @@ export default class Home extends React.Component {
                         <CustomAlert severity="error" ref={e => StaticInstances.gameNotRunningAlert = e} closeable>
                             The game is not running on the target machine. Start the game and try again.
                         </CustomAlert>
+                        <CustomAlert severity="error" ref={e => StaticInstances.bettingStartErrorAlert = e} closeable>
+                            Could not start the betting process
+                        </CustomAlert>
+                        <CustomAlert severity="error" ref={e => StaticInstances.bettingStopErrorAlert = e} closeable>
+                            Could not stop the betting process
+                        </CustomAlert>
                         <CustomAlert severity="warning" ref={e => this.disconnectedAlert = e} closeable>
                             Disconnected. Retrying to reconnect in 10 seconds.
                         </CustomAlert>

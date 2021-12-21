@@ -54,7 +54,7 @@ export default class StartStopButton extends React.Component<{}, StartStopButton
     }
 
     private async onClick(): Promise<void> {
-        if (!this.gameRunning) {
+        if (!this.gameRunning && this.state.start) {
             if (StaticInstances.gameNotRunningAlert?.visible) {
                 StaticInstances.gameNotRunningAlert?.hide();
                 setTimeout(() => {
@@ -67,10 +67,20 @@ export default class StartStopButton extends React.Component<{}, StartStopButton
             this.setLoading(true);
             if (this.state.start) {
                 StaticInstances.bettingStartAlert?.show(5000);
-                await StaticInstances.api.js_start_script();
+                try {
+                    await StaticInstances.api.js_start_script();
+                } catch (e) {
+                    StaticInstances.bettingStartErrorAlert?.show(5000);
+                    console.error("Could not start the betting process:", e);
+                }
             } else {
                 StaticInstances.bettingStopAlert?.show(5000);
-                await StaticInstances.api.js_stop_script();
+                try {
+                    await StaticInstances.api.js_stop_script();
+                } catch (e) {
+                    StaticInstances.bettingStopErrorAlert?.show(5000);
+                    console.error("Could not stop the betting process:", e);
+                }
             }
         }
     }

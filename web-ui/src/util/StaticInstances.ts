@@ -7,4 +7,6 @@ export default class StaticInstances {
     public static gameNotRunningAlert: CustomAlert | null = null;
     public static bettingStartAlert: CustomAlert | null = null;
     public static bettingStopAlert: CustomAlert | null = null;
+    public static bettingStartErrorAlert: CustomAlert | null = null;
+    public static bettingStopErrorAlert: CustomAlert | null = null;
 }
