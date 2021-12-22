@@ -1,17 +1,18 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import React from 'react'
 import styles from '../styles/Home.module.scss'
 import StaticInstances from "../src/util/StaticInstances";
 import CustomAlert from "../components/util/CustomAlert";
 import LoadingBackdrop from "../components/util/LoadingBackdrop";
 import MainContent from "../components/MainContent";
+import Alerts from '../components/Alerts';
+import Footer from '../components/Footer';
 
 export default class Home extends React.Component {
-    private connectionError: CustomAlert | null = null;
-    private disconnectedAlert: CustomAlert | null = null;
-    private connectedAlert: CustomAlert | null = null;
-    private reloadingAlert: CustomAlert | null = null;
+    public connectionError: CustomAlert | null = null;
+    public disconnectedAlert: CustomAlert | null = null;
+    public connectedAlert: CustomAlert | null = null;
+    public reloadingAlert: CustomAlert | null = null;
     private loadingBackdrop: LoadingBackdrop | null = null;
 
     private mainContent: MainContent | null = null;
@@ -27,55 +28,12 @@ export default class Home extends React.Component {
 
                 <main className={styles.main}>
                     <MainContent ref={e => this.mainContent = e}/>
-
-                    <div className={styles.errorContainer}>
-                        <CustomAlert ref={e => this.connectionError = e} severity="error">
-                            Could not connect to the backend!
-                        </CustomAlert>
-                        <CustomAlert severity="error" ref={e => StaticInstances.gameNotRunningAlert = e} closeable>
-                            The game is not running on the target machine. Start the game and try again.
-                        </CustomAlert>
-                        <CustomAlert severity="error" ref={e => StaticInstances.bettingStartErrorAlert = e} closeable>
-                            Could not start the betting process
-                        </CustomAlert>
-                        <CustomAlert severity="error" ref={e => StaticInstances.bettingStopErrorAlert = e} closeable>
-                            Could not stop the betting process
-                        </CustomAlert>
-                        <CustomAlert severity="error" ref={e => StaticInstances.notificationErrorAlert = e} closeable>
-                            Could not enable notifications: Your browser does not support notifications
-                        </CustomAlert>
-                        <CustomAlert severity="warning" ref={e => this.disconnectedAlert = e} closeable>
-                            Disconnected. Retrying to reconnect in 10 seconds.
-                        </CustomAlert>
-                        <CustomAlert severity="info" ref={e => this.reloadingAlert = e}>
-                            Reloading. This may take a while.
-                        </CustomAlert>
-                        <CustomAlert severity="success" ref={e => this.connectedAlert = e} closeable>
-                            Successfully connected.
-                        </CustomAlert>
-                        <CustomAlert severity="info" closeable ref={e => StaticInstances.bettingStartAlert = e}>
-                            Attempting to start the betting process...
-                        </CustomAlert>
-                        <CustomAlert severity="info" closeable ref={e => StaticInstances.bettingStopAlert = e}>
-                            Attempting to stop the betting process...
-                        </CustomAlert>
-                    </div>
+                    <Alerts parent={this}/>
                 </main>
 
                 <LoadingBackdrop ref={e => this.loadingBackdrop = e}/>
 
-                <footer className={styles.footer} style={{display: 'none'}}>
-                    <a
-                        href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Powered by{' '}
-                        <span className={styles.logo}>
-                        <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16}/>
-                    </span>
-                    </a>
-                </footer>
+                <Footer/>
             </div>
         );
     }
@@ -114,7 +72,7 @@ export default class Home extends React.Component {
         };
 
         StaticInstances.api.listen("disconnect", () => {
-            reload();
+            // reload();
         });
 
         StaticInstances.api.listen("connect", () => {
@@ -125,6 +83,7 @@ export default class Home extends React.Component {
             this.connectedAlert?.show(10000);
         });
 
-        init();
+        // init();
+        this.loadingBackdrop?.setOpen(false);
     }
 }

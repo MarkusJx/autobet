@@ -1,5 +1,5 @@
 import React from "react";
-import {Alert, AlertColor, AlertTitle, Collapse, IconButton} from "@mui/material";
+import { Alert, AlertColor, AlertTitle, Collapse, IconButton } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 
 interface CustomAlertProps {
@@ -35,15 +35,24 @@ export default class CustomAlert extends React.Component<CustomAlertProps, Custo
     }
 
     public show(timeout?: number): void {
-        this.visible = true;
+        const makeVisible = (): void => {
+            this.visible = true;
 
-        if (this.timeout != null) {
-            clearInterval(this.timeout);
-            this.timeout = null;
-        }
+            if (this.timeout != null) {
+                clearInterval(this.timeout);
+                this.timeout = null;
+            }
 
-        if (timeout) {
-            this.timeout = setTimeout(this.hide.bind(this), timeout);
+            if (timeout) {
+                this.timeout = setTimeout(this.hide.bind(this), timeout);
+            }
+        };
+
+        if (this.visible) {
+            this.hide();
+            setTimeout(makeVisible, 250);
+        } else {
+            makeVisible();
         }
     }
 
@@ -67,10 +76,10 @@ export default class CustomAlert extends React.Component<CustomAlertProps, Custo
             <Collapse in={this.state.visible}>
                 <Alert severity={this.props.severity} action={
                     this.props.closeable ?
-                    <IconButton aria-label="close" color="inherit" size="small" onClick={() => this.visible = false}>
-                        <CloseIcon fontSize="inherit" />
-                    </IconButton> : undefined
-                } style={{marginTop: '10px'}}>
+                        <IconButton aria-label="close" color="inherit" size="small" onClick={() => this.visible = false}>
+                            <CloseIcon fontSize="inherit" />
+                        </IconButton> : undefined
+                } style={{ marginTop: '10px' }}>
                     {this.props.title ? <AlertTitle>{this.props.title}</AlertTitle> : undefined}
                     {this.state.text || this.props.children}
                 </Alert>

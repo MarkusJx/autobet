@@ -13,14 +13,12 @@
         "@mui/icons-material": "^5.2.4",
         "@mui/lab": "^5.0.0-alpha.60",
         "@mui/material": "^5.2.4",
-        "elliptic": "^6.5.4",
         "next": "12.0.7",
         "node-sass": "^6.0.0",
         "react": "17.0.2",
         "react-dom": "17.0.2"
     },
     "devDependencies": {
-        "@types/elliptic": "^6.4.14",
         "@types/node": "17.0.0",
         "@types/react": "17.0.37",
         "eslint": "8.4.1",

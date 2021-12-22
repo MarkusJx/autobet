@@ -55,14 +55,7 @@ export default class StartStopButton extends React.Component<{}, StartStopButton
 
     private async onClick(): Promise<void> {
         if (!this.gameRunning && this.state.start) {
-            if (StaticInstances.gameNotRunningAlert?.visible) {
-                StaticInstances.gameNotRunningAlert?.hide();
-                setTimeout(() => {
-                    StaticInstances.gameNotRunningAlert?.show(10000);
-                }, 250);
-            } else {
-                StaticInstances.gameNotRunningAlert?.show(10000);
-            }
+            StaticInstances.gameNotRunningAlert?.show(5000);
         } else {
             this.setLoading(true);
             if (this.state.start) {
