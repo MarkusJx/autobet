@@ -37,8 +37,16 @@ std::atomic<float> variables::multiplierH = 0;
 std::atomic<int32_t> variables::xPos = 0;
 std::atomic<int32_t> variables::yPos = 0;
 
-std::shared_ptr<uiNavigationStrategies::navigationStrategy> variables::navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
+std::shared_ptr<uiNavigationStrategies::navigationStrategy> variables::navigationStrategy = nullptr;
+std::shared_ptr<markusjx::autobet::database> variables::database = nullptr;
+std::shared_ptr<markusjx::autobet::push_notifications> variables::pushNotifications = nullptr;
 
 bool variables::isDefaultGameApplication() {
     return strcmp("GTA5.exe", game_program_name) == 0 && strcmp("Grand Theft Auto V", game_process_name) == 0;
+}
+
+void variables::init() {
+    navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
+    database = std::make_shared<markusjx::autobet::database>();
+    pushNotifications = std::make_shared<markusjx::autobet::push_notifications>();
 }

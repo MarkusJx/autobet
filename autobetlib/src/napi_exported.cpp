@@ -911,6 +911,8 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
         variables::setProgramName("GTA5.exe");
         variables::setProcessName("Grand Theft Auto V");
 
+        variables::init();
+
         quit = [] {
             try {
                 control::kill(true);

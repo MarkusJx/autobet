@@ -21,35 +21,31 @@ ExternalProject_Add(zip_proj
 ExternalProject_Get_Property(zip_proj install_dir)
 set(zip_dir ${install_dir})
 
-set(PUSHA_ROOT "${CMAKE_SOURCE_DIR}/external/pusha")
 find_package(OpenSSL REQUIRED)
 get_filename_component(OPENSSL_ROOT ${OPENSSL_INCLUDE_DIR} DIRECTORY)
-message(STATUS ${OPENSSL_ROOT})
+
 ExternalProject_Add(pusha_proj
-        #PREFIX "${PUSHA_ROOT}"
-        #DOWNLOAD_COMMAND "" # Disable download step
-        #SOURCE_DIR "${PUSHA_ROOT}" # Source dir for configuration
-        #INSTALL_DIR ${PUSHA_ROOT}
-        GIT_REPOSITORY "https://github.com/rnascunha/pusha"
+        GIT_REPOSITORY "https://github.com/MarkusJx/pusha"
         GIT_TAG master
-        #CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env OPENSSL_ROOT_DIR=${OPENSSL_ROOT} ${CMAKE_COMMAND} . -B build
-        #BUILD_IN_SOURCE true
-        #BUILD_COMMAND cmake --build build
-        #CMAKE_CACHE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
         CMAKE_ARGS -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT}
-)
+        )
 ExternalProject_Get_Property(pusha_proj install_dir)
 set(pusha_dir ${install_dir})
 
 # Include everything
 include_directories(${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_INC}
-                    ${CMAKE_SOURCE_DIR}/external/CppJsLib ${CMAKE_SOURCE_DIR}/external/csv/single_include)
+        ${CMAKE_SOURCE_DIR}/external/CppJsLib ${CMAKE_SOURCE_DIR}/external/csv/single_include
+        ${pusha_dir}/src/pusha_proj/include_cpp
+        ${pusha_dir}/src/pusha_proj/include
+        ${pusha_dir}/src/pusha_proj/third/ecec/include
+        )
 
 set(src ${CMAKE_SOURCE_DIR}/src)
 set(AUTOBETLIB_SRC ${src}/debug/debug.cpp ${src}/autostop.cpp ${src}/logger.cpp ${src}/betting.cpp
         ${src}/opencv_link.cpp ${src}/settings.cpp ${src}/utils.cpp ${src}/webui.cpp ${src}/napi_exported.cpp
         ${src}/variables.cpp ${src}/control.cpp ${src}/windowUtils.cpp ${src}/controls/controller.cpp
-        ${src}/controls/navigationStrategies.cpp ${src}/historic_data.cpp)
+        ${src}/controls/navigationStrategies.cpp src/push_notifications.cpp ${src}/historic_data.cpp src/database.cpp)
 
 # Add the library
 add_library(${PROJECT_NAME} SHARED ${AUTOBETLIB_SRC} ${CMAKE_JS_SRC})
@@ -57,11 +53,16 @@ add_library(${PROJECT_NAME} SHARED ${AUTOBETLIB_SRC} ${CMAKE_JS_SRC})
 # Set the library directory
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 
+# Set pusha imports
+set(PUSHA_LIB "${pusha_dir}/src/pusha_proj-build/${CMAKE_BUILD_TYPE}/pusha.lib")
+set(ECE_LIB "${pusha_dir}/src/pusha_proj-build/third/ecec/${CMAKE_BUILD_TYPE}/ece.lib")
+
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
 target_link_directories(${PROJECT_NAME} PRIVATE ${zip_dir}/lib)
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CONAN_LIBS} zip vXboxInterface)
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CONAN_LIBS} zip vXboxInterface ${PUSHA_LIB}
+        ${ECE_LIB})
 
 # Include N-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"
@@ -88,3 +89,4 @@ endif ()
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 
 add_compile_definitions(CPPJSLIB_ENABLE_WEBSOCKET)
+add_dependencies(${PROJECT_NAME} zip_proj pusha_proj)

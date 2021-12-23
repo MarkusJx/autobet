@@ -4,7 +4,9 @@
 #include <cstdint>
 #include <atomic>
 
+#include "database.hpp"
 #include "opencv_link.hpp"
+#include "push_notifications.hpp"
 #include "controls/navigationStrategies.hpp"
 
 class variables {
@@ -42,6 +44,8 @@ public:
     static std::atomic<int32_t> yPos;
 
     static std::shared_ptr<uiNavigationStrategies::navigationStrategy> navigationStrategy;
+    static std::shared_ptr<markusjx::autobet::database> database;
+    static std::shared_ptr<markusjx::autobet::push_notifications> pushNotifications;
 
     /**
      * Check if the game program and process names are set to their default values
@@ -49,6 +53,11 @@ public:
      * @return true if the selected game program is GTA5.exe
      */
     static bool isDefaultGameApplication();
+
+    /**
+     * Initialize all required static classes
+     */
+    static void init();
 };
 
 #endif //AUTOBETLIB_VARIABLES_HPP

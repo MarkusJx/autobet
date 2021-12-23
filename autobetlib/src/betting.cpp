@@ -114,7 +114,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
     // If evens exist, only bet if the second highest percentage is lower than 4/1 (basically only 4/1 or 5/1)
     if (std::find(std::begin(res), std::end(res), 1) != std::end(res)) {
         short lowest = -1;
-        for (short re : res) {
+        for (short re: res) {
             // Set lowest if res[s] is smaller than lowest and not equal to 1 (evens), since this will always be lower,
             // but the second' lowest percentage is to be searched for.
             if ((lowest == -1 || re < lowest) && re != 1) {
@@ -377,6 +377,8 @@ void betting::mainLoop() {
                 StaticLogger::error(
                         "Could not get the position to bet on, retried 3 times, which did not help, stopping betting.");
                 napi_exported::bettingException(lastError);
+                variables::pushNotifications->send_notification("Autobet - Error",
+                                                                "The betting process has been stopped due to an error");
                 stopBetting();
                 break;
             }
