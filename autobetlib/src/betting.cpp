@@ -15,6 +15,7 @@
 #include "variables.hpp"
 #include "webui.hpp"
 #include "napi_exported.hpp"
+#include "historic_data.hpp"
 #include "control.hpp"
 #include "betting.hpp"
 #include "logger.hpp"
@@ -100,7 +101,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
         // Get the odd as a short
         const short b_res = opencv_link::knn::oddToShort(odds[i]);
 
-        // Check if the current result already exist, so there are not multiple >10/1 odds ore there is a evens
+        // Check if the current result already exist, so there are not multiple >10/1 odds ore there is an evens
         // if one of this occurs, bet not on this one
         auto s = std::find(std::begin(res), std::end(res), b_res);
         if (b_res <= 5 && s != std::end(res)) { // If this is 5/1 or higher (%!) and exists multiple times, skip
@@ -115,7 +116,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
         short lowest = -1;
         for (short re : res) {
             // Set lowest if res[s] is smaller than lowest and not equal to 1 (evens), since this will always be lower,
-            // but the second lowest percentage is to be searched for.
+            // but the second' lowest percentage is to be searched for.
             if ((lowest == -1 || re < lowest) && re != 1) {
                 lowest = re;
             }
@@ -179,6 +180,9 @@ short get_pos(const std::shared_ptr<void> &src) {
             StaticLogger::debugStream() << "Odd prediction: " << odds[i];
         }
     }
+
+    // Save the odds
+    markusjx::autobet::historic_data::save_odds(odds);
 
     if (napi_exported::isBettingFunctionSet()) {
         // Call the bettingPositionCallback
@@ -275,7 +279,7 @@ void getWinnings() {
     // Delete the original screenshot
     src.reset();
 
-    // Get the prediction and check if its an actual odd.
+    // Get the prediction and check if it's an actual odd.
     // For further information on how an odd looks like,
     // take a look at the implementation of opencv_link::knn::isWinning(1)
     std::string pred;
@@ -294,6 +298,9 @@ void getWinnings() {
     // Convert the prediction to an integer
     const int res = opencv_link::knn::winningToInt(pred);
     StaticLogger::debugStream() << "Winnings prediction: " << res;
+
+    // Save the winnings to the historic data file
+    markusjx::autobet::historic_data::save_winnings(res);
 
     // Update the winnings
     updateWinnings(res);
@@ -344,7 +351,7 @@ void betting::mainLoop() {
             // If this doesn't help, the betting will be stopped.
             for (int i = 0; i < 3; i++) {
                 try {
-                    // Take a screen shot
+                    // Take a screenshot
                     std::shared_ptr<void> src(utils::TakeScreenShot(variables::xPos, variables::yPos, width, height),
                                               DeleteObject);
                     pos = get_pos(src);
@@ -361,6 +368,9 @@ void betting::mainLoop() {
                     std::this_thread::sleep_for(std::chrono::seconds(5));
                 }
             }
+
+            // Save the horse on which the bet will be placed on
+            markusjx::autobet::historic_data::save_bet_placed_on(pos);
 
             // Check if the position could be retrieved
             if (pos == -2) {

@@ -7,6 +7,7 @@
 #include <atlimage.h>
 #include <iostream>
 #include <shlobj.h>
+#include <filesystem>
 
 #include "variables.hpp"
 #include "logger.hpp"
@@ -461,9 +462,24 @@ std::string utils::getDocumentsFolder() {
     HRESULT result = SHGetFolderPathA(nullptr, CSIDL_MYDOCUMENTS, nullptr, SHGFP_TYPE_CURRENT, res.data());
 
     if (result != S_OK) {
-        return std::string();
+        return {};
     } else {
         res.resize(strlen(res.c_str()));
         return res;
+    }
+}
+
+std::string utils::get_or_create_documents_folder() {
+    const std::string documents = utils::getDocumentsFolder();
+
+    if (documents.empty()) {
+        throw std::runtime_error("Could not get the documents folder");
+    }
+
+    const std::string dir = documents + "\\autobet";
+    if (!utils::fileExists(dir) && !std::filesystem::create_directory(dir)) {
+        throw std::runtime_error("Could not create the autobet directory");
+    } else {
+        return dir;
     }
 }
