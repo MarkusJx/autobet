@@ -12,6 +12,7 @@ import GameRunning from "./GameRunning";
 import RacesLost from "./RacesLost";
 import StartStopButton from "./StartStopButton";
 import EnableNotifications from "./EnableNotifications";
+import PageVisibility from 'react-page-visibility';
 
 export default class MainContent extends React.Component {
     private status: Status | null = null;
@@ -40,6 +41,7 @@ export default class MainContent extends React.Component {
                 <GameRunning ref={e => this.gameRunning = e}/>
                 <EnableNotifications ref={e => this.enableNotifications = e}/>
                 <StartStopButton ref={e => this.startStopButton = e}/>
+                <PageVisibility onChange={this.visibilityChange.bind(this)}/>
             </div>
         );
     }
@@ -56,6 +58,18 @@ export default class MainContent extends React.Component {
         StaticInstances.api.expose(this.webSetRacesLost.bind(this), "webSetRacesLost");
     }
 
+    private async visibilityChange(visible: boolean): Promise<void> {
+        try {
+            if (visible) {
+                await this.loadData();
+            } else {
+                this.timeRunning?.stopTimer();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     public async loadData(): Promise<void> {
         StaticInstances.api.get_current_winnings().then(this.webSetWinnings.bind(this));
         StaticInstances.api.get_all_winnings().then(this.webSetWinningsAll.bind(this));
@@ -63,6 +77,7 @@ export default class MainContent extends React.Component {
         StaticInstances.api.get_races_won().then(this.webSetRacesWon.bind(this));
         StaticInstances.api.get_races_lost().then(this.webSetRacesLost.bind(this));
         StaticInstances.api.get_current_winnings().then(this.webSetWinnings.bind(this));
+        StaticInstances.api.get_gta_running().then(this.webSetGtaRunning.bind(this));
 
         const running: number = await StaticInstances.api.get_running();
         switch (running) {

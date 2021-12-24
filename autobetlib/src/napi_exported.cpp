@@ -133,6 +133,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         utils::setDpiAware();
+        variables::init();
 
         // Print some system information
         utils::printSystemInformation();
@@ -144,8 +145,6 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 #ifndef NDEBUG
 #       pragma message("INFO: Building in debug mode")
         StaticLogger::warning("Program was compiled in debug mode");
-#else
-#       pragma message("INFO: Building in release mode")
 #endif //NDEBUG
         // Check if model.yml exists
         if (!utils::fileExists("resources/data/model.yml")) {
@@ -910,8 +909,6 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
         betting::setWebUiFunctions();
         variables::setProgramName("GTA5.exe");
         variables::setProcessName("Grand Theft Auto V");
-
-        variables::init();
 
         quit = [] {
             try {

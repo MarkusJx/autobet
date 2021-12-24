@@ -2,6 +2,8 @@ import { Switch, Tooltip } from "@mui/material";
 import React from "react";
 import StaticInstances from "../src/util/StaticInstances";
 import Container from "./util/Container";
+import PushNotificationSubscriber from "../src/interfaces/PushNotificationSubscriber";
+import PartialObjectValidator from "../src/util/PartialObjectValidator";
 
 interface EnableNotificationsState {
     checked: boolean;
@@ -105,7 +107,17 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
                 } else {
                     try {
                         const subscription = await this.subscribe();
-                        console.log(subscription.toJSON());
+                        const subJson = subscription.toJSON();
+                        const subscriber: Partial<PushNotificationSubscriber> = {
+                            subscriber: "sup dude",
+                            endpoint: subJson.endpoint,
+                            p256dh: subJson.keys?.p256dh,
+                            auth: subJson.keys?.auth
+                        };
+
+                        await StaticInstances.api.push_notifications_subscribe(
+                            PartialObjectValidator.validate(subscriber)
+                        );
                         StaticInstances.notificationsEnabledAlert?.show(5000);
                     } catch (e) {
                         console.error(e);

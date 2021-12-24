@@ -3,6 +3,9 @@ import {CppJsLib} from "../../../autobetlib/external/CppJsLib/ts/CppJsLib";
 import CustomAlert from "../../components/util/CustomAlert";
 
 export default class StaticInstances {
+    private constructor() {
+    }
+
     public static readonly api: AutobetApi = <AutobetApi> new CppJsLib();
     public static gameNotRunningAlert: CustomAlert | null = null;
     public static bettingStartAlert: CustomAlert | null = null;

@@ -9,10 +9,13 @@
     background: linear-gradient(
                 115deg, #002a77d9, rgba(0, 201, 56, .85),rgba(0, 60, 255, .85), rgba(0, 183, 255, .85)
     );
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto min-content;
 }
 
 .main {
-    min-height: 100vh;
+    //min-height: 100vh;
     padding: 4rem 0;
     flex: 2;
     display: flex;

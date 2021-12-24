@@ -11,7 +11,8 @@ std::atomic<bool> variables::starting = false;
 std::atomic<bool> variables::gtaVRunning = false;
 std::atomic<bool> variables::stopping = false;
 std::atomic<int> variables::winnings = 0;
-// NOTE: This could also be a int32, you would have to bet 11 years to fill that shit up
+// NOTE: This could also be an int32, you would have to bet 11 years to fill that shit up
+// Another note: CLion thinks that the word 'shit' is too offensive. Fuck you too.
 std::atomic<int64_t> variables::winnings_all = 0L;
 opencv_link::knn variables::knn = nullptr;
 

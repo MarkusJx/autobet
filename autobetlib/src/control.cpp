@@ -111,7 +111,6 @@ void control::listenForKeycomb() {
         }
     };
 
-#   pragma message(TODO(Maybe add custom key combinations))
     while (variables::keyCombListen) {
         // If SHIFT+CTRL+F9 is pressed, start/stop, if SHIFT+CTRL+F10 is pressed, quit
         if (unsigned(GetKeyState(VK_SHIFT)) & unsigned(0x8000)) {

@@ -32,7 +32,6 @@ export default class Home extends React.Component {
                 </main>
 
                 <LoadingBackdrop ref={e => this.loadingBackdrop = e}/>
-
                 <Footer/>
             </div>
         );
@@ -43,7 +42,7 @@ export default class Home extends React.Component {
         StaticInstances.api.logging = false;
 
         const init = () => {
-            StaticInstances.api.init().then(async () => {
+            StaticInstances.api.init(!!window?.location).then(async () => {
                 await this.mainContent?.loadData();
             }).catch(e => {
                 console.error(e);
@@ -72,7 +71,7 @@ export default class Home extends React.Component {
         };
 
         StaticInstances.api.listen("disconnect", () => {
-            // reload();
+            reload();
         });
 
         StaticInstances.api.listen("connect", () => {
@@ -83,7 +82,7 @@ export default class Home extends React.Component {
             this.connectedAlert?.show(10000);
         });
 
-        // init();
+        init();
         this.loadingBackdrop?.setOpen(false);
     }
 }

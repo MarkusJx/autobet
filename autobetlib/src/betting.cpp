@@ -80,11 +80,13 @@ void set_positions() {
  * @param val the new value
  */
 void setGtaVRunning(bool val) {
-    // Only send data to the web listeners every 10-ish seconds
-    static int count = 0;
-    count = (count + 1) % 10;
+    // Only send data to the web listeners if something has changed
+    static bool prev = false;
     try {
-        if (count == 0) webui::setGtaRunning(val);
+        if (val != prev) {
+            prev = val;
+            webui::setGtaRunning(val);
+        }
 
         variables::gtaVRunning = val;
         napi_exported::setGtaRunning(val);

@@ -45,7 +45,8 @@ set(src ${CMAKE_SOURCE_DIR}/src)
 set(AUTOBETLIB_SRC ${src}/debug/debug.cpp ${src}/autostop.cpp ${src}/logger.cpp ${src}/betting.cpp
         ${src}/opencv_link.cpp ${src}/settings.cpp ${src}/utils.cpp ${src}/webui.cpp ${src}/napi_exported.cpp
         ${src}/variables.cpp ${src}/control.cpp ${src}/windowUtils.cpp ${src}/controls/controller.cpp
-        ${src}/controls/navigationStrategies.cpp src/push_notifications.cpp ${src}/historic_data.cpp src/database.cpp)
+        ${src}/controls/navigationStrategies.cpp src/push_notifications.cpp ${src}/historic_data.cpp
+        src/database.cpp src/objects/push_notification_subscriber.cpp src/exposed_methods.cpp)
 
 # Add the library
 add_library(${PROJECT_NAME} SHARED ${AUTOBETLIB_SRC} ${CMAKE_JS_SRC})
@@ -60,9 +61,16 @@ set(ECE_LIB "${pusha_dir}/src/pusha_proj-build/third/ecec/${CMAKE_BUILD_TYPE}/ec
 # n-api stuff
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
+#set(IMPORTED_LIBS ${CONAN_LIBS_BOOST} ${CONAN_LIBS_OPENCV} ${CONAN_LIBS_OPENSSL} ${CONAN_LIBS_SQLITECPP}
+#        ${CONAN_LIBS_WEBSOCKETPP} ${CONAN_LIBS_CPP-HTTPLIB} ${CONAN_LIBS_SQLITE3} ${CONAN_LIBS_LIBJPEG}
+#        ${CONAN_LIBS_JASPER} ${CONAN_LIBS_LIBPNG} ${CONAN_LIBS_OPENEXR} ${CONAN_LIBS_LIBTIFF} ${CONAN_LIBS_LIBDEFLATE}
+#        ${CONAN_LIBS_JBIG} ${CONAN_LIBS_ZSTD} ${CONAN_LIBS_LIBWEBP} ${CONAN_LIBS_EIGEN} ${CONAN_LIBS_QUIRC}
+#        ${CONAN_LIBS_PROTOBUF} ${CONAN_LIBS_BZIP2} ${CONAN_LIBS_LIBICONV} ${CONAN_LIBS_XZ_UTILS}
+#        ${CONAN_LIBS_BROTLI})
+
 target_link_directories(${PROJECT_NAME} PRIVATE ${zip_dir}/lib)
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${CONAN_LIBS} zip vXboxInterface ${PUSHA_LIB}
-        ${ECE_LIB})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} zip vXboxInterface ${PUSHA_LIB}
+        ${ECE_LIB} ${CONAN_LIBS})
 
 # Include N-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"
@@ -86,7 +94,12 @@ endif ()
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
 
 # NOTE: This option is required when building a debug build (debug/relWithDebInfo)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 
+add_compile_definitions(CPPHTTPLIB_BROTLI_SUPPORT)
 add_compile_definitions(CPPJSLIB_ENABLE_WEBSOCKET)
-add_dependencies(${PROJECT_NAME} zip_proj pusha_proj)
+add_compile_definitions(CPPJSLIB_ENABLE_HTTPS)
+
+if (ADD_DEPENDENCIES)
+    add_dependencies(${PROJECT_NAME} zip_proj pusha_proj)
+endif ()

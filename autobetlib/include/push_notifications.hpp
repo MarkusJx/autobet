@@ -10,8 +10,12 @@ namespace markusjx::autobet {
         push_notifications();
 
         void send_notification(const std::string &title, const std::string &message);
+
+        [[nodiscard]] const std::string &get_public_key() const;
+
     private:
         std::unique_ptr<pusha::key> key;
+        std::string public_key;
     };
 }
 

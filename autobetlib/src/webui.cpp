@@ -9,11 +9,13 @@
 
 #include <CppJsLib.hpp>
 #include <memory>
+#include <filesystem>
 
 #include "webui.hpp"
-#include "logger.hpp"
 #include "util/utils.hpp"
 #include "autostop.hpp"
+#include "exposed_methods.hpp"
+#include "logger.hpp"
 
 std::unique_ptr<markusjx::cppJsLib::Server> webUi = nullptr;
 
@@ -222,7 +224,22 @@ bool webui::startWebUi(const std::string &ip) {
             return false;
         }
 
+#ifdef CPPJSLIB_ENABLE_HTTPS
+        const std::filesystem::path public_key = utils::get_or_create_documents_folder() + "\\ssl_public.pem";
+        const std::filesystem::path private_key = utils::get_or_create_documents_folder() + "\\ssl_private.pem";
+
+        if (std::filesystem::exists(private_key) && std::filesystem::exists(public_key)) {
+            logger::StaticLogger::debug("The private and public key files exist, starting the server with ssl enabled");
+            webUi = std::make_unique<markusjx::cppJsLib::SSLServer>(base_dir, public_key.string(),
+                                                                    private_key.string());
+        } else {
+            logger::StaticLogger::debug(
+                    "The private and public key files do not exist, starting the server with ssl disabled");
+            webUi = std::make_unique<markusjx::cppJsLib::Server>(base_dir);
+        }
+#else
         webUi = std::make_unique<markusjx::cppJsLib::Server>(base_dir);
+#endif //CPPJSLIB_ENABLE_HTTPS
         webUi->setLogger([](const std::string &s) {
             logger::StaticLogger::simpleDebug(s);
         });
@@ -231,7 +248,11 @@ bool webui::startWebUi(const std::string &ip) {
             logger::StaticLogger::simpleError(s);
         });
 
-        webUi->getHttpServer()->set_error_handler([base_dir](const auto&, auto& res) {
+        webUi->getHttpServer()->set_default_headers({
+            {"Cache-Control", "max-age=31536000"}
+        });
+
+        webUi->getHttpServer()->set_error_handler([base_dir](const auto &, auto &res) {
             if (res.status == 404) {
                 res.set_content(get404Page(base_dir), "text/html");
             }
@@ -259,6 +280,10 @@ bool webui::startWebUi(const std::string &ip) {
     webUi->expose(get_autostop_time);
     webUi->expose(set_autostop_time);
     webUi->expose(set_autostop_money);
+
+    using namespace markusjx::autobet::exposed_methods;
+    webUi->expose(get_app_server_key);
+    webUi->expose(push_notifications_subscribe);
 
     // Import some functions, ignore their results
     webUi->import(webSetGtaRunning, false);
