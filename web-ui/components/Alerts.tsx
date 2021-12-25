@@ -50,6 +50,12 @@ export default class Alerts extends React.Component<AlertsProps> {
                 <CustomAlert severity="info" closeable ref={e => StaticInstances.bettingStopAlert = e}>
                     Attempting to stop the betting process...
                 </CustomAlert>
+                <CustomAlert severity="success" ref={e => StaticInstances.bettingStartedAlert = e} closeable>
+                    Successfully started the betting process
+                </CustomAlert>
+                <CustomAlert severity="success" ref={e => StaticInstances.bettingStoppedAlert = e} closeable>
+                    Successfully stopped the betting process
+                </CustomAlert>
                 <CustomAlert severity="success" ref={e => this.parent.connectedAlert = e} closeable>
                     Successfully connected.
                 </CustomAlert>

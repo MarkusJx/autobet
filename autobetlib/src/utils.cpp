@@ -14,6 +14,7 @@
 #include "util/utils.hpp"
 #include "settings.hpp"
 #include "windowUtils.hpp"
+#include "util/iputil.hpp"
 
 std::function<void()> clbk = {};
 std::unique_ptr<windowUtils::processInfo> processInfo = nullptr;
@@ -35,7 +36,7 @@ bool generateProcessInfo() {
         }
 
         windowUtils::windowsProgramInfo info(program_name);
-        for (auto &&p : info.getProcesses()) {
+        for (auto &&p: info.getProcesses()) {
             if (p->getWindowName() == process_name) {
                 processInfo = std::move(p);
                 return true;
@@ -62,13 +63,19 @@ std::string utils::getIP() {
     if (settings::has_key(AUTOBET_SETTINGS_WEB_UI_IP)) {
         return settings::read<std::string>(AUTOBET_SETTINGS_WEB_UI_IP);
     } else {
-        utils::IPv4 iPv4;
-        if (!utils::getOwnIP(iPv4)) {
-            StaticLogger::error("Could not retrieve own IP!");
-            return "";
-        }
+        try {
+            return markusjx::autobet::iputil::get_ip();
+        } catch (std::exception &e) {
+            logger::StaticLogger::errorStream() << "Could not retrieve this pc's ip using boost::asio: " << e.what();
 
-        return iPv4.to_string();
+            utils::IPv4 iPv4;
+            if (!utils::getOwnIP(iPv4)) {
+                StaticLogger::error("Could not retrieve own IP!");
+                return "";
+            }
+
+            return iPv4.to_string();
+        }
     }
 }
 

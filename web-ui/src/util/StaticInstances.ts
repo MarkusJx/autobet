@@ -17,4 +17,6 @@ export default class StaticInstances {
     public static notificationsEnabledAlert: CustomAlert | null = null;
     public static notificationsDisabledAlert: CustomAlert | null = null;
     public static notificationsDisableErrorAlert: CustomAlert | null = null;
+    public static bettingStartedAlert: CustomAlert | null = null;
+    public static bettingStoppedAlert: CustomAlert | null = null;
 }

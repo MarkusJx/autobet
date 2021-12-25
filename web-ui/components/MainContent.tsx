@@ -98,6 +98,13 @@ export default class MainContent extends React.Component {
         }
     }
 
+    public async webSetStopped(): Promise<void> {
+        this.status?.setStopped();
+        this.timeRunning?.stopTimer();
+        this.startStopButton?.displayStart(true);
+        this.startStopButton?.setLoading(false);
+    }
+
     private async webSetGtaRunning(running: boolean): Promise<void> {
         this.gameRunning?.setRunning(running);
         this.startStopButton?.setGameRunning(running);
@@ -118,13 +125,6 @@ export default class MainContent extends React.Component {
         this.status?.setRunning();
         this.timeRunning?.startTimer().then();
         this.startStopButton?.displayStart(false);
-        this.startStopButton?.setLoading(false);
-    }
-
-    private async webSetStopped(): Promise<void> {
-        this.status?.setStopped();
-        this.timeRunning?.stopTimer();
-        this.startStopButton?.displayStart(true);
         this.startStopButton?.setLoading(false);
     }
 

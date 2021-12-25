@@ -7,6 +7,7 @@ import LoadingBackdrop from "../components/util/LoadingBackdrop";
 import MainContent from "../components/MainContent";
 import Alerts from '../components/Alerts';
 import Footer from '../components/Footer';
+import Title from "../components/Title";
 
 export default class Home extends React.Component {
     public connectionError: CustomAlert | null = null;
@@ -27,6 +28,7 @@ export default class Home extends React.Component {
                 </Head>
 
                 <main className={styles.main}>
+                    <Title/>
                     <MainContent ref={e => this.mainContent = e}/>
                     <Alerts parent={this}/>
                 </main>
@@ -55,6 +57,7 @@ export default class Home extends React.Component {
 
         let timeout: NodeJS.Timeout | null = null;
         const reload = () => {
+            this.mainContent?.webSetStopped();
             this.disconnectedAlert?.show();
             if (timeout == null) {
                 timeout = setTimeout(() => {

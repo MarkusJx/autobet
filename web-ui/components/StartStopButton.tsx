@@ -62,6 +62,8 @@ export default class StartStopButton extends React.Component<{}, StartStopButton
                 StaticInstances.bettingStartAlert?.show(5000);
                 try {
                     await StaticInstances.api.js_start_script();
+                    StaticInstances.bettingStartAlert?.hide();
+                    StaticInstances.bettingStartedAlert?.show(5000);
                 } catch (e) {
                     StaticInstances.bettingStartErrorAlert?.show(5000);
                     console.error("Could not start the betting process:", e);
@@ -70,6 +72,8 @@ export default class StartStopButton extends React.Component<{}, StartStopButton
                 StaticInstances.bettingStopAlert?.show(5000);
                 try {
                     await StaticInstances.api.js_stop_script();
+                    StaticInstances.bettingStopAlert?.hide();
+                    StaticInstances.bettingStoppedAlert?.show(5000);
                 } catch (e) {
                     StaticInstances.bettingStopErrorAlert?.show(5000);
                     console.error("Could not stop the betting process:", e);

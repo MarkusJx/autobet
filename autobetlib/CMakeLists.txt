@@ -8,6 +8,8 @@ add_compile_definitions(NAPI_CPP_EXCEPTIONS)
 include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+include(${CMAKE_SOURCE_DIR}/util.cmake)
+
 # Get the ExternalProject module
 include(ExternalProject)
 
@@ -46,7 +48,8 @@ set(AUTOBETLIB_SRC ${src}/debug/debug.cpp ${src}/autostop.cpp ${src}/logger.cpp 
         ${src}/opencv_link.cpp ${src}/settings.cpp ${src}/utils.cpp ${src}/webui.cpp ${src}/napi_exported.cpp
         ${src}/variables.cpp ${src}/control.cpp ${src}/windowUtils.cpp ${src}/controls/controller.cpp
         ${src}/controls/navigationStrategies.cpp src/push_notifications.cpp ${src}/historic_data.cpp
-        src/database.cpp src/objects/push_notification_subscriber.cpp src/exposed_methods.cpp)
+        ${src}/database.cpp ${src}/objects/push_notification_subscriber.cpp ${src}/exposed_methods.cpp
+        ${src}/iputil.cpp)
 
 # Add the library
 add_library(${PROJECT_NAME} SHARED ${AUTOBETLIB_SRC} ${CMAKE_JS_SRC})

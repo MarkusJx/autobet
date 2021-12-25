@@ -51,7 +51,7 @@ bool settings::settingsFileExists() {
 bool settings::has_key(const std::string &key) {
     if (settingsFileExists()) {
         const nlohmann::json json = util::readFile();
-        return json.contains(key);
+        return json.contains(key) && json[key] != nullptr;;
     } else {
         return false;
     }
