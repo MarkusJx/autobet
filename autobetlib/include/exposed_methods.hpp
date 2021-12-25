@@ -8,6 +8,8 @@ namespace markusjx::autobet::exposed_methods {
     const std::string &get_app_server_key();
 
     void push_notifications_subscribe(const markusjx::autobet::objects::push_notification_subscriber &sub);
+
+    void push_notifications_unsubscribe(const markusjx::autobet::objects::push_notification_subscriber &sub);
 }
 
 #endif //AUTOBETLIB_EXPOSED_METHODS_HPP

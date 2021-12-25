@@ -46,3 +46,17 @@ void autobet::database::delete_subscriber_by_id(int64_t id) {
     stmt.exec();
     transaction.commit();
 }
+
+void autobet::database::delete_subscriber(const markusjx::autobet::objects::push_notification_subscriber &sub) {
+    logger::StaticLogger::debugStream() << "Deleting subscriber with auth: " << sub.auth;
+    SQLite::Transaction transaction(db);
+    SQLite::Statement stmt(db, DELETE_NOTIFICATION_SUBSCRIBER_BY_CONTENTS);
+
+    stmt.bindNoCopy(1, sub.subscriber);
+    stmt.bindNoCopy(2, sub.p256dh);
+    stmt.bindNoCopy(3, sub.auth);
+    stmt.bindNoCopy(4, sub.endpoint);
+
+    stmt.exec();
+    transaction.commit();
+}

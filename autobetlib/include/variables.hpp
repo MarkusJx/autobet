@@ -43,9 +43,10 @@ public:
     static std::atomic<int32_t> xPos;
     static std::atomic<int32_t> yPos;
 
-    static std::shared_ptr<uiNavigationStrategies::navigationStrategy> navigationStrategy;
-    static std::shared_ptr<markusjx::autobet::database> database;
-    static std::shared_ptr<markusjx::autobet::push_notifications> pushNotifications;
+    static void setNavigationStrategy(std::shared_ptr<uiNavigationStrategies::navigationStrategy> &&strategy);
+    static std::shared_ptr<uiNavigationStrategies::navigationStrategy> navigationStrategy();
+    static std::shared_ptr<markusjx::autobet::database> database();
+    static std::shared_ptr<markusjx::autobet::push_notifications> pushNotifications();
 
     /**
      * Check if the game program and process names are set to their default values
@@ -58,6 +59,11 @@ public:
      * Initialize all required static classes
      */
     static void init();
+
+private:
+    static std::shared_ptr<uiNavigationStrategies::navigationStrategy> _navigationStrategy;
+    static std::shared_ptr<markusjx::autobet::database> _database;
+    static std::shared_ptr<markusjx::autobet::push_notifications> _pushNotifications;
 };
 
 #endif //AUTOBETLIB_VARIABLES_HPP

@@ -12,6 +12,7 @@
 #include "variables.hpp"
 #include "logger.hpp"
 #include "util/utils.hpp"
+#include "settings.hpp"
 #include "windowUtils.hpp"
 
 std::function<void()> clbk = {};
@@ -58,13 +59,17 @@ std::string utils::IPv4::to_string() const {
 }
 
 std::string utils::getIP() {
-    utils::IPv4 iPv4;
-    if (!utils::getOwnIP(iPv4)) {
-        StaticLogger::error("Could not retrieve own IP!");
-        return "";
-    }
+    if (settings::has_key(AUTOBET_SETTINGS_WEB_UI_IP)) {
+        return settings::read<std::string>(AUTOBET_SETTINGS_WEB_UI_IP);
+    } else {
+        utils::IPv4 iPv4;
+        if (!utils::getOwnIP(iPv4)) {
+            StaticLogger::error("Could not retrieve own IP!");
+            return "";
+        }
 
-    return iPv4.to_string();
+        return iPv4.to_string();
+    }
 }
 
 bool utils::openWebsite(const std::string &address) {

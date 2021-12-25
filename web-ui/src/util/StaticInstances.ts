@@ -16,4 +16,5 @@ export default class StaticInstances {
     public static notificationPermissionDeniedAlert: CustomAlert | null = null;
     public static notificationsEnabledAlert: CustomAlert | null = null;
     public static notificationsDisabledAlert: CustomAlert | null = null;
+    public static notificationsDisableErrorAlert: CustomAlert | null = null;
 }

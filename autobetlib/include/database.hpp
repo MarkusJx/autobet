@@ -17,6 +17,8 @@ namespace markusjx::autobet {
 
         void delete_subscriber_by_id(int64_t id);
 
+        void delete_subscriber(const objects::push_notification_subscriber &sub);
+
     private:
         SQLite::Database db;
     };

@@ -48,6 +48,15 @@ bool settings::settingsFileExists() {
     return utils::fileExists(filename);
 }
 
+bool settings::has_key(const std::string &key) {
+    if (settingsFileExists()) {
+        const nlohmann::json json = util::readFile();
+        return json.contains(key);
+    } else {
+        return false;
+    }
+}
+
 nlohmann::json util::readFile() {
     logger::StaticLogger::debug("Reading settings file");
     std::string filename = getSettingsFile();
@@ -80,7 +89,7 @@ void util::writeFile(const nlohmann::json &value) {
     outFile.open(filename);
 
     if (!outFile.is_open()) throw std::exception("Could not open the file");
-    outFile << value;
+    outFile << std::setw(4) << value;
     outFile.close();
 }
 

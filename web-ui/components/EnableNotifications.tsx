@@ -1,9 +1,8 @@
-import { Switch, Tooltip } from "@mui/material";
+import {Switch, Tooltip} from "@mui/material";
 import React from "react";
 import StaticInstances from "../src/util/StaticInstances";
 import Container from "./util/Container";
-import PushNotificationSubscriber from "../src/interfaces/PushNotificationSubscriber";
-import PartialObjectValidator from "../src/util/PartialObjectValidator";
+import {subscriptionToSubscriber} from "../src/interfaces/PushNotificationSubscriber";
 
 interface EnableNotificationsState {
     checked: boolean;
@@ -25,8 +24,14 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
         };
     }
 
-    private get notificationsSupported(): boolean {
+    private static get notificationsSupported(): boolean {
         return typeof window !== "undefined" && !!window?.Notification && !!navigator?.serviceWorker;
+    }
+
+    private static get permissionGranted(): boolean {
+        if (!EnableNotifications.notificationsSupported) return false;
+
+        return window.Notification.permission === "granted";
     }
 
     private set switchDisabled(disabled: boolean) {
@@ -35,14 +40,8 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
         });
     }
 
-    private get permissionGranted(): boolean {
-        if (!this.notificationsSupported) return false;
-
-        return window.Notification.permission === "granted";
-    }
-
     private get serviceWorkerActivated(): boolean {
-        if (!this.notificationsSupported) return false;
+        if (!EnableNotifications.notificationsSupported) return false;
         return this.serviceWorker?.state === "activated";
     }
 
@@ -58,9 +57,10 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
         });
     }
 
-    private setServiceWorker(registration: ServiceWorkerRegistration): void {
-        this.serviceWorkerRegistration = registration;
-        this.serviceWorker = (registration.active || registration.installing || registration.waiting);
+    private static async unregisterServiceWorkers(): Promise<void> {
+        if (!EnableNotifications.notificationsSupported) return;
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(r => r.unregister()));
     }
 
     public override render(): React.ReactNode {
@@ -68,7 +68,7 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
             <Container heading="Enable Notifications">
                 <Tooltip title={this.state.tooltipTitle || "Enable/Disable Notifications"}>
                     <Switch onChange={this.onChange.bind(this)} disabled={this.state.disabled}
-                        checked={this.state.checked} />
+                            checked={this.state.checked}/>
                 </Tooltip>
             </Container>
         );
@@ -76,8 +76,8 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
 
     public override componentDidMount(): void {
         this.switchDisabled = true;
-        if (this.notificationsSupported) {
-            if (this.permissionGranted) {
+        if (EnableNotifications.notificationsSupported) {
+            if (EnableNotifications.permissionGranted) {
                 navigator.serviceWorker.getRegistration().then(registration => {
                     if (registration) {
                         this.setServiceWorker(registration);
@@ -93,30 +93,29 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
         }
     }
 
+    private setServiceWorker(registration: ServiceWorkerRegistration): void {
+        this.serviceWorkerRegistration = registration;
+        this.serviceWorker = (registration.active || registration.installing || registration.waiting);
+    }
+
     private async onChange(_: React.ChangeEvent<HTMLInputElement>, checked: boolean): Promise<void> {
         this.switchDisabled = true;
         this.switchChecked = checked;
         if (checked) {
             if (this.switchChecked) {
                 this.switchChecked = true;
-            } else if (this.notificationsSupported) {
+            } else if (EnableNotifications.notificationsSupported) {
                 if ((await window.Notification.requestPermission()) !== "granted") {
                     this.switchChecked = false;
                     StaticInstances.notificationPermissionDeniedAlert?.show(5000);
-                    await this.unregisterServiceWorkers();
+                    await EnableNotifications.unregisterServiceWorkers();
                 } else {
                     try {
                         const subscription = await this.subscribe();
                         const subJson = subscription.toJSON();
-                        const subscriber: Partial<PushNotificationSubscriber> = {
-                            subscriber: "sup dude",
-                            endpoint: subJson.endpoint,
-                            p256dh: subJson.keys?.p256dh,
-                            auth: subJson.keys?.auth
-                        };
 
                         await StaticInstances.api.push_notifications_subscribe(
-                            PartialObjectValidator.validate(subscriber)
+                            subscriptionToSubscriber(subJson)
                         );
                         StaticInstances.notificationsEnabledAlert?.show(5000);
                     } catch (e) {
@@ -126,7 +125,7 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
                         );
                         StaticInstances.notificationErrorAlert?.show(5000);
                         this.switchChecked = false;
-                        await this.unregisterServiceWorkers();
+                        await EnableNotifications.unregisterServiceWorkers();
                     }
                 }
             } else {
@@ -135,25 +134,39 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
                 this.switchChecked = false;
             }
         } else {
-            if (this.notificationsSupported) {
-                await Promise.all([
-                    this.serviceWorkerRegistration?.pushManager?.getSubscription()
-                        .then(s => s?.unsubscribe())
-                        .catch(console.warn),
-                    this.unregisterServiceWorkers().catch(console.warn)
-                ]);
-            }
-
             this.switchChecked = false;
-            StaticInstances.notificationsDisabledAlert?.show(5000);
+            if (EnableNotifications.notificationsSupported) {
+                try {
+                    await this.unsubscribeNotifications();
+                    await Promise.all([
+                        this.serviceWorkerRegistration?.pushManager?.getSubscription()
+                            .then(s => s?.unsubscribe())
+                            .catch(console.warn),
+                        EnableNotifications.unregisterServiceWorkers().catch(console.warn)
+                    ]);
+
+                    StaticInstances.notificationsDisabledAlert?.show(5000);
+                } catch (e) {
+                    console.error(e);
+                    this.switchChecked = true;
+                    StaticInstances.notificationsDisableErrorAlert?.show(5000);
+                }
+            } else {
+                StaticInstances.notificationsDisabledAlert?.show(5000);
+            }
         }
         this.switchDisabled = false;
     }
 
-    private async unregisterServiceWorkers(): Promise<void> {
-        if (!this.notificationsSupported) return;
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map(r => r.unregister()));
+    private async unsubscribeNotifications(): Promise<void> {
+        const subscription = await this.serviceWorkerRegistration?.pushManager.getSubscription();
+        const subJson = subscription?.toJSON();
+
+        if (subJson) {
+            await StaticInstances.api.push_notifications_unsubscribe(
+                subscriptionToSubscriber(subJson)
+            );
+        }
     }
 
     private async awaitServiceWorkerActivated(): Promise<void> {
@@ -172,7 +185,7 @@ export default class EnableNotifications extends React.Component<{}, EnableNotif
     }
 
     private async subscribe(): Promise<PushSubscription> {
-        await this.unregisterServiceWorkers();
+        await EnableNotifications.unregisterServiceWorkers();
         this.setServiceWorker(await navigator.serviceWorker.register('serviceworker.js'));
         this.serviceWorker?.addEventListener('statechange', (): void => {
             this.switchChecked = this.serviceWorkerActivated;

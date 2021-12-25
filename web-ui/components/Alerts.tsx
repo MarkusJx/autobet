@@ -31,8 +31,12 @@ export default class Alerts extends React.Component<AlertsProps> {
                 <CustomAlert severity="error" ref={e => StaticInstances.notificationErrorAlert = e} closeable>
                     Could not enable notifications: Your browser does not support notifications
                 </CustomAlert>
-                <CustomAlert severity="warning" ref={e => StaticInstances.notificationPermissionDeniedAlert = e} closeable>
+                <CustomAlert severity="warning" ref={e => StaticInstances.notificationPermissionDeniedAlert = e}
+                             closeable>
                     Could not enable notifications: The permission was denied
+                </CustomAlert>
+                <CustomAlert severity="warning" ref={e => StaticInstances.notificationsDisableErrorAlert = e} closeable>
+                    Could not disable notifications: An unexpected error occurred
                 </CustomAlert>
                 <CustomAlert severity="warning" ref={e => this.parent.disconnectedAlert = e} closeable>
                     Disconnected. Retrying to reconnect in 10 seconds.

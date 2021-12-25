@@ -33,4 +33,14 @@ where
     id = ?
 )";
 
+const char *DELETE_NOTIFICATION_SUBSCRIBER_BY_CONTENTS = R"(
+delete from
+    notification_subscribers
+where
+    subscriber = ? and
+    p256dh = ? and
+    auth = ? and
+    endpoint = ?
+)";
+
 #endif //AUTOBETLIB_DATABASE_COMMANDS_HPP

@@ -17,7 +17,8 @@
         "node-sass": "^6.0.0",
         "react": "17.0.2",
         "react-dom": "17.0.2",
-        "react-page-visibility": "^6.4.0"
+        "react-page-visibility": "^6.4.0",
+        "typeface-roboto": "^1.1.13"
     },
     "devDependencies": {
         "@types/node": "17.0.0",

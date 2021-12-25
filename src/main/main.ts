@@ -31,7 +31,7 @@ export function init(): void {
     // The qr code dialog
     const qrdialog: MDCDialog = new MDCDialog(document.getElementById('qrdialog'));
 
-    //The enable webserver switch
+    // The enable-webserver switch
     const enable_webserver: MDCSwitch = new MDCSwitch(document.getElementById('enable-webserver-switch'));
 
     // The settings saved message snackbar
@@ -219,8 +219,8 @@ export function init(): void {
      * Set the ips
      */
     function setIPs(): void {
-        let ip: string = autobetLib.getIP();
-        weblink.innerText = `http://${ip}:8027`;
+        const ip: string = autobetLib.getIP();
+        weblink.innerText = ip;
         setQRCode(ip);
     }
 

@@ -56,7 +56,7 @@ autobet::push_notifications::push_notifications() {
 void autobet::push_notifications::send_notification(const std::string &title, const std::string &message) {
     try {
         const auto expiration = static_cast<unsigned int>(time(nullptr) + 12 * 60 * 60);
-        const std::vector<objects::push_notification_subscriber> subscribers = variables::database->get_all_subscribers();
+        const std::vector<objects::push_notification_subscriber> subscribers = variables::database()->get_all_subscribers();
 
         nlohmann::json json;
         json["title"] = title;
@@ -65,30 +65,15 @@ void autobet::push_notifications::send_notification(const std::string &title, co
         logger::StaticLogger::debugStream() << "Sending notification with payload: " << payload
                                             << " to " << subscribers.size() << " subscribers";
 
-        static const auto check_err = [](int err, const objects::push_notification_subscriber &sub) -> void {
-            if (err) {
-                std::error_code ec = make_error_code((pusha::errc) err);
-                logger::StaticLogger::warningStream() << "Could not send a notification: " << ec.message();
-                logger::StaticLogger::debug("Could not send/receive the notification request, deleting subscriber");
-                variables::database->delete_subscriber_by_id(sub.id);
-            }
-        };
-
         for (const auto &sub: subscribers) {
-            pusha::notify notify(*key, sub.subscriber);
-            pusha_http_headers headers = {};
-            pusha_payload pp = {};
-
-            int err = notify.make(headers, &pp, sub.endpoint, sub.p256dh, sub.auth, expiration, payload.c_str(),
-                                  payload.size());
-            check_err(err, sub);
-
-            err = send_web_push(sub.endpoint.c_str(), sub.endpoint.size(), &headers, pp.cipher_payload,
-                                pp.cipher_payload_len, 0);
-            check_err(err, sub);
-
-            free_pusha_http_headers(&headers);
-            free_pusha_payload(&pp);
+            try {
+                pusha::notify::create_and_send_notification(this->get_key(), sub.subscriber, payload, sub.endpoint,
+                                                            sub.p256dh, sub.auth, expiration);
+            } catch (const std::exception &e) {
+                logger::StaticLogger::warningStream() << "Could not send a notification: " << e.what();
+                logger::StaticLogger::debug("Could not send/receive the notification request, deleting subscriber");
+                variables::database()->delete_subscriber_by_id(sub.id);
+            }
         }
     } catch (const std::exception &e) {
         logger::StaticLogger::errorStream() << "Could not send the notifications: " << e.what();
@@ -97,4 +82,8 @@ void autobet::push_notifications::send_notification(const std::string &title, co
 
 const std::string &autobet::push_notifications::get_public_key() const {
     return this->public_key;
+}
+
+pusha::key &autobet::push_notifications::get_key() {
+    return *key;
 }

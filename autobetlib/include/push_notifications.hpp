@@ -16,6 +16,8 @@ namespace markusjx::autobet {
     private:
         std::unique_ptr<pusha::key> key;
         std::string public_key;
+
+        pusha::key &get_key();
     };
 }
 

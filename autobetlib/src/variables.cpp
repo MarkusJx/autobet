@@ -1,5 +1,9 @@
 #include "variables.hpp"
 
+#define ASSERT_SMART_PTR_RET(ptr) if (!(ptr)) \
+                                throw std::runtime_error("Tried to call " #ptr " but it was not initialized"); \
+                            else return ptr
+
 std::atomic<uint32_t> variables::time_sleep = 36;
 std::atomic<uint32_t> variables::time_running = 0;
 std::atomic<bool> variables::debug_full = false;
@@ -38,16 +42,36 @@ std::atomic<float> variables::multiplierH = 0;
 std::atomic<int32_t> variables::xPos = 0;
 std::atomic<int32_t> variables::yPos = 0;
 
-std::shared_ptr<uiNavigationStrategies::navigationStrategy> variables::navigationStrategy = nullptr;
-std::shared_ptr<markusjx::autobet::database> variables::database = nullptr;
-std::shared_ptr<markusjx::autobet::push_notifications> variables::pushNotifications = nullptr;
+std::shared_ptr<uiNavigationStrategies::navigationStrategy> variables::_navigationStrategy = nullptr;
+std::shared_ptr<markusjx::autobet::database> variables::_database = nullptr;
+std::shared_ptr<markusjx::autobet::push_notifications> variables::_pushNotifications = nullptr;
 
 bool variables::isDefaultGameApplication() {
     return strcmp("GTA5.exe", game_program_name) == 0 && strcmp("Grand Theft Auto V", game_process_name) == 0;
 }
 
 void variables::init() {
-    navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
-    database = std::make_shared<markusjx::autobet::database>();
-    pushNotifications = std::make_shared<markusjx::autobet::push_notifications>();
+    _navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
+    _database = std::make_shared<markusjx::autobet::database>();
+    _pushNotifications = std::make_shared<markusjx::autobet::push_notifications>();
+}
+
+std::mutex navigationStrategyMtx;
+
+void variables::setNavigationStrategy(std::shared_ptr<uiNavigationStrategies::navigationStrategy> &&strategy) {
+    std::unique_lock lock(navigationStrategyMtx);
+    _navigationStrategy = std::move(strategy);
+}
+
+std::shared_ptr<uiNavigationStrategies::navigationStrategy> variables::navigationStrategy() {
+    std::unique_lock lock(navigationStrategyMtx);
+    ASSERT_SMART_PTR_RET(_navigationStrategy);
+}
+
+std::shared_ptr<markusjx::autobet::database> variables::database() {
+    ASSERT_SMART_PTR_RET(_database);
+}
+
+std::shared_ptr<markusjx::autobet::push_notifications> variables::pushNotifications() {
+    ASSERT_SMART_PTR_RET(_pushNotifications);
 }

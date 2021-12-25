@@ -13,4 +13,5 @@ export default abstract class AutobetApi extends CppJsLib {
     public abstract js_stop_script(): Promise<void>;
     public abstract get_app_server_key(): Promise<string>;
     public abstract push_notifications_subscribe(subscriber: PushNotificationSubscriber): Promise<void>;
+    public abstract push_notifications_unsubscribe(subscriber: PushNotificationSubscriber): Promise<void>;
 }

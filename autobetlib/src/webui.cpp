@@ -15,9 +15,13 @@
 #include "util/utils.hpp"
 #include "autostop.hpp"
 #include "exposed_methods.hpp"
+#include "settings.hpp"
 #include "logger.hpp"
 
-std::unique_ptr<markusjx::cppJsLib::Server> webUi = nullptr;
+static std::unique_ptr<markusjx::cppJsLib::Server> webUi = nullptr;
+static std::mutex mtx;
+static bool is_https = false;
+static uint16_t port = 8027;
 
 // web functions ==========================================
 
@@ -189,7 +193,11 @@ bool webui::initialized() {
 }
 
 bool webui::running() {
-    return webUi->running();
+    if (webUi) {
+        return webUi->running();
+    } else {
+        return false;
+    }
 }
 
 std::string &get404Page(const std::string &base_dir) {
@@ -211,6 +219,7 @@ std::string &get404Page(const std::string &base_dir) {
  * @return true, if the operation was successful
  */
 bool webui::startWebUi(const std::string &ip) {
+    std::unique_lock lock(mtx);
     try {
         // Set the base directory to the appropriate directory
         // depending on whether the program is packed or not
@@ -232,13 +241,16 @@ bool webui::startWebUi(const std::string &ip) {
             logger::StaticLogger::debug("The private and public key files exist, starting the server with ssl enabled");
             webUi = std::make_unique<markusjx::cppJsLib::SSLServer>(base_dir, public_key.string(),
                                                                     private_key.string());
+            is_https = true;
         } else {
             logger::StaticLogger::debug(
                     "The private and public key files do not exist, starting the server with ssl disabled");
             webUi = std::make_unique<markusjx::cppJsLib::Server>(base_dir);
+            is_https = false;
         }
 #else
         webUi = std::make_unique<markusjx::cppJsLib::Server>(base_dir);
+        is_https = false;
 #endif //CPPJSLIB_ENABLE_HTTPS
         webUi->setLogger([](const std::string &s) {
             logger::StaticLogger::simpleDebug(s);
@@ -248,9 +260,11 @@ bool webui::startWebUi(const std::string &ip) {
             logger::StaticLogger::simpleError(s);
         });
 
-        webUi->getHttpServer()->set_default_headers({
-            {"Cache-Control", "max-age=31536000"}
-        });
+        webUi->getHttpServer()->set_default_headers(
+                {
+                        {"Cache-Control", "max-age=31536000"}
+                }
+        );
 
         webUi->getHttpServer()->set_error_handler([base_dir](const auto &, auto &res) {
             if (res.status == 404) {
@@ -284,6 +298,7 @@ bool webui::startWebUi(const std::string &ip) {
     using namespace markusjx::autobet::exposed_methods;
     webUi->expose(get_app_server_key);
     webUi->expose(push_notifications_subscribe);
+    webUi->expose(push_notifications_unsubscribe);
 
     // Import some functions, ignore their results
     webUi->import(webSetGtaRunning, false);
@@ -298,28 +313,40 @@ bool webui::startWebUi(const std::string &ip) {
     webUi->import(webSetAutostopMoney, false);
     webUi->import(webSetAutostopTime, false);
 
-    logger::StaticLogger::debug("Starting web ui web server");
+    logger::StaticLogger::debug("Starting the web ui web server");
+
+    if (settings::has_key(AUTOBET_SETTINGS_WEB_UI_PORT)) {
+        port = settings::read<uint16_t>(AUTOBET_SETTINGS_WEB_UI_PORT);
+    }
+
+    uint16_t websocket_port = 8028;
+    if (settings::has_key(AUTOBET_SETTINGS_WEB_UI_WEBSOCKET_PORT)) {
+        websocket_port = settings::read<uint16_t>(AUTOBET_SETTINGS_WEB_UI_WEBSOCKET_PORT);
+    }
+
+    logger::StaticLogger::debugStream() << "Starting web ui web server with ip " << ip << ", port " << port
+                                        << " and websocket port " << websocket_port;
 
     try {
         // We're building with websocket protocol support by default.
         // This may only be disabled when boost is not installed
         // or the BOOST_ROOT environment variable is not set.
 #ifdef CPPJSLIB_ENABLE_WEBSOCKET
-#       pragma message("INFO: Building with websocket support")
+//#       pragma message("INFO: Building with websocket support")
         logger::StaticLogger::debug("Starting with websocket enabled");
-        bool res = webUi->start(8027, ip, 8028, false);
+        bool res = webUi->start(port, ip, websocket_port, false);
 #else
-#       pragma message("INFO: Building without websocket support")
+//#       pragma message("INFO: Building without websocket support")
         logger::StaticLogger::debug("Starting with websocket disabled");
-        bool res = webUi->start(8027, ip, 0, false);
+        bool res = webUi->start(port, ip, 0, false);
 #endif // CPPJSLIB_ENABLE_WEBSOCKET
 
         // Check the result, if it is set to true, everything is ok
         if (res) {
-            logger::StaticLogger::debug("Successfully started webUi");
+            logger::StaticLogger::debug("Successfully started the web ui http server");
             return true;
         } else {
-            logger::StaticLogger::warning("Could not start webUi");
+            logger::StaticLogger::warning("Could not start the web ui http server");
             webUi.reset();
 
             // Set all functions to nullptr
@@ -334,6 +361,7 @@ bool webui::startWebUi(const std::string &ip) {
 }
 
 bool webui::reset() {
+    std::unique_lock lock(mtx);
     // Set all imported functions to nullptr
     destroyImportedWebFunctions();
 
@@ -355,4 +383,17 @@ bool webui::reset() {
         logger::StaticLogger::debug("Could not stop web ui web server since it was not running");
         return false;
     }
+}
+
+bool webui::https() {
+    return is_https;
+}
+
+uint16_t webui::get_port() {
+    return port;
+}
+
+std::string webui::get_ip() {
+    std::string address = webui::https() ? "https://" : "http://";
+    return address.append(utils::getIP()).append(":").append(std::to_string(webui::get_port()));
 }

@@ -3,6 +3,10 @@
 
 #include <nlohmann/json.hpp>
 
+#define AUTOBET_SETTINGS_WEB_UI_IP "webUiIp"
+#define AUTOBET_SETTINGS_WEB_UI_PORT "webUiPort"
+#define AUTOBET_SETTINGS_WEB_UI_WEBSOCKET_PORT "webUiWebsocketPort"
+
 /**
  * The settings namespace
  */
@@ -40,6 +44,8 @@ namespace settings {
      */
     bool settingsFileExists();
 
+    bool has_key(const std::string &key);
+
     /**
      * Read a setting from the settings file. Throws on error
      *
@@ -48,7 +54,7 @@ namespace settings {
      * @return the read value
      */
     template<class R>
-    inline R read(const std::string key) {
+    inline R read(const std::string &key) {
         nlohmann::json json = util::readFile();
 
         return json[key].get<R>();

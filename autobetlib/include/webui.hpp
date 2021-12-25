@@ -52,6 +52,12 @@ namespace webui {
     bool startWebUi(const std::string &ip);
 
     bool reset();
+
+    bool https();
+
+    uint16_t get_port();
+
+    std::string get_ip();
 }
 
 #endif //AUTOBET_WEBUI_HPP
