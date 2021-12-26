@@ -75,7 +75,8 @@
                 <h1 class="text subheading">Webserver</h1>
                 <h1 class="text maintext-maincolor" id="webinfotext">Webserver running on:</h1>
                 <button class="mdc-button mdc-ripple-upgraded" id="weblink"
-                    title="Open the web site">http://localhost:8027</button>
+                        title="Open the web site">http://localhost:8027
+                </button>
             </div>
 
             <div class="textalign">
@@ -88,7 +89,8 @@
                     </div>
                 </div>
                 <button class="mdc-button" id="showqrbutton" title="Show the QR Code pointing to the web site">Show
-                    QR-Code</button>
+                    QR-Code
+                </button>
             </div>
         </div>
 
@@ -103,7 +105,8 @@
             <div class="textalign">
                 <h1 class="text subheading">Controls</h1>
                 <button class="mdc-button mdc-button--raised" id="startstop"
-                    title="Start/Stop the betting">Start</button>
+                        title="Start/Stop the betting">Start
+                </button>
             </div>
         </div>
 
@@ -124,7 +127,8 @@
                 <div id="navigation-strategy-selector-surface" class="mdc-menu-surface--anchor">
                     <button class="mdc-button mdc-button--outlined" id="navigation-strategy-selector-open-menu-button">
                         <span class="mdc-button__ripple"></span>
-                        <span class="mdc-button__label" id="navigation-strategy-selector-open-menu-button-label">Mouse</span>
+                        <span class="mdc-button__label"
+                              id="navigation-strategy-selector-open-menu-button-label">Mouse</span>
                         <i class="material-icons mdc-button__icon" aria-hidden="true" style="margin-left: auto">arrow_drop_down</i>
                     </button>
 
@@ -133,12 +137,14 @@
                             <li class="mdc-list-item" role="menuitem" id="navigation-strategy-mouse">
                                 <span class="mdc-list-item__ripple"></span>
                                 <span class="mdc-list-item__text">Mouse</span>
-                                <i class="material-icons mdc-button__icon navigation-strategy-menu-item" aria-hidden="true">check</i>
+                                <i class="material-icons mdc-button__icon navigation-strategy-menu-item"
+                                   aria-hidden="true">check</i>
                             </li>
                             <li class="mdc-list-item" role="menuitem" id="navigation-strategy-controller">
                                 <span class="mdc-list-item__ripple"></span>
                                 <span class="mdc-list-item__text">Controller</span>
-                                <i class="material-icons mdc-button__icon navigation-strategy-menu-item" aria-hidden="true">check</i>
+                                <i class="material-icons mdc-button__icon navigation-strategy-menu-item"
+                                   aria-hidden="true">check</i>
                             </li>
                         </ul>
                     </div>
@@ -163,7 +169,8 @@
                     </button>
 
                     <div class="mdc-menu mdc-menu-surface" id="game-selector">
-                        <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical" tabindex="-1" id="game-selector-menu-items-container">
+                        <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical" tabindex="-1"
+                            id="game-selector-menu-items-container">
                             <!-- The menu items will be generated in here --->
                         </ul>
                     </div>
@@ -200,7 +207,8 @@
 
                 <label class="mdc-text-field mdc-text-field--filled setting-text-field" id="after-click-sleep-field">
                     <span class="mdc-text-field__ripple"></span>
-                    <input class="mdc-text-field__input" type="number" min="0" aria-labelledby="after-click-sleep-label-id">
+                    <input class="mdc-text-field__input" type="number" min="0"
+                           aria-labelledby="after-click-sleep-label-id">
                     <span class="mdc-floating-label" id="after-click-sleep-label-id">Time</span>
                     <span class="mdc-line-ripple"></span>
                 </label>
@@ -275,10 +283,10 @@
                                 <h6 class="mdc-drawer__subtitle">Select your definition here</h6>
                             </div>
                             <a class="mdc-list-item mdc-list-item--activated" aria-current="page"
-                                id="default-impl-button">
+                               id="default-impl-button">
                                 <span class="mdc-list-item__ripple"></span>
                                 <i class="material-icons mdc-list-item__graphic editor-icon-ok"
-                                    aria-hidden="true">check_circle_outline</i>
+                                   aria-hidden="true">check_circle_outline</i>
                                 <span class="mdc-list-item__text">Default</span>
                             </a>
                             <hr class="mdc-list-divider">
@@ -301,28 +309,35 @@
                             <!-- The sidebar open button -->
                             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
                                 <button
-                                    class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button">menu</button>
+                                        class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button">menu
+                                </button>
                                 <span class="mdc-top-app-bar__title" id="editor-title">Code editor</span>
                             </section>
                             <!-- The editor action buttons -->
                             <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar"
-                                id="editor-action-bar">
+                                     id="editor-action-bar">
                                 <button
-                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
-                                    aria-label="Test" title="Run tests on this implementation" id="check-impl-button"
-                                    disabled>cached</button>
+                                        class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                        aria-label="Test" title="Run tests on this implementation"
+                                        id="check-impl-button"
+                                        disabled>cached
+                                </button>
                                 <button
-                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
-                                    aria-label="SetDefault" title="Set this as your default implementation"
-                                    id="set-default-button" disabled>done</button>
+                                        class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                        aria-label="SetDefault" title="Set this as your default implementation"
+                                        id="set-default-button" disabled>done
+                                </button>
                                 <button
-                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
-                                    aria-label="Save" title="Save the current state and test it" id="save-impl-button"
-                                    disabled>save</button>
+                                        class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                        aria-label="Save" title="Save the current state and test it"
+                                        id="save-impl-button"
+                                        disabled>save
+                                </button>
                                 <button
-                                    class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
-                                    aria-label="Delete" title="Delete this implementation" id="delete-impl-button"
-                                    disabled>delete_forever</button>
+                                        class="material-icons mdc-top-app-bar__action-item mdc-icon-button editor-button"
+                                        aria-label="Delete" title="Delete this implementation" id="delete-impl-button"
+                                        disabled>delete_forever
+                                </button>
                             </section>
                         </div>
                     </header>
@@ -354,7 +369,7 @@
                         <div class="mdc-switch__thumb-underlay">
                             <div class="mdc-switch__thumb"></div>
                             <input type="checkbox" class="mdc-switch__native-control" role="switch"
-                                aria-checked="false">
+                                   aria-checked="false">
                         </div>
                     </div>
                 </div>
@@ -367,7 +382,7 @@
                         <div class="mdc-switch__thumb-underlay">
                             <div class="mdc-switch__thumb"></div>
                             <input type="checkbox" class="mdc-switch__native-control" role="switch"
-                                aria-checked="false">
+                                   aria-checked="false">
                         </div>
                     </div>
                 </div>
@@ -375,10 +390,10 @@
 
             <!-- The fake console displaying logs -->
             <label class="mdc-text-field mdc-text-field--outlined mdc-text-field--textarea mdc-text-field--fullwidth"
-                id="log-textfield">
+                   id="log-textfield">
                 <span class="mdc-text-field__resizer" style="height: 56px;" id="log-textfield-resizer">
                     <textarea class="mdc-text-field__input" rows="8" cols="40" aria-labelledby="view-log-label-id"
-                        id="log-textfield-input" disabled></textarea>
+                              id="log-textfield-input" disabled></textarea>
                 </span>
                 <span class="mdc-notched-outline">
                     <span class="mdc-notched-outline__leading log-textfield-outline"></span>
@@ -397,7 +412,7 @@
     <div class="mdc-dialog" id="description-dialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true"
-                aria-labelledby="description-dialog-title" aria-describedby="description-dialog-content">
+                 aria-labelledby="description-dialog-title" aria-describedby="description-dialog-content">
                 <h2 class="mdc-dialog__title" id="description-dialog-title"></h2>
                 <div class="mdc-dialog__content" id="description-dialog-content"></div>
                 <div class="mdc-dialog__actions">
@@ -412,7 +427,7 @@
     </div>
 
     <div aria-describedby="my-dialog-content" aria-labelledby="my-dialog-title" aria-modal="true" class="mdc-dialog"
-        id="qrdialog" role="alertdialog">
+         id="qrdialog" role="alertdialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface">
                 <h2 class="mdc-dialog__title" id="my-dialog-title">
@@ -423,7 +438,7 @@
                 </div>
                 <footer class="mdc-dialog__actions">
                     <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="done" id="qrdonebutton"
-                        type="button">
+                            type="button">
                         <span class="mdc-button__label">Done</span>
                     </button>
                 </footer>
@@ -433,7 +448,7 @@
     </div>
 
     <div aria-describedby="error-dialog-content" aria-labelledby="error-dialog" aria-modal="true" class="mdc-dialog"
-        id="error-dialog-container" role="alertdialog">
+         id="error-dialog-container" role="alertdialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface">
                 <h2 class="mdc-dialog__title" id="error-dialog">Error</h2>
@@ -442,7 +457,7 @@
                 </div>
                 <footer class="mdc-dialog__actions">
                     <button class="mdc-button mdc-dialog__button" data-mdc-dialog-action="no" id="errordialogbutton"
-                        type="button">
+                            type="button">
                         <span class="mdc-button__label">ok</span>
                     </button>
                 </footer>
@@ -455,7 +470,7 @@
     <div class="mdc-dialog" id="select-name-dialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true"
-                aria-describedby="select-name-dialog-content" aria-labelledby="select-name-dialog-title">
+                 aria-describedby="select-name-dialog-content" aria-labelledby="select-name-dialog-title">
                 <h2 class="mdc-dialog__title" id="select-name-dialog-title">
                     Select a name
                 </h2>
@@ -491,7 +506,7 @@
     <div class="mdc-dialog" id="editor-error-dialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="editor-error-dialog-surface"
-                aria-describedby="editor-error-dialog-content" aria-labelledby="editor-error-dialog-title">
+                 aria-describedby="editor-error-dialog-content" aria-labelledby="editor-error-dialog-title">
                 <h2 class="mdc-dialog__title" id="editor-error-dialog-title">
                     Last message
                 </h2>
@@ -513,7 +528,7 @@
     <div class="mdc-dialog" id="betting-error-dialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="betting-error-dialog-surface"
-                aria-describedby="betting-error-dialog-content" aria-labelledby="betting-error-dialog-title">
+                 aria-describedby="betting-error-dialog-content" aria-labelledby="betting-error-dialog-title">
                 <h2 class="mdc-dialog__title" id="betting-error-dialog-title">
                     Betting stopped
                 </h2>
@@ -535,7 +550,7 @@
     <div class="mdc-dialog" id="license-dialog">
         <div class="mdc-dialog__container">
             <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="license-dialog-surface"
-                aria-describedby="license-dialog-content" aria-labelledby="license-dialog-title">
+                 aria-describedby="license-dialog-content" aria-labelledby="license-dialog-title">
                 <h2 class="mdc-dialog__title" id="license-dialog-title">
                     Autobet license
                 </h2>
@@ -546,6 +561,32 @@
                     <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="ok">
                         <div class="mdc-button__ripple"></div>
                         <span class="mdc-button__label">Ok</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <!-- Patch notes dialog -->
+    <div class="mdc-dialog" id="patch-notes-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface" role="alertdialog" aria-modal="true" id="patch-notes-dialog-surface"
+                 aria-describedby="license-dialog-content" aria-labelledby="license-dialog-title">
+                <h2 class="mdc-dialog__title" id="patch-notes-dialog-title">
+                    Patch notes
+                </h2>
+                <div class="mdc-dialog__content" id="patch-notes-dialog-content">
+                    Not available
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Cancel</span>
+                    </button>
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="install">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Install</span>
                     </button>
                 </div>
             </div>
@@ -568,7 +609,7 @@
                 </button>
 
                 <button type="button" class="mdc-button mdc-snackbar__action editor-message-snackbar-action"
-                    id="editor-message-snackbar-show-info">
+                        id="editor-message-snackbar-show-info">
                     <div class="mdc-button__ripple"></div>
                     <span class="mdc-button__label">View info</span>
                 </button>
@@ -585,7 +626,7 @@
         </div>
     </div>
 
-    <!-- GTA ont running message snackbar -->
+    <!-- GTA not running message snackbar -->
     <div class="mdc-snackbar noselect" id="gta-not-running-message">
         <div class="mdc-snackbar__surface">
             <div aria-live="polite" class="mdc-snackbar__label" role="status">
@@ -593,7 +634,8 @@
             </div>
             <div class="mdc-snackbar__actions">
                 <button class="mdc-button mdc-snackbar__action" id="gta-not-running-message-ok"
-                    type="button">Ok</button>
+                        type="button">Ok
+                </button>
             </div>
         </div>
     </div>
@@ -603,6 +645,31 @@
         <div class="mdc-snackbar__surface">
             <div aria-live="polite" class="mdc-snackbar__label" role="status" id="strategy-select-snackbar-label">
                 Unavailable
+            </div>
+        </div>
+    </div>
+
+    <!-- Update available snackbar -->
+    <div class="mdc-snackbar noselect" id="update-available-message">
+        <div class="mdc-snackbar__surface">
+            <div aria-live="polite" class="mdc-snackbar__label" role="status" id="update-available-label">
+                A new version of autobet is available: v0.0.0
+            </div>
+            <div class="mdc-snackbar__actions">
+                <button class="mdc-button mdc-snackbar__action" id="update-available-message-patch-notes"
+                        type="button">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">View Patch notes</span>
+                </button>
+                <button class="mdc-button mdc-snackbar__action" id="update-available-message-install"
+                        type="button">
+                    <div class="mdc-button__ripple"></div>
+                    <span class="mdc-button__label">Install</span>
+                </button>
+                <button class="mdc-icon-button mdc-snackbar__dismiss material-icons" title="Dismiss"
+                        data-bcup-haslogintext="no">
+                    close
+                </button>
             </div>
         </div>
     </div>

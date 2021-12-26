@@ -14,6 +14,7 @@ import * as clickSleep from"./clickSleep";
 import {loadNavigationStrategy} from "./navigationStrategySelect";
 import {getCurrentlySelectedGameWindow} from "./gameSelector";
 import {showSnackbar} from "./utils";
+import {checkForUpdates} from "./update";
 
 export function init(): void {
     const showqrbutton: HTMLButtonElement = <HTMLButtonElement>document.getElementById('showqrbutton'); // The 'show qr code' button
@@ -341,6 +342,7 @@ export function init(): void {
             enable_webserver.disabled = false;
         }
 
+        checkForUpdates();
         await autobetLib.setOddTranslations();
         await autobetLib.start();
     }
@@ -348,7 +350,8 @@ export function init(): void {
     // Run the main function
     main().then(() => {
         autobetLib.logging.debug("main.ts", "JS main function finished");
-    }, () => {
+    }, (e) => {
+        console.error(e);
         // main failed
         utils.errordialog.open();
         utils.errordialog.listen("MDCDialog:closed", async function () {
