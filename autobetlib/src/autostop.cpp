@@ -1,6 +1,6 @@
 #include "autostop.hpp"
 #include "variables.hpp"
-#include "webui.hpp"
+#include "web/webui.hpp"
 #include "logger.hpp"
 
 int autostop_time = -1;

@@ -1,10 +1,10 @@
 #include <fstream>
 
 #include "napi_exported.hpp"
-#include "webui.hpp"
+#include "web/webui.hpp"
 #include "util/utils.hpp"
 #include "debug/debug.hpp"
-#include "settings.hpp"
+#include "storage/settings.hpp"
 #include "autostop.hpp"
 #include "opencv_link.hpp"
 #include "variables.hpp"

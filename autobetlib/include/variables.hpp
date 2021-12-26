@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <atomic>
 
-#include "database.hpp"
+#include "storage/database.hpp"
 #include "opencv_link.hpp"
-#include "push_notifications.hpp"
+#include "web/push_notifications.hpp"
 #include "controls/navigationStrategies.hpp"
 
 class variables {

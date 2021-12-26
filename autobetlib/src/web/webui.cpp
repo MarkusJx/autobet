@@ -11,17 +11,21 @@
 #include <memory>
 #include <filesystem>
 
-#include "webui.hpp"
+#include "web/webui.hpp"
 #include "util/utils.hpp"
 #include "autostop.hpp"
 #include "exposed_methods.hpp"
-#include "settings.hpp"
+#include "storage/settings.hpp"
+#include "web/upnp.hpp"
 #include "logger.hpp"
 
 static std::unique_ptr<markusjx::cppJsLib::Server> webUi = nullptr;
 static std::mutex mtx;
 static bool is_https = false;
 static uint16_t port = 8027;
+static uint16_t websocket_port = 8028;
+static bool upnp_used = false;
+static std::string ip_address;
 
 // web functions ==========================================
 
@@ -152,39 +156,39 @@ void webui::setAutostopTime(int val) {
     }
 }
 
-void webui::set_js_start_script(std::function<void()> fn) {
+AUTOBET_UNUSED void webui::set_js_start_script(std::function<void()> fn) {
     js_start_script = std::move(fn);
 }
 
-void webui::set_js_stop_script(std::function<void()> fn) {
+AUTOBET_UNUSED void webui::set_js_stop_script(std::function<void()> fn) {
     js_stop_script = std::move(fn);
 }
 
-void webui::set_get_races_won(std::function<int()> fn) {
+AUTOBET_UNUSED void webui::set_get_races_won(std::function<int()> fn) {
     get_races_won = std::move(fn);
 }
 
-void webui::set_get_races_lost(std::function<int()> fn) {
+AUTOBET_UNUSED void webui::set_get_races_lost(std::function<int()> fn) {
     get_races_lost = std::move(fn);
 }
 
-void webui::set_get_all_winnings(std::function<int()> fn) {
+AUTOBET_UNUSED void webui::set_get_all_winnings(std::function<int()> fn) {
     get_all_winnings = std::move(fn);
 }
 
-void webui::set_get_current_winnings(std::function<int()> fn) {
+AUTOBET_UNUSED void webui::set_get_current_winnings(std::function<int()> fn) {
     get_current_winnings = std::move(fn);
 }
 
-void webui::set_get_time(std::function<int()> fn) {
+AUTOBET_UNUSED void webui::set_get_time(std::function<int()> fn) {
     get_time = std::move(fn);
 }
 
-void webui::set_get_gta_running(std::function<bool()> fn) {
+AUTOBET_UNUSED void webui::set_get_gta_running(std::function<bool()> fn) {
     get_gta_running = std::move(fn);
 }
 
-void webui::set_get_running(std::function<int()> fn) {
+AUTOBET_UNUSED void webui::set_get_running(std::function<int()> fn) {
     get_running = std::move(fn);
 }
 
@@ -319,9 +323,21 @@ bool webui::startWebUi(const std::string &ip) {
         port = settings::read<uint16_t>(AUTOBET_SETTINGS_WEB_UI_PORT);
     }
 
-    uint16_t websocket_port = 8028;
     if (settings::has_key(AUTOBET_SETTINGS_WEB_UI_WEBSOCKET_PORT)) {
         websocket_port = settings::read<uint16_t>(AUTOBET_SETTINGS_WEB_UI_WEBSOCKET_PORT);
+    }
+
+    if (settings::has_key(AUTOBET_SETTINGS_ENABLE_UPNP) && settings::read<bool>(AUTOBET_SETTINGS_ENABLE_UPNP)) {
+        logger::StaticLogger::debug("UPnP was enabled via the settings, exposing the ports via UPnP");
+        try {
+            markusjx::autobet::web::upnp::expose_ports(ip, port, websocket_port);
+            upnp_used = true;
+        } catch (const std::exception &e) {
+            logger::StaticLogger::errorStream() << "Could not expose the ports via upnp: " << e.what();
+            upnp_used = false;
+        }
+    } else {
+        upnp_used = false;
     }
 
     logger::StaticLogger::debugStream() << "Starting web ui web server with ip " << ip << ", port " << port
@@ -336,14 +352,15 @@ bool webui::startWebUi(const std::string &ip) {
         logger::StaticLogger::debug("Starting with websocket enabled");
         bool res = webUi->start(port, ip, websocket_port, false);
 #else
-//#       pragma message("INFO: Building without websocket support")
-        logger::StaticLogger::debug("Starting with websocket disabled");
-        bool res = webUi->start(port, ip, 0, false);
+        //#       pragma message("INFO: Building without websocket support")
+                logger::StaticLogger::debug("Starting with websocket disabled");
+                bool res = webUi->start(port, ip, 0, false);
 #endif // CPPJSLIB_ENABLE_WEBSOCKET
 
         // Check the result, if it is set to true, everything is ok
         if (res) {
             logger::StaticLogger::debug("Successfully started the web ui http server");
+            ip_address = ip;
             return true;
         } else {
             logger::StaticLogger::warning("Could not start the web ui http server");
@@ -378,6 +395,16 @@ bool webui::reset() {
         }
 
         webUi.reset();
+
+        if (upnp_used) {
+            logger::StaticLogger::debug("UPnP was used to expose ports, removing port mappings");
+            try {
+                markusjx::autobet::web::upnp::remove_ports(ip_address, port, websocket_port);
+            } catch (const std::exception &e) {
+                logger::StaticLogger::errorStream() << "Could not remove the ports via upnp: " << e.what();
+            }
+        }
+
         return true;
     } else {
         logger::StaticLogger::debug("Could not stop web ui web server since it was not running");
@@ -395,5 +422,5 @@ uint16_t webui::get_port() {
 
 std::string webui::get_ip() {
     std::string address = webui::https() ? "https://" : "http://";
-    return address.append(utils::getIP()).append(":").append(std::to_string(webui::get_port()));
+    return address.append(ip_address).append(":").append(std::to_string(webui::get_port()));
 }

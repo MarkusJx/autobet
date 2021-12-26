@@ -12,7 +12,7 @@
 #include "variables.hpp"
 #include "logger.hpp"
 #include "util/utils.hpp"
-#include "settings.hpp"
+#include "storage/settings.hpp"
 #include "windowUtils.hpp"
 #include "util/iputil.hpp"
 
