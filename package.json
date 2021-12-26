@@ -68,6 +68,7 @@
             "ui/mountains.svg",
             "ui/style.min.css",
             "ui/err/*",
+            "ui/update/*",
             "main.js",
             "out/**",
             "icon.png",
