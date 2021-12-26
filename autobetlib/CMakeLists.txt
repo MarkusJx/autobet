@@ -46,10 +46,19 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(CPPUPnP)
-set(BOOST_ROOT ${CONAN_BOOST_ROOT})
 
 set(CPPUPnP_DIR ${CMAKE_BINARY_DIR}/_deps/cppupnp-src)
-find_package(CPPUPnP REQUIRED)
+add_library(
+        cpp_upnp STATIC
+        ${CPPUPnP_DIR}/src/xml.cpp
+        ${CPPUPnP_DIR}/src/igd.cpp
+        ${CPPUPnP_DIR}/src/ssdp.cpp
+        ${CPPUPnP_DIR}/src/url.cpp
+        ${CPPUPnP_DIR}/src/parse_device.cpp
+)
+
+target_include_directories(cpp_upnp PUBLIC ${CPPUPnP_DIR}/include)
+target_link_libraries(cpp_upnp PRIVATE ${CONAN_LIBS})
 
 set(PROJECT_NAME autobetLib)
 
