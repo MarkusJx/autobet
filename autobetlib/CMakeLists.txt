@@ -1,3 +1,6 @@
+cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0048 NEW)
+
 project(autobetLib CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
@@ -25,15 +28,12 @@ ExternalProject_Add(
 ExternalProject_Get_Property(zip_proj install_dir)
 set(zip_dir ${install_dir})
 
-find_package(OpenSSL REQUIRED)
-get_filename_component(OPENSSL_ROOT ${OPENSSL_INCLUDE_DIR} DIRECTORY)
-
 ExternalProject_Add(
         pusha_proj
         GIT_REPOSITORY "https://github.com/MarkusJx/pusha"
         GIT_TAG 354465ab54c78022a7f2ca375f348e0bb06a33c6
         INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
-        CMAKE_ARGS -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT}
+        CMAKE_ARGS -DOPENSSL_ROOT_DIR=${CONAN_OPENSSL_ROOT}
 )
 
 ExternalProject_Get_Property(pusha_proj install_dir)
@@ -46,6 +46,7 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(CPPUPnP)
+set(BOOST_ROOT ${CONAN_BOOST_ROOT})
 
 set(CPPUPnP_DIR ${CMAKE_BINARY_DIR}/_deps/cppupnp-src)
 find_package(CPPUPnP REQUIRED)
