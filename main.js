@@ -19,7 +19,7 @@ let enableDevTools;
     const version = require('./package.json').version;
     const rel_ver_regex = /^([0-9]+\.)*[0-9]*$/;
 
-    enableDevTools = !rel_ver_regex.test(version) || (process.argv.length >= 3 && process.argv[2] === "--enableDevTools");
+    enableDevTools = !rel_ver_regex.test(version) || (process.argv.indexOf("--enableDevTools") !== -1);
 
     console.log(`Starting with devTools ${enableDevTools ? "enabled" : "disabled"}`);
 }
@@ -28,9 +28,14 @@ let tray = null;
 
 function createWindow() {
     Store.initRenderer();
-    autoUpdater.checkForUpdatesAndNotify().then(r => {
-        if (r != null)
-            console.log(r);
+
+    autoUpdater.autoDownload = false;
+    ipcMain.handle('check-for-update', async () => {
+        return await autoUpdater.checkForUpdates();
+    });
+
+    ipcMain.handle('update-available', async () => {
+        return autoUpdater.currentVersion.compare((await autoUpdater.checkForUpdates()).updateInfo.version) < 0;
     });
 
     const mainWindowState = windowStateKeeper({
@@ -106,11 +111,64 @@ function createWindow() {
         mainWindow.hide();
     });
 
+    ipcMain.on('install-update', () => {
+        installUpdate();
+    });
+
     mainWindow.loadFile(path.join(__dirname, 'ui', 'index.html')).then(() => {
         console.log("Main window loaded");
     });
 
     mainWindowState.manage(mainWindow);
+}
+
+function installUpdate(install = true) {
+    const quit = () => {
+        if (tray) tray.destroy();
+        app.quit();
+        app.relaunch({
+            args: install ? ["--installUpdate"] : []
+        });
+    };
+
+    autobetLib.shutdown().then(quit, quit);
+}
+
+async function createUpdateWindow() {
+    const updateWindow = new BrowserWindow({
+        width: 400,
+        height: 150,
+        frame: false,
+        resizable: true,
+        transparent: true,
+        icon: "icon.png",
+        webPreferences: {
+            preload: path.join(__dirname, 'out', 'update.js'),
+            contextIsolation: true,
+            worldSafeExecuteJavaScript: true,
+            nodeIntegration: false,
+            webSecurity: true,
+            enableRemoteModule: true,
+            devTools: enableDevTools
+        }
+    });
+
+    await updateWindow.loadFile(path.join(__dirname, 'ui', 'update', 'index.html'))
+        .catch(() => installUpdate(false));
+
+    if (autoUpdater.currentVersion.compare((await autoUpdater.checkForUpdates()).updateInfo.version) >= 0) {
+        installUpdate(false);
+        return;
+    }
+
+    autoUpdater.on('download-progress', (data) => {
+        console.log(`Download progress: ${data.percent}%`);
+        updateWindow.webContents.send('update-progress', data.percent / 100);
+    });
+
+    autoUpdater.downloadUpdate()
+        .then(() => autoUpdater.quitAndInstall(true, true))
+        .catch(() => installUpdate(false));
 }
 
 function createErrorWindow() {
@@ -161,6 +219,8 @@ app.whenReady().then(() => {
             autobetLib.callbacks.setQuitCallback(() => {
                 app.quit();
             });
+        } else if (process.argv.indexOf("--installUpdate") !== -1) {
+            createUpdateWindow().then();
         } else {
             createWindow();
         }
@@ -171,7 +231,11 @@ app.whenReady().then(() => {
     app.on('activate', function () {
         if (BrowserWindow.getAllWindows().length === 0) {
             if (autobetLib != null) {
-                createWindow();
+                if (process.argv.indexOf("--installUpdate") !== -1) {
+                    createUpdateWindow().then();
+                } else {
+                    createWindow();
+                }
             } else {
                 createErrorWindow();
             }
