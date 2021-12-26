@@ -118,16 +118,11 @@ jobs:
         GH_TOKEN: ${{secrets.github_token}}
     
     # Upload the artifact
-    - name: Upload beta build (installer)
+    - name: Upload beta build
       uses: actions/upload-artifact@v1
       with:
         name: ${{steps.version_name.outputs.version}}
         path: dist/autobet-v${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}}.exe
-    - name: Upload beta build (unpacked)
-      uses: actions/upload-artifact@v1
-      with:
-        name: ${{steps.version_name.outputs.version}}-unpacked
-        path: dist/win-unpacked/**/*
 
   analyze-js:
     #name: Analyze javascript
