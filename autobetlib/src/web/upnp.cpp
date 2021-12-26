@@ -13,7 +13,8 @@ using namespace markusjx::autobet;
 void add_port_mapping(::upnp::igd &igd, uint16_t ext_p, uint16_t int_p, ::upnp::net::yield_context yield) {
     logger::StaticLogger::debugStream() << "Adding port mapping: " << ext_p << " -> " << int_p;
 
-    auto r = igd.add_port_mapping(::upnp::igd::tcp, ext_p, int_p, "Autobet", std::chrono::minutes(1), yield);
+    // TODO: Fixup the port mapping, e.g. convert this to a class and refresh the mappings each 6 hours or so
+    auto r = igd.add_port_mapping(::upnp::igd::tcp, ext_p, int_p, "Autobet", std::chrono::days(5), yield);
     if (r) {
         logger::StaticLogger::debug("Successfully added the mapping");
     } else {
