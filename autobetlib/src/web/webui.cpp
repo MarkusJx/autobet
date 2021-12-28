@@ -17,9 +17,14 @@
 #include "exposed_methods.hpp"
 #include "storage/settings.hpp"
 #include "web/upnp.hpp"
+#include "util/recurring_job.hpp"
 #include "logger.hpp"
 
+using namespace markusjx::autobet;
+
 static std::unique_ptr<markusjx::cppJsLib::Server> webUi = nullptr;
+static std::unique_ptr<util::recurring_job> upnp_refresher;
+static std::shared_ptr<web::upnp> upnp_client;
 static std::mutex mtx;
 static bool is_https = false;
 static uint16_t port = 8027;
@@ -299,6 +304,7 @@ bool webui::startWebUi(const std::string &ip) {
     webUi->expose(set_autostop_time);
     webUi->expose(set_autostop_money);
 
+    // Expose methods for notifications
     using namespace markusjx::autobet::exposed_methods;
     webUi->expose(get_app_server_key);
     webUi->expose(push_notifications_subscribe);
@@ -319,21 +325,36 @@ bool webui::startWebUi(const std::string &ip) {
 
     logger::StaticLogger::debug("Starting the web ui web server");
 
+    // Set the port if set in the settings
     if (settings::has_key(AUTOBET_SETTINGS_WEB_UI_PORT)) {
         port = settings::read<uint16_t>(AUTOBET_SETTINGS_WEB_UI_PORT);
     }
 
+    // Set the websocket port if set in the settings
     if (settings::has_key(AUTOBET_SETTINGS_WEB_UI_WEBSOCKET_PORT)) {
         websocket_port = settings::read<uint16_t>(AUTOBET_SETTINGS_WEB_UI_WEBSOCKET_PORT);
     }
 
     if (settings::has_key(AUTOBET_SETTINGS_ENABLE_UPNP) && settings::read<bool>(AUTOBET_SETTINGS_ENABLE_UPNP)) {
         logger::StaticLogger::debug("UPnP was enabled via the settings, exposing the ports via UPnP");
+        // Expose the ports for one hour
+        upnp_client = std::make_shared<web::upnp>(ip, port, websocket_port, std::chrono::hours(1));
         try {
-            markusjx::autobet::web::upnp::expose_ports(ip, port, websocket_port);
+            // Add the port mappings
+            upnp_client->add_port_mappings();
             upnp_used = true;
+
+            // Refresh the port mappings each hour
+            upnp_refresher = std::make_unique<util::recurring_job>([upnp_client = upnp_client] {
+                logger::StaticLogger::debug("Refreshing ports exposed via upnp");
+                upnp_client->add_port_mappings();
+            }, boost::chrono::hours(1));
+
+            // Start the runner
+            upnp_refresher->start();
         } catch (const std::exception &e) {
             logger::StaticLogger::errorStream() << "Could not expose the ports via upnp: " << e.what();
+            upnp_client.reset();
             upnp_used = false;
         }
     } else {
@@ -388,23 +409,37 @@ bool webui::reset() {
         webUi->stop(stopPromise);
         std::future<void> stopFuture = stopPromise.get_future();
 
+        // Wait for five seconds to join the server
         if (stopFuture.wait_for(std::chrono::seconds(5)) == std::future_status::timeout) {
             logger::StaticLogger::warning("Could not stop web ui web server");
         } else {
             logger::StaticLogger::debug("Stopped web ui web server");
         }
 
+        // Reset the pointer
         webUi.reset();
 
-        if (upnp_used) {
+        if (upnp_used && upnp_refresher && upnp_client) {
             logger::StaticLogger::debug("UPnP was used to expose ports, removing port mappings");
             try {
-                markusjx::autobet::web::upnp::remove_ports(ip_address, port, websocket_port);
+                // Try to delete the port mappings
+                upnp_client->delete_port_mappings();
             } catch (const std::exception &e) {
                 logger::StaticLogger::errorStream() << "Could not remove the ports via upnp: " << e.what();
             }
+
+            // Join the refresher task runner thread
+            logger::StaticLogger::debug("Trying to join the refresher thread");
+            if (upnp_refresher->try_join_for(boost::chrono::milliseconds(2000))) {
+                logger::StaticLogger::debug("Successfully joined the refresher thread");
+            } else {
+                logger::StaticLogger::debug("Could not join the refresher thread");
+            }
         }
 
+        // Cleanup
+        upnp_client.reset();
+        upnp_refresher.reset();
         return true;
     } else {
         logger::StaticLogger::debug("Could not stop web ui web server since it was not running");

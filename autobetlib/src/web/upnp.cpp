@@ -10,11 +10,11 @@
 
 using namespace markusjx::autobet;
 
-void add_port_mapping(::upnp::igd &igd, uint16_t ext_p, uint16_t int_p, ::upnp::net::yield_context yield) {
+void add_port_mapping(::upnp::igd &igd, uint16_t ext_p, uint16_t int_p, const std::chrono::seconds &validity,
+                      const ::upnp::net::yield_context &yield) {
     logger::StaticLogger::debugStream() << "Adding port mapping: " << ext_p << " -> " << int_p;
 
-    // TODO: Fixup the port mapping, e.g. convert this to a class and refresh the mappings each 6 hours or so
-    auto r = igd.add_port_mapping(::upnp::igd::tcp, ext_p, int_p, "Autobet", std::chrono::days(5), yield);
+    auto r = igd.add_port_mapping(::upnp::igd::tcp, ext_p, int_p, "Autobet", validity, yield);
     if (r) {
         logger::StaticLogger::debug("Successfully added the mapping");
     } else {
@@ -22,7 +22,7 @@ void add_port_mapping(::upnp::igd &igd, uint16_t ext_p, uint16_t int_p, ::upnp::
     }
 }
 
-void delete_port_mapping(upnp::igd &igd, uint16_t port, ::upnp::net::yield_context yield) {
+void delete_port_mapping(upnp::igd &igd, uint16_t port, const ::upnp::net::yield_context &yield) {
     logger::StaticLogger::debugStream() << "Removing port mapping: " << port;
     auto r = igd.delete_port_mapping(::upnp::igd::tcp, port, yield);
     if (r) {
@@ -32,47 +32,44 @@ void delete_port_mapping(upnp::igd &igd, uint16_t port, ::upnp::net::yield_conte
     }
 }
 
-void
-change_port_mappings(const std::string &ip, const uint16_t port, const uint16_t websocket_port, const bool expose) {
+void web::upnp::add_port_mappings() {
     ::upnp::net::io_context ctx;
+    ::upnp::net::spawn(ctx, [&](const ::upnp::net::yield_context &yield) {
+        for (auto &igd: this->get_gateways(ctx, yield)) {
+            logger::StaticLogger::debugStream() << "Opening port on IGD: " << igd.friendly_name();
 
-    ::upnp::net::spawn(ctx, [&](::upnp::net::yield_context yield) {
-        logger::StaticLogger::debug("Discovering Internet Gateway Devices");
-
-        auto gateways_res = ::upnp::igd::discover(ctx.get_executor(), yield, ip);
-        if (gateways_res) {
-            logger::StaticLogger::debugStream() << "Found " << gateways_res.value().size() << " gateways";
-        } else {
-            throw std::runtime_error(gateways_res.error().message());
-        }
-
-        auto gateways = std::move(gateways_res.value());
-        for (auto &igd: gateways) {
-            //get_external_address(igd, yield);
-            //list_port_mappings_igd1(igd, yield);
-            //list_port_mappings_igd2(igd, yield);
-
-            if (expose) {
-                logger::StaticLogger::debugStream() << "Opening port on IGD: " << igd.friendly_name();
-
-                add_port_mapping(igd, port, port, yield);
-                add_port_mapping(igd, websocket_port, websocket_port, yield);
-            } else {
-                logger::StaticLogger::debugStream() << "Closing port on IGD: " << igd.friendly_name();
-
-                delete_port_mapping(igd, port, yield);
-                delete_port_mapping(igd, websocket_port, yield);
-            }
+            add_port_mapping(igd, port, port, validity, yield);
+            add_port_mapping(igd, websocket_port, websocket_port, validity, yield);
         }
     });
 
     ctx.run();
 }
 
-void web::upnp::expose_ports(const std::string &ip, const uint16_t port, const uint16_t websocket_port) {
-    change_port_mappings(ip, port, websocket_port, true);
+void web::upnp::delete_port_mappings() {
+    ::upnp::net::io_context ctx;
+    ::upnp::net::spawn(ctx, [&](::upnp::net::yield_context yield) {
+        for (auto &igd: this->get_gateways(ctx, yield)) {
+            logger::StaticLogger::debugStream() << "Closing port on IGD: " << igd.friendly_name();
+
+            delete_port_mapping(igd, port, yield);
+            delete_port_mapping(igd, websocket_port, yield);
+        }
+    });
+
+    ctx.run();
 }
 
-void web::upnp::remove_ports(const std::string &ip, uint16_t port, uint16_t websocket_port) {
-    change_port_mappings(ip, port, websocket_port, false);
+std::vector<::upnp::igd>
+web::upnp::get_gateways(::upnp::net::io_context &ctx, const ::upnp::net::yield_context &yield) {
+    logger::StaticLogger::debug("Discovering Internet Gateway Devices");
+
+    auto gateways_res = ::upnp::igd::discover(ctx.get_executor(), yield, ip);
+    if (gateways_res) {
+        logger::StaticLogger::debugStream() << "Found " << gateways_res.value().size() << " gateways";
+    } else {
+        throw std::runtime_error(gateways_res.error().message());
+    }
+
+    return std::move(gateways_res.value());
 }
