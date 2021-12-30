@@ -30,7 +30,7 @@ set(zip_dir ${install_dir})
 
 ExternalProject_Add(
         pusha_proj
-        GIT_REPOSITORY "https://github.com/MarkusJx/pusha"
+        GIT_REPOSITORY https://github.com/MarkusJx/pusha
         GIT_TAG 354465ab54c78022a7f2ca375f348e0bb06a33c6
         INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
         CMAKE_ARGS -DOPENSSL_ROOT_DIR=${CONAN_OPENSSL_ROOT}
@@ -41,8 +41,8 @@ set(pusha_dir ${install_dir})
 
 FetchContent_Declare(
         CPPUPnP
-        GIT_REPOSITORY https://github.com/MarkusJx/cpp-upnp
-        GIT_TAG 457bf65301b3a40141e8c1b3279761968d427c2a
+        GIT_REPOSITORY https://github.com/equalitie/cpp-upnp
+        GIT_TAG a949b9f272c38badd39f764d5587a0c7e8f33e14
 )
 
 FetchContent_MakeAvailable(CPPUPnP)

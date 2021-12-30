@@ -64,7 +64,10 @@ std::vector<::upnp::igd>
 web::upnp::get_gateways(::upnp::net::io_context &ctx, const ::upnp::net::yield_context &yield) {
     logger::StaticLogger::debug("Discovering Internet Gateway Devices");
 
-    auto gateways_res = ::upnp::igd::discover(ctx.get_executor(), yield, ip);
+    using namespace boost::asio;
+    const ip::address_v4 address = ip.empty() ? ip::address_v4::any() : ip::make_address_v4(ip);
+
+    auto gateways_res = ::upnp::igd::discover(ctx.get_executor(), address, yield);
     if (gateways_res) {
         logger::StaticLogger::debugStream() << "Found " << gateways_res.value().size() << " gateways";
     } else {
