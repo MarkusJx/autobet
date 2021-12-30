@@ -34,7 +34,7 @@ bool generateProcessInfo() {
         }
 
         windowUtils::windowsProgramInfo info(program_name);
-        for (auto &&p : info.getProcesses()) {
+        for (auto &&p: info.getProcesses()) {
             if (p->getWindowName() == process_name) {
                 processInfo = std::move(p);
                 return true;
@@ -183,12 +183,12 @@ errno_t utils::isForeground(bool &res) {
     }
 }
 
-utils::bitmap utils::convertHBitmap(int width, int height, void *HBMP) {
-    return crop(0, 0, width, height, HBMP);
+utils::bitmap utils::convertHBitmap(int width, int height, const std::shared_ptr<void> &bmp) {
+    return crop(0, 0, width, height, bmp);
 }
 
-utils::bitmap utils::crop(int x, int y, int width, int height, void *src) {
-    auto hSource = (HBITMAP) src;
+utils::bitmap utils::crop(int x, int y, int width, int height, const std::shared_ptr<void> &src) {
+    auto hSource = (HBITMAP) src.get();
     HDC hdcMem, hdcMem2;
     // Get some HDCs that are compatible with the display driver
 

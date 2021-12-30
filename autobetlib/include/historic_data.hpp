@@ -14,6 +14,13 @@ namespace markusjx::autobet::historic_data {
     void init();
 
     /**
+     * Whether historic data should be saved
+     *
+     * @return true if data should be saved
+     */
+    bool should_save();
+
+    /**
      * Save the odds of the horses to bet on
      *
      * @param odds the odds to save
@@ -34,6 +41,8 @@ namespace markusjx::autobet::historic_data {
      * @param winnings the winnings
      */
     void save_winnings(int winnings);
+
+    void save_winning_odds(const std::string &o1, const std::string &o2, const std::string &o3);
 
     /**
      * Close the csv file

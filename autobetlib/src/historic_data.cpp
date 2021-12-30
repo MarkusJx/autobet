@@ -1,10 +1,11 @@
 #define __STDC_WANT_LIB_EXT1__
+
 #include "historic_data.hpp"
 #include "util/utils.hpp"
 
 #include <csv.hpp>
 #include <mutex>
-#include <time.h>
+#include <ctime>
 
 #define ASSERT_FILE() std::unique_lock lock(mtx); \
                         if (!file_ptr) return
@@ -29,8 +30,12 @@ void markusjx::autobet::historic_data::init() {
 
         file << "Run started at:" << time << std::endl;
         file << "Horse #1" << "Horse #2" << "Horse #3" << "Horse #4" << "Horse #5" << "Horse #6";
-        file << "Bet placed on" << "Won" << "Payout/Loss" << std::endl;
+        file << "Bet placed on" << "Won" << "Winner" << "Second place" << "Third place" << "Payout/Loss" << std::endl;
     }
+}
+
+bool markusjx::autobet::historic_data::should_save() {
+    return file_ptr.operator bool();
 }
 
 void markusjx::autobet::historic_data::save_odds(const std::vector<std::string> &odds) {
@@ -55,14 +60,21 @@ void markusjx::autobet::historic_data::save_bet_placed_on(short pos) {
 
 void markusjx::autobet::historic_data::save_winnings(int winnings) {
     ASSERT_FILE();
-    if (winnings > 0) {
-        file[file.size()][7] = true;
-        file[file.size()][8] = winnings;
-    } else {
+    //if (winnings > 0) {
+    file[file.size()][7] = true;
+    file[file.size()][11] = winnings;
+    /*} else {
         file[file.size()][7] = false;
-    }
+    }*/
 
     file << std::endl;
+}
+
+void markusjx::autobet::historic_data::save_winning_odds(const std::string &o1, const std::string &o2,
+                                                         const std::string &o3) {
+    file[file.size()][8] = o1;
+    file[file.size()][9] = o2;
+    file[file.size()][10] = o3;
 }
 
 void markusjx::autobet::historic_data::close() {
