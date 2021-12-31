@@ -23,13 +23,13 @@ set(zip_dir ${install_dir})
 
 # Include everything
 include_directories(${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_INC}
-                    ${CMAKE_SOURCE_DIR}/external/CppJsLib)
+                    ${CMAKE_SOURCE_DIR}/external/CppJsLib ${CMAKE_SOURCE_DIR}/external/csv/single_include)
 
 set(src ${CMAKE_SOURCE_DIR}/src)
 set(AUTOBETLIB_SRC ${src}/debug/debug.cpp ${src}/autostop.cpp ${src}/logger.cpp ${src}/betting.cpp
         ${src}/opencv_link.cpp ${src}/settings.cpp ${src}/utils.cpp ${src}/webui.cpp ${src}/napi_exported.cpp
         ${src}/variables.cpp ${src}/control.cpp ${src}/windowUtils.cpp ${src}/controls/controller.cpp
-        ${src}/controls/navigationStrategies.cpp)
+        ${src}/controls/navigationStrategies.cpp ${src}/historic_data.cpp)
 
 # Add the library
 add_library(${PROJECT_NAME} SHARED ${AUTOBETLIB_SRC} ${CMAKE_JS_SRC})

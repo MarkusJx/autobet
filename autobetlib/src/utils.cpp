@@ -7,6 +7,7 @@
 #include <atlimage.h>
 #include <iostream>
 #include <shlobj.h>
+#include <filesystem>
 
 #include "variables.hpp"
 #include "logger.hpp"
@@ -33,7 +34,7 @@ bool generateProcessInfo() {
         }
 
         windowUtils::windowsProgramInfo info(program_name);
-        for (auto &&p : info.getProcesses()) {
+        for (auto &&p: info.getProcesses()) {
             if (p->getWindowName() == process_name) {
                 processInfo = std::move(p);
                 return true;
@@ -182,12 +183,12 @@ errno_t utils::isForeground(bool &res) {
     }
 }
 
-utils::bitmap utils::convertHBitmap(int width, int height, void *HBMP) {
-    return crop(0, 0, width, height, HBMP);
+utils::bitmap utils::convertHBitmap(int width, int height, const std::shared_ptr<void> &bmp) {
+    return crop(0, 0, width, height, bmp);
 }
 
-utils::bitmap utils::crop(int x, int y, int width, int height, void *src) {
-    auto hSource = (HBITMAP) src;
+utils::bitmap utils::crop(int x, int y, int width, int height, const std::shared_ptr<void> &src) {
+    auto hSource = (HBITMAP) src.get();
     HDC hdcMem, hdcMem2;
     // Get some HDCs that are compatible with the display driver
 
@@ -461,9 +462,24 @@ std::string utils::getDocumentsFolder() {
     HRESULT result = SHGetFolderPathA(nullptr, CSIDL_MYDOCUMENTS, nullptr, SHGFP_TYPE_CURRENT, res.data());
 
     if (result != S_OK) {
-        return std::string();
+        return {};
     } else {
         res.resize(strlen(res.c_str()));
         return res;
+    }
+}
+
+std::string utils::get_or_create_documents_folder() {
+    const std::string documents = utils::getDocumentsFolder();
+
+    if (documents.empty()) {
+        throw std::runtime_error("Could not get the documents folder");
+    }
+
+    const std::string dir = documents + "\\autobet";
+    if (!utils::fileExists(dir) && !std::filesystem::create_directory(dir)) {
+        throw std::runtime_error("Could not create the autobet directory");
+    } else {
+        return dir;
     }
 }
