@@ -8,7 +8,12 @@
             "ESNext",
             "DOM"
         ],
-        "inlineSourceMap": true
+        "inlineSourceMap": true,
+        "strict": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "alwaysStrict": true,
+        "jsx": "react"
     },
     "exclude": [
         "node_modules",
