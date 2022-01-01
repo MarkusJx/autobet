@@ -1,11 +1,12 @@
 .backgroundImage {
+    background-image: url(../../web/mountains.svg);
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
     overflow: hidden;
     margin: 0;
     height: 101vh;
-    width: 100vw;
+    min-width: 100vw;
     position: fixed;
     z-index: -999;
     top: 0;

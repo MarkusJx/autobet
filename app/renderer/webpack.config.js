@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
     target: "electron-renderer",
     entry: [
-        path.resolve(__dirname, 'renderer.ts')
+        path.resolve(__dirname, 'index.tsx')
     ],
     output: {
         path: path.resolve(__dirname, '..', '..', "out"),
@@ -60,7 +60,7 @@ module.exports = {
                             importLoaders: 1,
                             modules: {
                                 exportLocalsConvention: 'dashes',
-                                localIdentName: '[local]',
+                                //localIdentName: '[file]-[local]',
                             }
                         }
                     },
@@ -72,9 +72,19 @@ module.exports = {
             },
             // loads common image formats
             {
-                test: /\.(eot|woff|woff2|ttf|svg|png|jpg|gif)$/,
-                use: "url-loader"
+                test: /\.(eot|woff|woff2|ttf|png|jpg|gif)$/,
+                use: "file-loader"
             },
+            {
+                test: /\.svg$/,
+                issuer: /\.(js)x?$/,
+                use: ['svgr/webpack']
+            },
+            {
+                test: /\.svg$/,
+                issuer: /\.css$/,
+                use: ['svg-url-loader']
+            }
         ]
     },
     plugins: [

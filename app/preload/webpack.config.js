@@ -6,7 +6,7 @@ const nodeExternals = require('webpack-node-externals');
 module.exports = {
     target: "electron-preload",
     entry: [
-        path.resolve(__dirname, "index.tsx")
+        path.resolve(__dirname, "preload.ts")
     ],
     output: {
         path: path.resolve(__dirname, '..', '..', "out"),
@@ -48,7 +48,7 @@ module.exports = {
                             importLoaders: 1,
                             modules: {
                                 exportLocalsConvention: 'dashes',
-                                localIdentName: '[local]',
+                                localIdentName: '[file]-[local]',
                             }
                         }
                     },
@@ -59,8 +59,18 @@ module.exports = {
                 }
             },
             {
-                test: /\.(eot|woff|woff2|ttf|svg|png|jpg|gif)$/,
-                use: "url-loader"
+                test: /\.(eot|woff|woff2|ttf|png|jpg|gif)$/,
+                use: "file-loader"
+            },
+            {
+                test: /\.svg$/,
+                issuer: /\.(js)x?$/,
+                use: ['svgr/webpack']
+            },
+            {
+                test: /\.svg$/,
+                issuer: /\.css$/,
+                use: ['svg-url-loader']
             },
             {
                 test: /\.node$/,

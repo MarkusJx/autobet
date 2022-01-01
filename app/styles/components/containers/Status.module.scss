@@ -1,0 +1,15 @@
+.status {
+    text-align: left;
+
+    .init {
+        color: #ff8800;
+    }
+
+    .running {
+        color: #40d158
+    }
+
+    .stopped {
+        color: rgb(201, 37, 37);
+    }
+}

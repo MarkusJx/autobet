@@ -1,5 +1,11 @@
-@use "components/BackgroundImage.module";
-
 body {
     margin: 0;
+    -ms-overflow-style: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    transition: all .5s ease-in-out;
 }
