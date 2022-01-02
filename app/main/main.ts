@@ -45,7 +45,7 @@ function createWindow(): void {
         height: mainWindowState.height,
         minHeight: 500,
         minWidth: 530,
-        frame: false,
+        frame: true,
         resizable: true,
         icon: "icon.png",
         webPreferences: {
@@ -152,6 +152,7 @@ function createErrorWindow(): void {
 }
 
 app.whenReady().then(() => {
+    require('electron-react-titlebar/main').initialize();
     if (autobetLib != null) {
         if (autobetLib.programIsRunning()) {
             autobetLib.callbacks.setQuitCallback(() => {

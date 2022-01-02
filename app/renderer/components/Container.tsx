@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "../../styles/components/Container.module.scss";
 
-interface ClassNameProps {
+export interface ClassNameProps {
     className?: string;
     children?: any;
 }

@@ -1,0 +1,31 @@
+.container {
+    height: max-content;
+    display: grid;
+
+    .headingContainer {
+        margin: 10px auto 0 auto;
+        width: max-content;
+    }
+
+    .editorContainer {
+        margin: 20px 20px 0 20px;
+        height: 0;
+        width: calc(100% - 40px);
+        background-color: white;
+        border-radius: 10px;
+        display: grid;
+        overflow: hidden;
+        transition: all ease-in-out 0.5s;
+
+        &.open {
+            margin: 20px;
+            height: 550px;
+        }
+    }
+}
+
+@media only screen and (min-width: 860px) {
+    .container {
+        grid-column: 1 / 3;
+    }
+}

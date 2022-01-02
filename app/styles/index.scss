@@ -9,3 +9,8 @@ body {
     user-select: none;
     transition: all .5s ease-in-out;
 }
+
+// Hide the scroll bar
+body::-webkit-scrollbar {
+    display: none;
+}
