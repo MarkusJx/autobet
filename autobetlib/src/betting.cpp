@@ -22,7 +22,14 @@
 
 using namespace logger;
 
-int32_t width = 0, height = 0, racesWon = 0, racesLost = 0;
+// The width of the game window
+int32_t width = 0;
+// The height of the game window
+int32_t height = 0;
+// The number of races won since the program was started
+int32_t racesWon = 0;
+// The number of races lost since the program was started
+int32_t racesLost = 0;
 
 // The previous status of the game window,
 // with -1 being unset, 0 being closed
@@ -151,7 +158,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
 short get_pos(const std::shared_ptr<void> &src) {
     // Write the src to the debug zip folder
     if (variables::debug_full) {
-        utils::bitmap bmp = utils::convertHBitmap(width, height, src.get());
+        utils::bitmap bmp = utils::convertHBitmap(width, height, src);
         debug::writeImage(bmp);
     }
 
@@ -165,7 +172,7 @@ short get_pos(const std::shared_ptr<void> &src) {
         _width = static_cast<uint16_t>(std::round(220 * variables::multiplierW));
 
         // Crop the screenshot
-        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src.get());
+        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src);
 
         // Write bitmap object to debug zip folder
         if (variables::debug_full) {
@@ -260,7 +267,7 @@ void updateWinnings(int amount) {
 void getWinnings() {
     // Set coordinates, width and height to get the image from.
     // These values are based on the positions on a 2560x1440 screen.
-    // They are then scaled to the current game resulution and rounded.
+    // They are then scaled to the current game resolution and rounded.
     // If the images cropped are too small/big/wrong placed,
     // these values probably should be changed.
     auto yCoord = static_cast<short>(std::round(1060.0f * variables::multiplierH));
@@ -270,12 +277,45 @@ void getWinnings() {
 
     // Take a screenshot and crop the image
     std::shared_ptr<void> src(utils::TakeScreenShot(variables::xPos, variables::yPos, width, height), DeleteObject);
-    utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src.get());
+    utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src);
 
     if (variables::debug_full) {
-        utils::bitmap b = utils::convertHBitmap(width, height, src.get());
+        utils::bitmap b = utils::convertHBitmap(width, height, src);
         debug::writeImage(b);
         debug::writeImage(bmp);
+    }
+
+    if (markusjx::autobet::historic_data::should_save()) {
+        // The x-pos of the odd of the second horse
+        const auto x2 = static_cast<uint16_t>(std::round(220 * variables::multiplierW));
+        // The x-pos of the odd of the first horse
+        const auto x1 = static_cast<uint16_t>(std::round(965 * variables::multiplierW));
+        // The x-pos of the odd of the third horse
+        const auto x3 = static_cast<uint16_t>(std::round(1755 * variables::multiplierW));
+
+        // The y-pos of the odds of the second and third horse
+        const auto y1 = static_cast<uint16_t>(std::round(1115 * variables::multiplierH));
+        // The y-pos of the odd of the first horse
+        const auto y2 = static_cast<uint16_t>(std::round(1140 * variables::multiplierH));
+
+        // The height of the images to crop
+        const auto h = static_cast<uint16_t>(std::round(75 * variables::multiplierH));
+        // The width of the images to crop
+        const auto w = static_cast<uint16_t>(std::round(120 * variables::multiplierW));
+
+        const utils::bitmap second = utils::crop(x2, y1, w, h, src);
+        const utils::bitmap first = utils::crop(x1, y2, w, h, src);
+        const utils::bitmap third = utils::crop(x3, y1, w, h, src);
+
+        try {
+            const std::string o2 = variables::knn.predict(second, variables::multiplierW, variables::multiplierH);
+            const std::string o1 = variables::knn.predict(first, variables::multiplierW, variables::multiplierH);
+            const std::string o3 = variables::knn.predict(third, variables::multiplierW, variables::multiplierH);
+
+            markusjx::autobet::historic_data::save_winning_odds(o1, o2, o3);
+        } catch (const std::exception &e) {
+            StaticLogger::errorStream() << "Could not predict the odds of the winning horses: " << e.what();
+        }
     }
 
     // Delete the original screenshot
