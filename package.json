@@ -1,6 +1,6 @@
 {
     "name": "autobet",
-    "version": "1.3.2",
+    "version": "1.4.0",
     "description": "A GTA Online horse racing betting bot",
     "main": "out/main.bundled.js",
     "scripts": {
