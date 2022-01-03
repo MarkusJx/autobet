@@ -1,0 +1,18 @@
+.container {
+    height: max-content;
+    margin-bottom: 40px;
+    transition: all .5s ease-in-out;
+}
+
+.logViewerContainer {
+    position: relative;
+    color: white;
+}
+
+@media only screen and (min-width: 860px) {
+    .container {
+        grid-column: 1 / 3;
+        margin: 0 30px;
+        width: calc(100% - 60px);
+    }
+}

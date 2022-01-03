@@ -21,6 +21,7 @@ import AfterClickSleep from "./containers/settings/AfterClickSleep";
 import TimeSleep from "./containers/settings/TimeSleep";
 import FullDebug from "./containers/settings/FullDebug";
 import CustomBettingFunction from "./containers/settings/CustomBettingFunction";
+import DebugSettings from "./containers/settings/DebugSettings";
 
 export default class MainContent extends React.Component {
     public override render(): React.ReactNode {
@@ -46,6 +47,7 @@ export default class MainContent extends React.Component {
                         <TimeSleep/>
                         <FullDebug/>
                         <CustomBettingFunction/>
+                        <DebugSettings/>
                     </ThemeProvider>
                 </BackgroundImage>
             </div>
