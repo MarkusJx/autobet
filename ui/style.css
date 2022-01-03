@@ -1,4 +1,5 @@
 /* Disable selection on the whole document */
+
 body {
     margin: 0;
     -ms-overflow-style: none;
@@ -312,6 +313,7 @@ body {
     --mdc-theme-primary: blue;
 }
 
+
 /* ============================= Settings ============================= */
 
 #settingsdivider {
@@ -461,7 +463,9 @@ body {
     transition: all .5s ease-in-out;
 }
 
+
 /* ========== Editor ========== */
+
 #custom-betting-function-container {
     height: max-content;
 }
@@ -508,7 +512,7 @@ body {
 #editor-top-app-bar {
     padding: 0;
 }
-  
+
 .app-bar {
     position: absolute;
 }
@@ -570,13 +574,17 @@ body {
     --mdc-theme-primary: blue;
 }
 
+
 /* Set the snackbar action buttons on the info snackbar to blue */
+
 .mdc-button.mdc-snackbar__action.editor-message-snackbar-action {
     color: rgb(0, 145, 255);
     --mdc-theme-primary: rgb(0, 145, 255);
 }
 
+
 /* Set the ok button on the gta not running message to blue */
+
 #gta-not-running-message-ok {
     color: rgb(0, 145, 255);
     --mdc-theme-primary: rgb(0, 145, 255);
@@ -586,15 +594,67 @@ body {
     max-width: calc(100vw - 40px);
 }
 
+#update-available-message {
+    color: rgb(0, 145, 255);
+    --mdc-theme-primary: rgb(0, 145, 255);
+}
+
+#update-available-message-install {
+    color: rgb(0, 145, 255);
+    --mdc-theme-primary: rgb(0, 145, 255);
+}
+
+#update-available-message-patch-notes {
+    color: rgb(0, 145, 255);
+    --mdc-theme-primary: rgb(0, 145, 255);
+}
+
+#patch-notes-dialog {
+    --mdc-theme-primary: rgb(0, 145, 255);
+}
+
+#patch-notes-dialog-content {
+    overflow-y: hidden;
+}
+
+#patch-notes-dialog-content code {
+    white-space: break-spaces;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+}
+
+
 /* Options for colored js objects */
-pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-.string { color: green; }
-.number { color: darkorange; }
-.boolean { color: blue; }
-.null { color: magenta; }
-.key { color: red; }
+
+pre {
+    outline: 1px solid #ccc;
+    padding: 5px;
+    margin: 5px;
+}
+
+.string {
+    color: green;
+}
+
+.number {
+    color: darkorange;
+}
+
+.boolean {
+    color: blue;
+}
+
+.null {
+    color: magenta;
+}
+
+.key {
+    color: red;
+}
+
 
 /* Navigation strategy stuff ================================================== */
+
 #navigation-strategy-selector {
     width: 200px;
 }
@@ -617,7 +677,9 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     margin-left: -100px;
 }
 
+
 /* Game selector stuff ======================================================== */
+
 #game-selector-open-menu-button {
     --mdc-theme-primary: white;
     width: 200px;
@@ -639,6 +701,7 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     margin-left: auto;
     visibility: hidden;
 }
+
 
 /* Beta feature info ========================================================== */
 
@@ -666,17 +729,21 @@ pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
     grid-column-gap: 7px;
 }
 
+
 /* 
 Hide the editor action buttons when the sidebar is open
 and there is not enough space left
 */
+
 @media only screen and (max-width: 735px) {
     #editor-action-bar.opened {
         display: none;
     }
 }
 
+
 /* ========== Attributes to be set when width >= 860px ========== */
+
 @media only screen and (min-width: 860px) {
     #Container {
         grid-template-columns: 50% 50%;

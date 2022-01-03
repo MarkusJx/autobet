@@ -1,6 +1,7 @@
 {
     "name": "@autobet/autobetlib",
-    "version": "1.3.2",
+    "version": "1.4.0",
+    "private": true,
     "description": "The autobet native library module",
     "main": "index.js",
     "scripts": {
@@ -9,7 +10,7 @@
         "test:dev": "node test.js",
         "pretest:dev": "npm run-script build:dev",
         "build": "cmake-js build",
-        "build:dev": "cmake-js configure --release && cmake --build build --config RelWithDebInfo",
+        "build:dev": "cmake-js configure --debug && cmake --build build --config Debug",
         "postbuild:dev": "node prelaunch.js --dev",
         "postbuild": "node prelaunch.js",
         "clean": "cmake-js clean",

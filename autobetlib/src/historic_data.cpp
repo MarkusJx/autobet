@@ -1,5 +1,4 @@
 #define __STDC_WANT_LIB_EXT1__
-
 #include "historic_data.hpp"
 #include "util/utils.hpp"
 
@@ -12,7 +11,7 @@
 
 std::unique_ptr<markusjx::csv_file> file_ptr = nullptr;
 markusjx::csv_file &file = *file_ptr;
-std::mutex mtx;
+static std::mutex mtx;
 
 void markusjx::autobet::historic_data::init() {
     std::unique_lock lock(mtx);

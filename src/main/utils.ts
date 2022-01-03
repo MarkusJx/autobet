@@ -11,6 +11,7 @@ const snackbar_label: HTMLDivElement = <HTMLDivElement>document.getElementById('
 snackbar.timeoutMs = 5000;
 
 const description_dialog: MDCDialog = new MDCDialog(document.getElementById("description-dialog")); // The description dialog
+const descriptionDialogContent = document.getElementById('description-dialog-content');
 
 /**
  * A function to be called when a fatal exception is thrown
@@ -61,7 +62,7 @@ export function showSnackbar(text: string): void {
  */
 export function showDescription(title: string, description: string): void {
     document.getElementById("description-dialog-title").innerText = title;
-    (description_dialog as any).content_.innerText = description;
+    descriptionDialogContent.innerText = description;
 
     description_dialog.open();
 }

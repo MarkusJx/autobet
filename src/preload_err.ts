@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron');
+import {ipcRenderer} from 'electron';
 
 function getError(): Error | null {
     return ipcRenderer.sendSync('get-error');

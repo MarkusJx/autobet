@@ -1,10 +1,10 @@
 #include <fstream>
 
 #include "napi_exported.hpp"
-#include "webui.hpp"
+#include "web/webui.hpp"
 #include "util/utils.hpp"
 #include "debug/debug.hpp"
-#include "settings.hpp"
+#include "storage/settings.hpp"
 #include "autostop.hpp"
 #include "opencv_link.hpp"
 #include "variables.hpp"
@@ -14,7 +14,7 @@
 #include "logger.hpp"
 #include "windowUtils.hpp"
 
-#define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
+//#define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
 
 #include "n_api/napi_tools.hpp"
 
@@ -114,8 +114,10 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             }
 
             try {
-                variables::navigationStrategy = uiNavigationStrategies::navigationStrategy::fromName(
-                        settings::read<std::string>("navigationStrategy"));
+                variables::setNavigationStrategy(
+                        uiNavigationStrategies::navigationStrategy::fromName(
+                                settings::read<std::string>("navigationStrategy"))
+                );
             } catch (const std::exception &e) {
                 StaticLogger::warningStream() << "Could not read the navigationStrategy setting: " << e.what();
             }
@@ -133,6 +135,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         utils::setDpiAware();
+        variables::init();
 
         // Print some system information
         utils::printSystemInformation();
@@ -144,8 +147,6 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 #ifndef NDEBUG
 #       pragma message("INFO: Building in debug mode")
         StaticLogger::warning("Program was compiled in debug mode");
-#else
-#       pragma message("INFO: Building in release mode")
 #endif //NDEBUG
         // Check if model.yml exists
         if (!utils::fileExists("resources/data/model.yml")) {
@@ -289,16 +290,14 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
  * Get the IP address of this machine from the node process
  */
 Napi::String node_getIP(const Napi::CallbackInfo &info) {
-    return Napi::String::New(info.Env(), utils::getIP());
+    return Napi::String::New(info.Env(), webui::get_ip());
 }
 
 /**
  * Open the web ui
  */
 void open_website(const Napi::CallbackInfo &) {
-    std::string addr = "http://";
-    addr.append(utils::getIP()).append(":8027");
-    if (utils::openWebsite(addr)) {
+    if (utils::openWebsite(webui::get_ip())) {
         StaticLogger::debug("Opened website");
     } else {
         StaticLogger::error("Unable to open Web page");
@@ -728,10 +727,10 @@ Napi::Promise getAllOpenWindows(const Napi::CallbackInfo &info) {
     using map_type = std::map<std::u16string, std::vector<std::string>>;
     return promises::promise<map_type>(info.Env(), [] {
         map_type res;
-        for (const auto &w : windowUtils::getAllOpenWindows()) {
+        for (const auto &w: windowUtils::getAllOpenWindows()) {
             std::wstring w_program_name = w->getProgramName();
             std::u16string program_name(w_program_name.begin(), w_program_name.end());
-            for (const auto &p : w->getProcesses()) {
+            for (const auto &p: w->getProcesses()) {
                 if (res.contains(program_name)) {
                     res.at(program_name).push_back(p->getWindowName());
                 } else {
@@ -779,16 +778,17 @@ void setNavigationStrategy(const Napi::CallbackInfo &info) {
         int n = info[0].ToNumber();
         switch (n) {
             case 0:
-                variables::navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
+                variables::setNavigationStrategy(std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>());
                 break;
             case 1:
-                variables::navigationStrategy = std::make_shared<uiNavigationStrategies::controllerNavigationStrategy>();
+                variables::setNavigationStrategy(
+                        std::make_shared<uiNavigationStrategies::controllerNavigationStrategy>());
                 break;
             default:
                 throw std::runtime_error("Invalid number supplied");
         }
 
-        settings::write("navigationStrategy", variables::navigationStrategy->getName());
+        settings::write("navigationStrategy", variables::navigationStrategy()->getName());
     CATCH_EXCEPTIONS
 }
 
@@ -814,7 +814,7 @@ Napi::Promise setClickSleep(const Napi::CallbackInfo &info) {
     CHECK_ARGS(number);
     const int sleep = info[0].ToNumber();
     return promises::promise<void>(info.Env(), [sleep] {
-        variables::navigationStrategy->setClickSleep(sleep);
+        variables::navigationStrategy()->setClickSleep(sleep);
     });
 }
 
@@ -822,19 +822,19 @@ Napi::Promise setAfterClickSleep(const Napi::CallbackInfo &info) {
     CHECK_ARGS(number);
     const int sleep = info[0].ToNumber();
     return promises::promise<void>(info.Env(), [sleep] {
-        variables::navigationStrategy->setAfterClickSleep(sleep);
+        variables::navigationStrategy()->setAfterClickSleep(sleep);
     });
 }
 
 Napi::Number getClickSleep(const Napi::CallbackInfo &info) {
     TRY
-        return Napi::Number::New(info.Env(), variables::navigationStrategy->getClickSleep());
+        return Napi::Number::New(info.Env(), variables::navigationStrategy()->getClickSleep());
     CATCH_EXCEPTIONS
 }
 
 Napi::Number getAfterClickSleep(const Napi::CallbackInfo &info) {
     TRY
-        return Napi::Number::New(info.Env(), variables::navigationStrategy->getAfterClickSleep());
+        return Napi::Number::New(info.Env(), variables::navigationStrategy()->getAfterClickSleep());
     CATCH_EXCEPTIONS
 }
 
