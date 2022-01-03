@@ -234,3 +234,4 @@ node_modules
 /autobetlib/graph_info.json
 out/**
 autobet.config.json
+!*.module.scss

@@ -2,12 +2,15 @@
  "graph_lock": {
   "nodes": {
    "0": {
-    "options": "cpp-httplib:with_brotli=False\ncpp-httplib:with_openssl=False\ncpp-httplib:with_zlib=False\neigen:MPL2_only=False\njasper:shared=False\njasper:with_libjpeg=libjpeg\njbig:build_executables=True\njbig:shared=False\nlibdeflate:shared=False\nlibjpeg:shared=False\nlibpng:api_prefix=None\nlibpng:shared=False\nlibtiff:cxx=True\nlibtiff:jbig=True\nlibtiff:jpeg=libjpeg\nlibtiff:libdeflate=True\nlibtiff:lzma=True\nlibtiff:shared=False\nlibtiff:webp=True\nlibtiff:zlib=True\nlibtiff:zstd=True\nlibwebp:near_lossless=True\nlibwebp:shared=False\nlibwebp:swap_16bit_csp=False\nlibwebp:with_simd=True\nnlohmann_json:implicit_conversions=True\nnlohmann_json:multiple_headers=False\nopencv:contrib=False\nopencv:dnn=True\nopencv:parallel=False\nopencv:shared=False\nopencv:with_cuda=False\nopencv:with_eigen=True\nopencv:with_jpeg=libjpeg\nopencv:with_jpeg2000=jasper\nopencv:with_openexr=True\nopencv:with_png=True\nopencv:with_quirc=True\nopencv:with_tiff=True\nopencv:with_webp=True\nopenexr:shared=False\nprotobuf:lite=False\nprotobuf:shared=False\nprotobuf:with_rtti=True\nprotobuf:with_zlib=True\nquirc:max_regions=254\nquirc:shared=False\nwebsocketpp:asio=boost\nxz_utils:shared=False\nzlib:minizip=False\nzlib:shared=False\nzstd:shared=False",
+    "options": "brotli:shared=False\ncpp-httplib:with_brotli=False\ncpp-httplib:with_openssl=False\ncpp-httplib:with_zlib=False\neigen:MPL2_only=False\njasper:shared=False\njasper:with_libjpeg=libjpeg\njbig:build_executables=True\njbig:shared=False\nlibdeflate:shared=False\nlibjpeg:shared=False\nlibpng:api_prefix=None\nlibpng:shared=False\nlibtiff:cxx=True\nlibtiff:jbig=True\nlibtiff:jpeg=libjpeg\nlibtiff:libdeflate=True\nlibtiff:lzma=True\nlibtiff:shared=False\nlibtiff:webp=True\nlibtiff:zlib=True\nlibtiff:zstd=True\nlibwebp:near_lossless=True\nlibwebp:shared=False\nlibwebp:swap_16bit_csp=False\nlibwebp:with_simd=True\nopencv:contrib=False\nopencv:dnn=True\nopencv:parallel=False\nopencv:shared=False\nopencv:with_cuda=False\nopencv:with_eigen=True\nopencv:with_jpeg=libjpeg\nopencv:with_jpeg2000=jasper\nopencv:with_openexr=True\nopencv:with_png=True\nopencv:with_quirc=True\nopencv:with_tiff=True\nopencv:with_webp=True\nopenexr:shared=False\nopenssl:386=False\nopenssl:capieng_dialog=False\nopenssl:enable_capieng=False\nopenssl:no_aria=False\nopenssl:no_asm=False\nopenssl:no_async=False\nopenssl:no_bf=False\nopenssl:no_blake2=False\nopenssl:no_camellia=False\nopenssl:no_cast=False\nopenssl:no_chacha=False\nopenssl:no_cms=False\nopenssl:no_comp=False\nopenssl:no_ct=False\nopenssl:no_deprecated=False\nopenssl:no_des=False\nopenssl:no_dgram=False\nopenssl:no_dh=False\nopenssl:no_dsa=False\nopenssl:no_dso=False\nopenssl:no_engine=False\nopenssl:no_filenames=False\nopenssl:no_gost=False\nopenssl:no_hmac=False\nopenssl:no_idea=False\nopenssl:no_md4=False\nopenssl:no_md5=False\nopenssl:no_mdc2=False\nopenssl:no_ocsp=False\nopenssl:no_pinshared=False\nopenssl:no_rc2=False\nopenssl:no_rmd160=False\nopenssl:no_rsa=False\nopenssl:no_sha=False\nopenssl:no_sm2=False\nopenssl:no_sm3=False\nopenssl:no_sm4=False\nopenssl:no_srp=False\nopenssl:no_srtp=False\nopenssl:no_sse2=False\nopenssl:no_ssl=False\nopenssl:no_threads=False\nopenssl:no_ts=False\nopenssl:no_whirlpool=False\nopenssl:openssldir=None\nopenssl:shared=False\nprotobuf:lite=False\nprotobuf:shared=False\nprotobuf:with_rtti=True\nprotobuf:with_zlib=True\nquirc:max_regions=254\nquirc:shared=False\nsqlite3:build_executable=True\nsqlite3:disable_gethostuuid=False\nsqlite3:enable_column_metadata=True\nsqlite3:enable_dbstat_vtab=False\nsqlite3:enable_default_secure_delete=False\nsqlite3:enable_default_vfs=True\nsqlite3:enable_explain_comments=False\nsqlite3:enable_fts3=False\nsqlite3:enable_fts3_parenthesis=False\nsqlite3:enable_fts4=False\nsqlite3:enable_fts5=False\nsqlite3:enable_json1=False\nsqlite3:enable_math_functions=True\nsqlite3:enable_preupdate_hook=False\nsqlite3:enable_rtree=True\nsqlite3:enable_soundex=False\nsqlite3:enable_unlock_notify=True\nsqlite3:max_blob_size=1000000000\nsqlite3:omit_load_extension=False\nsqlite3:shared=False\nsqlite3:threadsafe=1\nsqlite3:use_alloca=False\nsqlitecpp:lint=deprecated\nsqlitecpp:shared=False\nsqlitecpp:stack_protection=True\nwebsocketpp:asio=boost\nxz_utils:shared=False\nzlib:minizip=False\nzlib:shared=False\nzstd:shared=False",
     "requires": [
      "1",
      "16",
      "17",
-     "18"
+     "18",
+     "19",
+     "23",
+     "25"
     ],
     "path": "conanfile.txt",
     "context": "host"
@@ -151,14 +154,14 @@
     "context": "host"
    },
    "16": {
-    "ref": "nlohmann_json/3.9.1",
-    "options": "implicit_conversions=True\nmultiple_headers=False",
-    "package_id": "d1091b2ed420e6d287293709a907ae824d5de508",
+    "ref": "nlohmann_json/3.10.4",
+    "options": "",
+    "package_id": "5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9",
     "prev": "0",
     "context": "host"
    },
    "17": {
-    "ref": "cpp-httplib/0.8.8",
+    "ref": "cpp-httplib/0.9.10",
     "options": "with_brotli=False\nwith_openssl=False\nwith_zlib=False",
     "package_id": "5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9",
     "prev": "0",
@@ -204,6 +207,30 @@
    },
    "22": {
     "ref": "libiconv/1.16",
+    "options": "shared=False",
+    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "prev": "0",
+    "context": "host"
+   },
+   "23": {
+    "ref": "sqlitecpp/3.1.1",
+    "options": "lint=deprecated\nshared=False\nstack_protection=True\nsqlite3:build_executable=True\nsqlite3:disable_gethostuuid=False\nsqlite3:enable_column_metadata=True\nsqlite3:enable_dbstat_vtab=False\nsqlite3:enable_default_secure_delete=False\nsqlite3:enable_default_vfs=True\nsqlite3:enable_explain_comments=False\nsqlite3:enable_fts3=False\nsqlite3:enable_fts3_parenthesis=False\nsqlite3:enable_fts4=False\nsqlite3:enable_fts5=False\nsqlite3:enable_json1=False\nsqlite3:enable_math_functions=True\nsqlite3:enable_preupdate_hook=False\nsqlite3:enable_rtree=True\nsqlite3:enable_soundex=False\nsqlite3:enable_unlock_notify=True\nsqlite3:max_blob_size=1000000000\nsqlite3:omit_load_extension=False\nsqlite3:shared=False\nsqlite3:threadsafe=1\nsqlite3:use_alloca=False",
+    "package_id": "76dba0ec9bc88d488e30066d4327e0b7ebdd2b21",
+    "prev": "0",
+    "requires": [
+     "24"
+    ],
+    "context": "host"
+   },
+   "24": {
+    "ref": "sqlite3/3.36.0",
+    "options": "build_executable=True\ndisable_gethostuuid=False\nenable_column_metadata=True\nenable_dbstat_vtab=False\nenable_default_secure_delete=False\nenable_default_vfs=True\nenable_explain_comments=False\nenable_fts3=False\nenable_fts3_parenthesis=False\nenable_fts4=False\nenable_fts5=False\nenable_json1=False\nenable_math_functions=True\nenable_preupdate_hook=False\nenable_rtree=True\nenable_soundex=False\nenable_unlock_notify=True\nmax_blob_size=1000000000\nomit_load_extension=False\nshared=False\nthreadsafe=1\nuse_alloca=False",
+    "package_id": "050fb3a4d3559ab088bce91739e61889c28839d1",
+    "prev": "0",
+    "context": "host"
+   },
+   "25": {
+    "ref": "brotli/1.0.9",
     "options": "shared=False",
     "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
     "prev": "0",

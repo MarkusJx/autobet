@@ -16,6 +16,7 @@
         "ui",
         "web",
         "docs",
-        ".github"
+        ".github",
+        "web-ui"
     ]
 }

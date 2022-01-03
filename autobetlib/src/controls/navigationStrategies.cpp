@@ -3,7 +3,7 @@
 #include "controls/navigationStrategies.hpp"
 #include "util/utils.hpp"
 #include "variables.hpp"
-#include "settings.hpp"
+#include "storage/settings.hpp"
 #include "logger.hpp"
 
 using namespace logger;
@@ -53,7 +53,7 @@ void leftClick(unsigned int x, unsigned int y, int sleep, bool move = true) {
     // Only click if the program is running and not trying to stop or the user paused the betting
     // so the mouse is not moved while the user is using it
     if (variables::runLoops) {
-        // Apply the multipliers to the x and y coords so they fit to any window size
+        // Apply the multipliers to the x and y coords, so they fit to any window size
         // because the built-in values are for a 1440p config
         x = (int) round((float) x * variables::multiplierW) + variables::xPos;
         y = (int) round((float) y * variables::multiplierH) + variables::yPos;
@@ -90,7 +90,7 @@ void mouseNavigationStrategy::placeBet(short y) const {
 
     // 25/08/2020: Today I found out, you could just press tab to place a max bet. Now, that I have invested
     // many hours into setting positions for the 'increase bet' button, this is not very nice. I've even used
-    // vXbox to simulate a xBox controller, which is now completely useless. I will not include this fact in any
+    // vXbox to simulate an xBox controller, which is now completely useless. I will not include this fact in any
     // changelog or commit message, this is the only place where anyone can find this shit. If you just found it:
     // good for you, keep it a secret, I don't want anyone to know how dumb I really am. Have a nice day.
     // I am definitely not having a nice day at this point. F*ck.
@@ -116,8 +116,8 @@ void mouseNavigationStrategy::skipBet() const {
     sleepMs(afterClick_sleep);
 
     // Sleep between clicks as the game cannot accept so many clicks in quick succession
-    // Also, this helps making our clicks seem more human.
-    // Just so we going the safer route as of not getting banned.
+    // Also, this helps to make our clicks seem more human.
+    // Just so we're going the safer route as of not getting banned.
     // Rockstar would probably not ban anyone for using this,
     // since they are incompetent as fuck, despite having billions of dollars.
     leftClick(1720, 1036, click_sleep);
@@ -140,7 +140,7 @@ void mouseNavigationStrategy::setAfterClickSleep(int time) {
 
 // controllerNavigationStrategy class ===============================
 // This was mainly created to support streaming from an xbox,
-// requested by github user Max-ES. This feature was made in
+// requested by GitHub user Max-ES. This feature was made in
 // collaboration with them as there was no way for me to test
 // this feature, so thank you for your time and effort to make
 // this possible.
@@ -210,7 +210,7 @@ void controllerNavigationStrategy::placeBet(short y) const {
 void controllerNavigationStrategy::reset() const {
     // Press 'B' to return to the main screen;
     // Press the right d-pad to go to the bet button;
-    // Press a to confirm the choice.
+    // Press 'A' to confirm the choice.
     impl.pressB();
     sleepMs(afterClick_sleep);
     impl.pressDPadRight();

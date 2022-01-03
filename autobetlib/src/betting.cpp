@@ -13,7 +13,7 @@
 #include "autobetException.hpp"
 #include "opencv_link.hpp"
 #include "variables.hpp"
-#include "webui.hpp"
+#include "web/webui.hpp"
 #include "napi_exported.hpp"
 #include "historic_data.hpp"
 #include "control.hpp"
@@ -87,11 +87,13 @@ void set_positions() {
  * @param val the new value
  */
 void setGtaVRunning(bool val) {
-    // Only send data to the web listeners every 10-ish seconds
-    static int count = 0;
-    count = (count + 1) % 10;
+    // Only send data to the web listeners if something has changed
+    static bool prev = false;
     try {
-        if (count == 0) webui::setGtaRunning(val);
+        if (val != prev) {
+            prev = val;
+            webui::setGtaRunning(val);
+        }
 
         variables::gtaVRunning = val;
         napi_exported::setGtaRunning(val);
@@ -351,7 +353,7 @@ void betting::mainLoop() {
     const auto stopBetting = [] {
         try {
             napi_exported::keyCombStop();
-            webui::setStopping();
+            webui::setStopped();
         } catch (const std::exception &e) {
             StaticLogger::errorStream() << "Exception thrown: " << e.what();
         }
@@ -373,7 +375,7 @@ void betting::mainLoop() {
         if (variables::running) {
             StaticLogger::debug("Running first bet");
             // Run the first reset on the navigation strategy
-            variables::navigationStrategy->firstBet();
+            variables::navigationStrategy()->firstBet();
         }
 
         // A note to my C Professor: I've learned my lesson,
@@ -402,7 +404,7 @@ void betting::mainLoop() {
 
                     StaticLogger::errorStream() << lastError;
                     StaticLogger::debug("Assuming the game is stuck, resetting...");
-                    variables::navigationStrategy->reset();
+                    variables::navigationStrategy()->reset();
 
                     StaticLogger::debug("Sleeping for 5 seconds");
                     std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -417,6 +419,8 @@ void betting::mainLoop() {
                 StaticLogger::error(
                         "Could not get the position to bet on, retried 3 times, which did not help, stopping betting.");
                 napi_exported::bettingException(lastError);
+                variables::pushNotifications()->send_notification("Autobet - Error",
+                                                                  "The betting process has been stopped due to an error");
                 stopBetting();
                 break;
             }
@@ -427,7 +431,7 @@ void betting::mainLoop() {
 
                 // Plot twist: pos is actually the y-position
                 // of the button of the horse to bet on
-                variables::navigationStrategy->placeBet(pos);
+                variables::navigationStrategy()->placeBet(pos);
                 StaticLogger::debugStream() << "Running: " << std::boolalpha << variables::running;
 
                 // Updating winnings by -10000 since betting costs 100000
@@ -454,14 +458,14 @@ void betting::mainLoop() {
                 getWinnings();
 
                 if (!variables::running) continue;
-                variables::navigationStrategy->reset();
+                variables::navigationStrategy()->reset();
                 if (autostop::checkStopConditions()) {
                     stopBetting();
                     break;
                 }
             } else {
                 // Should not bet, skip
-                variables::navigationStrategy->skipBet();
+                variables::navigationStrategy()->skipBet();
                 updateWinnings(-100);
                 StaticLogger::debugStream() << "Sleeping for " << variables::time_sleep << " seconds";
                 std::this_thread::sleep_for(std::chrono::seconds(variables::time_sleep / 2));
@@ -471,7 +475,7 @@ void betting::mainLoop() {
 
                 // Update the winnings and return to the betting screen
                 getWinnings();
-                variables::navigationStrategy->reset();
+                variables::navigationStrategy()->reset();
             }
 
             // Check if the game is in focus
