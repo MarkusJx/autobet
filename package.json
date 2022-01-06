@@ -1,10 +1,11 @@
 {
     "name": "autobet",
     "version": "1.4.0",
+    "private": true,
     "description": "A GTA Online horse racing betting bot",
     "main": "out/main.bundled.js",
     "scripts": {
-        "build": "cd autobetlib && npm run-script build",
+        "build": "npm run build:web && npm run build:autobetlib",
         "build:preload": "webpack build --config app/preload/webpack.config.js --mode development",
         "build:renderer": "webpack build --config app/renderer/webpack.config.js --mode development",
         "build:main": "webpack build --config app/main/webpack.config.js --mode production",
@@ -14,10 +15,14 @@
         "test": "electron . --enableDevTools",
         "pack": "electron-builder",
         "prepack": "npm run-script build",
-        "postinstall": "node install.js --downloadModel && cd autobetlib && npm install",
+        "postinstall": "node install.js --downloadModel && npm run install:autobetlib && npm run install:web",
         "clean": "node install.js --clean && cd autobetlib && npm run-script clean",
         "clean_all": "cd autobetlib && npm run-script clean && cd .. && node install.js --clean_all",
-        "testrun": "npm run postbuild && npm test"
+        "testrun": "npm run postbuild && npm test",
+        "build:web": "cd web-ui && npm run build",
+        "build:autobetlib": "cd autobetlib && npm run build",
+        "install:web": "cd web-ui && npm install",
+        "install:autobetlib": "cd autobetlib && npm install"
     },
     "repository": {
         "type": "git",
@@ -132,12 +137,10 @@
                 "to": "icon.png"
             },
             {
-                "from": "web",
+                "from": "web-ui/out",
                 "to": "web",
                 "filter": [
-                    "**/*.min.*",
-                    "**/index.html",
-                    "**/favicon.ico"
+                    "**/*"
                 ]
             }
         ],
