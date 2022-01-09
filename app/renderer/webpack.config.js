@@ -72,8 +72,8 @@ module.exports = {
             },
             // loads common image formats
             {
-                test: /\.(eot|woff|woff2|ttf|png|jpg|gif)$/,
-                use: "file-loader"
+                test: /\.(eot|woff2?|ttf|png|je?pg|gif)(\?v=\d+\.\d+\.\d+)?$/,
+                type: 'asset/resource'
             },
             {
                 test: /\.svg$/,

@@ -1,12 +1,42 @@
+@use "@fontsource/fira-code/scss/mixins" as FiraCode;
+
+@include FiraCode.fontFace(
+        $weight: 400,
+        $display: fallback,
+        $fontDir: "~@fontsource/fira-code/files"
+);
+
 .container {
     height: max-content;
     margin-bottom: 40px;
     transition: all .5s ease-in-out;
 }
 
-.logViewerContainer {
-    position: relative;
+.console {
     color: white;
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-break: break-all;
+    word-wrap: break-word;
+
+    .message {
+        font-family: "Fira Code", "Open Sans", Roboto, sans-serif;
+        font-weight: 400;
+    }
+}
+
+.headingContainer {
+    margin: 10px auto 0 auto;
+    width: max-content;
+}
+
+.infoAlignLogging {
+    column-gap: 40px;
+}
+
+.scroll {
+    max-height: 1000px;
+    transition: height ease-in-out .5s;
 }
 
 @media only screen and (min-width: 860px) {

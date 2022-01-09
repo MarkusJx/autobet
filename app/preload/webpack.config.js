@@ -41,6 +41,7 @@ module.exports = {
                     path.resolve(__dirname, '..', '..', "node_modules"),
                 ],
                 use: [
+                    //"style-loader",
                     MiniCssExtractPlugin.loader,
                     {
                         loader: "css-loader",
@@ -59,8 +60,8 @@ module.exports = {
                 }
             },
             {
-                test: /\.(eot|woff|woff2|ttf|png|jpg|gif)$/,
-                use: "file-loader"
+                test: /\.(eot|woff|woff2|ttf|png|jpg|gif)(\?v=\d+\.\d+\.\d+)?$/,
+                use: "asset/resource"
             },
             {
                 test: /\.svg$/,
