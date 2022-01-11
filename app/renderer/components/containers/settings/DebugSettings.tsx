@@ -6,9 +6,8 @@ import {Switch} from "@mui/material";
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import Terminal from 'react-console-emulator';
-import CustomScroll from 'react-custom-scroll';
+import {Scrollbars} from 'rc-scrollbars';
 import "@fontsource/fira-code";
-import "react-custom-scroll/dist/customScroll.css";
 import styles from "../../../../styles/components/containers/settings/DebugSettings.module.scss";
 
 interface DebugSettingsState {
@@ -19,6 +18,7 @@ interface DebugSettingsState {
 
 export default class DebugSettings extends React.Component<{}, DebugSettingsState> {
     private terminal: Terminal | null = null;
+    private scrollbar: Scrollbars | null = null;
 
     public constructor(props: {}) {
         super(props);
@@ -47,19 +47,19 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
                         <Switch checked={this.state.logToConsole} onChange={this.onLogToConsoleChange.bind(this)}/>
                     </InfoAlign>
                 </TextAlign>
-                {/*TODO: Still broken*/}
-                <CustomScroll className={styles.scroll} allowOuterScroll>
+                <Scrollbars className={styles.scroll} autoHide autoHideTimeout={1000} autoHideDuration={200} autoHeight
+                            autoHeightMin={0} autoHeightMax={1000} thumbMinSize={30} ref={e => this.scrollbar = e}>
                     <Terminal readOnly ref={(e: any) => this.terminal = e} commands={{}} className={styles.console}
-                              messageClassName={styles.message}/>
-                </CustomScroll>
+                              messageClassName={styles.message} style={{minHeight: 0}}
+                              contentStyle={{padding: this.state.logToConsole ? 20 : 0}}/>
+                </Scrollbars>
+
             </SettingContainer>
         );
     }
 
     public override componentDidMount(): void {
-        window.autobet.logging.setLogCallback(msg => {
-            this.terminal?.pushToStdout(msg);
-        });
+        window.autobet.logging.setLogCallback(this.writeToConsole.bind(this));
 
         this.logToFile = window.autobet.logging.isLoggingToFile();
         this.logToConsole = window.autobet.logging.isLoggingToConsole();
@@ -87,6 +87,16 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
         });
     }
 
+    private writeToConsole(msg: string): void {
+        const scrolledDown: boolean = (this.scrollbar?.getScrollTop()! + this.scrollbar?.getClientHeight()!) >=
+            (this.scrollbar?.getScrollHeight()! - 20);
+        this.terminal?.pushToStdout(msg);
+
+        if (scrolledDown) {
+            this.scrollbar?.scrollToBottom();
+        }
+    }
+
     private async onLogToFileChange(event: React.ChangeEvent<HTMLInputElement>): Promise<void> {
         event.target.disabled = true;
         try {
@@ -103,6 +113,7 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
         try {
             this.logToConsole = event.target.checked;
             await window.autobet.settings.saveSettings();
+            if (!this.logToConsole) this.terminal?.clearStdout();
         } catch (e) {
             console.error(e);
         }

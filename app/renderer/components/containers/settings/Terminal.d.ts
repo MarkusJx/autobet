@@ -4,6 +4,7 @@ interface TerminalProps {
     className: string;
     messageClassName: string;
     style?: React.CSSProperties;
+    contentStyle?: React.CSSProperties;
 }
 
 declare module 'react-console-emulator' {

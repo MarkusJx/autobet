@@ -14,10 +14,11 @@
 
 .console {
     color: white;
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
     word-break: break-all;
     word-wrap: break-word;
+    transition: height, padding ease-in-out .5s;
 
     .message {
         font-family: "Fira Code", "Open Sans", Roboto, sans-serif;
@@ -35,8 +36,9 @@
 }
 
 .scroll {
-    max-height: 1000px;
-    transition: height ease-in-out .5s;
+    //max-height: 1000px;
+    transition: all ease-in-out .5s;
+    margin-top: 20px;
 }
 
 @media only screen and (min-width: 860px) {
