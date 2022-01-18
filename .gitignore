@@ -235,3 +235,5 @@ node_modules
 out/**
 autobet.config.json
 !*.module.scss
+!renderer/styles/**/*
+/renderer/.next
