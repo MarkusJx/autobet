@@ -14,9 +14,9 @@ try {
 }
 
 let enableDevTools: boolean;
+const version: string = require('./../../package.json').version;
 
 {
-    const version: string = require('./../../package.json').version;
     const rel_ver_regex: RegExp = /^([0-9]+\.)*[0-9]*$/;
 
     enableDevTools = !rel_ver_regex.test(version) || (process.argv.length >= 3 && process.argv[2] === "--enableDevTools");
@@ -103,6 +103,8 @@ function createWindow(): void {
     ipcMain.on('hide-window', () => {
         mainWindow.hide();
     });
+
+    ipcMain.handle('autobet-version', () => version);
 
     mainWindow.loadFile(path.join(__dirname, 'index.html')).then(() => {
         console.log("Main window loaded");

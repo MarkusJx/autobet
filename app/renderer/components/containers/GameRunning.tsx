@@ -27,4 +27,8 @@ export default class GameRunning extends React.Component<any, GameRunningState> 
             running: running
         });
     }
+
+    public override componentDidMount(): void {
+        window.autobet.callbacks.setGtaRunningCallback(this.setRunning.bind(this));
+    }
 }

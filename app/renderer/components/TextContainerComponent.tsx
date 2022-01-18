@@ -18,7 +18,7 @@ export default class TextContainerComponent extends React.Component<any, TextCon
         return <Container heading={this.heading} text={this.state.text}/>;
     }
 
-    protected setText(text: string): void {
+    public setText(text: string): void {
         this.setState({
             text: text
         });
