@@ -1,3 +1,5 @@
+import StaticInstances from "./StaticInstances";
+
 /**
  * Make sums more readable by adding 'K' for thousand
  * or 'M' for million to the end of the sum
@@ -29,4 +31,9 @@ export function makeSumsDisplayable(sum: number, k: boolean = false): string {
     } else {
         return "$" + res;
     }
+}
+
+export async function saveSettings(): Promise<void> {
+    await window.autobet.settings.saveSettings();
+    StaticInstances.settingsSavedAlert?.show(5000);
 }

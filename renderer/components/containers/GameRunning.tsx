@@ -22,13 +22,13 @@ export default class GameRunning extends React.Component<any, GameRunningState> 
         );
     }
 
-    public setRunning(running: boolean): void {
+    public get running(): boolean {
+        return this.state.running;
+    }
+
+    public set running(running: boolean) {
         this.setState({
             running: running
         });
-    }
-
-    public override componentDidMount(): void {
-        window.autobet.callbacks.setGtaRunningCallback(this.setRunning.bind(this));
     }
 }

@@ -12,6 +12,7 @@ enum NavStrategy {
 
 interface NavigationStrategyState {
     selectedStrategy: NavStrategy;
+    disabled: boolean;
 }
 
 export default class NavigationStrategy extends React.Component<{}, NavigationStrategyState> {
@@ -19,8 +20,15 @@ export default class NavigationStrategy extends React.Component<{}, NavigationSt
         super(props);
 
         this.state = {
-            selectedStrategy: NavStrategy.MOUSE
+            selectedStrategy: NavStrategy.MOUSE,
+            disabled: false
         };
+    }
+
+    public set disabled(val: boolean) {
+        this.setState({
+            disabled: val
+        });
     }
 
     public override render(): React.ReactNode {
@@ -40,7 +48,7 @@ export default class NavigationStrategy extends React.Component<{}, NavigationSt
                         </InfoIcon>
                     </InfoAlign>
 
-                    <FormControl fullWidth style={textFieldStyle}>
+                    <FormControl fullWidth style={textFieldStyle} disabled={this.state.disabled}>
                         <InputLabel id="nav-strategy-select-label">Navigation Strategy</InputLabel>
                         <Select labelId="nav-strategy-select-label" id="nav-strategy-select"
                                 value={this.state.selectedStrategy} label="Navigation Strategy"

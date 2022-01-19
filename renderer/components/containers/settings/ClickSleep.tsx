@@ -5,7 +5,25 @@ import {InfoAlign, InfoIcon} from "./Info";
 import {TextField} from "@mui/material";
 import textFieldStyle from "./textFieldStyle";
 
-export default class ClickSleep extends React.Component<any, any> {
+interface ClickSleepState {
+    disabled: boolean;
+}
+
+export default class ClickSleep extends React.Component<{}, ClickSleepState> {
+    public constructor(props: {}) {
+        super(props);
+
+        this.state = {
+            disabled: false
+        };
+    }
+
+    public set disabled(val: boolean) {
+        this.setState({
+            disabled: val
+        });
+    }
+
     public override render(): React.ReactNode {
         return (
             <SettingContainer>
@@ -20,7 +38,7 @@ export default class ClickSleep extends React.Component<any, any> {
 
                     <TextField inputProps={{
                         inputMode: 'numeric', pattern: '[0-9]*', type: 'number', min: '1', max: '10000'
-                    }} variant="filled" label="Time" style={textFieldStyle}/>
+                    }} variant="filled" label="Time" style={textFieldStyle} disabled={this.state.disabled}/>
                 </TextAlign>
             </SettingContainer>
         );

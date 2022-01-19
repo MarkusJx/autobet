@@ -2,8 +2,8 @@ import React from "react";
 import styles from "../styles/components/Webserver.module.scss";
 import {Button, Switch} from "@mui/material";
 import {ContainerComponent, ContainerHeading, TextAlign} from "./Container";
-//import "core-js/stable";
-//import "regenerator-runtime/runtime";
+import {saveSettings} from "../util/util";
+import Loadable from "./containers/Loadable";
 
 interface WebserverState {
     buttonText: string;
@@ -13,14 +13,14 @@ interface WebserverState {
     qrButtonDisabled: boolean;
 }
 
-export default class Webserver extends React.Component<any, WebserverState> {
+export default class Webserver extends React.Component<any, WebserverState> implements Loadable {
     public constructor(props: {}) {
         super(props);
 
         this.state = {
             buttonText: "http://localhost:8027",
             switchChecked: false,
-            switchDisabled: false,
+            switchDisabled: true,
             weblinkDisabled: true,
             qrButtonDisabled: true
         };
@@ -95,10 +95,19 @@ export default class Webserver extends React.Component<any, WebserverState> {
         );
     }
 
+    public loadData(): void {
+        this.switchDisabled = false;
+        this.switchChecked = window.autobet.settings.webServerActivated();
+
+        if (this.switchChecked) {
+            this.weblinkDisabled = false;
+            this.qrButtonDisabled = false;
+            this.setIp();
+        }
+    }
+
     private setIp(): void {
-        this.setState({
-            buttonText: window.autobet.getIP()
-        });
+        this.weblinkText = window.autobet.getIP();
     }
 
     private async onSwitchChange(_: any, checked: boolean): Promise<void> {
@@ -119,7 +128,7 @@ export default class Webserver extends React.Component<any, WebserverState> {
             this.qrButtonDisabled = true;
         }
 
-        await window.autobet.settings.saveSettings();
+        await saveSettings();
         this.switchDisabled = false;
     }
 }

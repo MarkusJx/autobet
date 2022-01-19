@@ -8,6 +8,7 @@ import textFieldStyle from "./textFieldStyle";
 interface GameSelectorState {
     selectedGame: Program;
     applications: React.ReactNode[] | undefined;
+    disabled: boolean;
 }
 
 export class Program {
@@ -23,8 +24,21 @@ export default class GameSelector extends React.Component<{}, GameSelectorState>
 
         this.state = {
             selectedGame: GameSelector.GtaV,
-            applications: undefined
+            applications: undefined,
+            disabled: false
         };
+    }
+
+    public set disabled(val: boolean) {
+        this.setState({
+            disabled: val
+        });
+    }
+
+    public setApplications(apps: Program[]): void {
+        this.setState({
+            applications: this.getApplicationArray(apps)
+        });
     }
 
     public override render(): React.ReactNode {
@@ -42,7 +56,7 @@ export default class GameSelector extends React.Component<{}, GameSelectorState>
                         </InfoIcon>
                     </InfoAlign>
 
-                    <FormControl fullWidth style={textFieldStyle}>
+                    <FormControl fullWidth style={textFieldStyle} disabled={this.state.disabled}>
                         <InputLabel id="game-select-label">Navigation Strategy</InputLabel>
                         <Select labelId="game-select-label" id="game-select"
                                 value={JSON.stringify(this.state.selectedGame)} label="Navigation Strategy"
@@ -56,12 +70,6 @@ export default class GameSelector extends React.Component<{}, GameSelectorState>
                 </TextAlign>
             </SettingContainer>
         );
-    }
-
-    public setApplications(apps: Program[]): void {
-        this.setState({
-            applications: this.getApplicationArray(apps)
-        });
     }
 
     private getApplicationArray(apps: Program[]): React.ReactNode[] | undefined {

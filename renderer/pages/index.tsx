@@ -1,8 +1,9 @@
-import type {NextPage} from 'next'
-import Head from 'next/head'
-import React from 'react'
-import styles from '../styles/Home.module.css'
+import type {NextPage} from 'next';
+import Head from 'next/head';
+import React from 'react';
+import styles from '../styles/Home.module.css';
 import MainContent from "../components/MainContent";
+import Alerts from "../components/Alerts";
 
 const Home: NextPage = () => {
     return (
@@ -15,9 +16,10 @@ const Home: NextPage = () => {
 
             <main className={styles.main}>
                 <MainContent/>
+                <Alerts/>
             </main>
         </div>
-    )
+    );
 }
 
-export default Home
+export default Home;

@@ -7,7 +7,7 @@ interface StatusState {
     className: string;
 }
 
-enum StatusValue {
+export enum StatusValue {
     initializing,
     starting,
     running,

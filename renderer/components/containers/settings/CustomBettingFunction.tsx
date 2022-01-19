@@ -39,6 +39,7 @@ interface CustomBettingFunctionState {
     editorVisible: boolean;
     selectedImpl: string;
     drawerOpen: boolean;
+    openButtonDisabled: boolean;
 }
 
 export default class CustomBettingFunction extends React.Component<any, CustomBettingFunctionState> {
@@ -50,8 +51,15 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         this.state = {
             editorVisible: false,
             selectedImpl: "default",
-            drawerOpen: false
+            drawerOpen: false,
+            openButtonDisabled: false
         };
+    }
+
+    public set openButtonDisabled(val: boolean) {
+        this.setState({
+            openButtonDisabled: val
+        });
     }
 
     public override render(): React.ReactNode {
@@ -87,7 +95,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
 
                 <Button variant="outlined" onClick={this.onOpenClick.bind(this)} style={{
                     margin: '10px auto auto auto'
-                }}>
+                }} disabled={this.state.openButtonDisabled}>
                     {`${this.state.editorVisible ? "Hide" : "Show"} editor`}
                 </Button>
 
@@ -146,6 +154,12 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
                 </div>
             </SettingContainer>
         );
+    }
+
+    public hide(): void {
+        this.setState({
+            editorVisible: false
+        });
     }
 
     private onOpenClick(): void {

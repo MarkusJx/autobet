@@ -3,11 +3,11 @@ import SettingContainer from "./SettingContainer";
 import {InfoAlign, InfoIcon} from "./Info";
 import {ContainerHeading, TextAlign} from "../../Container";
 import {Switch} from "@mui/material";
-//import "core-js/stable";
-//import "regenerator-runtime/runtime";
 import Terminal from 'react-console-emulator';
 import {Scrollbars} from 'rc-scrollbars';
 import styles from "../../../styles/components/containers/settings/DebugSettings.module.scss";
+import {saveSettings} from "../../../util/util";
+import Loadable from "../Loadable";
 
 interface DebugSettingsState {
     logToFile: boolean;
@@ -15,7 +15,7 @@ interface DebugSettingsState {
     loggedData: string[];
 }
 
-export default class DebugSettings extends React.Component<{}, DebugSettingsState> {
+export default class DebugSettings extends React.Component<{}, DebugSettingsState> implements Loadable {
     private terminal: Terminal | null = null;
     private scrollbar: Scrollbars | null = null;
 
@@ -37,7 +37,7 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
         window.autobet.logging.setLogToFile(val);
         this.setState({
             logToFile: val
-        });
+        }, () => saveSettings());
     }
 
     public get logToConsole(): boolean {
@@ -48,7 +48,7 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
         window.autobet.logging.setLogToConsole(val);
         this.setState({
             logToConsole: val
-        });
+        }, () => saveSettings());
     }
 
     public override render(): React.ReactNode {
@@ -85,9 +85,13 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
 
     public override componentDidMount(): void {
         window.autobet.logging.setLogCallback(this.writeToConsole.bind(this));
+    }
 
-        this.logToFile = window.autobet.logging.isLoggingToFile();
-        this.logToConsole = window.autobet.logging.isLoggingToConsole();
+    public loadData(): void {
+        this.setState({
+            logToFile: window.autobet.logging.isLoggingToFile(),
+            logToConsole: window.autobet.logging.isLoggingToConsole()
+        });
     }
 
     private writeToConsole(msg: string): void {
