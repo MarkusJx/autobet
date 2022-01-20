@@ -48,8 +48,9 @@ export default class Settings extends React.Component<{}, {}> implements Loadabl
         );
     }
 
-    public loadData(): void {
+    public async loadData(): Promise<void> {
         this.timeSleep?.loadData();
         this.debugSettings?.loadData();
+        await this.gameSelector?.loadData();
     }
 }

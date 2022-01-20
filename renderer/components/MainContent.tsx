@@ -106,7 +106,7 @@ export default class MainContent extends React.Component<{}, {}> {
         }
 
         await window.autobet.loadWinnings();
-        StaticInstances.settings!.loadData();
+        await StaticInstances.settings!.loadData();
         this.webserver!.loadData();
 
         await window.autobet.setOddTranslations();

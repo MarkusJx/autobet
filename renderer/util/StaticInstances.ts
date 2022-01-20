@@ -10,6 +10,7 @@ export default class StaticInstances {
     public static infoDialog?: InfoDialog;
     public static settingsSavedAlert?: CustomAlert;
     public static gameNotRunningAlert?: CustomAlert;
+    public static gameSelectedAlert?: CustomAlert;
     public static status?: Status;
     public static settings?: Settings;
     public static gameRunning?: GameRunning;

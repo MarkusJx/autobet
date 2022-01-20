@@ -9,7 +9,7 @@ interface BettingFunctionEditorState {
     drawerOpen: boolean;
 }
 
-export default function WrappedBettingFunctionEditor({editorRef, ...props}) {
+export default function WrappedBettingFunctionEditor({editorRef, ...props}: { editorRef: any }) {
     return <BettingFunctionEditor {...props} ref={editorRef}/>;
 }
 

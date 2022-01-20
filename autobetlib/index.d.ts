@@ -278,7 +278,7 @@ export namespace windows {
      *
      * @return the open windows
      */
-    function getOpenWindows(): Promise<object>;
+    function getOpenWindows(): Promise<Record<string, string[]>>;
 
     /**
      * Set the game window name
