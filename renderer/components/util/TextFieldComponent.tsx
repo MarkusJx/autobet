@@ -92,6 +92,10 @@ export default abstract class TextFieldComponent<T> extends React.Component<{}, 
      */
     protected abstract onEnterPressed(): Promise<boolean>;
 
+    /**
+     * Get the stored value from the backend
+     * @protected
+     */
     protected abstract getStoredValue(): Promise<T>;
 
     private onChangeEvent(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
