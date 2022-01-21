@@ -1,62 +1,32 @@
 import React from "react";
-import SettingContainer from "./SettingContainer";
-import {ContainerHeading, TextAlign} from "../../Container";
-import {InfoAlign, InfoIcon} from "./Info";
-import {Switch} from "@mui/material";
+import StaticInstances from "../../../util/StaticInstances";
+import SwitchComponent from "../../util/SwitchComponent";
 
-interface FullDebugState {
-    checked: boolean;
-    disabled: boolean;
-}
-
-export default class FullDebug extends React.Component<{}, FullDebugState> {
+export default class FullDebug extends SwitchComponent {
     public constructor(props: {}) {
-        super(props);
-
-        this.state = {
-            checked: false,
-            disabled: false
-        };
+        super("Extended Debugging", <>
+            This option will create a zip file called 'autobet_debug.zip' on you Desktop. This File will
+            contain a log and screenshots for debugging purposes. IMPORTANT: If you submit this file
+            anywhere, make sure to delete any personal information from the zip file.
+        </>, props);
     }
 
-    public override render(): React.ReactNode {
-        return (
-            <SettingContainer>
-                <TextAlign>
-                    <InfoAlign>
-                        <ContainerHeading>Extended Debugging</ContainerHeading>
-                        <InfoIcon title="Extended Debugging">
-                            This option will create a zip file called 'autobet_debug.zip' on you Desktop. This File will
-                            contain a log and screenshots for debugging purposes. IMPORTANT: If you submit this file
-                            anywhere, make sure to delete any personal information from the zip file.
-                        </InfoIcon>
-                    </InfoAlign>
+    protected override async onChange(checked: boolean): Promise<void> {
+        if (checked) {
+            if (!window.autobet.logging.isLoggingToFile()) {
+                await StaticInstances.debugSettings?.setLogToFile(true);
+            }
 
-                    <div style={{margin: 'auto'}}>
-                        <Switch onChange={this.onChange.bind(this)} value={this.state.checked}
-                                disabled={this.state.disabled}/>
-                    </div>
-                </TextAlign>
-            </SettingContainer>
-        );
-    }
+            StaticInstances.debugSettings!.logToFileDisabled = true;
+        } else {
+            StaticInstances.debugSettings!.logToFileDisabled = false;
+        }
 
-    public setChecked(val: boolean): void {
-        this.setState({
-            checked: val
-        });
-    }
-
-    private setDisabled(val: boolean): void {
-        this.setState({
-            disabled: val
-        });
-    }
-
-    private onChange(event: React.ChangeEvent<HTMLInputElement>): void {
-        this.setChecked(true);
-        this.setChecked(event.target.checked);
-        // TODO
-        this.setDisabled(false);
+        const ok = await window.autobet.settings.setDebugFull(checked);
+        if (!ok) {
+            this.checked = false;
+            StaticInstances.extendedDebuggingErrorAlert?.show(5000);
+            window.autobet.logging.warn("FullDebug.tsx", "setDebugFull returned false");
+        }
     }
 }

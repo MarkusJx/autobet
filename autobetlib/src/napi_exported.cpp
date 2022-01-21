@@ -746,20 +746,22 @@ Napi::Promise getAllOpenWindows(const Napi::CallbackInfo &info) {
     });
 }
 
-void setGameWindow(const Napi::CallbackInfo &info) {
+Napi::Promise setGameWindow(const Napi::CallbackInfo &info) {
     CHECK_ARGS(string, string);
-    try {
-        std::string program_name = info[0].ToString();
-        std::string process_name = info[1].ToString();
+    const std::string program_name = info[0].ToString();
+    const std::string process_name = info[1].ToString();
 
-        settings::write("processName", process_name);
-        settings::write("programName", program_name);
+    return promises::promise<void>(info.Env(), [program_name, process_name] {
+        try {
+            settings::write("processName", process_name);
+            settings::write("programName", program_name);
 
-        variables::setProgramName(program_name);
-        variables::setProcessName(process_name);
-    } catch (const std::exception &e) {
-        StaticLogger::errorStream() << e.what();
-    }
+            variables::setProgramName(program_name);
+            variables::setProcessName(process_name);
+        } catch (const std::exception &e) {
+            StaticLogger::errorStream() << e.what();
+        }
+    });
 }
 
 Napi::Object getGameWindow(const Napi::CallbackInfo &info) {
@@ -772,10 +774,10 @@ Napi::Object getGameWindow(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
-void setNavigationStrategy(const Napi::CallbackInfo &info) {
+Napi::Promise setNavigationStrategy(const Napi::CallbackInfo &info) {
     CHECK_ARGS(number);
-    TRY
-        int n = info[0].ToNumber();
+    int n = info[0].ToNumber();
+    return promises::promise<void>(info.Env(), [n] {
         switch (n) {
             case 0:
                 variables::setNavigationStrategy(std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>());
@@ -789,25 +791,24 @@ void setNavigationStrategy(const Napi::CallbackInfo &info) {
         }
 
         settings::write("navigationStrategy", variables::navigationStrategy()->getName());
-    CATCH_EXCEPTIONS
+    });
 }
 
-Napi::Number getNavigationStrategy(const Napi::CallbackInfo &info) {
-    try {
-        const auto name = settings::read<std::string>("navigationStrategy");
-        int res;
-        if (name == "mouse") {
-            res = 0;
-        } else if (name == "controller") {
-            res = 1;
-        } else {
-            res = -1;
+Napi::Promise getNavigationStrategy(const Napi::CallbackInfo &info) {
+    return promises::promise<int>(info.Env(), [] {
+        try {
+            const auto name = settings::read<std::string>("navigationStrategy");
+            if (name == "mouse") {
+                return 0;
+            } else if (name == "controller") {
+                return 1;
+            } else {
+                return -1;
+            }
+        } catch (...) {
+            return -1;
         }
-
-        return Napi::Number::New(info.Env(), res);
-    } catch (...) {
-        return Napi::Number::New(info.Env(), -1);
-    }
+    });
 }
 
 Napi::Promise setClickSleep(const Napi::CallbackInfo &info) {
@@ -836,6 +837,25 @@ Napi::Number getAfterClickSleep(const Napi::CallbackInfo &info) {
     TRY
         return Napi::Number::New(info.Env(), variables::navigationStrategy()->getAfterClickSleep());
     CATCH_EXCEPTIONS
+}
+
+Napi::Promise getUpnpEnabled(const Napi::CallbackInfo &info) {
+    return promises::promise<bool>(info.Env(), [] {
+        if (settings::has_key(AUTOBET_SETTINGS_ENABLE_UPNP)) {
+            return settings::read<bool>(AUTOBET_SETTINGS_ENABLE_UPNP);
+        } else {
+            return false;
+        }
+    });
+}
+
+Napi::Promise setUpnpEnabled(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(boolean);
+
+    const bool enable = info[0].ToBoolean();
+    return promises::promise<void>(info.Env(), [enable] {
+        settings::write(AUTOBET_SETTINGS_ENABLE_UPNP, enable);
+    });
 }
 
 #define export(func) exports.Set("lib_" #func, Napi::Function::New(env, func))
@@ -905,6 +925,9 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setAfterClickSleep);
     export(getClickSleep);
     export(getAfterClickSleep);
+
+    export(getUpnpEnabled);
+    export(setUpnpEnabled);
 
     try {
         betting::setWebUiFunctions();

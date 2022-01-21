@@ -4,6 +4,8 @@ import {ContainerHeading, TextAlign} from "../../Container";
 import {InfoAlign, InfoIcon} from "./Info";
 import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 import textFieldStyle from "./textFieldStyle";
+import StaticInstances from "../../../util/StaticInstances";
+import Loadable from "../Loadable";
 
 enum NavStrategy {
     MOUSE = "Mouse",
@@ -15,19 +17,25 @@ interface NavigationStrategyState {
     disabled: boolean;
 }
 
-export default class NavigationStrategy extends React.Component<{}, NavigationStrategyState> {
+export default class NavigationStrategy extends React.Component<{}, NavigationStrategyState> implements Loadable {
     public constructor(props: {}) {
         super(props);
 
         this.state = {
             selectedStrategy: NavStrategy.MOUSE,
-            disabled: false
+            disabled: true
         };
     }
 
     public set disabled(val: boolean) {
         this.setState({
             disabled: val
+        });
+    }
+
+    private set strategy(strategy: NavStrategy) {
+        this.setState({
+            selectedStrategy: strategy
         });
     }
 
@@ -66,11 +74,61 @@ export default class NavigationStrategy extends React.Component<{}, NavigationSt
         );
     }
 
-    private onStrategyChange(event: SelectChangeEvent): void {
-        this.setState({
-            selectedStrategy: event.target.value as NavStrategy
-        });
+    public async loadData(): Promise<void> {
+        const strategy = await window.autobet.uiNavigation.getNavigationStrategy();
+        if (strategy === window.autobet.uiNavigation.navigationStrategy.MOUSE) {
+            this.strategy = NavStrategy.MOUSE;
+        } else if (strategy === window.autobet.uiNavigation.navigationStrategy.CONTROLLER) {
+            this.strategy = NavStrategy.MOUSE;
+        } else {
+            this.disabled = false;
+            throw new Error(`An error occurred while loading the navigation strategy: Unknown strategy: ${strategy}`);
+        }
 
-        // TODO
+        this.disabled = false;
+    }
+
+    private async changeStrategy(strategy: NavStrategy): Promise<void> {
+        let nativeStrategy: import("@autobet/autobetlib").uiNavigation.navigationStrategy;
+        if (strategy === NavStrategy.MOUSE) {
+            nativeStrategy = window.autobet.uiNavigation.navigationStrategy.MOUSE;
+        } else if (strategy === NavStrategy.CONTROLLER) {
+            nativeStrategy = window.autobet.uiNavigation.navigationStrategy.CONTROLLER;
+        } else {
+            throw new TypeError(`Unknown navigation strategy '${strategy}'`);
+        }
+
+        try {
+            await window.autobet.uiNavigation.setNavigationStrategy(nativeStrategy);
+        } catch (e: any) {
+            throw new TypeError(`Could not change the navigation strategy: '${e.message}'`);
+        }
+
+        StaticInstances.navigationStrategyAlert?.setText(`Navigation strategy changed to '${strategy}'`);
+        StaticInstances.navigationStrategyAlert?.show(5000);
+
+        this.setState({
+            selectedStrategy: strategy
+        });
+    }
+
+    private async onStrategyChange(event: SelectChangeEvent): Promise<void> {
+        const wasDisabled = this.state.disabled;
+        this.disabled = true;
+        const strategy = event.target.value as NavStrategy;
+
+        try {
+            await this.changeStrategy(strategy);
+        } catch (e: any) {
+            StaticInstances.navigationStrategyErrorAlert?.setText(e.message);
+            StaticInstances.navigationStrategyErrorAlert?.show(5000);
+            console.error(e);
+        }
+
+        StaticInstances.clickSleep?.loadData();
+        StaticInstances.afterClickSleep?.loadData();
+        if (!wasDisabled && this.state.disabled) {
+            this.disabled = false;
+        }
     }
 }

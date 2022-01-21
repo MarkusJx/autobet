@@ -268,6 +268,10 @@ export namespace settings {
      * Save the settings
      */
     function saveSettings(): Promise<void>;
+
+    function getUpnpEnabled(): Promise<boolean>;
+
+    function setUpnpEnabled(enabled: boolean): Promise<void>;
 }
 
 export namespace windows {
@@ -286,7 +290,7 @@ export namespace windows {
      * @param programName the program name
      * @param processName the process name
      */
-    function setGameWindowName(programName: string, processName: string): void;
+    function setGameWindowName(programName: string, processName: string): Promise<void>;
 
     /**
      * A combination of the game executable
@@ -300,7 +304,7 @@ export namespace windows {
     };
 
     /**
-     * Get the game window name combination
+     * Get the game window name combination of the currently selected game window
      *
      * @return the game program process name combination
      */
@@ -317,18 +321,19 @@ export namespace uiNavigation {
     }
 
     /**
-     * Set the ui navigation strategy
+     * Set the ui navigation strategy.
+     * This saves the settings.
      *
      * @param strategy the navigation strategy
      */
-    function setNavigationStrategy(strategy: navigationStrategy): void;
+    function setNavigationStrategy(strategy: navigationStrategy): Promise<void>;
 
     /**
      * Get the currently active navigation strategy
      *
      * @return the strategy
      */
-    function getNavigationStrategy(): navigationStrategy;
+    function getNavigationStrategy(): Promise<navigationStrategy>;
 
     namespace clicks {
         function setClickSleep(time: number): Promise<void>;

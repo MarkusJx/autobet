@@ -4,6 +4,9 @@ import {Button, Switch} from "@mui/material";
 import {ContainerComponent, ContainerHeading, TextAlign} from "./Container";
 import {saveSettings} from "../util/util";
 import Loadable from "./containers/Loadable";
+import StaticInstances from "../util/StaticInstances";
+
+const NOT_RUNNING: string = "not running";
 
 interface WebserverState {
     buttonText: string;
@@ -18,7 +21,7 @@ export default class Webserver extends React.Component<any, WebserverState> impl
         super(props);
 
         this.state = {
-            buttonText: "http://localhost:8027",
+            buttonText: NOT_RUNNING,
             switchChecked: false,
             switchDisabled: true,
             weblinkDisabled: true,
@@ -30,10 +33,6 @@ export default class Webserver extends React.Component<any, WebserverState> impl
         this.setState({
             switchDisabled: val
         });
-    }
-
-    private get switchChecked(): boolean {
-        return this.state.switchChecked;
     }
 
     private set switchChecked(val: boolean) {
@@ -95,15 +94,26 @@ export default class Webserver extends React.Component<any, WebserverState> impl
         );
     }
 
-    public loadData(): void {
-        this.switchDisabled = false;
-        this.switchChecked = window.autobet.settings.webServerActivated();
+    public async loadData(): Promise<void> {
+        const checked = window.autobet.settings.webServerActivated();
+        this.switchChecked = checked;
 
-        if (this.switchChecked) {
-            this.weblinkDisabled = false;
-            this.qrButtonDisabled = false;
-            this.setIp();
+        if (checked) {
+            const ok = await window.autobet.startWebServer();
+            if (ok) {
+                window.autobet.logging.debug("Webserver.tsx", "Web server started")
+                StaticInstances.upnpSelect!.disabled = true;
+                this.weblinkDisabled = false;
+                this.qrButtonDisabled = false;
+                this.setIp();
+            } else {
+                window.autobet.logging.error("Webserver.tsx", "Could not start web server");
+                this.weblinkDisabled = true;
+                this.weblinkText = NOT_RUNNING;
+                this.qrButtonDisabled = true;
+            }
         }
+        this.switchDisabled = false;
     }
 
     private setIp(): void {
@@ -112,19 +122,21 @@ export default class Webserver extends React.Component<any, WebserverState> impl
 
     private async onSwitchChange(_: any, checked: boolean): Promise<void> {
         this.switchDisabled = true;
+        StaticInstances.upnpSelect!.disabled = true;
         if (!await window.autobet.settings.setWebServer(checked)) {
-            this.switchChecked = window.autobet.settings.webServerRunning();
-        } else {
-            this.switchChecked = checked;
+            checked = window.autobet.settings.webServerRunning();
+            StaticInstances.webserverStateChangeError?.show(5000);
         }
 
-        if (this.switchChecked) {
+        this.switchChecked = checked;
+        if (checked) {
             this.weblinkDisabled = false;
             this.qrButtonDisabled = false;
             this.setIp();
         } else {
+            StaticInstances.upnpSelect!.disabled = false;
             this.weblinkDisabled = true;
-            this.weblinkText = "not running";
+            this.weblinkText = NOT_RUNNING;
             this.qrButtonDisabled = true;
         }
 

@@ -4,6 +4,11 @@ const autobetLib_native = require("./bin/autobetLib.node");
 const autobetlib_version = require('./package.json').version;
 autobetLib_native.lib_setAutobetlibVersion(autobetlib_version);
 
+const navStrategy = {
+    MOUSE: 0,
+    CONTROLLER: 1
+};
+
 module.exports = {
     init: async function () {
         return await autobetLib_native.lib_init();
@@ -137,6 +142,12 @@ module.exports = {
         },
         saveSettings: async function () {
             await autobetLib_native.lib_saveSettings();
+        },
+        getUpnpEnabled: function () {
+            return autobetLib_native.lib_getUpnpEnabled();
+        },
+        setUpnpEnabled: function (enabled) {
+            return autobetLib_native.lib_setUpnpEnabled(enabled);
         }
     },
     windows: {
@@ -144,33 +155,30 @@ module.exports = {
             return await autobetLib_native.lib_getAllOpenWindows();
         },
         setGameWindowName: function(programName, processName) {
-            autobetLib_native.lib_setGameWindow(programName, processName);
+            return autobetLib_native.lib_setGameWindow(programName, processName);
         },
         getGameWindowName: function() {
             return autobetLib_native.lib_getGameWindow();
         }
     },
     uiNavigation: {
-        navigationStrategy: {
-            MOUSE: 0,
-            CONTROLLER: 1
-        },
-        setNavigationStrategy: function(strategy) {
+        navigationStrategy: navStrategy,
+        setNavigationStrategy: function (strategy) {
             let n = -1;
             switch (strategy) {
-                case this.navigationStrategy.MOUSE:
+                case navStrategy.MOUSE:
                     n = 0;
                     break;
-                case this.navigationStrategy.CONTROLLER:
+                case navStrategy.CONTROLLER:
                     n = 1;
                     break;
             }
 
-            autobetLib_native.lib_setNavigationStrategy(n);
+            return autobetLib_native.lib_setNavigationStrategy(n);
         },
-        getNavigationStrategy: function() {
-            const strategy = autobetLib_native.lib_getNavigationStrategy();
-            console.log("Strategy: " + strategy);
+        getNavigationStrategy: async function () {
+            const strategy = await autobetLib_native.lib_getNavigationStrategy();
+            //console.log("Strategy: " + strategy);
             if (strategy < 0) {
                 return this.navigationStrategy.MOUSE;
             } else {
@@ -178,7 +186,7 @@ module.exports = {
             }
         },
         clicks: {
-            setClickSleep: async function(time) {
+            setClickSleep: async function (time) {
                 await autobetLib_native.lib_setClickSleep(time);
             },
             setAfterClickSleep: async function (time) {

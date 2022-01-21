@@ -16,6 +16,8 @@ import StaticInstances from "../util/StaticInstances";
 import {makeSumsDisplayable} from "../util/util";
 import InfoDialog from "./dialogs/InfoDialog";
 import Settings from "./Settings";
+import {ThemeProvider} from "@mui/material";
+import settingsTheme from "./containers/settings/settingsTheme";
 
 export default class MainContent extends React.Component<{}, {}> {
     private bettingErrorDialog: BettingErrorDialog | null = null;
@@ -38,19 +40,21 @@ export default class MainContent extends React.Component<{}, {}> {
         return (
             <div className={styles.mainContent}>
                 <BackgroundImage>
-                    <Title/>
-                    <Status ref={e => StaticInstances.status = e!}/>
-                    <TimeRunning ref={e => StaticInstances.timeRunning = e!}/>
-                    <MoneyThisHour ref={e => this.moneyThisHour = e}/>
-                    <MoneyAllTime ref={e => this.moneyAllTime = e}/>
-                    <RacesWon ref={e => this.racesWon = e}/>
-                    <ProbabilityOfWinning ref={e => this.probabilityOfWinning = e}/>
-                    <Webserver ref={e => this.webserver = e}/>
-                    <GameRunning ref={e => StaticInstances.gameRunning = e!}/>
-                    <Controls ref={e => this.controls = e}/>
-                    <Settings ref={e => StaticInstances.settings = e!}/>
-                    <BettingErrorDialog ref={e => this.bettingErrorDialog = e}/>
-                    <InfoDialog ref={e => StaticInstances.infoDialog = e!}/>
+                    <ThemeProvider theme={settingsTheme}>
+                        <Title/>
+                        <Status ref={e => StaticInstances.status = e!}/>
+                        <TimeRunning ref={e => StaticInstances.timeRunning = e!}/>
+                        <MoneyThisHour ref={e => this.moneyThisHour = e}/>
+                        <MoneyAllTime ref={e => this.moneyAllTime = e}/>
+                        <RacesWon ref={e => this.racesWon = e}/>
+                        <ProbabilityOfWinning ref={e => this.probabilityOfWinning = e}/>
+                        <Webserver ref={e => this.webserver = e}/>
+                        <GameRunning ref={e => StaticInstances.gameRunning = e!}/>
+                        <Controls ref={e => this.controls = e}/>
+                        <Settings ref={e => StaticInstances.settings = e!}/>
+                        <BettingErrorDialog ref={e => this.bettingErrorDialog = e}/>
+                        <InfoDialog ref={e => StaticInstances.infoDialog = e!}/>
+                    </ThemeProvider>
                 </BackgroundImage>
             </div>
         );
@@ -107,7 +111,7 @@ export default class MainContent extends React.Component<{}, {}> {
 
         await window.autobet.loadWinnings();
         await StaticInstances.settings!.loadData();
-        this.webserver!.loadData();
+        await this.webserver!.loadData();
 
         await window.autobet.setOddTranslations();
         await window.autobet.start();

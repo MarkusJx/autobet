@@ -12,6 +12,7 @@ import Loadable from "../Loadable";
 interface DebugSettingsState {
     logToFile: boolean;
     logToConsole: boolean;
+    logToFileDisabled: boolean;
     loggedData: string[];
 }
 
@@ -25,6 +26,7 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
         this.state = {
             logToFile: false,
             logToConsole: false,
+            logToFileDisabled: false,
             loggedData: []
         };
     }
@@ -51,6 +53,22 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
         }, () => saveSettings());
     }
 
+    public set logToFileDisabled(val: boolean) {
+        this.setState({
+            logToFileDisabled: val
+        });
+    }
+
+    public async setLogToFile(val: boolean): Promise<void> {
+        this.logToFileDisabled = true;
+        window.autobet.logging.setLogToFile(val);
+        await saveSettings();
+        this.setState({
+            logToFile: val
+        });
+        this.logToFileDisabled = false;
+    }
+
     public override render(): React.ReactNode {
         return (
             <SettingContainer className={styles.container}>
@@ -65,7 +83,8 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
                 <TextAlign>
                     <InfoAlign className={styles.infoAlignLogging}>
                         <ContainerHeading>Log to File</ContainerHeading>
-                        <Switch checked={this.state.logToFile} onChange={this.onLogToFileChange.bind(this)}/>
+                        <Switch checked={this.state.logToFile} onChange={this.onLogToFileChange.bind(this)}
+                                disabled={this.state.logToFileDisabled}/>
                     </InfoAlign>
                     <InfoAlign className={styles.infoAlignLogging}>
                         <ContainerHeading>Log to Console</ContainerHeading>
@@ -73,7 +92,8 @@ export default class DebugSettings extends React.Component<{}, DebugSettingsStat
                     </InfoAlign>
                 </TextAlign>
                 <Scrollbars className={styles.scroll} autoHide autoHideTimeout={1000} autoHideDuration={200} autoHeight
-                            autoHeightMin={0} autoHeightMax={1000} thumbMinSize={30} ref={e => this.scrollbar = e}>
+                            autoHeightMin={0} autoHeightMax={1000} thumbMinSize={30} ref={e => this.scrollbar = e}
+                            universal>
                     <Terminal readOnly ref={(e: any) => this.terminal = e} commands={{}} className={styles.console}
                               messageClassName={styles.message} style={{minHeight: 0}}
                               contentStyle={{padding: this.state.logToConsole ? 20 : 0}}/>

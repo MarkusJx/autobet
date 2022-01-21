@@ -1,46 +1,37 @@
 import React from "react";
-import SettingContainer from "./SettingContainer";
-import {ContainerHeading, TextAlign} from "../../Container";
-import {InfoAlign, InfoIcon} from "./Info";
-import {TextField} from "@mui/material";
-import textFieldStyle from "./textFieldStyle";
+import Loadable from "../Loadable";
+import StaticInstances from "../../../util/StaticInstances";
+import TextFieldComponent, {numericInputProps} from "../../util/TextFieldComponent";
 
-interface ClickSleepState {
-    disabled: boolean;
-}
-
-export default class ClickSleep extends React.Component<{}, ClickSleepState> {
+export default class ClickSleep extends TextFieldComponent<number> implements Loadable {
     public constructor(props: {}) {
-        super(props);
-
-        this.state = {
-            disabled: false
-        };
+        super("Click sleep", "Time", "Button between click sleep time", <>
+            Set the time to sleep between a button is pressed and then released in milliseconds.
+            Increase this value if button clicks are not recognized by the game. Is different for different
+            navigation strategies. Press enter to save.
+        </>, numericInputProps(1, 10000), 100, props);
     }
 
-    public set disabled(val: boolean) {
-        this.setState({
-            disabled: val
-        });
+    protected override onChange(val: any): number | null {
+        const value = Number(val);
+        if (value > 0 && value < 10000) {
+            return value;
+        } else {
+            return null;
+        }
     }
 
-    public override render(): React.ReactNode {
-        return (
-            <SettingContainer>
-                <TextAlign>
-                    <InfoAlign>
-                        <ContainerHeading>Click sleep</ContainerHeading>
-                        <InfoIcon title="Button click sleep time">
-                            Set the time to sleep between a button is pressed and then released. Increase this value if
-                            button clicks are not recognized by the game. Press enter to save.
-                        </InfoIcon>
-                    </InfoAlign>
+    protected override async onEnterPressed(): Promise<boolean> {
+        if (this.value > 0 && this.value < 10000) {
+            await window.autobet.uiNavigation.clicks.setClickSleep(this.value);
+            return true;
+        } else {
+            StaticInstances.sleepTimeInvalidValueAlert?.show(5000);
+            return false;
+        }
+    }
 
-                    <TextField inputProps={{
-                        inputMode: 'numeric', pattern: '[0-9]*', type: 'number', min: '1', max: '10000'
-                    }} variant="filled" label="Time" style={textFieldStyle} disabled={this.state.disabled}/>
-                </TextAlign>
-            </SettingContainer>
-        );
+    protected override async getStoredValue(): Promise<number> {
+        return window.autobet.uiNavigation.clicks.getClickSleep();
     }
 }
