@@ -76,6 +76,13 @@ export default abstract class TextFieldComponent<T> extends React.Component<{}, 
         this.value = await this.getStoredValue();
     }
 
+    /**
+     * Called when the value is changed
+     *
+     * @param value the new value, must be parsed
+     * @return the parsed value or null if the value is invalid
+     * @protected
+     */
     protected abstract onChange(value: any): T | null;
 
     /**
