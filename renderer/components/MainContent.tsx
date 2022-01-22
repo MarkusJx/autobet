@@ -18,6 +18,7 @@ import InfoDialog from "./dialogs/InfoDialog";
 import Settings from "./Settings";
 import {ThemeProvider} from "@mui/material";
 import settingsTheme from "./containers/settings/settingsTheme";
+import CertificateInfoDialog from "./dialogs/CertificateInfoDialog";
 
 export default class MainContent extends React.Component<{}, {}> {
     private bettingErrorDialog: BettingErrorDialog | null = null;
@@ -54,6 +55,7 @@ export default class MainContent extends React.Component<{}, {}> {
                         <Settings ref={e => StaticInstances.settings = e!}/>
                         <BettingErrorDialog ref={e => this.bettingErrorDialog = e}/>
                         <InfoDialog ref={e => StaticInstances.infoDialog = e!}/>
+                        <CertificateInfoDialog ref={e => StaticInstances.certificateInfoDialog = e!}/>
                     </ThemeProvider>
                 </BackgroundImage>
             </div>
@@ -92,12 +94,11 @@ export default class MainContent extends React.Component<{}, {}> {
         });
 
         window.autobet.init().then(this.loadData.bind(this));
-
-        window.onbeforeunload = function (): void {
+        window.addEventListener('beforeunload', () => {
             window.autobet.shutdown().then(() => {
                 window.util.quit();
             });
-        }
+        });
     }
 
     private async loadData(initialized: boolean): Promise<void> {

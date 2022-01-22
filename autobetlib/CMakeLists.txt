@@ -79,7 +79,7 @@ set(
         ${src}/controls/controller.cpp ${src}/controls/navigationStrategies.cpp ${src}/web/push_notifications.cpp
         ${src}/historic_data.cpp ${src}/storage/database.cpp ${src}/objects/push_notification_subscriber.cpp
         ${src}/exposed_methods.cpp ${src}/util/iputil.cpp ${src}/web/upnp.cpp
-        ${src}/util/recurring_job.cpp)
+        ${src}/util/recurring_job.cpp ${src}/web/certificate.cpp)
 
 # Add the library
 add_library(${PROJECT_NAME} SHARED ${AUTOBETLIB_SRC} ${CMAKE_JS_SRC})

@@ -8,10 +8,11 @@ import ClickSleep from "../components/containers/settings/ClickSleep";
 import AfterClickSleep from "../components/containers/settings/AfterClickSleep";
 import DebugSettings from "../components/containers/settings/DebugSettings";
 import UPnPSelect from "../components/containers/settings/UPnPSelect";
+import SSLSupport from "../components/containers/settings/SSLSupport";
+import CertificateInfoDialog from "../components/dialogs/CertificateInfoDialog";
 
 export default class StaticInstances {
     public static timeRunning?: TimeRunning;
-    public static infoDialog?: InfoDialog;
     public static status?: Status;
     public static settings?: Settings;
     public static gameRunning?: GameRunning;
@@ -19,6 +20,7 @@ export default class StaticInstances {
     public static afterClickSleep?: AfterClickSleep;
     public static debugSettings?: DebugSettings;
     public static upnpSelect?: UPnPSelect;
+    public static sslSupport?: SSLSupport;
 
     // Alerts
     public static settingsSavedAlert?: CustomAlert;
@@ -30,6 +32,11 @@ export default class StaticInstances {
     public static settingsDiscardedAlert?: CustomAlert;
     public static extendedDebuggingErrorAlert?: CustomAlert;
     public static webserverStateChangeError?: CustomAlert;
+    public static loadingCertificateAlert?: CustomAlert;
+
+    // Dialogs
+    public static infoDialog?: InfoDialog;
+    public static certificateInfoDialog?: CertificateInfoDialog;
 
     private constructor() {
     }

@@ -222,5 +222,11 @@ module.exports = {
     },
     programIsRunning: function () {
         return autobetLib_native.lib_programIsRunning();
+    },
+    maySupportHttps: function () {
+        return autobetLib_native.lib_maySupportHttps();
+    },
+    getCertificateInfo: function () {
+        return autobetLib_native.lib_getCertificateInfo();
     }
 };

@@ -23,6 +23,9 @@ export default function Alerts(): JSX.Element {
             <CustomAlert severity="info" ref={e => StaticInstances.settingsDiscardedAlert = e!} closeable>
                 Settings discarded
             </CustomAlert>
+            <CustomAlert severity="info" ref={e => StaticInstances.loadingCertificateAlert = e!}>
+                Loading the certificate
+            </CustomAlert>
             <CustomAlert severity="success" ref={e => StaticInstances.settingsSavedAlert = e!} closeable>
                 Settings saved successfully
             </CustomAlert>

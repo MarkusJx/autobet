@@ -11,6 +11,7 @@ import DebugSettings from "./containers/settings/DebugSettings";
 import Loadable from "./containers/Loadable";
 import StaticInstances from "../util/StaticInstances";
 import UPnPSelect from "./containers/settings/UPnPSelect";
+import SSLSupport from "./containers/settings/SSLSupport";
 
 export default class Settings extends React.Component<{}, {}> implements Loadable {
     private navigationStrategy?: NavigationStrategy;
@@ -40,6 +41,7 @@ export default class Settings extends React.Component<{}, {}> implements Loadabl
                 <TimeSleep ref={e => this.timeSleep = e!}/>
                 <FullDebug ref={e => this.fullDebug = e!}/>
                 <UPnPSelect ref={e => StaticInstances.upnpSelect = e!}/>
+                <SSLSupport ref={e => StaticInstances.sslSupport = e!}/>
                 <CustomBettingFunction ref={e => this.customBettingFunction = e!}/>
                 <DebugSettings ref={e => StaticInstances.debugSettings = e!}/>
             </>

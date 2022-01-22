@@ -858,6 +858,29 @@ Napi::Promise setUpnpEnabled(const Napi::CallbackInfo &info) {
     });
 }
 
+Napi::Promise maySupportHttps(const Napi::CallbackInfo &info) {
+    return promises::promise<bool>(info.Env(), [] {
+        return webui::supports_https();
+    });
+}
+
+Napi::Promise getCertificateInfo(const Napi::CallbackInfo &info) {
+    using result_map = std::map<std::string, autobet::web::cert_info>;
+    using result_pair = std::pair<std::string, autobet::web::cert_info>;
+    return promises::promise<result_map>(info.Env(), [] {
+        const auto cert = webui::get_certificate();
+        if (cert) {
+            result_map map;
+            map.insert(result_pair("subject", *(cert->get_subject())));
+            map.insert(result_pair("issuer", *(cert->get_issuer())));
+
+            return map;
+        } else {
+            throw std::runtime_error("The certificates are not loaded");
+        }
+    });
+}
+
 #define export(func) exports.Set("lib_" #func, Napi::Function::New(env, func))
 
 /**
@@ -928,6 +951,8 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 
     export(getUpnpEnabled);
     export(setUpnpEnabled);
+    export(maySupportHttps);
+    export(getCertificateInfo);
 
     try {
         betting::setWebUiFunctions();

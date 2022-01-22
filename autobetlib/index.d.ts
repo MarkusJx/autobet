@@ -367,3 +367,23 @@ export function setOddTranslations(): Promise<void>;
  * @return true, if it is already running
  */
 export function programIsRunning(): boolean;
+
+export function maySupportHttps(): Promise<boolean>;
+
+export interface CertificateName {
+    country: string;
+    state: string;
+    locality: string;
+    organization: string;
+    organizational_unit: string;
+    email: string;
+    common_name: string;
+    user_id: string;
+}
+
+export interface CertificateInfo {
+    issuer: CertificateName;
+    subject: CertificateName;
+}
+
+export function getCertificateInfo(): Promise<CertificateInfo>;

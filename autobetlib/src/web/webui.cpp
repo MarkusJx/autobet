@@ -11,6 +11,8 @@
 #include <memory>
 #include <filesystem>
 
+#define NO_NAPI
+
 #include "web/webui.hpp"
 #include "util/utils.hpp"
 #include "autostop.hpp"
@@ -19,6 +21,9 @@
 #include "web/upnp.hpp"
 #include "util/recurring_job.hpp"
 #include "logger.hpp"
+
+#define PUBLIC_KEY_FILE utils::get_or_create_documents_folder() + "\\ssl_public.pem"
+#define PRIVATE_KEY_FILE utils::get_or_create_documents_folder() + "\\ssl_private.pem"
 
 using namespace markusjx::autobet;
 
@@ -31,6 +36,8 @@ static uint16_t port = 8027;
 static uint16_t websocket_port = 8028;
 static bool upnp_used = false;
 static std::string ip_address;
+static std::mutex certificate_mutex;
+static std::shared_ptr<autobet::web::certificate> certificate;
 
 // web functions ==========================================
 
@@ -243,10 +250,10 @@ bool webui::startWebUi(const std::string &ip) {
         }
 
 #ifdef CPPJSLIB_ENABLE_HTTPS
-        const std::filesystem::path public_key = utils::get_or_create_documents_folder() + "\\ssl_public.pem";
-        const std::filesystem::path private_key = utils::get_or_create_documents_folder() + "\\ssl_private.pem";
+        const std::filesystem::path public_key = PUBLIC_KEY_FILE;
+        const std::filesystem::path private_key = PRIVATE_KEY_FILE;
 
-        if (std::filesystem::exists(private_key) && std::filesystem::exists(public_key)) {
+        if (webui::supports_https()) {
             logger::StaticLogger::debug("The private and public key files exist, starting the server with ssl enabled");
             webUi = std::make_unique<markusjx::cppJsLib::SSLServer>(base_dir, public_key.string(),
                                                                     private_key.string());
@@ -447,8 +454,43 @@ bool webui::reset() {
     }
 }
 
+bool webui::supports_https() {
+    const std::filesystem::path public_key = PUBLIC_KEY_FILE;
+    const std::filesystem::path private_key = PRIVATE_KEY_FILE;
+
+    std::unique_lock lock(certificate_mutex);
+    if (std::filesystem::exists(private_key) && std::filesystem::exists(public_key)) {
+        if (certificate && certificate->certificates_valid()) {
+            logger::StaticLogger::debug("The cached certificates are still valid");
+            return true;
+        } else {
+            logger::StaticLogger::debug("Reloading the certificates");
+            try {
+                certificate = std::make_shared<autobet::web::certificate>(public_key.string(), private_key.string());
+                logger::StaticLogger::debug("The certificates are valid, ssl is supported");
+                return true;
+            } catch (const autobet::web::opensslException &e) {
+                logger::StaticLogger::errorStream() << "Could not open the certificates: " << e.what();
+                logger::StaticLogger::errorStream() << "Openssl error: " << e.getOpensslErr();
+                return false;
+            } catch (const std::exception &e) {
+                logger::StaticLogger::errorStream() << "Could not open the certificates: " << e.what();
+                return false;
+            }
+        }
+    } else {
+        logger::StaticLogger::debug("At least one of the certificate files does not exist, ssl is not supported");
+        return false;
+    }
+}
+
 bool webui::https() {
     return is_https;
+}
+
+std::shared_ptr<autobet::web::certificate> webui::get_certificate() {
+    std::unique_lock lock(certificate_mutex);
+    return certificate;
 }
 
 uint16_t webui::get_port() {

@@ -103,11 +103,13 @@ export default class Webserver extends React.Component<any, WebserverState> impl
             if (ok) {
                 window.autobet.logging.debug("Webserver.tsx", "Web server started")
                 StaticInstances.upnpSelect!.disabled = true;
+                StaticInstances.sslSupport!.disabled = true;
                 this.weblinkDisabled = false;
                 this.qrButtonDisabled = false;
                 this.setIp();
             } else {
                 window.autobet.logging.error("Webserver.tsx", "Could not start web server");
+                StaticInstances.sslSupport!.disabled = false;
                 this.weblinkDisabled = true;
                 this.weblinkText = NOT_RUNNING;
                 this.qrButtonDisabled = true;
@@ -130,11 +132,13 @@ export default class Webserver extends React.Component<any, WebserverState> impl
 
         this.switchChecked = checked;
         if (checked) {
+            StaticInstances.sslSupport!.disabled = true;
             this.weblinkDisabled = false;
             this.qrButtonDisabled = false;
             this.setIp();
         } else {
             StaticInstances.upnpSelect!.disabled = false;
+            StaticInstances.sslSupport!.disabled = false;
             this.weblinkDisabled = true;
             this.weblinkText = NOT_RUNNING;
             this.qrButtonDisabled = true;
