@@ -24,6 +24,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AddIcon from '@mui/icons-material/Add';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import dynamic from "next/dynamic";
+import ace from "ace-builds";
 
 const BettingFunctionEditor = dynamic(import("./BettingFunctionEditor"), {
     ssr: false
@@ -40,6 +41,10 @@ interface CustomBettingFunctionState {
     selectedImpl: string;
     drawerOpen: boolean;
     openButtonDisabled: boolean;
+    saveButtonDisabled: boolean;
+    deleteButtonDisabled: boolean;
+    setDefaultButtonDisabled: boolean;
+    checkImplButtonDisabled: boolean;
 }
 
 export default class CustomBettingFunction extends React.Component<any, CustomBettingFunctionState> {
@@ -52,7 +57,11 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
             editorVisible: false,
             selectedImpl: "default",
             drawerOpen: false,
-            openButtonDisabled: false
+            openButtonDisabled: false,
+            saveButtonDisabled: false,
+            deleteButtonDisabled: false,
+            setDefaultButtonDisabled: false,
+            checkImplButtonDisabled: false
         };
     }
 
@@ -60,6 +69,46 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         this.setState({
             openButtonDisabled: val
         });
+    }
+
+    private set saveButtonDisabled(val: boolean) {
+        this.setState({
+            saveButtonDisabled: val
+        });
+    }
+
+    private set deleteButtonDisabled(val: boolean) {
+        this.setState({
+            deleteButtonDisabled: val
+        });
+    }
+
+    private set setDefaultButtonDisabled(val: boolean) {
+        this.setState({
+            setDefaultButtonDisabled: val
+        });
+    }
+
+    private set checkImplButtonDisabled(val: boolean) {
+        this.setState({
+            checkImplButtonDisabled: val
+        });
+    }
+
+    private set selectedImpl(val: string) {
+        this.setState({
+            selectedImpl: val
+        });
+    }
+
+    private set editorDisabled(val: boolean) {
+        this.aceEditor?.setReadOnly(val);
+        const element = (this.aceEditor as Record<string, any> | undefined)?.textInput?.getElement();
+        if (element && element.disabled != undefined) element.disabled = val;
+    }
+
+    private get aceEditor(): ace.Ace.Editor | undefined {
+        return this.editor?.editor?.editor;
     }
 
     public override render(): React.ReactNode {
@@ -142,7 +191,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
                                 <ListItemText primary="Default"/>
                             </ListItem>
                             <Divider/>
-                            <ListItem button>
+                            <ListItem button onClick={this.onAddButtonClick.bind(this)}>
                                 <ListItemIcon>
                                     <AddIcon/>
                                 </ListItemIcon>
@@ -173,5 +222,16 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         this.setState({
             drawerOpen: !this.state.drawerOpen
         });
+    }
+
+    private onAddButtonClick(): void {
+        this.toggleDrawer();
+        this.selectedImpl = "Add implementation";
+        this.aceEditor?.setValue("", -1);
+        this.saveButtonDisabled = false;
+        this.deleteButtonDisabled = false;
+        this.setDefaultButtonDisabled = true;
+        this.checkImplButtonDisabled = true;
+        this.editorDisabled = false;
     }
 }

@@ -86,7 +86,7 @@ export default class Webserver extends React.Component<any, WebserverState> impl
                             inputProps={{'aria-label': 'controlled'}} disabled={this.state.switchDisabled}
                             className={styles.enableDisableSwitch}/>
                     <Button variant="outlined" className={styles.showQRCodeButton}
-                            disabled={this.state.qrButtonDisabled}>
+                            disabled={this.state.qrButtonDisabled} onClick={() => StaticInstances.qrCodeDialog?.open()}>
                         Show QR-Code
                     </Button>
                 </TextAlign>
@@ -119,7 +119,9 @@ export default class Webserver extends React.Component<any, WebserverState> impl
     }
 
     private setIp(): void {
-        this.weblinkText = window.autobet.getIP();
+        const ip = window.autobet.getIP();
+        this.weblinkText = ip;
+        StaticInstances.qrCodeDialog?.setUrl(ip);
     }
 
     private async onSwitchChange(_: any, checked: boolean): Promise<void> {

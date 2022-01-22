@@ -14,7 +14,7 @@ export default function WrappedBettingFunctionEditor({editorRef, ...props}: { ed
 }
 
 export class BettingFunctionEditor extends React.Component<{}, BettingFunctionEditorState> {
-    private editor: AceEditor | null = null;
+    public editor: AceEditor | null = null;
 
     public constructor(props: {}) {
         super(props);

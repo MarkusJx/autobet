@@ -19,6 +19,7 @@ import Settings from "./Settings";
 import {ThemeProvider} from "@mui/material";
 import settingsTheme from "./containers/settings/settingsTheme";
 import CertificateInfoDialog from "./dialogs/CertificateInfoDialog";
+import QRCodeDialog from "./dialogs/QRCodeDialog";
 
 export default class MainContent extends React.Component<{}, {}> {
     private bettingErrorDialog: BettingErrorDialog | null = null;
@@ -56,6 +57,7 @@ export default class MainContent extends React.Component<{}, {}> {
                         <BettingErrorDialog ref={e => this.bettingErrorDialog = e}/>
                         <InfoDialog ref={e => StaticInstances.infoDialog = e!}/>
                         <CertificateInfoDialog ref={e => StaticInstances.certificateInfoDialog = e!}/>
+                        <QRCodeDialog ref={e => StaticInstances.qrCodeDialog = e!}/>
                     </ThemeProvider>
                 </BackgroundImage>
             </div>

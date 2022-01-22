@@ -52,7 +52,7 @@ export default abstract class SwitchComponent extends React.Component<{}, Switch
                     </InfoAlign>
 
                     <div style={{margin: 'auto'}}>
-                        <Switch onChange={this.onSwitchChange.bind(this)} value={this.checked}
+                        <Switch onChange={this.onSwitchChange.bind(this)} checked={this.checked}
                                 disabled={this.state.disabled}/>
                     </div>
                 </TextAlign>

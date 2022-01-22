@@ -10,6 +10,7 @@ import DebugSettings from "../components/containers/settings/DebugSettings";
 import UPnPSelect from "../components/containers/settings/UPnPSelect";
 import SSLSupport from "../components/containers/settings/SSLSupport";
 import CertificateInfoDialog from "../components/dialogs/CertificateInfoDialog";
+import QRCodeDialog from "../components/dialogs/QRCodeDialog";
 
 export default class StaticInstances {
     public static timeRunning?: TimeRunning;
@@ -37,6 +38,7 @@ export default class StaticInstances {
     // Dialogs
     public static infoDialog?: InfoDialog;
     public static certificateInfoDialog?: CertificateInfoDialog;
+    public static qrCodeDialog?: QRCodeDialog;
 
     private constructor() {
     }
