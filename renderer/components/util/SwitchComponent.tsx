@@ -4,6 +4,7 @@ import SettingContainer from "../containers/settings/SettingContainer";
 import {ContainerHeading, TextAlign} from "../Container";
 import {InfoAlign, InfoIcon} from "../containers/settings/Info";
 import {Switch} from "@mui/material";
+import StaticInstances from "../../util/StaticInstances";
 
 interface SwitchComponentState {
     checked: boolean;
@@ -66,7 +67,14 @@ export default abstract class SwitchComponent extends React.Component<{}, Switch
         this.disabled = true;
         this.checked = checked;
 
-        await this.onChange(checked);
+        try {
+            await this.onChange(checked);
+        } catch (e: any) {
+            StaticInstances.settingsChangeErrorAlert?.show(10000);
+            window.autobet.logging.error("SwitchComponent.tsx", e.message.toString());
+            console.error(e);
+            this.checked = !checked;
+        }
 
         this.disabled = false;
     }

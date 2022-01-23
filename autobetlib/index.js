@@ -228,5 +228,11 @@ module.exports = {
     },
     getCertificateInfo: function () {
         return autobetLib_native.lib_getCertificateInfo();
+    },
+    getCollectHistoricData: function () {
+        return autobetLib_native.lib_getCollectHistoricData();
+    },
+    setCollectHistoricData: function (val) {
+        return autobetLib_native.lib_setCollectHistoricData(val);
     }
 };

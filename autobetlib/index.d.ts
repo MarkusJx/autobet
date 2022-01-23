@@ -387,3 +387,7 @@ export interface CertificateInfo {
 }
 
 export function getCertificateInfo(): Promise<CertificateInfo>;
+
+export function getCollectHistoricData(): Promise<boolean>;
+
+export function setCollectHistoricData(collect: boolean): Promise<void>;

@@ -18,7 +18,7 @@
    "1": {
     "ref": "opencv/4.5.2",
     "options": "contrib=False\ndetect_cpu_baseline=False\ndnn=True\nnonfree=False\nparallel=False\nshared=False\nwith_ade=True\nwith_cuda=False\nwith_eigen=True\nwith_ffmpeg=True\nwith_imgcodec_hdr=False\nwith_imgcodec_pfm=False\nwith_imgcodec_pxm=False\nwith_imgcodec_sunraster=False\nwith_jpeg=libjpeg\nwith_jpeg2000=jasper\nwith_openexr=True\nwith_png=True\nwith_quirc=True\nwith_tiff=True\nwith_webp=True\nbrotli:shared=False\nbzip2:build_executable=True\nbzip2:shared=False\neigen:MPL2_only=False\nffmpeg:avcodec=True\nffmpeg:avdevice=True\nffmpeg:avfilter=True\nffmpeg:avformat=True\nffmpeg:postproc=True\nffmpeg:shared=False\nffmpeg:swresample=True\nffmpeg:swscale=True\nffmpeg:with_bzip2=True\nffmpeg:with_freetype=True\nffmpeg:with_libfdk_aac=True\nffmpeg:with_libiconv=True\nffmpeg:with_libmp3lame=True\nffmpeg:with_libvpx=True\nffmpeg:with_libwebp=True\nffmpeg:with_libx264=True\nffmpeg:with_libx265=True\nffmpeg:with_lzma=True\nffmpeg:with_openh264=True\nffmpeg:with_openjpeg=True\nffmpeg:with_opus=True\nffmpeg:with_programs=True\nffmpeg:with_sdl=False\nffmpeg:with_ssl=openssl\nffmpeg:with_vorbis=True\nffmpeg:with_zeromq=False\nffmpeg:with_zlib=True\nfreetype:shared=False\nfreetype:with_brotli=True\nfreetype:with_bzip2=True\nfreetype:with_png=True\nfreetype:with_zlib=True\njasper:jpegturbo=deprecated\njasper:shared=False\njasper:with_libjpeg=libjpeg\njbig:build_executables=True\njbig:shared=False\nlibdeflate:shared=False\nlibfdk_aac:shared=False\nlibiconv:shared=False\nlibjpeg:shared=False\nlibmp3lame:shared=False\nlibpng:api_prefix=\nlibpng:shared=False\nlibpng:sse=True\nlibtiff:cxx=True\nlibtiff:jbig=True\nlibtiff:jpeg=libjpeg\nlibtiff:libdeflate=True\nlibtiff:lzma=True\nlibtiff:shared=False\nlibtiff:webp=True\nlibtiff:zlib=True\nlibtiff:zstd=True\nlibvpx:avx=False\nlibvpx:avx2=False\nlibvpx:avx512=False\nlibvpx:mmx=True\nlibvpx:shared=False\nlibvpx:sse=True\nlibvpx:sse2=True\nlibvpx:sse3=True\nlibvpx:sse4_1=True\nlibvpx:ssse3=True\nlibwebp:near_lossless=True\nlibwebp:shared=False\nlibwebp:swap_16bit_csp=False\nlibwebp:with_simd=True\nlibx264:bit_depth=all\nlibx264:shared=False\nlibx265:HDR10=False\nlibx265:SVG_HEVC_encoder=False\nlibx265:assembly=True\nlibx265:bit_depth=8\nlibx265:shared=False\nogg:shared=False\nopenexr:shared=False\nopenh264:shared=False\nopenjpeg:build_codec=False\nopenjpeg:shared=False\nopenssl:386=False\nopenssl:capieng_dialog=False\nopenssl:enable_capieng=False\nopenssl:enable_weak_ssl_ciphers=False\nopenssl:no_aria=False\nopenssl:no_asm=False\nopenssl:no_async=False\nopenssl:no_bf=False\nopenssl:no_blake2=False\nopenssl:no_camellia=False\nopenssl:no_cast=False\nopenssl:no_chacha=False\nopenssl:no_cms=False\nopenssl:no_comp=False\nopenssl:no_ct=False\nopenssl:no_deprecated=False\nopenssl:no_des=False\nopenssl:no_dgram=False\nopenssl:no_dh=False\nopenssl:no_dsa=False\nopenssl:no_dso=False\nopenssl:no_ec=False\nopenssl:no_ecdh=False\nopenssl:no_ecdsa=False\nopenssl:no_engine=False\nopenssl:no_filenames=False\nopenssl:no_gost=False\nopenssl:no_hmac=False\nopenssl:no_idea=False\nopenssl:no_md4=False\nopenssl:no_md5=False\nopenssl:no_mdc2=False\nopenssl:no_ocsp=False\nopenssl:no_pinshared=False\nopenssl:no_rc2=False\nopenssl:no_rfc3779=False\nopenssl:no_rmd160=False\nopenssl:no_rsa=False\nopenssl:no_seed=False\nopenssl:no_sha=False\nopenssl:no_sm2=False\nopenssl:no_sm3=False\nopenssl:no_sm4=False\nopenssl:no_sock=False\nopenssl:no_srp=False\nopenssl:no_srtp=False\nopenssl:no_sse2=False\nopenssl:no_ssl=False\nopenssl:no_ssl3=False\nopenssl:no_stdio=False\nopenssl:no_tests=False\nopenssl:no_threads=False\nopenssl:no_tls1=False\nopenssl:no_ts=False\nopenssl:no_whirlpool=False\nopenssl:openssldir=None\nopenssl:shared=False\nopus:fixed_point=False\nopus:shared=False\nprotobuf:lite=False\nprotobuf:shared=False\nprotobuf:with_rtti=True\nprotobuf:with_zlib=True\nquirc:max_regions=254\nquirc:shared=False\nvorbis:shared=False\nxz_utils:shared=False\nzlib:shared=False\nzstd:shared=False",
-    "package_id": "ff89420fc9738cdce66cc0b73ba7031e589108c6",
+    "package_id": "31e15981256e96c0da02dd2d8f74b6fdb472f00b",
     "prev": "0",
     "requires": [
      "2",
@@ -39,21 +39,21 @@
    "2": {
     "ref": "zlib/1.2.11",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "3": {
     "ref": "libjpeg/9d",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "4": {
     "ref": "jasper/2.0.32",
     "options": "jpegturbo=deprecated\nshared=False\nwith_libjpeg=libjpeg\nlibjpeg:shared=False",
-    "package_id": "264d5d4a0e3e283cd524e2a58344075802f4577c",
+    "package_id": "2278242cc765d77e29f54e7b3e73f056c18d9a10",
     "prev": "0",
     "requires": [
      "3"
@@ -63,7 +63,7 @@
    "5": {
     "ref": "libpng/1.6.37",
     "options": "api_prefix=\nshared=False\nsse=True\nzlib:shared=False",
-    "package_id": "ce650d9f1f1c1c0839cf0694a55c1351ddbed859",
+    "package_id": "8b1ef0ec9599374db4689199730c00a0d5f4de36",
     "prev": "0",
     "requires": [
      "2"
@@ -73,7 +73,7 @@
    "6": {
     "ref": "openexr/2.5.7",
     "options": "shared=False\nzlib:shared=False",
-    "package_id": "d140711d95cc16a85766a8fc3a551dfafe84cf63",
+    "package_id": "6acf24cd4adf2df742e006cc0e5f0329e3b6e60b",
     "prev": "0",
     "requires": [
      "2"
@@ -83,7 +83,7 @@
    "7": {
     "ref": "libtiff/4.3.0",
     "options": "cxx=True\njbig=True\njpeg=libjpeg\nlibdeflate=True\nlzma=True\nshared=False\nwebp=True\nzlib=True\nzstd=True\njbig:build_executables=True\njbig:shared=False\nlibdeflate:shared=False\nlibjpeg:shared=False\nlibwebp:near_lossless=True\nlibwebp:shared=False\nlibwebp:swap_16bit_csp=False\nlibwebp:with_simd=True\nxz_utils:shared=False\nzlib:shared=False\nzstd:shared=False",
-    "package_id": "a08a8e56550da57f6f3d93bb076a90cc6c19cfa2",
+    "package_id": "e2e95cb5797e0ea720de15db3e7a049a3772be97",
     "prev": "0",
     "requires": [
      "2",
@@ -99,35 +99,35 @@
    "8": {
     "ref": "libdeflate/1.8",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "9": {
     "ref": "xz_utils/5.2.5",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "10": {
     "ref": "jbig/20160605",
     "options": "build_executables=True\nshared=False",
-    "package_id": "1c06f8aa5b65435590877732bd94377a1ed95260",
+    "package_id": "a05a9ef21a91686b7138c926ec52aaeb70439310",
     "prev": "0",
     "context": "host"
    },
    "11": {
     "ref": "zstd/1.5.0",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "12": {
     "ref": "libwebp/1.2.0",
     "options": "near_lossless=True\nshared=False\nswap_16bit_csp=False\nwith_simd=True",
-    "package_id": "638042d3fd356128c913f5e725646a0c2af264c7",
+    "package_id": "092f77d3b4b4678d81fbffc1fccc9642b870175e",
     "prev": "0",
     "context": "host"
    },
@@ -141,7 +141,7 @@
    "14": {
     "ref": "ffmpeg/4.4",
     "options": "avcodec=True\navdevice=True\navfilter=True\navformat=True\npostproc=True\nshared=False\nswresample=True\nswscale=True\nwith_bzip2=True\nwith_freetype=True\nwith_libfdk_aac=True\nwith_libiconv=True\nwith_libmp3lame=True\nwith_libvpx=True\nwith_libwebp=True\nwith_libx264=True\nwith_libx265=True\nwith_lzma=True\nwith_openh264=True\nwith_openjpeg=True\nwith_opus=True\nwith_programs=True\nwith_sdl=False\nwith_ssl=openssl\nwith_vorbis=True\nwith_zeromq=False\nwith_zlib=True\nbrotli:shared=False\nbzip2:build_executable=True\nbzip2:shared=False\nfreetype:shared=False\nfreetype:with_brotli=True\nfreetype:with_bzip2=True\nfreetype:with_png=True\nfreetype:with_zlib=True\nlibfdk_aac:shared=False\nlibiconv:shared=False\nlibmp3lame:shared=False\nlibpng:api_prefix=\nlibpng:shared=False\nlibpng:sse=True\nlibvpx:avx=False\nlibvpx:avx2=False\nlibvpx:avx512=False\nlibvpx:mmx=True\nlibvpx:shared=False\nlibvpx:sse=True\nlibvpx:sse2=True\nlibvpx:sse3=True\nlibvpx:sse4_1=True\nlibvpx:ssse3=True\nlibwebp:near_lossless=True\nlibwebp:shared=False\nlibwebp:swap_16bit_csp=False\nlibwebp:with_simd=True\nlibx264:bit_depth=all\nlibx264:shared=False\nlibx265:HDR10=False\nlibx265:SVG_HEVC_encoder=False\nlibx265:assembly=True\nlibx265:bit_depth=8\nlibx265:shared=False\nogg:shared=False\nopenh264:shared=False\nopenjpeg:build_codec=False\nopenjpeg:shared=False\nopenssl:386=False\nopenssl:capieng_dialog=False\nopenssl:enable_capieng=False\nopenssl:enable_weak_ssl_ciphers=False\nopenssl:no_aria=False\nopenssl:no_asm=False\nopenssl:no_async=False\nopenssl:no_bf=False\nopenssl:no_blake2=False\nopenssl:no_camellia=False\nopenssl:no_cast=False\nopenssl:no_chacha=False\nopenssl:no_cms=False\nopenssl:no_comp=False\nopenssl:no_ct=False\nopenssl:no_deprecated=False\nopenssl:no_des=False\nopenssl:no_dgram=False\nopenssl:no_dh=False\nopenssl:no_dsa=False\nopenssl:no_dso=False\nopenssl:no_ec=False\nopenssl:no_ecdh=False\nopenssl:no_ecdsa=False\nopenssl:no_engine=False\nopenssl:no_filenames=False\nopenssl:no_gost=False\nopenssl:no_hmac=False\nopenssl:no_idea=False\nopenssl:no_md4=False\nopenssl:no_md5=False\nopenssl:no_mdc2=False\nopenssl:no_ocsp=False\nopenssl:no_pinshared=False\nopenssl:no_rc2=False\nopenssl:no_rfc3779=False\nopenssl:no_rmd160=False\nopenssl:no_rsa=False\nopenssl:no_seed=False\nopenssl:no_sha=False\nopenssl:no_sm2=False\nopenssl:no_sm3=False\nopenssl:no_sm4=False\nopenssl:no_sock=False\nopenssl:no_srp=False\nopenssl:no_srtp=False\nopenssl:no_sse2=False\nopenssl:no_ssl=False\nopenssl:no_ssl3=False\nopenssl:no_stdio=False\nopenssl:no_tests=False\nopenssl:no_threads=False\nopenssl:no_tls1=False\nopenssl:no_ts=False\nopenssl:no_whirlpool=False\nopenssl:openssldir=None\nopenssl:shared=False\nopus:fixed_point=False\nopus:shared=False\nvorbis:shared=False\nxz_utils:shared=False\nzlib:shared=False",
-    "package_id": "5fab03a8d577d94dcd4f3e1c0480fd69131a29ba",
+    "package_id": "aefd62bac804aedede309e41f47fc2e4f6d5af1b",
     "prev": "0",
     "requires": [
      "2",
@@ -166,21 +166,21 @@
    "15": {
     "ref": "bzip2/1.0.8",
     "options": "build_executable=True\nshared=False",
-    "package_id": "d16a91eadaaf5829b928b12d2f836ff7680d3df5",
+    "package_id": "589a23dff5fdb23a7fb851223eb766480ead0a9a",
     "prev": "0",
     "context": "host"
    },
    "16": {
     "ref": "libiconv/1.16",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "17": {
     "ref": "freetype/2.11.0",
     "options": "shared=False\nwith_brotli=True\nwith_bzip2=True\nwith_png=True\nwith_zlib=True\nbrotli:shared=False\nbzip2:build_executable=True\nbzip2:shared=False\nlibpng:api_prefix=\nlibpng:shared=False\nlibpng:sse=True\nzlib:shared=False",
-    "package_id": "27b2733304cef577b19f699fec3a5bdbefb36d16",
+    "package_id": "c69bad48274e7fc45c887cddc32aa0459f0a81e0",
     "prev": "0",
     "requires": [
      "5",
@@ -193,28 +193,28 @@
    "18": {
     "ref": "brotli/1.0.9",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "19": {
     "ref": "openjpeg/2.4.0",
     "options": "build_codec=False\nshared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "20": {
     "ref": "openh264/2.1.1",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "21": {
     "ref": "vorbis/1.3.7",
     "options": "shared=False\nogg:shared=False",
-    "package_id": "becff00909fb3d957c6b4ca60fa64d4e6a32a540",
+    "package_id": "b8a7c0e3d5f7f2dd0a4cf862cb60ff9f1b73be47",
     "prev": "0",
     "requires": [
      "22"
@@ -224,70 +224,70 @@
    "22": {
     "ref": "ogg/1.3.4",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "23": {
     "ref": "opus/1.3.1",
     "options": "fixed_point=False\nshared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "24": {
     "ref": "libx264/20191217",
     "options": "bit_depth=all\nshared=False",
-    "package_id": "1d690fdf83d82fb1eeea5656f775e7981b344e5e",
+    "package_id": "e03f63a768ca59a76d565ff28923e7805edec16d",
     "prev": "0",
     "context": "host"
    },
    "25": {
     "ref": "libx265/3.4",
     "options": "HDR10=False\nSVG_HEVC_encoder=False\nassembly=True\nbit_depth=8\nshared=False",
-    "package_id": "2ca72a585dd183f359ae9a3a2ce113138e4cf427",
+    "package_id": "1287c7aad58fe35bb1a62d9fcc674752df4a764a",
     "prev": "0",
     "context": "host"
    },
    "26": {
     "ref": "libvpx/1.10.0",
     "options": "avx=False\navx2=False\navx512=False\nmmx=True\nshared=False\nsse=True\nsse2=True\nsse3=True\nsse4_1=True\nssse3=True",
-    "package_id": "1891f371c45ee62bcbf1bca10591761a8074bc39",
+    "package_id": "0a69d6ddb06b8782b01aad521e2a0c2edf39870a",
     "prev": "0",
     "context": "host"
    },
    "27": {
     "ref": "libmp3lame/3.100",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "28": {
     "ref": "libfdk_aac/2.0.2",
     "options": "shared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "29": {
     "ref": "openssl/1.1.1h",
     "options": "386=False\ncapieng_dialog=False\nenable_capieng=False\nenable_weak_ssl_ciphers=False\nno_aria=False\nno_asm=False\nno_async=False\nno_bf=False\nno_blake2=False\nno_camellia=False\nno_cast=False\nno_chacha=False\nno_cms=False\nno_comp=False\nno_ct=False\nno_deprecated=False\nno_des=False\nno_dgram=False\nno_dh=False\nno_dsa=False\nno_dso=False\nno_ec=False\nno_ecdh=False\nno_ecdsa=False\nno_engine=False\nno_filenames=False\nno_gost=False\nno_hmac=False\nno_idea=False\nno_md4=False\nno_md5=False\nno_mdc2=False\nno_ocsp=False\nno_pinshared=False\nno_rc2=False\nno_rfc3779=False\nno_rmd160=False\nno_rsa=False\nno_seed=False\nno_sha=False\nno_sm2=False\nno_sm3=False\nno_sm4=False\nno_sock=False\nno_srp=False\nno_srtp=False\nno_sse2=False\nno_ssl=False\nno_ssl3=False\nno_stdio=False\nno_tests=False\nno_threads=False\nno_tls1=False\nno_ts=False\nno_whirlpool=False\nopenssldir=None\nshared=False",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
    "30": {
     "ref": "quirc/1.1",
     "options": "max_regions=254\nshared=False",
-    "package_id": "8e7d69ac1d5596196386f046159aacd9644a7227",
+    "package_id": "11b7230897ba30e6da1af1c8b0726ed134f404ee",
     "prev": "0",
     "context": "host"
    },
    "31": {
     "ref": "protobuf/3.17.1",
     "options": "lite=False\nshared=False\nwith_rtti=True\nwith_zlib=True\nzlib:shared=False",
-    "package_id": "9e56137bbb1f5dae27f8e6f5a1977466799557b9",
+    "package_id": "390b80578bf6c7353bb1fcd9b8fe1b4987dc6ea1",
     "prev": "0",
     "requires": [
      "2"
@@ -297,7 +297,7 @@
    "32": {
     "ref": "ade/0.1.1f",
     "options": "",
-    "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
+    "package_id": "d057732059ea44a47760900cb5e4855d2bea8714",
     "prev": "0",
     "context": "host"
    },
@@ -330,7 +330,7 @@
    "36": {
     "ref": "boost/1.77.0",
     "options": "asio_no_deprecated=False\nbuildid=None\nbzip2=True\ndebug_level=0\ndiagnostic_definitions=False\nerror_code_header_only=False\nextra_b2_flags=None\nfilesystem_no_deprecated=False\nheader_only=False\ni18n_backend=deprecated\ni18n_backend_iconv=off\ni18n_backend_icu=False\nlayout=system\nlzma=False\nmagic_autolink=False\nmultithreading=True\nnamespace=boost\nnamespace_alias=False\nnuma=True\npch=True\npython_executable=None\npython_version=None\nsegmented_stacks=False\nshared=False\nsystem_no_deprecated=False\nvisibility=hidden\nwithout_atomic=False\nwithout_chrono=False\nwithout_container=False\nwithout_context=False\nwithout_contract=False\nwithout_coroutine=False\nwithout_date_time=False\nwithout_exception=False\nwithout_fiber=False\nwithout_filesystem=False\nwithout_graph=False\nwithout_graph_parallel=True\nwithout_iostreams=False\nwithout_json=False\nwithout_locale=False\nwithout_log=False\nwithout_math=False\nwithout_mpi=True\nwithout_nowide=False\nwithout_program_options=False\nwithout_python=True\nwithout_random=False\nwithout_regex=False\nwithout_serialization=False\nwithout_stacktrace=False\nwithout_system=False\nwithout_test=False\nwithout_thread=False\nwithout_timer=False\nwithout_type_erasure=False\nwithout_wave=False\nzlib=True\nzstd=False\nbzip2:build_executable=True\nbzip2:shared=False\nzlib:shared=False",
-    "package_id": "37050c911e5419517ec6e0761c16c6e262b3e2a3",
+    "package_id": "e25da6736836401d14d18eb2361204b3783cc5f4",
     "prev": "0",
     "requires": [
      "2",
@@ -341,7 +341,7 @@
    "37": {
     "ref": "sqlitecpp/3.1.1",
     "options": "lint=deprecated\nshared=False\nstack_protection=True\nsqlite3:build_executable=True\nsqlite3:disable_gethostuuid=False\nsqlite3:enable_column_metadata=True\nsqlite3:enable_dbstat_vtab=False\nsqlite3:enable_default_secure_delete=False\nsqlite3:enable_default_vfs=True\nsqlite3:enable_explain_comments=False\nsqlite3:enable_fts3=False\nsqlite3:enable_fts3_parenthesis=False\nsqlite3:enable_fts4=False\nsqlite3:enable_fts5=False\nsqlite3:enable_json1=False\nsqlite3:enable_math_functions=True\nsqlite3:enable_preupdate_hook=False\nsqlite3:enable_rtree=True\nsqlite3:enable_soundex=False\nsqlite3:enable_unlock_notify=True\nsqlite3:max_blob_size=1000000000\nsqlite3:omit_load_extension=False\nsqlite3:shared=False\nsqlite3:threadsafe=1\nsqlite3:use_alloca=False",
-    "package_id": "76dba0ec9bc88d488e30066d4327e0b7ebdd2b21",
+    "package_id": "8385bc0ee873bb175e96183bf2cc318a4e0a0bc1",
     "prev": "0",
     "requires": [
      "38"
@@ -351,7 +351,7 @@
    "38": {
     "ref": "sqlite3/3.36.0",
     "options": "build_executable=True\ndisable_gethostuuid=False\nenable_column_metadata=True\nenable_dbstat_vtab=False\nenable_default_secure_delete=False\nenable_default_vfs=True\nenable_explain_comments=False\nenable_fts3=False\nenable_fts3_parenthesis=False\nenable_fts4=False\nenable_fts5=False\nenable_json1=False\nenable_math_functions=True\nenable_preupdate_hook=False\nenable_rtree=True\nenable_soundex=False\nenable_unlock_notify=True\nmax_blob_size=1000000000\nomit_load_extension=False\nshared=False\nthreadsafe=1\nuse_alloca=False",
-    "package_id": "050fb3a4d3559ab088bce91739e61889c28839d1",
+    "package_id": "5e2ee2bbbf247701a335de1962053720f3cbabf1",
     "prev": "0",
     "context": "host"
    }
@@ -359,5 +359,5 @@
   "revisions_enabled": false
  },
  "version": "0.4",
- "profile_host": "[settings]\narch=x86_64\narch_build=x86_64\nbuild_type=Release\ncompiler=Visual Studio\ncompiler.runtime=MD\ncompiler.version=16\nos=Windows\nos_build=Windows\n[options]\n[build_requires]\n[env]\n"
+ "profile_host": "[settings]\narch=x86_64\narch_build=x86_64\nbuild_type=Debug\ncompiler=Visual Studio\ncompiler.runtime=MDd\ncompiler.version=16\nos=Windows\nos_build=Windows\n[options]\n[build_requires]\n[env]\n"
 }

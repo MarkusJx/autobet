@@ -20,6 +20,9 @@ export default function Alerts(): JSX.Element {
             <CustomAlert severity="error" ref={e => StaticInstances.webserverStateChangeError = e!} closeable>
                 Could not change the web server running state
             </CustomAlert>
+            <CustomAlert severity="error" ref={e => StaticInstances.settingsChangeErrorAlert = e!} closeable>
+                An error occurred while trying to change a setting
+            </CustomAlert>
             <CustomAlert severity="info" ref={e => StaticInstances.settingsDiscardedAlert = e!} closeable>
                 Settings discarded
             </CustomAlert>

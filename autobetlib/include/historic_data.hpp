@@ -13,6 +13,8 @@ namespace markusjx::autobet::historic_data {
      */
     void init();
 
+    void start_betting();
+
     /**
      * Whether historic data should be saved
      *

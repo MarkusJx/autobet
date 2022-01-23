@@ -11,6 +11,7 @@
 #include "autobetException.hpp"
 #include "control.hpp"
 #include "betting.hpp"
+#include "historic_data.hpp"
 #include "logger.hpp"
 #include "windowUtils.hpp"
 
@@ -881,6 +882,29 @@ Napi::Promise getCertificateInfo(const Napi::CallbackInfo &info) {
     });
 }
 
+Napi::Promise setCollectHistoricData(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(boolean);
+    const bool collect = info[0].ToBoolean();
+    return promises::promise<void>(info.Env(), [collect] {
+        settings::write(AUTOBET_SETTINGS_COLLECT_HISTORIC_DATA, collect);
+        if (collect) {
+            markusjx::autobet::historic_data::init();
+        } else {
+            markusjx::autobet::historic_data::close();
+        }
+    });
+}
+
+Napi::Promise getCollectHistoricData(const Napi::CallbackInfo &info) {
+    return promises::promise<bool>(info.Env(), [] {
+        if (settings::has_key(AUTOBET_SETTINGS_COLLECT_HISTORIC_DATA)) {
+            return settings::read<bool>(AUTOBET_SETTINGS_COLLECT_HISTORIC_DATA);
+        } else {
+            return false;
+        }
+    });
+}
+
 #define export(func) exports.Set("lib_" #func, Napi::Function::New(env, func))
 
 /**
@@ -953,6 +977,9 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setUpnpEnabled);
     export(maySupportHttps);
     export(getCertificateInfo);
+
+    export(setCollectHistoricData);
+    export(getCollectHistoricData);
 
     try {
         betting::setWebUiFunctions();

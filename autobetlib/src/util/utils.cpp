@@ -488,7 +488,7 @@ std::string utils::get_or_create_documents_folder() {
         throw std::runtime_error("Could not get the documents folder");
     }
 
-    const std::string dir = documents + "\\autobet";
+    std::string dir = documents + "\\autobet";
     if (!utils::fileExists(dir) && !std::filesystem::create_directory(dir)) {
         throw std::runtime_error("Could not create the autobet directory");
     } else {

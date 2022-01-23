@@ -34,6 +34,7 @@ export default class StaticInstances {
     public static extendedDebuggingErrorAlert?: CustomAlert;
     public static webserverStateChangeError?: CustomAlert;
     public static loadingCertificateAlert?: CustomAlert;
+    public static settingsChangeErrorAlert?: CustomAlert;
 
     // Dialogs
     public static infoDialog?: InfoDialog;
