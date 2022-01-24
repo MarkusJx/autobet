@@ -529,6 +529,7 @@ void betting::mainLoop() {
             StaticLogger::debug("Betting is now paused");
             was_running = false;
             webui::setStopped();
+            markusjx::autobet::historic_data::betting_stopped();
         } else {
             // Only send this message every 10-ish seconds
             static int count = 0;
