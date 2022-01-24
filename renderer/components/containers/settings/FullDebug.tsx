@@ -11,6 +11,10 @@ export default class FullDebug extends SwitchComponent {
         </>, props);
     }
 
+    public override componentDidMount(): void {
+        this.disabled = false;
+    }
+
     protected override async onChange(checked: boolean): Promise<void> {
         if (checked) {
             if (!window.autobet.logging.isLoggingToFile()) {

@@ -20,7 +20,9 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "esnext",
-    "outDir": "../out/main"
+    "outDir": "../out/main",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "exclude": [
     "node_modules"

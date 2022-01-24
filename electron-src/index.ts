@@ -5,6 +5,7 @@ import Store from 'electron-store';
 import path from 'path';
 import prepareNext from "electron-next";
 import isDev from 'electron-is-dev';
+import store from "./preload/store";
 
 let autobetLib: typeof import("@autobet/autobetlib") | null = null;
 let autobetLibError: Error | null = null;
@@ -31,10 +32,12 @@ let tray: Tray | null = null;
 async function createWindow(): Promise<void> {
     await prepareNext('./renderer');
     Store.initRenderer();
-    autoUpdater.checkForUpdatesAndNotify().then(r => {
-        if (r != null)
-            console.log(r);
-    });
+    if (store.getAutoUpdate()) {
+        autoUpdater.checkForUpdatesAndNotify().then(r => {
+            if (r != null)
+                console.log(r);
+        });
+    }
 
     const mainWindowState: windowStateKeeper.State = windowStateKeeper({
         defaultWidth: 705,

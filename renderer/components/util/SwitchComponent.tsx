@@ -21,7 +21,7 @@ export default abstract class SwitchComponent extends React.Component<{}, Switch
 
         this.state = {
             checked: false,
-            disabled: false
+            disabled: true
         };
     }
 

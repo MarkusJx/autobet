@@ -13,6 +13,7 @@ import StaticInstances from "../util/StaticInstances";
 import UPnPSelect from "./containers/settings/UPnPSelect";
 import SSLSupport from "./containers/settings/SSLSupport";
 import HistoricData from "./containers/settings/HistoricData";
+import AutoUpdate from "./containers/settings/AutoUpdate";
 
 export default class Settings extends React.Component<{}, {}> implements Loadable {
     private navigationStrategy?: NavigationStrategy;
@@ -46,6 +47,7 @@ export default class Settings extends React.Component<{}, {}> implements Loadabl
                 <UPnPSelect ref={e => StaticInstances.upnpSelect = e!}/>
                 <SSLSupport ref={e => StaticInstances.sslSupport = e!}/>
                 <HistoricData ref={e => this.historicData = e!}/>
+                <AutoUpdate/>
                 <CustomBettingFunction ref={e => this.customBettingFunction = e!}/>
                 <DebugSettings ref={e => StaticInstances.debugSettings = e!}/>
             </>

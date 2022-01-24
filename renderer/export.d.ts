@@ -1,12 +1,12 @@
-import util from "../preload/util";
-
-type autobet_t = typeof import("@autobet/autobetlib");
+import util from "../electron-src/preload/util";
+import store from "../electron-src/preload/store";
 
 export {};
 
 declare global {
     interface Window {
-        autobet: autobet_t,
+        autobet: typeof import("@autobet/autobetlib"),
         util: typeof util,
+        store: typeof store
     }
 }
