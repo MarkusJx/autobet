@@ -32,6 +32,7 @@ let tray: Tray | null = null;
 async function createWindow(): Promise<void> {
     await prepareNext('./renderer');
     Store.initRenderer();
+
     if (store.getAutoUpdate()) {
         autoUpdater.checkForUpdatesAndNotify().then(r => {
             if (r != null)
@@ -51,8 +52,9 @@ async function createWindow(): Promise<void> {
         height: mainWindowState.height,
         minHeight: 500,
         minWidth: 530,
-        frame: true,
+        frame: false,
         resizable: true,
+        titleBarStyle: 'hidden',
         icon: "icon.png",
         webPreferences: {
             preload: path.join(__dirname, 'preload', 'preload.js'),
@@ -110,7 +112,35 @@ async function createWindow(): Promise<void> {
         mainWindow.hide();
     });
 
-    ipcMain.handle('autobet-version', () => version);
+    ipcMain.handle('autobet-version', (): string => version);
+
+    mainWindow.on('maximize', () => {
+        mainWindow.webContents.send('window-onMaximize');
+    });
+
+    mainWindow.on('unmaximize', () => {
+        mainWindow.webContents.send('window-onRestore');
+    });
+
+    ipcMain.handle('window-restore', (): void => {
+        mainWindow.restore();
+    });
+
+    ipcMain.handle('window-maximize', (): void => {
+        mainWindow.maximize();
+    });
+
+    ipcMain.handle('window-isMaximized', (): boolean => {
+        return mainWindow.isMaximized();
+    });
+
+    ipcMain.handle('window-minimize', () => {
+        mainWindow.minimize();
+    })
+
+    ipcMain.handle('window-close', () => {
+        mainWindow.close();
+    });
 
     if (isDev) {
         await mainWindow.loadURL('http://localhost:8000');
@@ -161,7 +191,6 @@ function createErrorWindow(): void {
 }
 
 app.whenReady().then(() => {
-    require('electron-react-titlebar/main').initialize();
     if (autobetLib != null) {
         if (autobetLib.programIsRunning()) {
             autobetLib.callbacks.setQuitCallback(() => {
