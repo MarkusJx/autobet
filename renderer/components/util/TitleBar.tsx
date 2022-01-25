@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import React from "react";
-import icon from "../../../icon.png";
+import Icon from "../../../icon.png";
 
 const FramelessTitleBar = dynamic(import("frameless-titlebar"), {
     ssr: false
@@ -31,15 +31,17 @@ export default class TitleBar extends React.Component<{}, TitleBarState> {
 
     public override render(): React.ReactNode {
         return (
-            <FramelessTitleBar title="Autobet"
-                               onMaximize={this.handleMaximize}
-                               onClose={() => window.electronWindow.close()}
-                               onMinimize={() => window.electronWindow.minimize()}
-                               onDoubleClick={this.handleMaximize}
-                               disableMinimize={false}
-                               disableMaximize={false}
-                               maximized={this.state.maximized}
-                               iconSrc={icon.src}/>
+            <div style={{zIndex: 9999, width: '100vw', position: 'fixed', top: 0}}>
+                <FramelessTitleBar title="Autobet"
+                                   onMaximize={this.handleMaximize}
+                                   onClose={() => window.electronWindow.close()}
+                                   onMinimize={() => window.electronWindow.minimize()}
+                                   onDoubleClick={this.handleMaximize}
+                                   disableMinimize={false}
+                                   disableMaximize={false}
+                                   maximized={this.state.maximized}
+                                   iconSrc={Icon.src}/>
+            </div>
         );
     }
 

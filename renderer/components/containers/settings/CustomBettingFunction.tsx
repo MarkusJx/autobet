@@ -205,6 +205,12 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         );
     }
 
+    public override componentDidMount() {
+        this.editor?.editor?.onChange(() => {
+
+        });
+    }
+
     public hide(): void {
         this.setState({
             editorVisible: false
