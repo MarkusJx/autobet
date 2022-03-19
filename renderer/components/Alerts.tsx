@@ -1,6 +1,8 @@
 import CustomAlert from "./CustomAlert";
 import styles from "../styles/components/Alerts.module.scss";
 import StaticInstances from "../util/StaticInstances";
+import CustomSnackbar from "./util/CustomSnackbar";
+import {Button} from "@mui/material";
 
 export default function Alerts(): JSX.Element {
     return (
@@ -23,6 +25,16 @@ export default function Alerts(): JSX.Element {
             <CustomAlert severity="error" ref={e => StaticInstances.settingsChangeErrorAlert = e!} closeable>
                 An error occurred while trying to change a setting
             </CustomAlert>
+            <CustomSnackbar buttons={
+                <>
+                    <Button size="small" onClick={() => StaticInstances.bettingFunctionErrorAlert?.hide()}>
+                        Ok
+                    </Button>
+                    <Button size="small" onClick={() => StaticInstances.bettingFunctionResultDialog?.open()}>
+                        View Info
+                    </Button>
+                </>
+            } severity="error" ref={e => StaticInstances.bettingFunctionErrorAlert = e!}/>
             <CustomAlert severity="info" ref={e => StaticInstances.settingsDiscardedAlert = e!} closeable>
                 Settings discarded
             </CustomAlert>
@@ -38,6 +50,16 @@ export default function Alerts(): JSX.Element {
             <CustomAlert severity="success" ref={e => StaticInstances.navigationStrategyAlert = e!} closeable>
                 Navigation strategy changed to 'unknown'
             </CustomAlert>
+            <CustomSnackbar buttons={
+                <>
+                    <Button size="small" onClick={() => StaticInstances.bettingFunctionSuccessAlert?.hide()}>
+                        Ok
+                    </Button>
+                    <Button size="small" onClick={() => StaticInstances.bettingFunctionResultDialog?.open()}>
+                        View Info
+                    </Button>
+                </>
+            } severity="success" ref={e => StaticInstances.bettingFunctionSuccessAlert = e!}/>
         </div>
     );
 }

@@ -137,16 +137,22 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
         }
     }
 
+    class chance {
+    public:
+        short chance;
+        short position;
+    };
+
     // Return the y-position of the lowest chance to bet on
-    std::array<short, 2> lowest = {res[0], 0};
+    chance lowest{res[0], 0};
     for (short i = 1; i < 6; i++) {
-        if (lowest[0] > res[i]) {
-            lowest[0] = res[i];
-            lowest[1] = i;
+        if (lowest.chance > res[i]) {
+            lowest.chance = res[i];
+            lowest.position = i;
         }
     }
 
-    return static_cast<short>(lowest[1]);
+    return lowest.position;
 }
 
 /**

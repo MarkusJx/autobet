@@ -11,6 +11,9 @@ import UPnPSelect from "../components/containers/settings/UPnPSelect";
 import SSLSupport from "../components/containers/settings/SSLSupport";
 import CertificateInfoDialog from "../components/dialogs/CertificateInfoDialog";
 import QRCodeDialog from "../components/dialogs/QRCodeDialog";
+import CustomBettingFunction from "../components/containers/settings/CustomBettingFunction";
+import CustomSnackbar from "../components/util/CustomSnackbar";
+import BettingFunctionResultDialog from "../components/dialogs/BettingFunctionResultDialog";
 
 export default class StaticInstances {
     public static timeRunning?: TimeRunning;
@@ -22,6 +25,7 @@ export default class StaticInstances {
     public static debugSettings?: DebugSettings;
     public static upnpSelect?: UPnPSelect;
     public static sslSupport?: SSLSupport;
+    public static customBettingFunctionElement?: CustomBettingFunction;
 
     // Alerts
     public static settingsSavedAlert?: CustomAlert;
@@ -35,11 +39,14 @@ export default class StaticInstances {
     public static webserverStateChangeError?: CustomAlert;
     public static loadingCertificateAlert?: CustomAlert;
     public static settingsChangeErrorAlert?: CustomAlert;
+    public static bettingFunctionErrorAlert?: CustomSnackbar;
+    public static bettingFunctionSuccessAlert?: CustomSnackbar;
 
     // Dialogs
     public static infoDialog?: InfoDialog;
     public static certificateInfoDialog?: CertificateInfoDialog;
     public static qrCodeDialog?: QRCodeDialog;
+    public static bettingFunctionResultDialog?: BettingFunctionResultDialog;
 
     private constructor() {
     }

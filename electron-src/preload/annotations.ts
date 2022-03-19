@@ -11,7 +11,7 @@ export function validate(target: any, propertyKey: string, descriptor: TypedProp
 
         for (let i = 0; i < arguments.length; i++) {
             if (typeof arguments[i] !== types[i].name.toLowerCase()) {
-                throw new TypeError(`Invalid type at position ${i}, expected ${types[i].name}, got ${typeof arguments[i]}`);
+                throw new TypeError(`Invalid type at position ${i}, expected ${types[i].name}, got ${typeof arguments[i]}. Received value: ${JSON.stringify(arguments[i])}`);
             }
         }
 

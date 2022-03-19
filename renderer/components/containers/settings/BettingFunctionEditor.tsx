@@ -2,7 +2,7 @@ import React from "react";
 import styles from "../../../styles/components/containers/settings/CustomBettingFunction.module.scss";
 
 import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-java";
+import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/theme-chrome";
 
 interface BettingFunctionEditorState {
@@ -26,7 +26,7 @@ export class BettingFunctionEditor extends React.Component<{}, BettingFunctionEd
 
     public override render(): React.ReactNode {
         return (
-            <AceEditor mode="java" theme="chrome" name="code-editor"
+            <AceEditor mode="javascript" theme="chrome" name="code-editor"
                        className={`${styles.editor} ${this.state.drawerOpen && styles.drawerOpen}`}
                        style={{width: 'auto'}} ref={e => this.editor = e}/>
         );

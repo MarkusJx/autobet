@@ -1,4 +1,4 @@
-export class functionStore {
+export class FunctionStore {
     /**
      * The function name
      */

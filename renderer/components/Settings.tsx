@@ -20,7 +20,6 @@ export default class Settings extends React.Component<{}, {}> implements Loadabl
     private gameSelector?: GameSelector;
     private timeSleep?: TimeSleep;
     private historicData?: HistoricData;
-    private customBettingFunction?: CustomBettingFunction;
     private fullDebug?: FullDebug;
 
     public set disabled(val: boolean) {
@@ -29,8 +28,8 @@ export default class Settings extends React.Component<{}, {}> implements Loadabl
         this.timeSleep!.disabled = val;
         StaticInstances.clickSleep!.disabled = val;
         StaticInstances.afterClickSleep!.disabled = val;
-        if (val) this.customBettingFunction?.hide();
-        this.customBettingFunction!.openButtonDisabled = val;
+        if (val) StaticInstances.customBettingFunctionElement?.hide();
+        StaticInstances.customBettingFunctionElement!.openButtonDisabled = val;
         this.historicData!.disabled = val;
     }
 
@@ -48,7 +47,7 @@ export default class Settings extends React.Component<{}, {}> implements Loadabl
                 <SSLSupport ref={e => StaticInstances.sslSupport = e!}/>
                 <HistoricData ref={e => this.historicData = e!}/>
                 <AutoUpdate/>
-                <CustomBettingFunction ref={e => this.customBettingFunction = e!}/>
+                <CustomBettingFunction ref={e => StaticInstances.customBettingFunctionElement = e!}/>
                 <DebugSettings ref={e => StaticInstances.debugSettings = e!}/>
             </>
         );
