@@ -37,7 +37,7 @@ const BettingFunctionEditor = dynamic(import("./BettingFunctionEditor"), {
     ssr: false
 });
 
-const ForwardRefEditor = forwardRef((props, ref) =>
+const ForwardRefEditor = forwardRef<editor_t>((props, ref) =>
     <BettingFunctionEditor {...props} editorRef={ref}/>
 );
 
@@ -361,7 +361,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
             StaticInstances.selectBettingFunctionNameDialog?.open(closeListener);
         } else {
             // Revert to default impl if to save == current
-            if (this.activeImplementation === this.state.selectedImpl) {
+            if (this.state.selectedImpl?.active) {
                 this.setActive(defaultImplementation);
             }
 
@@ -393,7 +393,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         this.select(defaultImplementation);
     }
 
-    private editorLoaded(e: editor_t): void {
+    private editorLoaded(e: editor_t | null): void {
         if (!e) return;
         const alreadyLoaded: boolean = !!this.editor;
 
