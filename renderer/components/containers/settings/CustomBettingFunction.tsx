@@ -426,16 +426,8 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
             ...functions.map(f => BettingFunctionImplementation.fromStore(f))
         ];
 
-        /*console.log(window.store.getActiveFunction(), window.BettingFunctionUtil.defaultIsActive())
-        if (window.BettingFunctionUtil.defaultIsActive()) {
-            console.log("Setting default to active")
-            defaultImplementation.active = true;
-            console.log(defaultImplementation);
-        }*/
-
         this.activeImplementation = implementations.find(i => i.active)!;
         this.setDefaultButtonDisabled = defaultImplementation.active;
-        //console.log(implementations);
         this.setState({
             implementations: implementations
         });

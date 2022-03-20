@@ -61,6 +61,7 @@ export default class SelectBettingFunctionNameDialog extends React.Component<{},
     }
 
     public open(closeListener: (value: string) => void): void {
+        this.setState({value: ""});
         this.closeListener = closeListener;
         this.element?.open();
     }
