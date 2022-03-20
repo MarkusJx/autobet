@@ -81,10 +81,10 @@ export default class BettingFunctionImplementation {
         return fn;
     }
 
-    public checkImplementation(): void {
+    public async checkImplementation(): Promise<void> {
         this.isWaiting = true;
 
-        const result = window.BettingFunctionUtil.checkFunction(this.implementation, this.store == null ? "default" : this.store.id);
+        const result = await window.BettingFunctionUtil.checkFunction(this.implementation, this.store == null ? "default" : this.store.id);
         this.ok = result.ok;
         this.isWaiting = false;
 

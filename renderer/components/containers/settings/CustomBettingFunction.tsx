@@ -54,6 +54,7 @@ interface CustomBettingFunctionState {
     checkImplButtonDisabled: boolean;
     addImplementation: boolean;
     implementations: BettingFunctionImplementation[];
+    openDrawerButtonDisabled: boolean;
 }
 
 const defaultImplementation = new BettingFunctionImplementation(defaultBettingFunction, "Default", null, true);
@@ -77,7 +78,8 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
             setDefaultButtonDisabled: false,
             checkImplButtonDisabled: false,
             addImplementation: false,
-            implementations: [defaultImplementation]
+            implementations: [defaultImplementation],
+            openDrawerButtonDisabled: false
         };
 
         defaultImplementation.ok = true;
@@ -148,6 +150,12 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
     private set addImplementation(val: boolean) {
         this.setState({
             addImplementation: val
+        });
+    }
+
+    private set openDrawerButtonDisabled(val: boolean) {
+        this.setState({
+            openDrawerButtonDisabled: val
         });
     }
 
@@ -222,7 +230,8 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
                     <AppBar position="relative">
                         <Toolbar variant="dense">
                             <IconButton color="inherit" aria-label="open drawer"
-                                        onClick={this.toggleDrawer.bind(this)} edge="start">
+                                        onClick={this.toggleDrawer.bind(this)} edge="start"
+                                        disabled={this.state.openDrawerButtonDisabled}>
                                 <MenuIcon/>
                             </IconButton>
                             <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
@@ -330,7 +339,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         });
     }
 
-    private saveCurrent(): void {
+    private async saveCurrent(): Promise<void> {
         if (this.state.addImplementation) {
             const nameRegex: RegExp = /^[a-zA-Z0-9_]+$/g;
             const closeListener = (value: string): void => {
@@ -355,7 +364,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
                     StaticInstances.bettingFunctionSavedAlert?.show(5000);
                     this.addButton!.style.backgroundColor = '';
                     this.select(impl);
-                    this.check(impl);
+                    this.check(impl).then();
                 }
             };
             StaticInstances.selectBettingFunctionNameDialog?.open(closeListener);
@@ -369,7 +378,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
             this.state.selectedImpl?.setImplementation(this.aceEditor!.getValue());
             StaticInstances.bettingFunctionSavedAlert?.setText("Successfully saved the implementation");
             StaticInstances.bettingFunctionSavedAlert?.show(5000);
-            this.checkCurrent();
+            await this.checkCurrent();
         }
     }
 
@@ -456,11 +465,15 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         }
     }
 
-    private check(impl: BettingFunctionImplementation): void {
+    private async check(impl: BettingFunctionImplementation): Promise<void> {
         this.checkImplButtonDisabled = true;
         this.saveButtonDisabled = true;
         this.deleteButtonDisabled = true;
-        impl.checkImplementation();
+        this.openDrawerButtonDisabled = true;
+        StaticInstances.checkingBettingFunctionAlert?.show();
+        await impl.checkImplementation();
+        StaticInstances.checkingBettingFunctionAlert?.hide();
+        this.openDrawerButtonDisabled = false;
         this.checkImplButtonDisabled = false;
 
         if (!impl.isDefault) {
@@ -470,9 +483,9 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         }
     }
 
-    private checkCurrent(): void {
+    private async checkCurrent(): Promise<void> {
         if (this.state.selectedImpl) {
-            this.check(this.state.selectedImpl);
+            await this.check(this.state.selectedImpl);
         }
     }
 

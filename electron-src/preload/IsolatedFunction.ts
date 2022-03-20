@@ -1,4 +1,6 @@
-import {VM} from "vm2";
+import {ExternalCopy, Isolate} from "isolated-vm";
+import {Mutex} from "async-mutex";
+import deasync from "deasync";
 
 /**
  * The type of odds
@@ -83,51 +85,41 @@ export type testResult = {
  * An isolated function
  */
 export default class IsolatedFunction {
-    /**
-     * Set to true, if a vm is already running
-     * @private
-     */
-    private running: boolean;
-
-    /**
-     * The result of a vm run
-     * @private
-     */
-    private result: string | null;
+    public readonly runSync: (odds: string[]) => (string | null);
 
     /**
      * The function to run in a vm
      * @private
      */
     private func: string | null;
-
+    /**
+     * Set to true, if a vm is already running
+     * @private
+     */
+    private readonly mutex: Mutex = new Mutex();
     /**
      * The vm to use
      * @private
      */
-    private vm: VM;
+    private readonly isolate: Isolate;
 
     /**
      * Create an isolated function
      *
      * @param loggingFunction the logging function callback
      */
-    public constructor(loggingFunction: (msg: string) => void = console.log) {
-        this.running = false;
-        this.result = null;
+    public constructor(private readonly loggingFunction: (msg: string) => void = console.log) {
         this.func = null;
-        this.vm = new VM({
-            timeout: 5000,
-            compiler: "javascript",
-            eval: false,
-            wasm: false,
-            fixAsync: true,
-            sandbox: {
-                log: loggingFunction,
-                setResult: (res: string) => {
-                    this.result = res;
-                }
-            }
+        this.isolate = new Isolate({
+            memoryLimit: 128
+        });
+
+        this.runSync = deasync((odds: string[], callback: (err: any, res: string | null) => void): void => {
+            this.run(odds).then((res: string | null): void => {
+                callback(undefined, res);
+            }, (err: any): void => {
+                callback(err, null);
+            });
         });
     }
 
@@ -136,8 +128,10 @@ export default class IsolatedFunction {
      *
      * @param func a script
      */
-    public setFunction(func: string): void {
-        this.func = func;
+    public setFunction(func: string): Promise<void> {
+        return this.mutex.runExclusive(() => {
+            this.func = func;
+        });
     }
 
     /**
@@ -146,28 +140,23 @@ export default class IsolatedFunction {
      * @param odds the odds argument
      * @returns the result of the operation or nothing if no bet should be placed
      */
-    public run(odds: string[]): string | null {
-        if (typeof this.func !== "string") {
+    public async run(odds: string[]): Promise<string | null> {
+        if (!this.func || typeof this.func !== "string") {
             throw new Error("The function is not set");
         }
 
-        // Basic synchronization
-        while (this.running) {
-        }
-        this.running = true;
+        return await this.mutex.runExclusive(async () => {
+            const context = await this.isolate.createContext();
+            const jail = context.global;
 
-        // Initialize the result
-        this.result = null;
+            await jail.set('odds', new ExternalCopy(odds).copyInto());
+            await jail.set('log', this.loggingFunction.bind(this));
 
-        // Set the odds and run the function
-        this.vm.setGlobal("odds", odds);
-        this.vm.run(this.func);
-
-        // Get the result and set this.result to null
-        const res: string | null = this.result;
-        this.result = null;
-        this.running = false;
-        return res;
+            const script = await this.isolate.compileScript(this.func!);
+            return await script.run(context, {
+                timeout: 5000
+            });
+        });
     }
 
     /**
@@ -176,7 +165,7 @@ export default class IsolatedFunction {
      * @param maxTests the maximum number of tests to run
      * @returns the rest result
      */
-    public testFunction(maxTests: number = 10): testResult {
+    public async testFunction(maxTests: number = 10): Promise<testResult> {
         /**
          * Generate an odds array
          *
@@ -270,7 +259,7 @@ export default class IsolatedFunction {
             const o: string[] = generateOdds();
             try {
                 // Run the function with o
-                let r: string | null = this.run(o);
+                let r: string | null = await this.run(o);
 
                 if (typeof r === "string") {
                     // Basic xss protection

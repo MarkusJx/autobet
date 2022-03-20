@@ -41,6 +41,9 @@ export default function Alerts(): JSX.Element {
             <CustomAlert severity="info" ref={e => StaticInstances.loadingCertificateAlert = e!}>
                 Loading the certificate
             </CustomAlert>
+            <CustomAlert severity="info" ref={e => StaticInstances.checkingBettingFunctionAlert = e!}>
+                Checking the provided implementation...
+            </CustomAlert>
             <CustomAlert severity="success" ref={e => StaticInstances.settingsSavedAlert = e!} closeable>
                 Settings saved successfully
             </CustomAlert>

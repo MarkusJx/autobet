@@ -36,7 +36,7 @@ class BettingFunctionUtil {
         return fn;
     }
 
-    public static checkFunction(implementation: string, id: string = "null"): testResult {
+    public static async checkFunction(implementation: string, id: string = "null"): Promise<testResult> {
         const isolatedFn = new IsolatedFunction((msg: string) => {
             if (typeof msg == "string") autobetLib.logging.debug(`isolatedFunction-${id}`, msg);
         });
@@ -44,7 +44,7 @@ class BettingFunctionUtil {
         isolatedFn.setFunction(implementation);
         let result: testResult;
         try {
-            result = isolatedFn.testFunction(25);
+            result = await isolatedFn.testFunction(25);
         } catch (e: any) {
             result = {
                 ok: false,
@@ -205,7 +205,7 @@ function bettingFunctionError(): void {
         let res: string | null = null;
         try {
             let odds_cpy: string[] = Array.from(odds);
-            res = BettingFunctionUtil.isolatedFunction().run(odds_cpy);
+            res = BettingFunctionUtil.isolatedFunction().runSync(odds_cpy);
         } catch (e: any) {
             autobetLib.logging.error("preload.js", `The custom betting function threw: ${e.message}`);
             functions[activeFunction].ok = false;

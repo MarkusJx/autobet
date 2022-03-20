@@ -43,6 +43,7 @@ export default class StaticInstances {
     public static bettingFunctionErrorAlert?: CustomSnackbar;
     public static bettingFunctionSuccessAlert?: CustomSnackbar;
     public static bettingFunctionSavedAlert?: CustomAlert;
+    public static checkingBettingFunctionAlert?: CustomAlert;
 
     // Dialogs
     public static infoDialog?: InfoDialog;

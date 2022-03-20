@@ -41,10 +41,13 @@ function run() {
     return lowest;
 }
 
-// Set the result.
+// Return the result. The result is the last value
+// evaluated in the script (in this case, it is
+// set as run() returns a value, which makes that
+// the last value evaluated).
 // Set null if no bet should be placed,
 // the odd of the horse to bet on otherwise
-setResult(run());
+run();
 `;
 
 export default defaultBettingFunction;
