@@ -60,6 +60,7 @@ export default function Alerts(): JSX.Element {
                     </Button>
                 </>
             } severity="success" ref={e => StaticInstances.bettingFunctionSuccessAlert = e!}/>
+            <CustomAlert severity="success" ref={e => StaticInstances.bettingFunctionSavedAlert = e!}/>
         </div>
     );
 }

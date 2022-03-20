@@ -7,20 +7,28 @@ export default class BettingFunctionImplementation {
     private isWaiting: boolean = false;
 
     public constructor(
-        public readonly implementation: string,
+        private _implementation: string,
         public readonly name: string,
-        private store: FunctionStore | null = null,
+        public readonly store: FunctionStore | null = null,
         public readonly isDefault: boolean = false
     ) {
+    }
+
+    public set ok(val: boolean) {
+        this.isOk = val;
+        if (!this.isDefault) this.store!.ok = val;
+        if (this.store) {
+            this.store.ok = val;
+            window.BettingFunctionUtil.updateFunction(this.store);
+        }
     }
 
     public get ok(): boolean {
         return this.isOk;
     }
 
-    public set ok(val: boolean) {
-        this.isOk = val;
-        if (!this.isDefault) this.store!.ok = val;
+    public get implementation(): string {
+        return this._implementation;
     }
 
     public get waiting(): boolean {
@@ -33,6 +41,10 @@ export default class BettingFunctionImplementation {
 
     public set active(val: boolean) {
         this.isActive = val;
+        if (this.store) {
+            this.store.active = val;
+            window.BettingFunctionUtil.updateFunction(this.store);
+        }
 
         if (val) {
             if (this.isDefault) {
@@ -47,6 +59,18 @@ export default class BettingFunctionImplementation {
                 }
             }
         }
+    }
+
+    public defaultLoadActive(): void {
+        if (this.isDefault) {
+            this.isActive = window.BettingFunctionUtil.defaultIsActive();
+        }
+    }
+
+    public setImplementation(impl: string): void {
+        this._implementation = impl;
+        this.store!.functionString = impl;
+        window.BettingFunctionUtil.updateFunction(this.store!);
     }
 
     public static fromStore(store: FunctionStore): BettingFunctionImplementation {

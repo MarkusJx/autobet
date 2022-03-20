@@ -74,7 +74,8 @@ export default class CustomSnackbar extends React.Component<CustomSnackbarProps,
             <Collapse in={this.state.visible}>
                 <Snackbar open={this.state.visible} onClose={() => this.visible = false} style={{marginTop: '10px'}}
                           action={this.props.buttons} anchorOrigin={{vertical: "bottom", horizontal: "center"}}
-                          message={this.state.text}/>
+                          message={this.state.text}
+                          sx={{display: 'block', position: 'relative', marginBottom: '-24px'}}/>
             </Collapse>
         );
     }

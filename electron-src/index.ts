@@ -70,7 +70,7 @@ async function createWindow(): Promise<void> {
     if (isDev) {
         await mainWindow.loadURL('http://localhost:8000');
     } else {
-        await mainWindow.loadFile(path.join(__dirname, '..', '..', 'renderer', 'out', 'index.html'));
+        await mainWindow.loadFile(path.join(__dirname, '..', '..', '..', 'renderer', 'out', 'index.html'));
     }
     mainWindowState.manage(mainWindow);
 }

@@ -200,11 +200,11 @@ export default class IsolatedFunction {
             }
 
             /**
-             * Count the number of occurences of an object in an array
+             * Count the number of occurrences of an object in an array
              *
              * @param arr the array the object may be in
              * @param val the value to search for or count
-             * @returns the number of occurences
+             * @returns the number of occurrences
              */
             function count<T>(arr: T[], val: T): number {
                 let c: number = 0;

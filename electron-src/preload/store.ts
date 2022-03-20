@@ -40,14 +40,14 @@ class store {
         electronStore.set('functions', functions);
     }
 
-    @validate
+    //@validate
     public static addFunction(fn: FunctionStore): void {
         const functions = store.getFunctions();
         functions.push(fn);
         electronStore.set('functions', functions);
     }
 
-    @validate
+    //@validate
     public static removeFunction(fn: FunctionStore): void {
         const functions = store.getFunctions();
         functions.splice(functions.indexOf(fn), 1);

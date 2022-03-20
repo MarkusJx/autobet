@@ -14,6 +14,7 @@ import QRCodeDialog from "../components/dialogs/QRCodeDialog";
 import CustomBettingFunction from "../components/containers/settings/CustomBettingFunction";
 import CustomSnackbar from "../components/util/CustomSnackbar";
 import BettingFunctionResultDialog from "../components/dialogs/BettingFunctionResultDialog";
+import SelectBettingFunctionNameDialog from "../components/dialogs/SelectBettingFunctionNameDialog";
 
 export default class StaticInstances {
     public static timeRunning?: TimeRunning;
@@ -41,12 +42,14 @@ export default class StaticInstances {
     public static settingsChangeErrorAlert?: CustomAlert;
     public static bettingFunctionErrorAlert?: CustomSnackbar;
     public static bettingFunctionSuccessAlert?: CustomSnackbar;
+    public static bettingFunctionSavedAlert?: CustomAlert;
 
     // Dialogs
     public static infoDialog?: InfoDialog;
     public static certificateInfoDialog?: CertificateInfoDialog;
     public static qrCodeDialog?: QRCodeDialog;
     public static bettingFunctionResultDialog?: BettingFunctionResultDialog;
+    public static selectBettingFunctionNameDialog?: SelectBettingFunctionNameDialog;
 
     private constructor() {
     }

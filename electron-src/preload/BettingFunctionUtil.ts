@@ -4,6 +4,7 @@ import autobetLib from "@autobet/autobetlib";
 import {v4 as uuidV4} from "uuid";
 import store from "./store";
 import {FunctionStore} from "../../renderer/util/FunctionStore";
+import {validate} from "./annotations";
 
 let _revertToDefaultCallback: () => void = () => {
 };
@@ -128,6 +129,27 @@ class BettingFunctionUtil {
     public static deleteFunction(fn: FunctionStore): void {
         store.removeFunction(fn);
         store.removeUid(fn.id);
+    }
+
+    @validate
+    public static nameExists(name: string): boolean {
+        return store.getFunctions().map(f => f.name).includes(name);
+    }
+
+    public static updateFunction(fn: FunctionStore): void {
+        const functions = store.getFunctions();
+        const index = functions.findIndex(v => v.id === fn.id);
+
+        if (index !== -1) {
+            functions[index] = fn;
+            store.setFunctions(functions);
+        } else {
+            console.error("Could not find implementation with id", fn.id);
+        }
+    }
+
+    public static defaultIsActive(): boolean {
+        return store.getActiveFunction() === -1;
     }
 
     private static generateUid(): string {

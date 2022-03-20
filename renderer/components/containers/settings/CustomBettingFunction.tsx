@@ -31,6 +31,7 @@ import ace from "ace-builds";
 import BettingFunctionImplementation from "../../../util/BettingFunctionImplementation";
 import defaultBettingFunction from "../../../util/defaultBettingFunction";
 import {FunctionStore} from "../../../util/FunctionStore";
+import StaticInstances from "../../../util/StaticInstances";
 
 const BettingFunctionEditor = dynamic(import("./BettingFunctionEditor"), {
     ssr: false
@@ -55,7 +56,7 @@ interface CustomBettingFunctionState {
     implementations: BettingFunctionImplementation[];
 }
 
-const defaultImplementation = new BettingFunctionImplementation(defaultBettingFunction, "default", null, true);
+const defaultImplementation = new BettingFunctionImplementation(defaultBettingFunction, "Default", null, true);
 
 export default class CustomBettingFunction extends React.Component<any, CustomBettingFunctionState> {
     private editor: editor_t | null = null;
@@ -85,8 +86,10 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
     private _activeImplementation: BettingFunctionImplementation | null = defaultImplementation;
 
     public set activeImplementation(newVal: BettingFunctionImplementation) {
-        if (this._activeImplementation) this._activeImplementation.active = false;
-        this._activeImplementation = newVal;
+        if (this._activeImplementation != newVal) {
+            if (this._activeImplementation) this._activeImplementation.active = false;
+            this._activeImplementation = newVal;
+        }
     }
 
     public set openButtonDisabled(val: boolean) {
@@ -247,7 +250,8 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
                         </Toolbar>
                     </AppBar>
                     <div className={styles.drawerEditorContainer}>
-                        <Drawer open={this.state.drawerOpen} sx={drawerSxProps} variant="persistent" anchor="left">
+                        <Drawer open={this.state.drawerOpen} sx={drawerSxProps} variant="persistent" anchor="left"
+                                style={{backgroundColor: '#1e1e1e'}}>
                             <div className={styles.drawerHeadingContainer}>
                                 <h3 className={`${styles.text} ${styles.heading}`}>
                                     Implementations
@@ -290,7 +294,6 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         this.aceEditor?.setValue(impl.implementation, -1);
         this.drawerOpen = false;
         this.addImplementation = false;
-        console.log("Selecting impl:", impl);
 
         // If this is the default implementation,
         // the title is 'View default', the save
@@ -309,7 +312,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         }
 
         this.checkImplButtonDisabled = impl.waiting;
-        this.setDefaultButtonDisabled = impl.isDefault || !impl.ok;
+        this.setDefaultButtonDisabled = impl.active || !impl.ok;
     }
 
     public hide(): void {
@@ -318,16 +321,76 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         });
     }
 
+    private addImpl(impl: BettingFunctionImplementation): void {
+        this.setState({
+            implementations: [
+                ...this.state.implementations,
+                impl
+            ]
+        });
+    }
+
     private saveCurrent(): void {
-        // TODO
+        if (this.state.addImplementation) {
+            const nameRegex: RegExp = /^[a-zA-Z0-9_]+$/g;
+            const closeListener = (value: string): void => {
+                value = value.trim();
+                if (value.length === 0) {
+                    StaticInstances.selectBettingFunctionNameDialog?.setInvalid(true, "The function name cannot be empty");
+                    StaticInstances.selectBettingFunctionNameDialog?.open(closeListener);
+                } else if (value.length > 20) {
+                    StaticInstances.selectBettingFunctionNameDialog?.setInvalid(true, "The function name may only be up to 20 characters in length");
+                    StaticInstances.selectBettingFunctionNameDialog?.open(closeListener);
+                } else if (window.BettingFunctionUtil.nameExists(value)) {
+                    StaticInstances.selectBettingFunctionNameDialog?.setInvalid(true, "An implementation with the given name already exists");
+                    StaticInstances.selectBettingFunctionNameDialog?.open(closeListener);
+                } else if (!nameRegex.test(value)) {
+                    StaticInstances.selectBettingFunctionNameDialog?.setInvalid(true, "The given name is invalid. Function names may only contain characters (a-z), numbers(0-9) and underscores in any combination.");
+                    StaticInstances.selectBettingFunctionNameDialog?.open(closeListener);
+                } else {
+                    const store = window.BettingFunctionUtil.addFunction(value, this.aceEditor!.getValue());
+                    const impl = BettingFunctionImplementation.fromStore(store);
+                    this.addImpl(impl);
+                    StaticInstances.bettingFunctionSavedAlert?.setText("Successfully saved the implementation");
+                    StaticInstances.bettingFunctionSavedAlert?.show(5000);
+                    this.addButton!.style.backgroundColor = '';
+                    this.select(impl);
+                    this.check(impl);
+                }
+            };
+            StaticInstances.selectBettingFunctionNameDialog?.open(closeListener);
+        } else {
+            // Revert to default impl if to save == current
+            if (this.activeImplementation === this.state.selectedImpl) {
+                this.setActive(defaultImplementation);
+            }
+
+            this.saveButtonDisabled = true;
+            this.state.selectedImpl?.setImplementation(this.aceEditor!.getValue());
+            StaticInstances.bettingFunctionSavedAlert?.setText("Successfully saved the implementation");
+            StaticInstances.bettingFunctionSavedAlert?.show(5000);
+            this.checkCurrent();
+        }
     }
 
     private deleteCurrent(): void {
-        if (this.state.addImplementation) {
-            this.select(defaultImplementation);
-        } else {
-            // TODO
+        if (this.state.selectedImpl?.active) {
+            this.setActive(defaultImplementation);
         }
+
+        if (!this.state.addImplementation && this.state.selectedImpl) {
+            this.setState({
+                implementations: this.state.implementations.filter(f => f != this.state.selectedImpl)
+            });
+            window.BettingFunctionUtil.deleteFunction(this.state.selectedImpl.store!);
+            StaticInstances.bettingFunctionSavedAlert?.setText(`Successfully deleted implementation '${this.state.selectedImpl.name}'`);
+            StaticInstances.bettingFunctionSavedAlert?.show(5000);
+        } else if (this.state.addImplementation) {
+            StaticInstances.bettingFunctionSavedAlert?.setText("Discarded the changes made");
+            StaticInstances.bettingFunctionSavedAlert?.show(5000);
+        }
+
+        this.select(defaultImplementation);
     }
 
     private editorLoaded(e: editor_t): void {
@@ -338,7 +401,6 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         this.aceEditor!.on("change", () => {
             if (this.state.selectedImpl != null && this.lastChangeOn != this.state.selectedImpl) {
                 this.lastChangeOn = this.state.selectedImpl;
-                this.checkImplButtonDisabled = true;
                 this.saveButtonDisabled = false;
                 this.checkImplButtonDisabled = true;
                 this.setDefaultButtonDisabled = true;
@@ -350,31 +412,42 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
             this.saveButtonDisabled = true;
             this.deleteButtonDisabled = true;
             this.editorDisabled = true;
+            this.checkImplButtonDisabled = defaultImplementation.active;
             this.loadFunctions();
+            this.select(defaultImplementation);
         }
     }
 
     private loadFunctions(): void {
-        let anyActive: boolean = false;
         const functions: FunctionStore[] = window.store.getFunctions();
-        this.setState({
-            implementations: [
-                defaultImplementation,
-                ...functions.map(f => {
-                    if (f.active) anyActive = true;
-                    return BettingFunctionImplementation.fromStore(f);
-                })
-            ]
-        });
+        defaultImplementation.defaultLoadActive();
+        const implementations = [
+            defaultImplementation,
+            ...functions.map(f => BettingFunctionImplementation.fromStore(f))
+        ];
 
-        if (!anyActive) {
+        /*console.log(window.store.getActiveFunction(), window.BettingFunctionUtil.defaultIsActive())
+        if (window.BettingFunctionUtil.defaultIsActive()) {
+            console.log("Setting default to active")
             defaultImplementation.active = true;
-        }
+            console.log(defaultImplementation);
+        }*/
+
+        this.activeImplementation = implementations.find(i => i.active)!;
+        this.setDefaultButtonDisabled = defaultImplementation.active;
+        //console.log(implementations);
+        this.setState({
+            implementations: implementations
+        });
     }
 
     private setActive(val: BettingFunctionImplementation) {
         val.active = true;
         this.activeImplementation = val;
+        this.setDefaultButtonDisabled = !!this.state.selectedImpl?.active;
+        this.reloadDrawer();
+        StaticInstances.bettingFunctionSavedAlert?.setText(`Set '${val.name}' as the active implementation`);
+        StaticInstances.bettingFunctionSavedAlert?.show(5000);
     }
 
     private setCurrentActive(): void {
@@ -383,19 +456,23 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         }
     }
 
+    private check(impl: BettingFunctionImplementation): void {
+        this.checkImplButtonDisabled = true;
+        this.saveButtonDisabled = true;
+        this.deleteButtonDisabled = true;
+        impl.checkImplementation();
+        this.checkImplButtonDisabled = false;
+
+        if (!impl.isDefault) {
+            this.deleteButtonDisabled = false;
+            this.setDefaultButtonDisabled = !impl.ok;
+            this.saveButtonDisabled = impl.ok;
+        }
+    }
+
     private checkCurrent(): void {
         if (this.state.selectedImpl) {
-            this.checkImplButtonDisabled = true;
-            this.saveButtonDisabled = true;
-            this.deleteButtonDisabled = true;
-            this.state.selectedImpl.checkImplementation();
-            this.checkImplButtonDisabled = false;
-
-            if (!this.state.selectedImpl.isDefault) {
-                this.deleteButtonDisabled = false;
-                this.setDefaultButtonDisabled = !this.state.selectedImpl.ok;
-                this.saveButtonDisabled = this.state.selectedImpl.ok;
-            }
+            this.check(this.state.selectedImpl);
         }
     }
 

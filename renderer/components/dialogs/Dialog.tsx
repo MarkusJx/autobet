@@ -3,12 +3,15 @@ import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogT
 
 export type TextType = JSX.Element | JSX.Element[] | string;
 
+type CloseCallback = (action: CloseAction) => void;
+
 interface DialogProps {
     title: string;
     children: TextType;
     cancelButton?: boolean;
     cancelText?: string;
     okText?: string;
+    onClose: CloseCallback | null;
 }
 
 export default interface DialogState {
@@ -16,6 +19,8 @@ export default interface DialogState {
     title?: string;
     text?: TextType;
 }
+
+export type CloseAction = "ok" | "cancel";
 
 export class DialogElement extends React.Component<DialogProps, DialogState> {
     private static lastId: number = 0;
@@ -45,11 +50,11 @@ export class DialogElement extends React.Component<DialogProps, DialogState> {
                 <DialogActions>
                     {
                         this.props.cancelButton != false ?
-                            <Button onClick={this.close.bind(this)}>
+                            <Button onClick={this.close.bind(this, "cancel")}>
                                 {this.props.cancelText || "Cancel"}
                             </Button> : undefined
                     }
-                    <Button onClick={this.close.bind(this)}>
+                    <Button onClick={this.close.bind(this, "ok")}>
                         {this.props.okText || "Ok"}
                     </Button>
                 </DialogActions>
@@ -63,10 +68,11 @@ export class DialogElement extends React.Component<DialogProps, DialogState> {
         });
     }
 
-    public close(): void {
+    public close(action: CloseAction): void {
         this.setState({
             open: false
-        })
+        });
+        if (this.props.onClose) this.props.onClose(action);
     }
 
     public setText(text: TextType | undefined): void {
@@ -90,6 +96,7 @@ export abstract class ADialog extends React.Component<any, any> {
         private readonly title: string = "",
         private readonly text: JSX.Element | JSX.Element[] | string = "",
         private readonly cancelButton?: boolean,
+        private readonly onClose: CloseCallback | null = null,
         private readonly cancelText?: string,
         private readonly okText?: string
     ) {
@@ -99,8 +106,9 @@ export abstract class ADialog extends React.Component<any, any> {
     public override render(): React.ReactNode {
         return (
             <DialogElement title={this.title} cancelText={this.cancelText} okText={this.okText}
-                           ref={e => this.dialog = e} cancelButton={this.cancelButton}>
-                {this.text}
+                           ref={e => this.dialog = e} cancelButton={this.cancelButton} {...this.props}
+                           onClose={this.onClose}>
+                {this.text || this.props.children as any}
             </DialogElement>
         );
     }
@@ -109,8 +117,8 @@ export abstract class ADialog extends React.Component<any, any> {
         this.dialog?.open();
     }
 
-    public close(): void {
-        this.dialog?.close();
+    public close(closeAction: CloseAction = "cancel"): void {
+        this.dialog?.close(closeAction);
     }
 
     public setText(text: TextType | undefined): void {

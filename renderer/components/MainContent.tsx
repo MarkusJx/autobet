@@ -21,6 +21,7 @@ import settingsTheme from "./containers/settings/settingsTheme";
 import CertificateInfoDialog from "./dialogs/CertificateInfoDialog";
 import QRCodeDialog from "./dialogs/QRCodeDialog";
 import BettingFunctionResultDialog from "./dialogs/BettingFunctionResultDialog";
+import SelectBettingFunctionNameDialog from "./dialogs/SelectBettingFunctionNameDialog";
 
 export default class MainContent extends React.Component<{}, {}> {
     private bettingErrorDialog: BettingErrorDialog | null = null;
@@ -59,7 +60,10 @@ export default class MainContent extends React.Component<{}, {}> {
                         <InfoDialog ref={e => StaticInstances.infoDialog = e!}/>
                         <CertificateInfoDialog ref={e => StaticInstances.certificateInfoDialog = e!}/>
                         <QRCodeDialog ref={e => StaticInstances.qrCodeDialog = e!}/>
-                        <BettingFunctionResultDialog ref={e => StaticInstances.bettingFunctionResultDialog = e!}/>
+                        <BettingFunctionResultDialog ref={e => StaticInstances.bettingFunctionResultDialog = e!}
+                                                     style={{width: '90%'}}/>
+                        <SelectBettingFunctionNameDialog
+                            ref={e => StaticInstances.selectBettingFunctionNameDialog = e!}/>
                     </ThemeProvider>
                 </BackgroundImage>
             </div>
