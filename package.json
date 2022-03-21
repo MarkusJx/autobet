@@ -6,7 +6,7 @@
     "main": "out/main/electron-src/index.js",
     "scripts": {
         "build": "npm run build:web && npm run build:autobetlib",
-        "build-renderer": "next build renderer && next export renderer",
+        "build-renderer": "node extractLicenses.js && next build renderer && next export renderer",
         "build-electron": "node extractLicenses.js && tsc -p electron-src",
         "postbuild": "npm run build-renderer && npm run build-electron",
         "start": "electron .",
