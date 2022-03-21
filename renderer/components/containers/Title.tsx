@@ -1,6 +1,7 @@
 import React from "react";
 import containerStyles from "../../styles/components/Container.module.scss";
 import styles from "../../styles/components/containers/Title.module.scss";
+import StaticInstances from "../../util/StaticInstances";
 
 interface TitleState {
     hovered: boolean;
@@ -26,7 +27,7 @@ export default class Title extends React.Component<{}, TitleState> {
                 <p className={styles.version}>Version {this.state.version || "unknown"}</p>
                 <p className={styles.copyright}>
                     © MarkusJx 2022.
-                    <span className={styles.opener}>
+                    <span className={styles.opener} onClick={() => StaticInstances.licenseViewerDialog?.open()}>
                         Licensed under the MIT License.
                     </span>
                 </p>

@@ -1,0 +1,24 @@
+.mainContent {
+    display: grid;
+    grid-template-columns: max-content auto;
+    grid-template-rows: 100%;
+}
+
+.progressContainer {
+    width: min-content;
+    height: max-content;
+    margin: 40px auto;
+    overflow: hidden;
+}
+
+.text {
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-x: hidden;
+    padding: 10px;
+    white-space: pre-line;
+}
+
+.scrollbarView::-webkit-scrollbar {
+    display: none;
+}

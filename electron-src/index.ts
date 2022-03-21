@@ -34,7 +34,7 @@ async function createWindow(): Promise<void> {
         width: mainWindowState.width,
         height: mainWindowState.height,
         minHeight: 500,
-        minWidth: 530,
+        minWidth: 600,
         frame: false,
         resizable: true,
         titleBarStyle: 'hidden',

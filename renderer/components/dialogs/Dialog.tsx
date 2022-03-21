@@ -1,5 +1,19 @@
 import React from "react";
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from "@mui/material";
+import {
+    AppBar,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    IconButton,
+    Slide,
+    Toolbar,
+    Typography
+} from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
+import {Scrollbars} from "rc-scrollbars";
 
 export type TextType = JSX.Element | JSX.Element[] | string;
 
@@ -12,6 +26,7 @@ interface DialogProps {
     cancelText?: string;
     okText?: string;
     onClose: CloseCallback | null;
+    fullscreen?: boolean;
 }
 
 export default interface DialogState {
@@ -21,6 +36,10 @@ export default interface DialogState {
 }
 
 export type CloseAction = "ok" | "cancel";
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} children={props.children as any} {...props}/>;
+});
 
 export class DialogElement extends React.Component<DialogProps, DialogState> {
     private static lastId: number = 0;
@@ -35,28 +54,43 @@ export class DialogElement extends React.Component<DialogProps, DialogState> {
 
     public override render(): React.ReactNode {
         const id = DialogElement.lastId++;
+
+        let style: React.CSSProperties = {};
+        if (this.props.fullscreen) {
+            style = {
+                marginTop: '28px',
+                height: 'calc(100vh - 28px)'
+            };
+        }
+
         return (
             <Dialog open={this.state.open} onClose={this.close.bind(this)}
                     aria-labelledby={`${id}-dialog-title`}
-                    aria-describedby={`${id}-dialog-description`}>
-                <DialogTitle id={`${id}-dialog-title`}>
-                    {this.state.title || this.props.title}
-                </DialogTitle>
-                <DialogContent>
-                    <DialogContentText id={`${id}-dialog-description`}>
-                        {this.state.text || this.props.children}
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
+                    aria-describedby={`${id}-dialog-description`}
+                    fullScreen={this.props.fullscreen} style={style}
+                    TransitionComponent={this.props.fullscreen ? Transition as any : undefined}>
+                {this.getTitle(id)}
+                <Scrollbars autoHide autoHideTimeout={1000} autoHideDuration={200} autoHeight
+                            autoHeightMin={0} autoHeightMax="100%" thumbMinSize={30} universal>
+                    <DialogContent style={this.props.fullscreen ? {padding: 0} : {}}>
+                        <DialogContentText id={`${id}-dialog-description`}>
+                            {this.state.text || this.props.children}
+                        </DialogContentText>
+                    </DialogContent>
+                </Scrollbars>
+                <DialogActions style={this.props.fullscreen ? {padding: 0} : {}}>
                     {
                         this.props.cancelButton != false ?
                             <Button onClick={this.close.bind(this, "cancel")}>
                                 {this.props.cancelText || "Cancel"}
                             </Button> : undefined
                     }
-                    <Button onClick={this.close.bind(this, "ok")}>
-                        {this.props.okText || "Ok"}
-                    </Button>
+                    {
+                        this.props.fullscreen ? undefined :
+                            <Button onClick={this.close.bind(this, "ok")}>
+                                {this.props.okText || "Ok"}
+                            </Button>
+                    }
                 </DialogActions>
             </Dialog>
         );
@@ -86,6 +120,37 @@ export class DialogElement extends React.Component<DialogProps, DialogState> {
             title: title
         });
     }
+
+    private getTitle(id: number): React.ReactNode {
+        if (this.props.fullscreen) {
+            return (
+                <AppBar sx={{position: 'relative'}}>
+                    <Toolbar>
+                        <IconButton edge="start" color="inherit"
+                                    onClick={this.close.bind(this, this.props.cancelButton ? "cancel" : "ok")}
+                                    aria-label="close">
+                            <CloseIcon/>
+                        </IconButton>
+                        <Typography sx={{ml: 2, flex: 1}} variant="h6" component="div">
+                            {this.state.title || this.props.title}
+                        </Typography>
+                        {
+                            this.props.cancelButton ?
+                                <Button autoFocus color="inherit" onClick={this.close.bind(this, "ok")}>
+                                    {this.props.okText || "Ok"}
+                                </Button> : undefined
+                        }
+                    </Toolbar>
+                </AppBar>
+            );
+        } else {
+            return (
+                <DialogTitle id={`${id}-dialog-title`}>
+                    {this.state.title || this.props.title}
+                </DialogTitle>
+            );
+        }
+    }
 }
 
 export abstract class ADialog extends React.Component<any, any> {
@@ -98,7 +163,8 @@ export abstract class ADialog extends React.Component<any, any> {
         private readonly cancelButton?: boolean,
         private readonly onClose: CloseCallback | null = null,
         private readonly cancelText?: string,
-        private readonly okText?: string
+        private readonly okText?: string,
+        private readonly fullscreen?: boolean
     ) {
         super(props);
     }
@@ -107,7 +173,7 @@ export abstract class ADialog extends React.Component<any, any> {
         return (
             <DialogElement title={this.title} cancelText={this.cancelText} okText={this.okText}
                            ref={e => this.dialog = e} cancelButton={this.cancelButton} {...this.props}
-                           onClose={this.onClose}>
+                           onClose={this.onClose} fullscreen={this.fullscreen}>
                 {this.text || this.props.children as any}
             </DialogElement>
         );

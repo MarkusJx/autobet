@@ -15,6 +15,7 @@ import CustomBettingFunction from "../components/containers/settings/CustomBetti
 import CustomSnackbar from "../components/util/CustomSnackbar";
 import BettingFunctionResultDialog from "../components/dialogs/BettingFunctionResultDialog";
 import SelectBettingFunctionNameDialog from "../components/dialogs/SelectBettingFunctionNameDialog";
+import LicenseViewerDialog from "../components/dialogs/LicenseViewerDialog";
 
 export default class StaticInstances {
     public static timeRunning?: TimeRunning;
@@ -50,6 +51,7 @@ export default class StaticInstances {
     public static qrCodeDialog?: QRCodeDialog;
     public static bettingFunctionResultDialog?: BettingFunctionResultDialog;
     public static selectBettingFunctionNameDialog?: SelectBettingFunctionNameDialog;
+    public static licenseViewerDialog?: LicenseViewerDialog;
 
     private constructor() {
     }

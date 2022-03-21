@@ -22,6 +22,7 @@ import CertificateInfoDialog from "./dialogs/CertificateInfoDialog";
 import QRCodeDialog from "./dialogs/QRCodeDialog";
 import BettingFunctionResultDialog from "./dialogs/BettingFunctionResultDialog";
 import SelectBettingFunctionNameDialog from "./dialogs/SelectBettingFunctionNameDialog";
+import LicenseViewerDialog from "./dialogs/LicenseViewerDialog";
 
 export default class MainContent extends React.Component<{}, {}> {
     private bettingErrorDialog: BettingErrorDialog | null = null;
@@ -64,6 +65,7 @@ export default class MainContent extends React.Component<{}, {}> {
                                                      style={{width: '90%'}}/>
                         <SelectBettingFunctionNameDialog
                             ref={e => StaticInstances.selectBettingFunctionNameDialog = e!}/>
+                        <LicenseViewerDialog ref={e => StaticInstances.licenseViewerDialog = e!}/>
                     </ThemeProvider>
                 </BackgroundImage>
             </div>

@@ -433,7 +433,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
         });
     }
 
-    private setActive(val: BettingFunctionImplementation) {
+    private setActive(val: BettingFunctionImplementation): void {
         val.active = true;
         this.activeImplementation = val;
         this.setDefaultButtonDisabled = !!this.state.selectedImpl?.active;
