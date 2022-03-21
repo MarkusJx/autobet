@@ -12,8 +12,8 @@ import {
     Toolbar,
     Typography
 } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
-import {Scrollbars} from "rc-scrollbars";
+import CloseIcon from "@mui/icons-material/Close";
+import styles from "../../styles/components/util/Dialog.module.scss";
 
 export type TextType = JSX.Element | JSX.Element[] | string;
 
@@ -70,14 +70,11 @@ export class DialogElement extends React.Component<DialogProps, DialogState> {
                     fullScreen={this.props.fullscreen} style={style}
                     TransitionComponent={this.props.fullscreen ? Transition as any : undefined}>
                 {this.getTitle(id)}
-                <Scrollbars autoHide autoHideTimeout={1000} autoHideDuration={200} autoHeight
-                            autoHeightMin={0} autoHeightMax="100%" thumbMinSize={30} universal>
-                    <DialogContent style={this.props.fullscreen ? {padding: 0} : {}}>
-                        <DialogContentText id={`${id}-dialog-description`}>
-                            {this.state.text || this.props.children}
-                        </DialogContentText>
-                    </DialogContent>
-                </Scrollbars>
+                <DialogContent style={this.props.fullscreen ? {padding: 0} : {}} className={styles.dialogContent}>
+                    <DialogContentText id={`${id}-dialog-description`}>
+                        {this.state.text || this.props.children}
+                    </DialogContentText>
+                </DialogContent>
                 <DialogActions style={this.props.fullscreen ? {padding: 0} : {}}>
                     {
                         this.props.cancelButton != false ?

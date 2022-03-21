@@ -180,7 +180,7 @@ module.exports = {
             const strategy = await autobetLib_native.lib_getNavigationStrategy();
             //console.log("Strategy: " + strategy);
             if (strategy < 0) {
-                return this.navigationStrategy.MOUSE;
+                return navStrategy.MOUSE;
             } else {
                 return strategy;
             }
