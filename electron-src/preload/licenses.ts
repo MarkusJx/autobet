@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs/promises";
 import {validate} from "./annotations";
 import classToObject from "./classToObject";
+import autobetLib from "@autobet/autobetlib";
 
 export interface LicenseInfo {
     name: string;
@@ -62,6 +63,7 @@ class licenses {
 
                 // Fix the ids
                 loadedLicenses.forEach((l: LicenseInfo, i: number) => l.id = i);
+                autobetLib.logging.debug(`Successfully loaded ${loadedLicenses.length} licenses`);
             }
 
             resolve(loadedLicenses);

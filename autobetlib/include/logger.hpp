@@ -445,6 +445,8 @@ namespace logger {
          */
         LOGGER_MAYBE_UNUSED static void destroy();
 
+        static bool loggingEnabled();
+
     private:
         /**
          * Set the logger

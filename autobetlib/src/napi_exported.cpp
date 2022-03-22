@@ -905,6 +905,10 @@ Napi::Promise getCollectHistoricData(const Napi::CallbackInfo &info) {
     });
 }
 
+Napi::Boolean loggingEnabled(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), StaticLogger::loggingEnabled());
+}
+
 #define export(func) exports.Set("lib_" #func, Napi::Function::New(env, func))
 
 /**
@@ -956,6 +960,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(node_debug);
     export(node_warn);
     export(node_error);
+    export(loggingEnabled);
 
     export(setAutobetlibVersion);
     export(setOddTranslations);

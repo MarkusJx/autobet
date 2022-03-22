@@ -27,7 +27,7 @@ class BettingFunctionUtil {
 
     public static addFunction(name: string, implementation: string): FunctionStore {
         const uid: string = BettingFunctionUtil.generateUid();
-        autobetLib.logging.debug("preload.js", `Creating new custom function with name '${name}' and UID '${uid}'`);
+        autobetLib.logging.debug(`Creating new custom function with name '${name}' and UID '${uid}'`);
 
         const fn: FunctionStore = new FunctionStore(name, implementation, uid);
         store.addFunction(fn);
@@ -37,7 +37,7 @@ class BettingFunctionUtil {
     }
 
     public static checkFunction(implementation: string, id: string = "null"): testResult {
-        const isolatedFn = new IsolatedFunction((msg: string) => {
+        const isolatedFn = new IsolatedFunction((msg: string | unknown) => {
             if (typeof msg == "string") autobetLib.logging.debug(`isolatedFunction-${id}`, msg);
         });
 
@@ -83,7 +83,7 @@ class BettingFunctionUtil {
                 }
             }
 
-            autobetLib.logging.debug("preload.js", `Setting active betting function to function with uid '${fnStore.id}'`);
+            autobetLib.logging.debug(`Setting active betting function to function with uid '${fnStore.id}'`);
 
             // Set the active function to activate as active
             activeFunction = index;
@@ -119,7 +119,7 @@ class BettingFunctionUtil {
         activeFunction = -1;
         autobetLib.customBettingFunction.setUseBettingFunction(false);
 
-        autobetLib.logging.debug("preload.js", "Reverting to the default implementation");
+        autobetLib.logging.debug("Reverting to the default implementation");
 
         // Store everything
         store.setFunctions(functions);
@@ -144,7 +144,7 @@ class BettingFunctionUtil {
             functions[index] = fn;
             store.setFunctions(functions);
         } else {
-            console.error("Could not find implementation with id", fn.id);
+            autobetLib.logging.error("Could not find implementation with id " + fn.id);
         }
     }
 
@@ -202,12 +202,12 @@ function bettingFunctionError(): void {
             return -2;
         }
 
-        let res: string | null = null;
+        let res: unknown = null;
         try {
             let odds_cpy: string[] = Array.from(odds);
             res = BettingFunctionUtil.isolatedFunction().run(odds_cpy);
         } catch (e: any) {
-            autobetLib.logging.error("preload.js", `The custom betting function threw: ${e.message}`);
+            autobetLib.logging.error(`The custom betting function threw: ${e.message}`);
             functions[activeFunction].ok = false;
             functions[activeFunction].lastError = e.message;
 
@@ -216,20 +216,21 @@ function bettingFunctionError(): void {
             return -2;
         }
 
-        if (res == null) {
+        autobetLib.logging.debug(`The custom betting function returned '${res}'`);
+        if (res === null) {
             // Return -1 on 'Do not bet'
             return -1;
         } else if (typeof res === "string") {
             let res_index: number = odds.indexOf(res);
             if (res_index < 0) {
-                autobetLib.logging.error("preload.ts", `The odds did not contain the result by the custom betting function: '${res}'`);
+                autobetLib.logging.error(`The odds did not contain the result by the custom betting function: '${res}'`);
                 return -2;
             } else {
                 // Return the result
                 return res_index;
             }
         } else {
-            autobetLib.logging.error("preload.ts", "The result from the custom betting function was neither null or a string");
+            autobetLib.logging.error("The result from the custom betting function was neither null or a string");
             bettingFunctionError();
             // Again, return -2 on error
             return -2;

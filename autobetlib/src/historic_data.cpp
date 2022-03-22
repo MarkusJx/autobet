@@ -35,9 +35,9 @@ void markusjx::autobet::historic_data::init() {
     std::unique_lock lock(mtx);
     if (!file) {
         file = std::make_unique<markusjx::csv_file>(utils::get_or_create_documents_folder() + "\\stats.csv");
-        if (file->empty()) {
+        /*if (file->empty()) {
             file->push("sep=;").endline();
-        }
+        }*/
     }
 }
 

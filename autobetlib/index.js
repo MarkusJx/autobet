@@ -1,4 +1,6 @@
 const autobetLib_native = require("./bin/autobetLib.node");
+const getCurrentLine = require("get-current-line").default;
+const path = require("path");
 
 // Set the autobetlib version
 const autobetlib_version = require('./package.json').version;
@@ -105,20 +107,32 @@ module.exports = {
         setLogToConsole: function (logToConsole) {
             autobetLib_native.lib_node_setLogToConsole(logToConsole);
         },
-        debug: function (file, message) {
-            //const info = getFileLine();
-            //autobetLib_native.lib_node_debug(info.file, info.line, message);
-            autobetLib_native.lib_node_debug(file, 1, message);
+        debug: function (fileOrMessage, message) {
+            if (autobetLib_native.lib_loggingEnabled()) {
+                const location = message ? {file: fileOrMessage, line: 1} : getCurrentLine({frames: 2});
+                if (location)
+                    autobetLib_native.lib_node_debug(path.basename(location.file), location.line, message || fileOrMessage);
+                else
+                    autobetLib_native.lib_node_debug("unknown", 0, message || fileOrMessage);
+            }
         },
-        warn: function (file, message) {
-            //const info = getFileLine();
-            //autobetLib_native.lib_node_warn(info.file, info.line, message);
-            autobetLib_native.lib_node_warn(file, 1, message);
+        warn: function (fileOrMessage, message) {
+            if (autobetLib_native.lib_loggingEnabled()) {
+                const location = message ? {file: fileOrMessage, line: 1} : getCurrentLine({frames: 2});
+                if (location)
+                    autobetLib_native.lib_node_warn(path.basename(location.file), location.line, message || fileOrMessage);
+                else
+                    autobetLib_native.lib_node_warn("unknown", 0, message || fileOrMessage);
+            }
         },
-        error: function (file, message) {
-            //const info = getFileLine();
-            //autobetLib_native.lib_node_error(info.file, info.line, message);
-            autobetLib_native.lib_node_error(file, 1, message);
+        error: function (fileOrMessage, message) {
+            if (autobetLib_native.lib_loggingEnabled()) {
+                const location = message ? {file: fileOrMessage, line: 1} : getCurrentLine({frames: 2});
+                if (location)
+                    autobetLib_native.lib_node_error(path.basename(location.file), location.line, message || fileOrMessage);
+                else
+                    autobetLib_native.lib_node_error("unknown", 0, message || fileOrMessage);
+            }
         }
     },
     settings: {

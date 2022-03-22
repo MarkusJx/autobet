@@ -194,26 +194,26 @@ export namespace logging {
     /**
      * Log a debug message
      *
-     * @param file the source file
+     * @param fileOrMessage the source file
      * @param message the message to log
      */
-    function debug(file: string, message: string): void;
+    function debug(fileOrMessage: string, message?: string): void;
 
     /**
      * Log a warning message
      *
-     * @param file the source file
+     * @param fileOrMessage the source file
      * @param message the message to log
      */
-    function warn(file: string, message: string): void;
+    function warn(fileOrMessage: string, message?: string): void;
 
     /**
      * Log an error message
      *
-     * @param file the source file
+     * @param fileOrMessage the source file
      * @param message the message to log
      */
-    function error(file: string, message: string): void;
+    function error(fileOrMessage: string, message?: string): void;
 }
 
 /**
