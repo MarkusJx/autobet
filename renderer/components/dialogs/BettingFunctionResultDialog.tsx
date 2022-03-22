@@ -1,7 +1,7 @@
 import {ADialog} from "./Dialog";
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import {nightOwl} from 'react-syntax-highlighter/dist/cjs/styles/hljs';
-import {err_res, test_res_arr} from "../../util/isolatedFunction";
+import {err_res, test_res_arr} from "../../../electron-src/preload/IsolatedFunction";
 
 export default class BettingFunctionResultDialog extends ADialog {
     public constructor(props: {}) {
