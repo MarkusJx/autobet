@@ -1,0 +1,18 @@
+.container {
+    background: linear-gradient(90deg, #114a9a, #09736f);
+}
+
+.text {
+    width: min-content;
+    height: min-content;
+    font-size: 40px;
+    margin: 3px auto;
+    font-family: 'Open Sans', sans-serif;
+    color: white;
+}
+
+@media only screen and (min-width: 860px) {
+    .container {
+        grid-column: 1/3;
+    }
+}

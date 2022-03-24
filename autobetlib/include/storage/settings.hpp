@@ -7,6 +7,7 @@
 #define AUTOBET_SETTINGS_WEB_UI_PORT "webUiPort"
 #define AUTOBET_SETTINGS_WEB_UI_WEBSOCKET_PORT "webUiWebsocketPort"
 #define AUTOBET_SETTINGS_ENABLE_UPNP "enableUpnp"
+#define AUTOBET_SETTINGS_COLLECT_HISTORIC_DATA "collectHistoricData"
 
 /**
  * The settings namespace

@@ -9,3 +9,6 @@ brotli/1.0.9
 
 [generators]
 cmake
+
+[imports]
+., license* -> ./licenses @ folder=True, ignore_case=True

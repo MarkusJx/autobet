@@ -7,11 +7,13 @@
 #include "web/webui.hpp"
 #include "debug/debug.hpp"
 #include "storage/settings.hpp"
+#include "historic_data.hpp"
 #include "logger.hpp"
 
 using namespace logger;
 
 void control::kill(bool _exit) {
+    markusjx::autobet::historic_data::close();
     napi_exported::stopCallbacks();
 
     // Set every possible bool to false

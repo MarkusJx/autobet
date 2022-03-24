@@ -807,9 +807,8 @@ namespace napi_tools {
              * @param func the callback function
              */
             inline void asyncCall(A &&...values, const std::function<void(R)> &func) {
-                mtx.lock();
+                std::unique_lock lock(mtx);
                 queue.push_back(new args(std::forward<A>(values)..., func));
-                mtx.unlock();
             }
 
             /**
@@ -883,7 +882,7 @@ namespace napi_tools {
 
                 while (jsCallback->run) {
                     // Lock the mutex
-                    jsCallback->mtx.lock();
+                    std::unique_lock<std::mutex> lock(jsCallback->mtx);
                     // Check if run is still true.
                     // Run may be false as the mutex is unlocked when stop() is called
                     if (jsCallback->run) {
@@ -903,11 +902,11 @@ namespace napi_tools {
 
                         // Clear the queue and unlock the mutex
                         jsCallback->queue.clear();
-                        jsCallback->mtx.unlock();
+                        lock.unlock();
 
                         std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     } else {
-                        jsCallback->mtx.unlock();
+                        lock.unlock();
                     }
                 }
 
@@ -975,13 +974,12 @@ namespace napi_tools {
              * @param values the values to pass
              */
             inline void asyncCall(A &&...values) {
-                mtx.lock();
+                std::unique_lock lock(mtx);
                 queue.push_back(args(std::forward<A>(values)...));
-                mtx.unlock();
             }
 
             /**
-             * Get the napi promise
+             * Get the n-api promise
              *
              * @return the promise
              */
@@ -990,7 +988,7 @@ namespace napi_tools {
             }
 
             /**
-             * Stop the function and deallocate all ressources
+             * Stop the function and deallocate all resources
              */
             inline void stop() {
                 run = false;
@@ -999,7 +997,7 @@ namespace napi_tools {
 
         private:
             /**
-             * A class for storing agtruments
+             * A class for storing arguments
              */
             class args {
             public:

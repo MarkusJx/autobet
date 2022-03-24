@@ -99,7 +99,7 @@ void mouseNavigationStrategy::placeBet(short y) const {
     }
     sleepMs(afterClick_sleep);
 
-    leftClick(1765, 1050, click_sleep);
+    leftClick(1730, 1050, click_sleep);
     sleepMs(afterClick_sleep);
 }
 
@@ -120,7 +120,7 @@ void mouseNavigationStrategy::skipBet() const {
     // Just so we're going the safer route as of not getting banned.
     // Rockstar would probably not ban anyone for using this,
     // since they are incompetent as fuck, despite having billions of dollars.
-    leftClick(1720, 1036, click_sleep);
+    leftClick(1730, 1036, click_sleep);
     sleepMs(afterClick_sleep);
 }
 

@@ -4,6 +4,8 @@
 #include <functional>
 #include <string>
 
+#include "web/certificate.hpp"
+
 namespace webui {
     void setGtaRunning(bool);
 
@@ -43,7 +45,7 @@ namespace webui {
 
     void set_get_gta_running(std::function<bool()>);
 
-    void set_get_running(std::function<int()>);
+    void set_get_running(std::function < int() > );
 
     bool initialized();
 
@@ -53,7 +55,11 @@ namespace webui {
 
     bool reset();
 
+    bool supports_https();
+
     bool https();
+
+    std::shared_ptr<autobet::web::certificate> get_certificate();
 
     uint16_t get_port();
 

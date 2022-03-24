@@ -1,0 +1,67 @@
+$drawerWidth: 200px;
+
+.container {
+    height: max-content;
+    display: grid;
+
+    .headingContainer {
+        margin: 10px auto 0 auto;
+        width: max-content;
+    }
+
+    .editorContainer {
+        margin: 20px 20px 0 20px;
+        height: 0;
+        width: calc(100% - 40px);
+        background-color: #272727;
+        border-radius: 10px;
+        display: grid;
+        overflow: hidden;
+        transition: all ease-in-out 0.5s;
+
+        &.open {
+            margin: 20px;
+            height: 550px;
+        }
+
+        .drawerEditorContainer {
+            display: grid;
+            grid-template-columns: $drawerWidth calc(100% - #{$drawerWidth});
+
+            .editor {
+                width: 100%;
+                transition: margin-left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+                margin-left: -$drawerWidth;
+
+                &.drawerOpen {
+                    margin-left: 0;
+                }
+            }
+
+            .drawerHeadingContainer {
+                margin: 5px 0;
+
+                .text {
+                    font-family: 'Open Sans', Roboto, sans-serif;
+                    font-weight: 400;
+                    text-align: center;
+                    margin: 5px 0;
+
+                    &.heading {
+                        font-size: 20px;
+                    }
+
+                    &.subheading {
+                        font-size: 14px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 860px) {
+    .container {
+        grid-column: 1 / 3;
+    }
+}

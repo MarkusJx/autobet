@@ -1,0 +1,16 @@
+.mainContent {
+    width: 100%;
+    height: max-content;
+    margin: 40px 0;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-auto-rows: min-content;
+    grid-row-gap: 20px;
+    padding-bottom: 40px;
+}
+
+@media only screen and (min-width: 860px) {
+    .mainContent {
+        grid-template-columns: 50% 50%;
+    }
+}

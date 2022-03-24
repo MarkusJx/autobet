@@ -137,16 +137,22 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
         }
     }
 
+    class chance {
+    public:
+        short chance;
+        short position;
+    };
+
     // Return the y-position of the lowest chance to bet on
-    std::array<short, 2> lowest = {res[0], 0};
+    chance lowest{res[0], 0};
     for (short i = 1; i < 6; i++) {
-        if (lowest[0] > res[i]) {
-            lowest[0] = res[i];
-            lowest[1] = i;
+        if (lowest.chance > res[i]) {
+            lowest.chance = res[i];
+            lowest.position = i;
         }
     }
 
-    return static_cast<short>(lowest[1]);
+    return lowest.position;
 }
 
 /**
@@ -294,23 +300,34 @@ void getWinnings() {
         const auto x3 = static_cast<uint16_t>(std::round(1755 * variables::multiplierW));
 
         // The y-pos of the odds of the second and third horse
-        const auto y1 = static_cast<uint16_t>(std::round(1115 * variables::multiplierH));
+        const auto y1 = static_cast<uint16_t>(std::round(1040 * variables::multiplierH));
         // The y-pos of the odd of the first horse
-        const auto y2 = static_cast<uint16_t>(std::round(1140 * variables::multiplierH));
+        const auto y2 = static_cast<uint16_t>(std::round(1070 * variables::multiplierH));
 
         // The height of the images to crop
         const auto h = static_cast<uint16_t>(std::round(75 * variables::multiplierH));
         // The width of the images to crop
-        const auto w = static_cast<uint16_t>(std::round(120 * variables::multiplierW));
+        const auto w = static_cast<uint16_t>(std::round(160 * variables::multiplierW));
 
         const utils::bitmap second = utils::crop(x2, y1, w, h, src);
         const utils::bitmap first = utils::crop(x1, y2, w, h, src);
         const utils::bitmap third = utils::crop(x3, y1, w, h, src);
 
+        if (variables::debug_full) {
+            debug::writeImage(first);
+            debug::writeImage(second);
+            debug::writeImage(third);
+        }
+
         try {
+            StaticLogger::debug("Getting the odds of the first three horses");
             const std::string o2 = variables::knn.predict(second, variables::multiplierW, variables::multiplierH);
             const std::string o1 = variables::knn.predict(first, variables::multiplierW, variables::multiplierH);
             const std::string o3 = variables::knn.predict(third, variables::multiplierW, variables::multiplierH);
+
+            StaticLogger::debugStream() << "First place: " << o1;
+            StaticLogger::debugStream() << "Second place: " << o2;
+            StaticLogger::debugStream() << "Third place: " << o3;
 
             markusjx::autobet::historic_data::save_winning_odds(o1, o2, o3);
         } catch (const std::exception &e) {
@@ -376,6 +393,10 @@ void betting::mainLoop() {
             StaticLogger::debug("Running first bet");
             // Run the first reset on the navigation strategy
             variables::navigationStrategy()->firstBet();
+
+            if (markusjx::autobet::historic_data::should_save()) {
+                markusjx::autobet::historic_data::start_betting();
+            }
         }
 
         // A note to my C Professor: I've learned my lesson,
@@ -514,6 +535,7 @@ void betting::mainLoop() {
             StaticLogger::debug("Betting is now paused");
             was_running = false;
             webui::setStopped();
+            markusjx::autobet::historic_data::betting_stopped();
         } else {
             // Only send this message every 10-ish seconds
             static int count = 0;
@@ -531,7 +553,7 @@ void betting::mainLoop() {
             variables::stopping = false;
             variables::running = false;
         }
-        setGtaVRunning(false);
+        if (variables::runLoops) setGtaVRunning(false);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }

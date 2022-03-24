@@ -13,6 +13,8 @@ namespace markusjx::autobet::historic_data {
      */
     void init();
 
+    void start_betting();
+
     /**
      * Whether historic data should be saved
      *
@@ -43,6 +45,8 @@ namespace markusjx::autobet::historic_data {
     void save_winnings(int winnings);
 
     void save_winning_odds(const std::string &o1, const std::string &o2, const std::string &o3);
+
+    void betting_stopped();
 
     /**
      * Close the csv file

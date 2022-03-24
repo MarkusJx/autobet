@@ -1,0 +1,42 @@
+.container {
+    height: max-content;
+    margin-bottom: 40px;
+    transition: all .5s ease-in-out;
+}
+
+.console {
+    color: white;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    word-break: break-all;
+    word-wrap: break-word;
+    transition: height, padding ease-in-out .5s;
+
+    .message {
+        font-family: "Fira Code", "Open Sans", Roboto, sans-serif;
+        font-weight: 400;
+    }
+}
+
+.headingContainer {
+    margin: 10px auto 0 auto;
+    width: max-content;
+}
+
+.infoAlignLogging {
+    column-gap: 40px;
+}
+
+.scroll {
+    //max-height: 1000px;
+    transition: all ease-in-out .5s;
+    margin-top: 20px;
+}
+
+@media only screen and (min-width: 860px) {
+    .container {
+        grid-column: 1 / 3;
+        margin: 0 30px;
+        width: calc(100% - 60px);
+    }
+}

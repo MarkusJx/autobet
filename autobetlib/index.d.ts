@@ -194,26 +194,26 @@ export namespace logging {
     /**
      * Log a debug message
      *
-     * @param file the source file
+     * @param fileOrMessage the source file
      * @param message the message to log
      */
-    function debug(file: string, message: string): void;
+    function debug(fileOrMessage: string, message?: string): void;
 
     /**
      * Log a warning message
      *
-     * @param file the source file
+     * @param fileOrMessage the source file
      * @param message the message to log
      */
-    function warn(file: string, message: string): void;
+    function warn(fileOrMessage: string, message?: string): void;
 
     /**
      * Log an error message
      *
-     * @param file the source file
+     * @param fileOrMessage the source file
      * @param message the message to log
      */
-    function error(file: string, message: string): void;
+    function error(fileOrMessage: string, message?: string): void;
 }
 
 /**
@@ -268,6 +268,10 @@ export namespace settings {
      * Save the settings
      */
     function saveSettings(): Promise<void>;
+
+    function getUpnpEnabled(): Promise<boolean>;
+
+    function setUpnpEnabled(enabled: boolean): Promise<void>;
 }
 
 export namespace windows {
@@ -278,7 +282,7 @@ export namespace windows {
      *
      * @return the open windows
      */
-    function getOpenWindows(): Promise<object>;
+    function getOpenWindows(): Promise<Record<string, string[]>>;
 
     /**
      * Set the game window name
@@ -286,7 +290,7 @@ export namespace windows {
      * @param programName the program name
      * @param processName the process name
      */
-    function setGameWindowName(programName: string, processName: string): void;
+    function setGameWindowName(programName: string, processName: string): Promise<void>;
 
     /**
      * A combination of the game executable
@@ -300,7 +304,7 @@ export namespace windows {
     };
 
     /**
-     * Get the game window name combination
+     * Get the game window name combination of the currently selected game window
      *
      * @return the game program process name combination
      */
@@ -317,18 +321,19 @@ export namespace uiNavigation {
     }
 
     /**
-     * Set the ui navigation strategy
+     * Set the ui navigation strategy.
+     * This saves the settings.
      *
      * @param strategy the navigation strategy
      */
-    function setNavigationStrategy(strategy: navigationStrategy): void;
+    function setNavigationStrategy(strategy: navigationStrategy): Promise<void>;
 
     /**
      * Get the currently active navigation strategy
      *
      * @return the strategy
      */
-    function getNavigationStrategy(): navigationStrategy;
+    function getNavigationStrategy(): Promise<navigationStrategy>;
 
     namespace clicks {
         function setClickSleep(time: number): Promise<void>;
@@ -362,3 +367,27 @@ export function setOddTranslations(): Promise<void>;
  * @return true, if it is already running
  */
 export function programIsRunning(): boolean;
+
+export function maySupportHttps(): Promise<boolean>;
+
+export interface CertificateName {
+    country: string;
+    state: string;
+    locality: string;
+    organization: string;
+    organizational_unit: string;
+    email: string;
+    common_name: string;
+    user_id: string;
+}
+
+export interface CertificateInfo {
+    issuer: CertificateName;
+    subject: CertificateName;
+}
+
+export function getCertificateInfo(): Promise<CertificateInfo>;
+
+export function getCollectHistoricData(): Promise<boolean>;
+
+export function setCollectHistoricData(collect: boolean): Promise<void>;
