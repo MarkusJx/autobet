@@ -1,33 +1,43 @@
 # Autobet [![Version](https://img.shields.io/github/v/release/markusjx/autobet.svg)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest) [![autobet-build](https://github.com/MarkusJx/autobet/workflows/autobet-build/badge.svg)](https://github.com/MarkusJx/autobet/actions?query=workflow%3Aautobet-build)
 
-A simple GTA Online horseracing-autobetting-bot
+A simple GTA Online horse racing betting bot.
+
+Basically a script which automatically places bets on horses which are likely to win in the Inside Track inside GTA
+Online's Casino. This should make you about $250K per hour (afk).
 
 [View project website](https://markusjx.github.io/autobet/)
 
-Table of contents
-=================
+## Features
 
-<!--ts-->
-   * [Usage](#usage)
-   * [Demonstration](#demonstration)
-   * [Compiling yourself](#Compiling-yourself)
-   * [Feedback](#feedback)
-     * [Not what you expected?](#this-is-not-what-you-expected)
-     * [Like it?](#like-it)
-     * [Actual feedback](#Actual-feedback)
-   * **[Download](#download)**
-<!--te-->
+* A fully-featured User Interface with statistics, settings and more:
+  ![UI](img/ui.png)
+* A web interface to control autobet on the go with [SSL](https://github.com/MarkusJx/autobet/wiki/SSL-Support)
+  and [Notification](https://github.com/MarkusJx/autobet/wiki/Notification-Support) Support:
+  ![Web UI](img/webui.png)
 
+## System requirements
+
+In general, you'll need a System, which is able to run GTA alongside a Web Browser. Recommended Specs:
+
+* A x64 CPU with at least 4 Cores
+* At least 8GB of RAM
+* 400MB of Storage
+* Microsoft Visual C++ Redistributables (x64) for
+    * [Visual Studio 2015, 2017, 2019, and 2022](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022)
+    * [Visual Studio 2013 (VC++ 12.0)](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2013-vc-120)
 
 ## Usage
 
 * For this to work, you need at least **100.000** chips in-Game.
 * Navigate on the betting computers to the betting screen
 
-![This one](betting.jpg)
+![This one](img/betting.jpg)
 (This one)
 
-* Press the 'start' button on the UI (a countdown will start, giving you time to head back into the game) or use the Key combination ```CTRL+SHIFT+F10```. You can also use that combo to stop the program from doing its thing. Using the combo ```CTRL+SHIFT+F9``` you can always kill the program instantly. **Just make sure the game is your active (selected) window (you should basically be able to move the cursor in-Game on the betting screen)**
+* Press the 'start' button on the UI (a countdown will start, giving you time to head back into the game) or use the Key
+  combination ```CTRL+SHIFT+F10```. You can also use that combo to stop the program from doing its thing. Using the
+  combo ```CTRL+SHIFT+F9``` you can always kill the program instantly. **Just make sure the game is your active (
+  selected) window (you should basically be able to move the cursor in-Game on the betting screen)**
 
 * After starting, the script will automatically bet, refresh the screens and earn about 300k - 500k per hour (more like ~250k after patch 1.50). Fully AFK. **Please don't move your mouse after the script has started, otherwise it will stop working and you'd have to restart the script.** This is a fail safe mechanism so it won't do any damage if the mouse for some reason doesn't move as expected. Be aware that Rockstar Games might ban you and will ban you after making a lot of money (about 10 - 20 mil) for a week from betting.
 
