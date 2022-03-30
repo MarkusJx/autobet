@@ -102,7 +102,7 @@ namespace utils {
      * @param src the screenshot returned by TakeScreenShot. NOTE: This function does not free the screenshot
      * @return the resulting bitmap
      */
-    bitmap crop(int x, int y, int width, int height, void *src);
+    bitmap crop(int x, int y, int width, int height, const std::shared_ptr<void> &src);
 
     /**
      * Press the tab button
@@ -158,10 +158,10 @@ namespace utils {
      * 
      * @param width the new width
      * @param height the new height
-     * @param HBMP the HBitmap to convert (from TakeScreenShot)
+     * @param bmp the HBitmap to convert (from TakeScreenShot)
      * @return the resulting bitmap
      */
-    bitmap convertHBitmap(int width, int height, void *HBMP);
+    bitmap convertHBitmap(int width, int height, const std::shared_ptr<void> &bmp);
 
     /**
      * Get the active screen by x and y coordinates.
@@ -179,7 +179,7 @@ namespace utils {
      * @param res the result. Is set to true, if the window is in foreground
      * @return 0 if everything is ok, an error code otherwise
      */
-    errno_t isForeground(bool& res);
+    errno_t isForeground(bool &res);
 
     /**
      * Check if this program is already running.
@@ -197,6 +197,13 @@ namespace utils {
      * @return the documents folder path
      */
     std::string getDocumentsFolder();
+
+    /**
+     * Get and/or create the folder
+     *
+     * @return the documents folder
+     */
+    std::string get_or_create_documents_folder();
 }
 
 #endif //GTA_ONLINE_AUTOBET_DEV_UTILS_HPP

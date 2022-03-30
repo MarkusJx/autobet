@@ -1,0 +1,34 @@
+@import "../util";
+
+.title {
+    color: white;
+    display: grid;
+    height: 132px;
+    padding: 20px;
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    text-align: center;
+    margin-top: 4rem;
+    margin-bottom: 40px;
+    width: 660px;
+    @include backdrop();
+
+    h1 {
+        margin: auto;
+        font-weight: 500;
+        border-bottom: white solid 1px;
+    }
+
+    h3 {
+        font-weight: 300;
+        margin: auto;
+    }
+}
+
+@media (max-width: 700px) {
+    .title {
+        width: 100%;
+        margin-top: 0;
+        border-radius: 0;
+    }
+}

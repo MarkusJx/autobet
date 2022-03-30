@@ -1,19 +1,27 @@
 {
     "name": "autobet",
-    "version": "1.3.2",
+    "version": "1.4.0",
+    "private": true,
     "description": "A GTA Online horse racing betting bot",
-    "main": "main.js",
+    "main": "out/main/electron-src/index.js",
     "scripts": {
-        "build": "cd autobetlib && npm run-script build && cd .. && tsc",
-        "postbuild": "node install.js --postbuild",
+        "build": "npm run build:web && npm run build:autobetlib",
+        "build-renderer": "node extractLicenses.js && next build renderer && next export renderer",
+        "build-electron": "node extractLicenses.js && tsc -p electron-src",
+        "postbuild": "npm run build-renderer && npm run build-electron",
         "start": "electron .",
-        "prestart": "npm run-script build",
+        "prestart": "npm run-script build-electron",
         "test": "electron . --enableDevTools",
         "pack": "electron-builder",
         "prepack": "npm run-script build",
-        "postinstall": "node install.js --downloadModel && cd autobetlib && npm install",
+        "postinstall": "node install.js --downloadModel && npm run install:autobetlib && npm run install:web",
         "clean": "node install.js --clean && cd autobetlib && npm run-script clean",
-        "clean_all": "cd autobetlib && npm run-script clean && cd .. && node install.js --clean_all"
+        "clean_all": "cd autobetlib && npm run-script clean && cd .. && node install.js --clean_all",
+        "testrun": "npm run postbuild && npm test",
+        "build:web": "cd web-ui && npm run build",
+        "build:autobetlib": "cd autobetlib && npm run build",
+        "install:web": "cd web-ui && npm install",
+        "install:autobetlib": "cd autobetlib && npm install"
     },
     "repository": {
         "type": "git",
@@ -26,21 +34,42 @@
     },
     "homepage": "https://github.com/MarkusJx/autobet#readme",
     "devDependencies": {
-        "@types/node": "^16.9.6",
-        "@types/uuid": "^8.3.1",
-        "electron": "^13.4.0",
-        "electron-builder": "^22.14.2",
-        "typescript": "^4.4.3"
+        "@types/license-checker": "^25.0.3",
+        "@types/node": "^17.0.23",
+        "@types/react": "^17.0.43",
+        "@types/react-dom": "^17.0.14",
+        "@types/react-syntax-highlighter": "^13.5.2",
+        "@types/uuid": "^8.3.4",
+        "electron": "^18.0.0",
+        "electron-builder": "^22.14.13",
+        "eslint": "^8.12.0",
+        "eslint-config-next": "^12.1.2",
+        "license-checker": "^25.0.1",
+        "next": "^12.1.2",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "typescript": "^4.6.3"
     },
     "dependencies": {
         "@autobet/autobetlib": "file:autobetlib",
-        "ace-builds": "^1.4.13",
-        "custom-electron-titlebar": "^3.2.7",
+        "@emotion/react": "^11.8.2",
+        "@emotion/styled": "^11.8.1",
+        "@mui/icons-material": "^5.5.1",
+        "@mui/lab": "^5.0.0-alpha.75",
+        "@mui/material": "^5.5.3",
+        "electron-is-dev": "^2.0.0",
+        "electron-next": "^3.1.5",
         "electron-store": "^8.0.1",
-        "electron-updater": "^4.3.9",
+        "electron-updater": "^4.6.5",
         "electron-window-state": "^5.0.3",
-        "material-components-web": "^10.0.0",
-        "open-sans-fonts": "^1.6.2",
+        "frameless-titlebar": "^2.1.4",
+        "rc-scrollbars": "^1.1.3",
+        "react-ace": "^9.5.0",
+        "react-console-emulator": "^5.0.1",
+        "react-qr-code": "^2.0.3",
+        "react-syntax-highlighter": "^15.5.0",
+        "reflect-metadata": "^0.1.13",
+        "sass": "^1.49.9",
         "uuid": "^8.3.2",
         "vm2": "^3.9.4"
     },
@@ -59,12 +88,8 @@
             "include": "pack/installer.nsh"
         },
         "files": [
-            "ui/index.html",
-            "ui/mountains.svg",
-            "ui/style.min.css",
-            "ui/err/*",
-            "main.js",
-            "out/**",
+            "out",
+            "renderer/out",
             "icon.png",
             "package.json",
             "LICENSE",
@@ -94,12 +119,10 @@
                 "to": "icon.png"
             },
             {
-                "from": "web",
+                "from": "web-ui/out",
                 "to": "web",
                 "filter": [
-                    "**/*.min.*",
-                    "**/index.html",
-                    "**/favicon.ico"
+                    "**/*"
                 ]
             }
         ],

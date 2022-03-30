@@ -4,14 +4,16 @@
 #include "control.hpp"
 #include "napi_exported.hpp"
 #include "variables.hpp"
-#include "webui.hpp"
+#include "web/webui.hpp"
 #include "debug/debug.hpp"
-#include "settings.hpp"
+#include "storage/settings.hpp"
+#include "historic_data.hpp"
 #include "logger.hpp"
 
 using namespace logger;
 
 void control::kill(bool _exit) {
+    markusjx::autobet::historic_data::close();
     napi_exported::stopCallbacks();
 
     // Set every possible bool to false
@@ -29,7 +31,7 @@ void control::kill(bool _exit) {
     // Sleep
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-    // Delete the logger so it closes the file stream, if open
+    // Delete the logger, so it closes the file stream, if open
     StaticLogger::destroy();
 
     if (variables::debug_full) {
@@ -111,7 +113,6 @@ void control::listenForKeycomb() {
         }
     };
 
-#   pragma message(TODO(Maybe add custom key combinations))
     while (variables::keyCombListen) {
         // If SHIFT+CTRL+F9 is pressed, start/stop, if SHIFT+CTRL+F10 is pressed, quit
         if (unsigned(GetKeyState(VK_SHIFT)) & unsigned(0x8000)) {

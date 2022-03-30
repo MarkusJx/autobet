@@ -234,3 +234,10 @@ node_modules
 /autobetlib/graph_info.json
 out/**
 autobet.config.json
+!*.module.scss
+!renderer/styles/**/*
+/renderer/.next
+/.next
+/autobetlib/licenses
+/autobetlib/conan_imports_manifest.txt
+licenses.json

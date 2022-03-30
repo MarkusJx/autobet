@@ -1,8 +1,15 @@
 const autobetLib_native = require("./bin/autobetLib.node");
+const getCurrentLine = require("get-current-line").default;
+const path = require("path");
 
 // Set the autobetlib version
 const autobetlib_version = require('./package.json').version;
 autobetLib_native.lib_setAutobetlibVersion(autobetlib_version);
+
+const navStrategy = {
+    MOUSE: 0,
+    CONTROLLER: 1
+};
 
 module.exports = {
     init: async function () {
@@ -100,20 +107,32 @@ module.exports = {
         setLogToConsole: function (logToConsole) {
             autobetLib_native.lib_node_setLogToConsole(logToConsole);
         },
-        debug: function (file, message) {
-            //const info = getFileLine();
-            //autobetLib_native.lib_node_debug(info.file, info.line, message);
-            autobetLib_native.lib_node_debug(file, 1, message);
+        debug: function (fileOrMessage, message) {
+            if (autobetLib_native.lib_loggingEnabled()) {
+                const location = message ? {file: fileOrMessage, line: 1} : getCurrentLine({frames: 2});
+                if (location)
+                    autobetLib_native.lib_node_debug(path.basename(location.file), location.line, message || fileOrMessage);
+                else
+                    autobetLib_native.lib_node_debug("unknown", 0, message || fileOrMessage);
+            }
         },
-        warn: function (file, message) {
-            //const info = getFileLine();
-            //autobetLib_native.lib_node_warn(info.file, info.line, message);
-            autobetLib_native.lib_node_warn(file, 1, message);
+        warn: function (fileOrMessage, message) {
+            if (autobetLib_native.lib_loggingEnabled()) {
+                const location = message ? {file: fileOrMessage, line: 1} : getCurrentLine({frames: 2});
+                if (location)
+                    autobetLib_native.lib_node_warn(path.basename(location.file), location.line, message || fileOrMessage);
+                else
+                    autobetLib_native.lib_node_warn("unknown", 0, message || fileOrMessage);
+            }
         },
-        error: function (file, message) {
-            //const info = getFileLine();
-            //autobetLib_native.lib_node_error(info.file, info.line, message);
-            autobetLib_native.lib_node_error(file, 1, message);
+        error: function (fileOrMessage, message) {
+            if (autobetLib_native.lib_loggingEnabled()) {
+                const location = message ? {file: fileOrMessage, line: 1} : getCurrentLine({frames: 2});
+                if (location)
+                    autobetLib_native.lib_node_error(path.basename(location.file), location.line, message || fileOrMessage);
+                else
+                    autobetLib_native.lib_node_error("unknown", 0, message || fileOrMessage);
+            }
         }
     },
     settings: {
@@ -137,6 +156,12 @@ module.exports = {
         },
         saveSettings: async function () {
             await autobetLib_native.lib_saveSettings();
+        },
+        getUpnpEnabled: function () {
+            return autobetLib_native.lib_getUpnpEnabled();
+        },
+        setUpnpEnabled: function (enabled) {
+            return autobetLib_native.lib_setUpnpEnabled(enabled);
         }
     },
     windows: {
@@ -144,41 +169,38 @@ module.exports = {
             return await autobetLib_native.lib_getAllOpenWindows();
         },
         setGameWindowName: function(programName, processName) {
-            autobetLib_native.lib_setGameWindow(programName, processName);
+            return autobetLib_native.lib_setGameWindow(programName, processName);
         },
         getGameWindowName: function() {
             return autobetLib_native.lib_getGameWindow();
         }
     },
     uiNavigation: {
-        navigationStrategy: {
-            MOUSE: 0,
-            CONTROLLER: 1
-        },
-        setNavigationStrategy: function(strategy) {
+        navigationStrategy: navStrategy,
+        setNavigationStrategy: function (strategy) {
             let n = -1;
             switch (strategy) {
-                case this.navigationStrategy.MOUSE:
+                case navStrategy.MOUSE:
                     n = 0;
                     break;
-                case this.navigationStrategy.CONTROLLER:
+                case navStrategy.CONTROLLER:
                     n = 1;
                     break;
             }
 
-            autobetLib_native.lib_setNavigationStrategy(n);
+            return autobetLib_native.lib_setNavigationStrategy(n);
         },
-        getNavigationStrategy: function() {
-            const strategy = autobetLib_native.lib_getNavigationStrategy();
-            console.log("Strategy: " + strategy);
+        getNavigationStrategy: async function () {
+            const strategy = await autobetLib_native.lib_getNavigationStrategy();
+            //console.log("Strategy: " + strategy);
             if (strategy < 0) {
-                return this.navigationStrategy.MOUSE;
+                return navStrategy.MOUSE;
             } else {
                 return strategy;
             }
         },
         clicks: {
-            setClickSleep: async function(time) {
+            setClickSleep: async function (time) {
                 await autobetLib_native.lib_setClickSleep(time);
             },
             setAfterClickSleep: async function (time) {
@@ -214,5 +236,17 @@ module.exports = {
     },
     programIsRunning: function () {
         return autobetLib_native.lib_programIsRunning();
+    },
+    maySupportHttps: function () {
+        return autobetLib_native.lib_maySupportHttps();
+    },
+    getCertificateInfo: function () {
+        return autobetLib_native.lib_getCertificateInfo();
+    },
+    getCollectHistoricData: function () {
+        return autobetLib_native.lib_getCollectHistoricData();
+    },
+    setCollectHistoricData: function (val) {
+        return autobetLib_native.lib_setCollectHistoricData(val);
     }
 };

@@ -68,7 +68,7 @@ static bool markVisited(std::vector<bool> &visited, int x1, int x2) {
 }
 
 std::string opencv_link::getOpenCvVersion() {
-    return std::string(CV_VERSION);
+    return {CV_VERSION};
 }
 
 opencv_link::knn::knn(std::nullptr_t) noexcept: k_nearest(nullptr) {}

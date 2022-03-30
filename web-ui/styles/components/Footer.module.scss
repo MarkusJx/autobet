@@ -1,0 +1,58 @@
+.footer {
+    display: flex;
+    flex: 1;
+    padding: 1.0rem 0;
+    border-top: 1px solid #eaeaea;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff78;
+    backdrop-filter: blur(10px);
+    font-size: 1.1em;
+}
+
+.footer a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.logo {
+    margin-left: 5px;
+    display: grid;
+}
+
+.icon {
+    color: #2a2a2a
+}
+
+.viewOnGH {
+    margin-left: 2px;
+    font-weight: 300;
+}
+
+.poweredBy {
+    font-weight: 200;
+    margin: auto 0;
+}
+
+.author {
+    margin-left: 2px;
+    font-weight: 300;
+    &:after {
+        content: "\00a0";
+    }
+}
+
+.year {
+    font-weight: 200;
+}
+
+@media (max-width: 700px) {
+    .footer {
+        display: grid;
+        grid-auto-rows: max-content;
+        grid-template-columns: 100%;
+        row-gap: 5px;
+    }
+}

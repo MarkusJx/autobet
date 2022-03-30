@@ -1,20 +1,21 @@
 #include <fstream>
 
 #include "napi_exported.hpp"
-#include "webui.hpp"
+#include "web/webui.hpp"
 #include "util/utils.hpp"
 #include "debug/debug.hpp"
-#include "settings.hpp"
+#include "storage/settings.hpp"
 #include "autostop.hpp"
 #include "opencv_link.hpp"
 #include "variables.hpp"
 #include "autobetException.hpp"
 #include "control.hpp"
 #include "betting.hpp"
+#include "historic_data.hpp"
 #include "logger.hpp"
 #include "windowUtils.hpp"
 
-#define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
+//#define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
 
 #include "n_api/napi_tools.hpp"
 
@@ -114,8 +115,10 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
             }
 
             try {
-                variables::navigationStrategy = uiNavigationStrategies::navigationStrategy::fromName(
-                        settings::read<std::string>("navigationStrategy"));
+                variables::setNavigationStrategy(
+                        uiNavigationStrategies::navigationStrategy::fromName(
+                                settings::read<std::string>("navigationStrategy"))
+                );
             } catch (const std::exception &e) {
                 StaticLogger::warningStream() << "Could not read the navigationStrategy setting: " << e.what();
             }
@@ -133,6 +136,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         }
 
         utils::setDpiAware();
+        variables::init();
 
         // Print some system information
         utils::printSystemInformation();
@@ -144,8 +148,6 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
 #ifndef NDEBUG
 #       pragma message("INFO: Building in debug mode")
         StaticLogger::warning("Program was compiled in debug mode");
-#else
-#       pragma message("INFO: Building in release mode")
 #endif //NDEBUG
         // Check if model.yml exists
         if (!utils::fileExists("resources/data/model.yml")) {
@@ -289,16 +291,14 @@ Napi::Promise loadWinnings(const Napi::CallbackInfo &info) {
  * Get the IP address of this machine from the node process
  */
 Napi::String node_getIP(const Napi::CallbackInfo &info) {
-    return Napi::String::New(info.Env(), utils::getIP());
+    return Napi::String::New(info.Env(), webui::get_ip());
 }
 
 /**
  * Open the web ui
  */
 void open_website(const Napi::CallbackInfo &) {
-    std::string addr = "http://";
-    addr.append(utils::getIP()).append(":8027");
-    if (utils::openWebsite(addr)) {
+    if (utils::openWebsite(webui::get_ip())) {
         StaticLogger::debug("Opened website");
     } else {
         StaticLogger::error("Unable to open Web page");
@@ -728,10 +728,10 @@ Napi::Promise getAllOpenWindows(const Napi::CallbackInfo &info) {
     using map_type = std::map<std::u16string, std::vector<std::string>>;
     return promises::promise<map_type>(info.Env(), [] {
         map_type res;
-        for (const auto &w : windowUtils::getAllOpenWindows()) {
+        for (const auto &w: windowUtils::getAllOpenWindows()) {
             std::wstring w_program_name = w->getProgramName();
             std::u16string program_name(w_program_name.begin(), w_program_name.end());
-            for (const auto &p : w->getProcesses()) {
+            for (const auto &p: w->getProcesses()) {
                 if (res.contains(program_name)) {
                     res.at(program_name).push_back(p->getWindowName());
                 } else {
@@ -747,20 +747,22 @@ Napi::Promise getAllOpenWindows(const Napi::CallbackInfo &info) {
     });
 }
 
-void setGameWindow(const Napi::CallbackInfo &info) {
+Napi::Promise setGameWindow(const Napi::CallbackInfo &info) {
     CHECK_ARGS(string, string);
-    try {
-        std::string program_name = info[0].ToString();
-        std::string process_name = info[1].ToString();
+    const std::string program_name = info[0].ToString();
+    const std::string process_name = info[1].ToString();
 
-        settings::write("processName", process_name);
-        settings::write("programName", program_name);
+    return promises::promise<void>(info.Env(), [program_name, process_name] {
+        try {
+            settings::write("processName", process_name);
+            settings::write("programName", program_name);
 
-        variables::setProgramName(program_name);
-        variables::setProcessName(process_name);
-    } catch (const std::exception &e) {
-        StaticLogger::errorStream() << e.what();
-    }
+            variables::setProgramName(program_name);
+            variables::setProcessName(process_name);
+        } catch (const std::exception &e) {
+            StaticLogger::errorStream() << e.what();
+        }
+    });
 }
 
 Napi::Object getGameWindow(const Napi::CallbackInfo &info) {
@@ -773,48 +775,48 @@ Napi::Object getGameWindow(const Napi::CallbackInfo &info) {
     CATCH_EXCEPTIONS
 }
 
-void setNavigationStrategy(const Napi::CallbackInfo &info) {
+Napi::Promise setNavigationStrategy(const Napi::CallbackInfo &info) {
     CHECK_ARGS(number);
-    TRY
-        int n = info[0].ToNumber();
+    int n = info[0].ToNumber();
+    return promises::promise<void>(info.Env(), [n] {
         switch (n) {
             case 0:
-                variables::navigationStrategy = std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>();
+                variables::setNavigationStrategy(std::make_shared<uiNavigationStrategies::mouseNavigationStrategy>());
                 break;
             case 1:
-                variables::navigationStrategy = std::make_shared<uiNavigationStrategies::controllerNavigationStrategy>();
+                variables::setNavigationStrategy(
+                        std::make_shared<uiNavigationStrategies::controllerNavigationStrategy>());
                 break;
             default:
                 throw std::runtime_error("Invalid number supplied");
         }
 
-        settings::write("navigationStrategy", variables::navigationStrategy->getName());
-    CATCH_EXCEPTIONS
+        settings::write("navigationStrategy", variables::navigationStrategy()->getName());
+    });
 }
 
-Napi::Number getNavigationStrategy(const Napi::CallbackInfo &info) {
-    try {
-        const auto name = settings::read<std::string>("navigationStrategy");
-        int res;
-        if (name == "mouse") {
-            res = 0;
-        } else if (name == "controller") {
-            res = 1;
-        } else {
-            res = -1;
+Napi::Promise getNavigationStrategy(const Napi::CallbackInfo &info) {
+    return promises::promise<int>(info.Env(), [] {
+        try {
+            const auto name = settings::read<std::string>("navigationStrategy");
+            if (name == "mouse") {
+                return 0;
+            } else if (name == "controller") {
+                return 1;
+            } else {
+                return -1;
+            }
+        } catch (...) {
+            return -1;
         }
-
-        return Napi::Number::New(info.Env(), res);
-    } catch (...) {
-        return Napi::Number::New(info.Env(), -1);
-    }
+    });
 }
 
 Napi::Promise setClickSleep(const Napi::CallbackInfo &info) {
     CHECK_ARGS(number);
     const int sleep = info[0].ToNumber();
     return promises::promise<void>(info.Env(), [sleep] {
-        variables::navigationStrategy->setClickSleep(sleep);
+        variables::navigationStrategy()->setClickSleep(sleep);
     });
 }
 
@@ -822,20 +824,89 @@ Napi::Promise setAfterClickSleep(const Napi::CallbackInfo &info) {
     CHECK_ARGS(number);
     const int sleep = info[0].ToNumber();
     return promises::promise<void>(info.Env(), [sleep] {
-        variables::navigationStrategy->setAfterClickSleep(sleep);
+        variables::navigationStrategy()->setAfterClickSleep(sleep);
     });
 }
 
 Napi::Number getClickSleep(const Napi::CallbackInfo &info) {
     TRY
-        return Napi::Number::New(info.Env(), variables::navigationStrategy->getClickSleep());
+        return Napi::Number::New(info.Env(), variables::navigationStrategy()->getClickSleep());
     CATCH_EXCEPTIONS
 }
 
 Napi::Number getAfterClickSleep(const Napi::CallbackInfo &info) {
     TRY
-        return Napi::Number::New(info.Env(), variables::navigationStrategy->getAfterClickSleep());
+        return Napi::Number::New(info.Env(), variables::navigationStrategy()->getAfterClickSleep());
     CATCH_EXCEPTIONS
+}
+
+Napi::Promise getUpnpEnabled(const Napi::CallbackInfo &info) {
+    return promises::promise<bool>(info.Env(), [] {
+        if (settings::has_key(AUTOBET_SETTINGS_ENABLE_UPNP)) {
+            return settings::read<bool>(AUTOBET_SETTINGS_ENABLE_UPNP);
+        } else {
+            return false;
+        }
+    });
+}
+
+Napi::Promise setUpnpEnabled(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(boolean);
+
+    const bool enable = info[0].ToBoolean();
+    return promises::promise<void>(info.Env(), [enable] {
+        settings::write(AUTOBET_SETTINGS_ENABLE_UPNP, enable);
+    });
+}
+
+Napi::Promise maySupportHttps(const Napi::CallbackInfo &info) {
+    return promises::promise<bool>(info.Env(), [] {
+        return webui::supports_https();
+    });
+}
+
+Napi::Promise getCertificateInfo(const Napi::CallbackInfo &info) {
+    using result_map = std::map<std::string, autobet::web::cert_info>;
+    using result_pair = std::pair<std::string, autobet::web::cert_info>;
+    return promises::promise<result_map>(info.Env(), [] {
+        const auto cert = webui::get_certificate();
+        if (cert) {
+            result_map map;
+            map.insert(result_pair("subject", *(cert->get_subject())));
+            map.insert(result_pair("issuer", *(cert->get_issuer())));
+
+            return map;
+        } else {
+            throw std::runtime_error("The certificates are not loaded");
+        }
+    });
+}
+
+Napi::Promise setCollectHistoricData(const Napi::CallbackInfo &info) {
+    CHECK_ARGS(boolean);
+    const bool collect = info[0].ToBoolean();
+    return promises::promise<void>(info.Env(), [collect] {
+        settings::write(AUTOBET_SETTINGS_COLLECT_HISTORIC_DATA, collect);
+        if (collect) {
+            markusjx::autobet::historic_data::init();
+        } else {
+            markusjx::autobet::historic_data::close();
+        }
+    });
+}
+
+Napi::Promise getCollectHistoricData(const Napi::CallbackInfo &info) {
+    return promises::promise<bool>(info.Env(), [] {
+        if (settings::has_key(AUTOBET_SETTINGS_COLLECT_HISTORIC_DATA)) {
+            return settings::read<bool>(AUTOBET_SETTINGS_COLLECT_HISTORIC_DATA);
+        } else {
+            return false;
+        }
+    });
+}
+
+Napi::Boolean loggingEnabled(const Napi::CallbackInfo &info) {
+    return Napi::Boolean::New(info.Env(), StaticLogger::loggingEnabled());
 }
 
 #define export(func) exports.Set("lib_" #func, Napi::Function::New(env, func))
@@ -889,6 +960,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(node_debug);
     export(node_warn);
     export(node_error);
+    export(loggingEnabled);
 
     export(setAutobetlibVersion);
     export(setOddTranslations);
@@ -905,6 +977,14 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
     export(setAfterClickSleep);
     export(getClickSleep);
     export(getAfterClickSleep);
+
+    export(getUpnpEnabled);
+    export(setUpnpEnabled);
+    export(maySupportHttps);
+    export(getCertificateInfo);
+
+    export(setCollectHistoricData);
+    export(getCollectHistoricData);
 
     try {
         betting::setWebUiFunctions();

@@ -1,0 +1,14 @@
+@import "../util";
+
+.container {
+    padding: 10px 20px;
+    width: 100%;
+    //max-width: 280px;
+    color: white;
+    @include backdrop();
+
+    h2 {
+        font-weight: 400;
+        margin: 10px 0;
+    }
+}

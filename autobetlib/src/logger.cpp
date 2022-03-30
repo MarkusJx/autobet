@@ -341,3 +341,7 @@ LoggerUtils::LoggerStream StaticLogger::_errorStream(const char *_file, int line
 void StaticLogger::destroy() {
     getLogger().reset();
 }
+
+bool StaticLogger::loggingEnabled() {
+    return getLogger().operator bool() && logToFile() && logToConsole();
+}

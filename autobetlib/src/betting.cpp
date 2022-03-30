@@ -13,15 +13,23 @@
 #include "autobetException.hpp"
 #include "opencv_link.hpp"
 #include "variables.hpp"
-#include "webui.hpp"
+#include "web/webui.hpp"
 #include "napi_exported.hpp"
+#include "historic_data.hpp"
 #include "control.hpp"
 #include "betting.hpp"
 #include "logger.hpp"
 
 using namespace logger;
 
-int32_t width = 0, height = 0, racesWon = 0, racesLost = 0;
+// The width of the game window
+int32_t width = 0;
+// The height of the game window
+int32_t height = 0;
+// The number of races won since the program was started
+int32_t racesWon = 0;
+// The number of races lost since the program was started
+int32_t racesLost = 0;
 
 // The previous status of the game window,
 // with -1 being unset, 0 being closed
@@ -79,11 +87,13 @@ void set_positions() {
  * @param val the new value
  */
 void setGtaVRunning(bool val) {
-    // Only send data to the web listeners every 10-ish seconds
-    static int count = 0;
-    count = (count + 1) % 10;
+    // Only send data to the web listeners if something has changed
+    static bool prev = false;
     try {
-        if (count == 0) webui::setGtaRunning(val);
+        if (val != prev) {
+            prev = val;
+            webui::setGtaRunning(val);
+        }
 
         variables::gtaVRunning = val;
         napi_exported::setGtaRunning(val);
@@ -100,7 +110,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
         // Get the odd as a short
         const short b_res = opencv_link::knn::oddToShort(odds[i]);
 
-        // Check if the current result already exist, so there are not multiple >10/1 odds ore there is a evens
+        // Check if the current result already exist, so there are not multiple >10/1 odds ore there is an evens
         // if one of this occurs, bet not on this one
         auto s = std::find(std::begin(res), std::end(res), b_res);
         if (b_res <= 5 && s != std::end(res)) { // If this is 5/1 or higher (%!) and exists multiple times, skip
@@ -113,9 +123,9 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
     // If evens exist, only bet if the second highest percentage is lower than 4/1 (basically only 4/1 or 5/1)
     if (std::find(std::begin(res), std::end(res), 1) != std::end(res)) {
         short lowest = -1;
-        for (short re : res) {
+        for (short re: res) {
             // Set lowest if res[s] is smaller than lowest and not equal to 1 (evens), since this will always be lower,
-            // but the second lowest percentage is to be searched for.
+            // but the second' lowest percentage is to be searched for.
             if ((lowest == -1 || re < lowest) && re != 1) {
                 lowest = re;
             }
@@ -127,16 +137,22 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
         }
     }
 
+    class chance {
+    public:
+        short chance;
+        short position;
+    };
+
     // Return the y-position of the lowest chance to bet on
-    std::array<short, 2> lowest = {res[0], 0};
+    chance lowest{res[0], 0};
     for (short i = 1; i < 6; i++) {
-        if (lowest[0] > res[i]) {
-            lowest[0] = res[i];
-            lowest[1] = i;
+        if (lowest.chance > res[i]) {
+            lowest.chance = res[i];
+            lowest.position = i;
         }
     }
 
-    return static_cast<short>(lowest[1]);
+    return lowest.position;
 }
 
 /**
@@ -148,7 +164,7 @@ short getBasicBettingPosition(const std::vector<std::string> &odds) {
 short get_pos(const std::shared_ptr<void> &src) {
     // Write the src to the debug zip folder
     if (variables::debug_full) {
-        utils::bitmap bmp = utils::convertHBitmap(width, height, src.get());
+        utils::bitmap bmp = utils::convertHBitmap(width, height, src);
         debug::writeImage(bmp);
     }
 
@@ -162,7 +178,7 @@ short get_pos(const std::shared_ptr<void> &src) {
         _width = static_cast<uint16_t>(std::round(220 * variables::multiplierW));
 
         // Crop the screenshot
-        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src.get());
+        utils::bitmap b = utils::crop(xCoord, yCoord, _width, _height, src);
 
         // Write bitmap object to debug zip folder
         if (variables::debug_full) {
@@ -179,6 +195,9 @@ short get_pos(const std::shared_ptr<void> &src) {
             StaticLogger::debugStream() << "Odd prediction: " << odds[i];
         }
     }
+
+    // Save the odds
+    markusjx::autobet::historic_data::save_odds(odds);
 
     if (napi_exported::isBettingFunctionSet()) {
         // Call the bettingPositionCallback
@@ -254,7 +273,7 @@ void updateWinnings(int amount) {
 void getWinnings() {
     // Set coordinates, width and height to get the image from.
     // These values are based on the positions on a 2560x1440 screen.
-    // They are then scaled to the current game resulution and rounded.
+    // They are then scaled to the current game resolution and rounded.
     // If the images cropped are too small/big/wrong placed,
     // these values probably should be changed.
     auto yCoord = static_cast<short>(std::round(1060.0f * variables::multiplierH));
@@ -264,18 +283,62 @@ void getWinnings() {
 
     // Take a screenshot and crop the image
     std::shared_ptr<void> src(utils::TakeScreenShot(variables::xPos, variables::yPos, width, height), DeleteObject);
-    utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src.get());
+    utils::bitmap bmp = utils::crop(xCoord, yCoord, _width, _height, src);
 
     if (variables::debug_full) {
-        utils::bitmap b = utils::convertHBitmap(width, height, src.get());
+        utils::bitmap b = utils::convertHBitmap(width, height, src);
         debug::writeImage(b);
         debug::writeImage(bmp);
+    }
+
+    if (markusjx::autobet::historic_data::should_save()) {
+        // The x-pos of the odd of the second horse
+        const auto x2 = static_cast<uint16_t>(std::round(220 * variables::multiplierW));
+        // The x-pos of the odd of the first horse
+        const auto x1 = static_cast<uint16_t>(std::round(965 * variables::multiplierW));
+        // The x-pos of the odd of the third horse
+        const auto x3 = static_cast<uint16_t>(std::round(1755 * variables::multiplierW));
+
+        // The y-pos of the odds of the second and third horse
+        const auto y1 = static_cast<uint16_t>(std::round(1040 * variables::multiplierH));
+        // The y-pos of the odd of the first horse
+        const auto y2 = static_cast<uint16_t>(std::round(1070 * variables::multiplierH));
+
+        // The height of the images to crop
+        const auto h = static_cast<uint16_t>(std::round(75 * variables::multiplierH));
+        // The width of the images to crop
+        const auto w = static_cast<uint16_t>(std::round(160 * variables::multiplierW));
+
+        const utils::bitmap second = utils::crop(x2, y1, w, h, src);
+        const utils::bitmap first = utils::crop(x1, y2, w, h, src);
+        const utils::bitmap third = utils::crop(x3, y1, w, h, src);
+
+        if (variables::debug_full) {
+            debug::writeImage(first);
+            debug::writeImage(second);
+            debug::writeImage(third);
+        }
+
+        try {
+            StaticLogger::debug("Getting the odds of the first three horses");
+            const std::string o2 = variables::knn.predict(second, variables::multiplierW, variables::multiplierH);
+            const std::string o1 = variables::knn.predict(first, variables::multiplierW, variables::multiplierH);
+            const std::string o3 = variables::knn.predict(third, variables::multiplierW, variables::multiplierH);
+
+            StaticLogger::debugStream() << "First place: " << o1;
+            StaticLogger::debugStream() << "Second place: " << o2;
+            StaticLogger::debugStream() << "Third place: " << o3;
+
+            markusjx::autobet::historic_data::save_winning_odds(o1, o2, o3);
+        } catch (const std::exception &e) {
+            StaticLogger::errorStream() << "Could not predict the odds of the winning horses: " << e.what();
+        }
     }
 
     // Delete the original screenshot
     src.reset();
 
-    // Get the prediction and check if its an actual odd.
+    // Get the prediction and check if it's an actual odd.
     // For further information on how an odd looks like,
     // take a look at the implementation of opencv_link::knn::isWinning(1)
     std::string pred;
@@ -295,6 +358,9 @@ void getWinnings() {
     const int res = opencv_link::knn::winningToInt(pred);
     StaticLogger::debugStream() << "Winnings prediction: " << res;
 
+    // Save the winnings to the historic data file
+    markusjx::autobet::historic_data::save_winnings(res);
+
     // Update the winnings
     updateWinnings(res);
 }
@@ -304,7 +370,7 @@ void betting::mainLoop() {
     const auto stopBetting = [] {
         try {
             napi_exported::keyCombStop();
-            webui::setStopping();
+            webui::setStopped();
         } catch (const std::exception &e) {
             StaticLogger::errorStream() << "Exception thrown: " << e.what();
         }
@@ -326,7 +392,11 @@ void betting::mainLoop() {
         if (variables::running) {
             StaticLogger::debug("Running first bet");
             // Run the first reset on the navigation strategy
-            variables::navigationStrategy->firstBet();
+            variables::navigationStrategy()->firstBet();
+
+            if (markusjx::autobet::historic_data::should_save()) {
+                markusjx::autobet::historic_data::start_betting();
+            }
         }
 
         // A note to my C Professor: I've learned my lesson,
@@ -344,7 +414,7 @@ void betting::mainLoop() {
             // If this doesn't help, the betting will be stopped.
             for (int i = 0; i < 3; i++) {
                 try {
-                    // Take a screen shot
+                    // Take a screenshot
                     std::shared_ptr<void> src(utils::TakeScreenShot(variables::xPos, variables::yPos, width, height),
                                               DeleteObject);
                     pos = get_pos(src);
@@ -355,18 +425,23 @@ void betting::mainLoop() {
 
                     StaticLogger::errorStream() << lastError;
                     StaticLogger::debug("Assuming the game is stuck, resetting...");
-                    variables::navigationStrategy->reset();
+                    variables::navigationStrategy()->reset();
 
                     StaticLogger::debug("Sleeping for 5 seconds");
                     std::this_thread::sleep_for(std::chrono::seconds(5));
                 }
             }
 
+            // Save the horse on which the bet will be placed on
+            markusjx::autobet::historic_data::save_bet_placed_on(pos);
+
             // Check if the position could be retrieved
             if (pos == -2) {
                 StaticLogger::error(
                         "Could not get the position to bet on, retried 3 times, which did not help, stopping betting.");
                 napi_exported::bettingException(lastError);
+                variables::pushNotifications()->send_notification("Autobet - Error",
+                                                                  "The betting process has been stopped due to an error");
                 stopBetting();
                 break;
             }
@@ -377,7 +452,7 @@ void betting::mainLoop() {
 
                 // Plot twist: pos is actually the y-position
                 // of the button of the horse to bet on
-                variables::navigationStrategy->placeBet(pos);
+                variables::navigationStrategy()->placeBet(pos);
                 StaticLogger::debugStream() << "Running: " << std::boolalpha << variables::running;
 
                 // Updating winnings by -10000 since betting costs 100000
@@ -404,14 +479,14 @@ void betting::mainLoop() {
                 getWinnings();
 
                 if (!variables::running) continue;
-                variables::navigationStrategy->reset();
+                variables::navigationStrategy()->reset();
                 if (autostop::checkStopConditions()) {
                     stopBetting();
                     break;
                 }
             } else {
                 // Should not bet, skip
-                variables::navigationStrategy->skipBet();
+                variables::navigationStrategy()->skipBet();
                 updateWinnings(-100);
                 StaticLogger::debugStream() << "Sleeping for " << variables::time_sleep << " seconds";
                 std::this_thread::sleep_for(std::chrono::seconds(variables::time_sleep / 2));
@@ -421,7 +496,7 @@ void betting::mainLoop() {
 
                 // Update the winnings and return to the betting screen
                 getWinnings();
-                variables::navigationStrategy->reset();
+                variables::navigationStrategy()->reset();
             }
 
             // Check if the game is in focus
@@ -460,6 +535,7 @@ void betting::mainLoop() {
             StaticLogger::debug("Betting is now paused");
             was_running = false;
             webui::setStopped();
+            markusjx::autobet::historic_data::betting_stopped();
         } else {
             // Only send this message every 10-ish seconds
             static int count = 0;
@@ -477,7 +553,7 @@ void betting::mainLoop() {
             variables::stopping = false;
             variables::running = false;
         }
-        setGtaVRunning(false);
+        if (variables::runLoops) setGtaVRunning(false);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
