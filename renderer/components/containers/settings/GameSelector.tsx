@@ -139,11 +139,13 @@ export default class GameSelector extends React.Component<{}, GameSelectorState>
     }
 
     private async onGameSelect(event: SelectChangeEvent): Promise<void> {
-        this.selectedGame = JSON.parse(event.target.value as string) as Program;
-        await window.autobet.windows.setGameWindowName(this.selectedGame.programName, this.selectedGame.windowName);
+        const game = JSON.parse(event.target.value as string) as Program;
+
+        this.selectedGame = game;
+        await window.autobet.windows.setGameWindowName(game.programName, game.windowName);
 
         StaticInstances.gameSelectedAlert?.setText(
-            `Game application set to '${this.selectedGame.programName} - ${this.selectedGame.windowName}'`
+            `Game application set to '${game.programName} - ${game.windowName}'`
         );
         StaticInstances.gameSelectedAlert?.show(5000);
         StaticInstances.settingsSavedAlert?.show(5000);
