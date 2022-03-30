@@ -754,6 +754,8 @@ Napi::Promise setGameWindow(const Napi::CallbackInfo &info) {
 
     return promises::promise<void>(info.Env(), [program_name, process_name] {
         try {
+            StaticLogger::debugStream() << "Setting process name to '" << process_name << "' and program name to '"
+                                        << program_name << '\'';
             settings::write("processName", process_name);
             settings::write("programName", program_name);
 
