@@ -107,13 +107,13 @@ jobs:
     - name: Run npm install
       run: npm ci
     - name: Build
-      run: npm run-script build
+      run: npm run build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
 
     - name: Package
-      run: npm run-script pack
+      run: npm run pack
       env:
         GH_TOKEN: ${{secrets.github_token}}
     

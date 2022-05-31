@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Suspense} from "react";
 import {ADialog} from "./Dialog";
 import {CircularProgress, Collapse, List, ListItemButton, ListItemText} from "@mui/material";
 import {CompleteLicenseFile, LicenseInfo} from "../../../electron-src/preload/licenses";
@@ -110,9 +110,11 @@ export default class LicenseViewerDialog extends React.Component<{}, LicenseView
     private getLicenseFile(): React.ReactNode {
         if (this.state.displayedFile) {
             return (
-                <p className={styles.text}>
-                    {this.state.displayedFile}
-                </p>
+                <Suspense fallback={<CircularProgress/>}>
+                    <p className={styles.text}>
+                        {this.state.displayedFile}
+                    </p>
+                </Suspense>
             );
         } else {
             return (
@@ -130,7 +132,9 @@ export default class LicenseViewerDialog extends React.Component<{}, LicenseView
                     <Scrollbars autoHide autoHideTimeout={1000} autoHideDuration={200} autoHeight
                                 autoHeightMin={0} thumbMinSize={30} universal autoHeightMax="calc(100vh - 92px)">
                         <List sx={{width: '100%', maxWidth: 360, bgcolor: 'background.paper'}} component="nav">
-                            {this.getMenuItems()}
+                            <Suspense fallback={<CircularProgress/>}>
+                                {this.getMenuItems()}
+                            </Suspense>
                         </List>
                     </Scrollbars>
                     <Scrollbars autoHide autoHideTimeout={1000} autoHideDuration={200} autoHeight
