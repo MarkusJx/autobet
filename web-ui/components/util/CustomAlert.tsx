@@ -1,11 +1,12 @@
 import React from "react";
-import { Alert, AlertColor, AlertTitle, Collapse, IconButton } from "@mui/material";
+import {Alert, AlertColor, AlertTitle, Collapse, IconButton} from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 
 interface CustomAlertProps {
     title?: string;
     severity?: AlertColor;
     closeable?: boolean;
+    children: any;
 }
 
 interface CustomAlertState {

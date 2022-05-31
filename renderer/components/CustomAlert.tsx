@@ -6,6 +6,7 @@ interface CustomAlertProps {
     title?: string;
     severity?: AlertColor;
     closeable?: boolean;
+    children?: any;
 }
 
 interface CustomAlertState {
