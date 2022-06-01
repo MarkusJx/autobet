@@ -106,9 +106,7 @@ export default class MainContent extends React.Component<{}, {}> {
             StaticInstances.gameRunning!.running = running;
         });
 
-        window.autobet.init().then(() => {
-            throw new Error("Error")
-        }).then(this.loadData.bind(this)).catch(e => {
+        window.autobet.init().then(this.loadData.bind(this)).catch(e => {
             console.error("Autobet.init() failed: ", e);
             let errorMessage = "";
             if ("message" in e && typeof e.message === "string") {
