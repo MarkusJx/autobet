@@ -15,7 +15,7 @@ specifiers:
   '@types/react-syntax-highlighter': ^15.5.1
   '@types/uuid': ^8.3.4
   ace-builds: ^1.5.3
-  electron: ^18.0.0
+  electron: ^19.0.1
   electron-builder: ^23.0.3
   electron-is-dev: ^2.0.0
   electron-next: ^3.1.5
@@ -78,7 +78,7 @@ devDependencies:
   '@types/react-dom': 18.0.5
   '@types/react-syntax-highlighter': 15.5.1
   '@types/uuid': 8.3.4
-  electron: 18.3.1
+  electron: 19.0.1
   electron-builder: 23.0.3
   eslint: 8.16.0
   eslint-config-next: 12.1.6_k6khgwrcmlpd2kpaxkviqw2zii
@@ -2454,8 +2454,8 @@ packages:
       mkdirp: 0.5.6
     dev: false
 
-  /electron/18.3.1:
-    resolution: { integrity: sha512-46lH3iEdvbbDSa0s2JiOysGruQlJwGUae0UrEfZ4NgHZUnHbglkvezfKSoRSOEob3c9rENZlvgEv9gCbhYx5Yw== }
+  /electron/19.0.1:
+    resolution: { integrity: sha512-zuhJVV7nTDFrRZ7uAIylSD0Eoi1xcUV4UzGfpWsREI4W5GsxNGyZQeqQDpg43w8+7oED812oDrGfPh5kb9rcQA== }
     engines: { node: '>= 8.6' }
     hasBin: true
     requiresBuild: true
