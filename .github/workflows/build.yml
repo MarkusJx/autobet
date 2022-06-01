@@ -37,7 +37,7 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
     
     - name: Initialize CppJsLib repo
       run: |
@@ -97,22 +97,22 @@ jobs:
         path: C:\Users\runneradmin\.conan
         key: host-${{ runner.os }}-target-${{ runner.os }}-${{ hashFiles('autobetlib/conanfile.txt') }}
 
-    # Set the autobet package version using npm
-    - name: Set autobet version
-      run: npm version --no-git-tag-version ${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}} -f
-    
-    # Build steps
-    # Runs 'npm install' and 'npm run-script pack'
-    # To install all dependencies and package the application
-    - name: Run npm install
-      run: |
-        npm ci
-        npm --prefix ./web-ui ci
-        npm --prefix ./autobetlib ci
-    - name: Build
-      run: npm run build
+      # Set the autobet package version using npm
+      - name: Set autobet version
+        run: npm version --no-git-tag-version ${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}} -f
 
-    - name: Perform CodeQL Analysis
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      # Build steps
+      # Runs 'npm install' and 'npm run-script pack'
+      # To install all dependencies and package the application
+      - name: Run npm install
+        run: pnpm -r -F !./autobetlib/external/** install --frozen-lockfile
+      - name: Build
+        run: npm run build
+
+      - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
 
     - name: Package

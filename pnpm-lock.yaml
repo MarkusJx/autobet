@@ -47,7 +47,7 @@ specifiers:
   webpack-node-externals: ^3.0.0
 
 dependencies:
-  '@autobet/autobetlib': file:autobetlib_4hkwgow5356cdmtz5c5vaxngqm
+  '@autobet/autobetlib': file:autobetlib
   '@babel/core': 7.18.2
   '@emotion/react': 11.9.0_t32v4ktcynrgeobeattnfg3v6m
   '@emotion/styled': 11.8.1_iay6a7nbb2nsf7nl3gr24qbc2a
@@ -5736,25 +5736,4 @@ packages:
     dependencies:
       autobet: file:_4hkwgow5356cdmtz5c5vaxngqm
       get-current-line: 6.6.0
-    dev: false
-
-  file:autobetlib_4hkwgow5356cdmtz5c5vaxngqm:
-    resolution: { directory: autobetlib, type: directory }
-    id: file:autobetlib
-    name: '@autobet/autobetlib'
-    version: 1.4.1
-    requiresBuild: true
-    dependencies:
-      autobet: file:_4hkwgow5356cdmtz5c5vaxngqm
-      get-current-line: 6.6.0
-    transitivePeerDependencies:
-      - '@types/react'
-      - date-fns
-      - dayjs
-      - luxon
-      - moment
-      - react
-      - react-dom
-      - react-native-svg
-      - supports-color
     dev: false
