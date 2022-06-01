@@ -68,7 +68,13 @@ callbacks::callback<void(std::string)> bettingExceptionCallback = nullptr;
  */
 Napi::Promise init(const Napi::CallbackInfo &info) {
     return promises::promise<bool>(info.Env(), [] {
-        // Delete the log if it is was last written more than 7 days ago
+        static bool initialized = false;
+        if (initialized) {
+            StaticLogger::warning("init() has already been called, ignoring this request");
+            return true;
+        }
+
+        // Delete the log if it was last written more than 7 days ago
         bool log_deleted = debug::checkLogAge();
         try {
             StaticLogger::create();
@@ -185,6 +191,7 @@ Napi::Promise init(const Napi::CallbackInfo &info) {
         std::thread keyCombThread(control::listenForKeycomb);
         keyCombThread.detach();
 
+        initialized = true;
         return true;
     });
 }
@@ -311,12 +318,15 @@ Napi::Boolean node_stopped(const Napi::CallbackInfo &info) {
 
 // Set callbacks ==========================================
 
+#define ALREADY_SET_CHECK(callback) if (callback) StaticLogger::warning("Re-defining callback '" #callback "'")
+
 /**
  * Set the setGtaRunningCallback, which is called every time
  * the running state of the game changes
  */
 Napi::Promise setSet_gta_running(const Napi::CallbackInfo &info) {
-    if (setGtaRunningCallback) throw Napi::Error::New(info.Env(), "setGtaRunningCallback is already defined");
+    ALREADY_SET_CHECK(setGtaRunningCallback);
+
     TRY
         setGtaRunningCallback = callbacks::callback<void(bool)>(info);
 
@@ -329,7 +339,8 @@ Napi::Promise setSet_gta_running(const Napi::CallbackInfo &info) {
  * some money is made or lost
  */
 Napi::Promise setAddMoneyCallback(const Napi::CallbackInfo &info) {
-    if (addMoneyCallback) throw Napi::Error::New(info.Env(), "addMoneyCallback is already defined");
+    ALREADY_SET_CHECK(addMoneyCallback);
+
     TRY
         addMoneyCallback = callbacks::callback<void(int)>(info);
         return addMoneyCallback.getPromise();
@@ -341,7 +352,8 @@ Napi::Promise setAddMoneyCallback(const Napi::CallbackInfo &info) {
  * time the overall money made value is changed
  */
 Napi::Promise setSetAllMoneyMadeCallback(const Napi::CallbackInfo &info) {
-    if (setAllMoneyMadeCallback) throw Napi::Error::New(info.Env(), "setAllMoneyMadeCallback is already defined");
+    ALREADY_SET_CHECK(setAllMoneyMadeCallback);
+
     TRY
         setAllMoneyMadeCallback = callbacks::callback<void(int)>(info);
         return setAllMoneyMadeCallback.getPromise();
@@ -353,7 +365,8 @@ Napi::Promise setSetAllMoneyMadeCallback(const Napi::CallbackInfo &info) {
  * the betting is started using a key combination
  */
 Napi::Promise setUiKeycombStartCallback(const Napi::CallbackInfo &info) {
-    if (uiKeycombStartCallback) throw Napi::Error::New(info.Env(), "uiKeycombStartCallback is already defined");
+    ALREADY_SET_CHECK(uiKeycombStartCallback);
+
     TRY
         uiKeycombStartCallback = callbacks::callback<void()>(info);
         return uiKeycombStartCallback.getPromise();
@@ -365,7 +378,8 @@ Napi::Promise setUiKeycombStartCallback(const Napi::CallbackInfo &info) {
  * the betting is stopped using a key combination
  */
 Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
-    if (uiKeycombStopCallback) throw Napi::Error::New(info.Env(), "uiKeycombStopCallback is already defined");
+    ALREADY_SET_CHECK(uiKeycombStopCallback);
+
     TRY
         uiKeycombStopCallback = callbacks::callback<void()>(info);
         return uiKeycombStopCallback.getPromise();
@@ -376,6 +390,8 @@ Napi::Promise setUiKeycombStopCallback(const Napi::CallbackInfo &info) {
  * Set the quit callback, which is used to quit the program
  */
 void setQuitCallback(const Napi::CallbackInfo &info) {
+    ALREADY_SET_CHECK(quit);
+
     TRY
         // Use a raw callback in here, as any other callback would get deleted
         auto *q = new callbacks::javascriptCallback<void()>(info);
@@ -391,7 +407,8 @@ void setQuitCallback(const Napi::CallbackInfo &info) {
  * Set the exception callback
  */
 Napi::Promise setExceptionCallback(const Napi::CallbackInfo &info) {
-    if (exceptionCallback) throw Napi::Error::New(info.Env(), "exceptionCallback is already defined");
+    ALREADY_SET_CHECK(exceptionCallback);
+
     TRY
         exceptionCallback = callbacks::callback<void()>(info);
         return exceptionCallback.getPromise();
@@ -402,7 +419,8 @@ Napi::Promise setExceptionCallback(const Napi::CallbackInfo &info) {
  * Set the log callback, which is used to log to the fake console
  */
 Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
-    if (logCallback) throw Napi::Error::New(info.Env(), "logCallback is already defined");
+    ALREADY_SET_CHECK(logCallback);
+
     TRY
         logCallback = callbacks::callback<void(std::string)>(info);
         return logCallback.getPromise();
@@ -414,7 +432,8 @@ Napi::Promise setLogCallback(const Napi::CallbackInfo &info) {
  * to get the horse to bet on, if a custom betting function is defined
  */
 Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
-    if (bettingPositionCallback) throw Napi::Error::New(info.Env(), "bettingPositionCallback is already defined");
+    ALREADY_SET_CHECK(bettingPositionCallback);
+
     TRY
         bettingPositionCallback = callbacks::callback<int(std::vector<std::string>)>(info);
         return bettingPositionCallback.getPromise();
@@ -426,12 +445,15 @@ Napi::Promise setBettingPositionCallback(const Napi::CallbackInfo &info) {
  * the betting is stopped due to an exception thrown
  */
 Napi::Promise setBettingExceptionCallback(const Napi::CallbackInfo &info) {
-    if (bettingExceptionCallback) throw Napi::Error::New(info.Env(), "bettingExceptionCallback is already defined");
+    ALREADY_SET_CHECK(bettingExceptionCallback);
+
     TRY
         bettingExceptionCallback = callbacks::callback<void(std::string)>(info);
         return bettingExceptionCallback.getPromise();
     CATCH_EXCEPTIONS
 }
+
+#undef ALREADY_SET_CHECK
 
 /**
  * Set whether to use a custom betting function
