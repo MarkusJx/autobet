@@ -15,8 +15,9 @@
 ## Build steps
 For newer versions of autobet, run these steps in a command line with 
 *node.js, npm, git, cmake and electron-builder* enabled:
-* ``npm install`` to install all required files
-* ``npm run-script build`` to build the native library
+* ``npm install && npm --prefix ./web-ui install && npm --prefix ./autobetlib install`` to install all required files or
+* ``pnpm -r -F !./autobetlib/external/** install`` if you want to use pnpm
+* ``npm run build`` to build the native library
 
 ## Packaging
 To package autobet, run:<br>

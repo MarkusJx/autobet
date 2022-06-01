@@ -5,12 +5,12 @@ import Store from 'electron-store';
 import path from 'path';
 import prepareNext from "electron-next";
 import isDev from 'electron-is-dev';
-import store from "./preload/store";
-import createComm from "./main/createComm";
-import createTrayMenu from "./main/createTrayMenu";
+import store from "../preload/store";
+import createComm from "./createComm";
+import createTrayMenu from "./createTrayMenu";
 import autobet from "@autobet/autobetlib";
-import enableDevTools from "./main/enableDevTools";
-import packageJson from "../package.json";
+import enableDevTools from "./enableDevTools";
+import packageJson from "../../package.json";
 
 async function createWindow(): Promise<void> {
     await prepareNext('./renderer');
@@ -40,7 +40,7 @@ async function createWindow(): Promise<void> {
         titleBarStyle: 'hidden',
         icon: "icon.png",
         webPreferences: {
-            preload: path.join(__dirname, 'preload', 'preload.js'),
+            preload: path.join(__dirname, 'preload.bundled.js'),
             contextIsolation: true,
             nodeIntegration: false,
             webSecurity: true,
@@ -70,7 +70,7 @@ async function createWindow(): Promise<void> {
     if (isDev) {
         await mainWindow.loadURL('http://localhost:8000');
     } else {
-        await mainWindow.loadFile(path.join(__dirname, '..', '..', '..', 'renderer', 'out', 'index.html'));
+        await mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'out', 'index.html'));
     }
     mainWindowState.manage(mainWindow);
 }
