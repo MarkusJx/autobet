@@ -4,7 +4,7 @@ on:
   push:
     branches-ignore:
       - "dependabot**"
-    paths: 
+    paths:
       - ".github/workflows/build.yml"
       - "autobetlib/**"
       - "pack/**"
@@ -18,7 +18,7 @@ on:
       - "install.js"
       - "src/**"
   pull_request:
-    paths: 
+    paths:
       - ".github/workflows/build.yml"
       - "autobetlib/**"
       - "pack/**"
@@ -38,54 +38,54 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-    
-    - name: Initialize CppJsLib repo
-      run: |
-        git submodule init
-        git submodule update
 
-    # Initializes the CodeQL tools for scanning.
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: 'cpp'
+      - name: Initialize CppJsLib repo
+        run: |
+          git submodule init
+          git submodule update
 
-    # Steps for getting the name for this artifact
-    # The artifact name has the followig format:
-    # autobet-${LATEST_RELEASE_TAG}-beta.YYYYmmdd-1HHMMSS
-    - name: Get latest release tag
-      id: latest_release
-      run: echo "::set-output name=release::$(node -p 'require(`./package.json`).version')"
-      shell: bash
-    - name: Get current date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y%m%d.1%H%M%S')"
-      shell: bash
-    - name: Set version name
-      id: version_name
-      run: echo "::set-output name=version::autobet-${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}}"
-      shell: bash
-    - name: Print version name
-      run: echo ${{steps.version_name.outputs.version}}
-      shell: bash
-    
-    # Retrieve caches
-    - name: Cache npm
-      uses: actions/cache@v2
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: |
-          ~\AppData\Roaming\npm-cache
-          **\node_modules
-          autobetLib\node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: 'cpp'
 
-    # Install conan
-    - name: Get Conan
-      uses: turtlebrowser/get-conan@v1.0
+      # Steps for getting the name for this artifact
+      # The artifact name has the followig format:
+      # autobet-${LATEST_RELEASE_TAG}-beta.YYYYmmdd-1HHMMSS
+      - name: Get latest release tag
+        id: latest_release
+        run: echo "::set-output name=release::$(node -p 'require(`./package.json`).version')"
+        shell: bash
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d.1%H%M%S')"
+        shell: bash
+      - name: Set version name
+        id: version_name
+        run: echo "::set-output name=version::autobet-${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}}"
+        shell: bash
+      - name: Print version name
+        run: echo ${{steps.version_name.outputs.version}}
+        shell: bash
+
+      # Retrieve caches
+      - name: Cache npm
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: |
+            ~\AppData\Roaming\npm-cache
+            **\node_modules
+            autobetLib\node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Install conan
+      - name: Get Conan
+        uses: turtlebrowser/get-conan@v1.0
 
       # Cache conan
       - name: Cache conan
@@ -120,12 +120,12 @@ jobs:
         env:
           GH_TOKEN: ${{secrets.github_token}}
 
-      # Upload the artifact
-    - name: Upload beta build
-      uses: actions/upload-artifact@v1
-      with:
-        name: ${{steps.version_name.outputs.version}}
-        path: dist/autobet-v${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}}.exe
+        # Upload the artifact
+      - name: Upload beta build
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{steps.version_name.outputs.version}}
+          path: dist/autobet-v${{steps.latest_release.outputs.release}}-beta.${{steps.date.outputs.date}}.exe
 
   analyze-js:
     #name: Analyze javascript
