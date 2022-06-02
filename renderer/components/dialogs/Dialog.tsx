@@ -37,8 +37,8 @@ export default interface DialogState {
 
 export type CloseAction = "ok" | "cancel";
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} children={props.children as any} {...props}/>;
+const Transition = React.forwardRef(function Transition(props: { children?: any }, ref) {
+    return <Slide direction="up" ref={ref} children={props.children} {...props}/>;
 });
 
 export class DialogElement extends React.Component<DialogProps, DialogState> {

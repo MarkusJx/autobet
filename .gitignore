@@ -241,3 +241,4 @@ autobet.config.json
 /autobetlib/licenses
 /autobetlib/conan_imports_manifest.txt
 licenses.json
+/autobetlib/external/CppJsLib/

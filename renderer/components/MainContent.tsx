@@ -23,9 +23,11 @@ import QRCodeDialog from "./dialogs/QRCodeDialog";
 import BettingFunctionResultDialog from "./dialogs/BettingFunctionResultDialog";
 import SelectBettingFunctionNameDialog from "./dialogs/SelectBettingFunctionNameDialog";
 import LicenseViewerDialog from "./dialogs/LicenseViewerDialog";
+import InitErrorDialog from "./dialogs/InitErrorDialog";
 
 export default class MainContent extends React.Component<{}, {}> {
     private bettingErrorDialog: BettingErrorDialog | null = null;
+    private initErrorDialog: InitErrorDialog | null = null;
     private moneyThisHour: MoneyThisHour | null = null;
     private moneyAllTime: MoneyAllTime | null = null;
     private racesWon: RacesWon | null = null;
@@ -58,6 +60,7 @@ export default class MainContent extends React.Component<{}, {}> {
                         <Controls ref={e => this.controls = e}/>
                         <Settings ref={e => StaticInstances.settings = e!}/>
                         <BettingErrorDialog ref={e => this.bettingErrorDialog = e}/>
+                        <InitErrorDialog ref={e => this.initErrorDialog = e}/>
                         <InfoDialog ref={e => StaticInstances.infoDialog = e!}/>
                         <CertificateInfoDialog ref={e => StaticInstances.certificateInfoDialog = e!}/>
                         <QRCodeDialog ref={e => StaticInstances.qrCodeDialog = e!}/>
@@ -103,7 +106,22 @@ export default class MainContent extends React.Component<{}, {}> {
             StaticInstances.gameRunning!.running = running;
         });
 
-        window.autobet.init().then(this.loadData.bind(this));
+        window.autobet.init().then(this.loadData.bind(this)).catch(e => {
+            console.error("Autobet.init() failed: ", e);
+            let errorMessage = "";
+            if ("message" in e && typeof e.message === "string") {
+                errorMessage = " Error message: " + e.message;
+            }
+
+            this.initErrorDialog?.setText(
+                "Could not start autobet. The application will exit once you dismiss this pop-up. " +
+                "Try re-installing the program to fix this issue. If that doesn't help, feel free to create an issue " +
+                "on GitHub and report this error." + errorMessage
+            );
+            this.initErrorDialog?.open();
+            window.autobet.logging.error("MainContent.tsx", "Calling init() failed." + errorMessage);
+        });
+
         window.addEventListener('beforeunload', () => {
             window.autobet.shutdown().then(() => {
                 window.util.quit();

@@ -21,7 +21,7 @@ export interface CompleteLicenseFile extends LicenseFile {
 }
 
 const loadedLicenses: LicenseInfo[] = [];
-const mainDirectory = path.join(__dirname, '..', '..', '..', '..');
+const mainDirectory = path.join(__dirname, '..');
 
 class licenses {
     @validate
