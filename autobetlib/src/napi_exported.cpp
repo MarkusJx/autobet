@@ -17,7 +17,7 @@
 
 //#define NAPI_TOOLS_CALLBACK_SLEEP_TIME 100
 
-#include "n_api/napi_tools.hpp"
+#include <napi_tools.hpp>
 
 using namespace logger;
 using namespace napi_tools;
@@ -394,11 +394,13 @@ void setQuitCallback(const Napi::CallbackInfo &info) {
 
     TRY
         // Use a raw callback in here, as any other callback would get deleted
-        auto *q = new callbacks::javascriptCallback<void()>(info);
+        auto *q = new callbacks::callback<void()>(info);
         quit = [q] {
             control::kill(false);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            q->asyncCall();
+            try {
+                q->callSync();
+            } catch (...) {}
         };
     CATCH_EXCEPTIONS
 }
@@ -1065,7 +1067,7 @@ void napi_exported::setGtaRunning(bool val) {
     setGtaRunningCallback(val);
 }
 
-std::promise<int> napi_exported::getBettingPosition(const std::vector<std::string> &v) {
+std::future<int> napi_exported::getBettingPosition(const std::vector<std::string> &v) {
     return bettingPositionCallback(v);
 }
 

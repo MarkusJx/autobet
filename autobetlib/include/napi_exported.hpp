@@ -26,7 +26,7 @@ namespace napi_exported {
 
     void setGtaRunning(bool);
 
-    std::promise<int> getBettingPosition(const std::vector<std::string> &);
+    std::future<int> getBettingPosition(const std::vector<std::string> &);
 
     void setAllMoneyMade(int);
 

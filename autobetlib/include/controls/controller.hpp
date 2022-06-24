@@ -94,7 +94,7 @@ namespace controller {
         int click_sleep;
 
     private:
-        shared_releaser releaser;
+        [[maybe_unused]] shared_releaser releaser;
 
         /**
          * The index of the controller created

@@ -62,9 +62,13 @@ target_link_libraries(cpp_upnp PRIVATE ${CONAN_LIBS})
 
 set(PROJECT_NAME autobetLib)
 
+execute_process(COMMAND node -p "require('@markusjx/n-api-tools').include"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE N_API_TOOLS_DIR)
+
 # Include everything
 include_directories(
-        ${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_INC} cpp_upnp
+        ${zip_dir}/include ${CMAKE_SOURCE_DIR}/include ${CMAKE_JS_INC} ${N_API_TOOLS_DIR} cpp_upnp
         ${CMAKE_SOURCE_DIR}/external/CppJsLib ${CMAKE_SOURCE_DIR}/external/csv/single_include
         ${pusha_dir}/src/pusha_proj/include_cpp
         ${pusha_dir}/src/pusha_proj/include
