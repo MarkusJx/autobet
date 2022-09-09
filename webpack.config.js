@@ -32,6 +32,7 @@ module.exports = [
         resolve: {
             extensions: ['.ts'],
         },
+        devtool: 'source-map',
     },
     {
         entry: './electron-src/preload/preload.ts',
@@ -60,5 +61,6 @@ module.exports = [
         resolve: {
             extensions: ['.ts'],
         },
+        devtool: 'source-map',
     },
 ];

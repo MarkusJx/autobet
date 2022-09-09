@@ -105,10 +105,7 @@ jobs:
       # Runs 'npm install' and 'npm run-script pack'
       # To install all dependencies and package the application
       - name: Run npm install
-        run: |
-          npm ci --legacy-peer-deps
-          npm --prefix ./web-ui ci --legacy-peer-deps
-          npm --prefix ./autobetlib ci
+        run: npm ci
       - name: Build
         run: npm run build
 

@@ -31,7 +31,7 @@
     "cmake-js": {
         "runtime": "electron",
         "arch": "x64",
-        "runtimeVersion": "18.0.0"
+        "runtimeVersion": "20.1.3"
     },
     "devDependencies": {
         "cmake-js": "^6.3.2",
