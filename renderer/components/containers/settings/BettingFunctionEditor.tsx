@@ -9,14 +9,21 @@ interface BettingFunctionEditorState {
     drawerOpen: boolean;
 }
 
-export default function WrappedBettingFunctionEditor({editorRef, ...props}: { editorRef: any }) {
+export interface BettingFunctionEditorProps {
+    defaultValue: string;
+}
+
+export default function WrappedBettingFunctionEditor({
+                                                         editorRef,
+                                                         ...props
+                                                     }: { editorRef: any } & BettingFunctionEditorProps) {
     return <BettingFunctionEditor {...props} ref={editorRef}/>;
 }
 
-export class BettingFunctionEditor extends React.Component<{}, BettingFunctionEditorState> {
+export class BettingFunctionEditor extends React.Component<BettingFunctionEditorProps, BettingFunctionEditorState> {
     public editor: AceEditor | null = null;
 
-    public constructor(props: {}) {
+    public constructor(props: BettingFunctionEditorProps) {
         super(props);
 
         this.state = {
@@ -28,7 +35,7 @@ export class BettingFunctionEditor extends React.Component<{}, BettingFunctionEd
         return (
             <AceEditor mode="javascript" theme="chrome" name="code-editor"
                        className={`${styles.editor} ${this.state.drawerOpen && styles.drawerOpen}`}
-                       style={{width: 'auto'}} ref={e => this.editor = e}/>
+                       style={{width: 'auto'}} ref={e => this.editor = e} defaultValue={this.props.defaultValue}/>
         );
     }
 

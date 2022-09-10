@@ -76,6 +76,8 @@ export default class SSLSupport extends React.Component<{}, SSLSupportState> imp
     }
 
     private async onClick(): Promise<void> {
+        if (!this.state.checked) return;
+
         StaticInstances.loadingCertificateAlert?.show();
         this.disabled = true;
         const cert = await window.autobet.getCertificateInfo();

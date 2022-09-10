@@ -9,7 +9,7 @@ import {
     Divider,
     Drawer,
     IconButton,
-    ListItem,
+    ListItemButton,
     ListItemIcon,
     ListItemText,
     SxProps,
@@ -32,12 +32,13 @@ import BettingFunctionImplementation from "../../../util/BettingFunctionImplemen
 import defaultBettingFunction from "../../../util/defaultBettingFunction";
 import {FunctionStore} from "../../../util/FunctionStore";
 import StaticInstances from "../../../util/StaticInstances";
+import type {BettingFunctionEditorProps} from "./BettingFunctionEditor";
 
 const BettingFunctionEditor = dynamic(import("./BettingFunctionEditor"), {
     ssr: false
 });
 
-const ForwardRefEditor = forwardRef<editor_t>((props, ref) =>
+const ForwardRefEditor = forwardRef<editor_t, BettingFunctionEditorProps>((props, ref) =>
     <BettingFunctionEditor {...props} editorRef={ref}/>
 );
 
@@ -154,7 +155,7 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
     private get sidebarButtons(): React.ReactNode[] {
         this.drawerButtons = [];
         return this.state.implementations.map((i, index) => (
-            <ListItem button ref={e => {
+            <ListItemButton ref={e => {
                 if (e) this.drawerButtons[index] = e;
             }} onClick={() => {
                 this.select(i);
@@ -163,14 +164,15 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
                 this.drawerButtons[index].style.backgroundColor = "#ffffff1f";
             }} key={i.name} style={{
                 borderRadius: '5px',
-                backgroundColor: this.state.selectedImpl == i ? "#ffffff1f" : undefined
+                backgroundColor: this.state.selectedImpl == i ? "#ffffff1f" : undefined,
+                maxHeight: '40px'
             }}>
                 <ListItemIcon>
                     {i.waiting ? <WatchLaterOutlinedIcon/> : (i.ok ? (i.active ? <CheckCircleOutlineIcon/> :
                         <CheckOutlinedIcon/>) : <ErrorOutlineOutlinedIcon/>)}
                 </ListItemIcon>
                 <ListItemText primary={i.name}/>
-            </ListItem>
+            </ListItemButton>
         ));
     }
 
@@ -263,14 +265,16 @@ export default class CustomBettingFunction extends React.Component<any, CustomBe
                             <Divider/>
                             {this.sidebarButtons}
                             <Divider/>
-                            <ListItem button onClick={this.onAddButtonClick.bind(this)} ref={e => this.addButton = e}>
+                            <ListItemButton onClick={this.onAddButtonClick.bind(this)} ref={e => this.addButton = e}
+                                            style={{maxHeight: '40px'}}>
                                 <ListItemIcon>
                                     <AddIcon/>
                                 </ListItemIcon>
                                 <ListItemText primary="Add"/>
-                            </ListItem>
+                            </ListItemButton>
                         </Drawer>
-                        <ForwardRefEditor ref={this.editorLoaded.bind(this)}/>
+                        <ForwardRefEditor ref={this.editorLoaded.bind(this)}
+                                          defaultValue={defaultImplementation.implementation}/>
                     </div>
                 </div>
             </SettingContainer>

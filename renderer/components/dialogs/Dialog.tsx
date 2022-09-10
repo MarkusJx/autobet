@@ -55,19 +55,11 @@ export class DialogElement extends React.Component<DialogProps, DialogState> {
     public override render(): React.ReactNode {
         const id = DialogElement.lastId++;
 
-        let style: React.CSSProperties = {};
-        if (this.props.fullscreen) {
-            style = {
-                marginTop: '28px',
-                height: 'calc(100vh - 28px)'
-            };
-        }
-
         return (
             <Dialog open={this.state.open} onClose={this.close.bind(this)}
                     aria-labelledby={`${id}-dialog-title`}
                     aria-describedby={`${id}-dialog-description`}
-                    fullScreen={this.props.fullscreen} style={style}
+                    fullScreen={this.props.fullscreen}
                     TransitionComponent={this.props.fullscreen ? Transition as any : undefined}>
                 {this.getTitle(id)}
                 <DialogContent style={this.props.fullscreen ? {padding: 0} : {}} className={styles.dialogContent}>

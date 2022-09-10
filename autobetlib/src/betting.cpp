@@ -201,8 +201,7 @@ short get_pos(const std::shared_ptr<void> &src) {
 
     if (napi_exported::isBettingFunctionSet()) {
         // Call the bettingPositionCallback
-        std::promise<int> promise = napi_exported::getBettingPosition(odds);
-        std::future<int> future = promise.get_future();
+        std::future<int> future = napi_exported::getBettingPosition(odds);
 
         // Wait for max 10 seconds
         std::future_status status = future.wait_for(std::chrono::seconds(10));

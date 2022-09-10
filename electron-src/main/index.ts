@@ -35,15 +35,15 @@ async function createWindow(): Promise<void> {
         height: mainWindowState.height,
         minHeight: 500,
         minWidth: 600,
-        frame: false,
+        frame: true,
         resizable: true,
-        titleBarStyle: 'hidden',
         icon: "icon.png",
         webPreferences: {
             preload: path.join(__dirname, 'preload.bundled.js'),
             contextIsolation: true,
             nodeIntegration: false,
             webSecurity: true,
+            sandbox: false,
             devTools: enableDevTools
         }
     });
