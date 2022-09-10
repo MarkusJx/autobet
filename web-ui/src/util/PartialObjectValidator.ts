@@ -2,7 +2,7 @@ export default class PartialObjectValidator {
     private constructor() {
     }
 
-    public static validate<T extends {}>(obj: T): Required<T> {
+    public static validate<T extends Record<string, any>>(obj: T): Required<T> {
         for (let key in obj) {
             if (!obj[key]) {
                 throw new TypeError(`The value of key '${key}' was undefined`);

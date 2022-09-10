@@ -130,7 +130,7 @@ export default class LicenseViewerDialog extends React.Component<{}, LicenseView
             return (
                 <div className={styles.mainContent}>
                     <Scrollbars autoHide autoHideTimeout={1000} autoHideDuration={200} autoHeight
-                                autoHeightMin={0} thumbMinSize={30} universal autoHeightMax="calc(100vh - 92px)">
+                                autoHeightMin={0} thumbMinSize={30} universal autoHeightMax="calc(100vh - 64px)">
                         <List sx={{width: '100%', maxWidth: 360, bgcolor: 'background.paper'}} component="nav">
                             <Suspense fallback={<CircularProgress/>}>
                                 {this.getMenuItems()}
@@ -138,7 +138,7 @@ export default class LicenseViewerDialog extends React.Component<{}, LicenseView
                         </List>
                     </Scrollbars>
                     <Scrollbars autoHide autoHideTimeout={1000} autoHideDuration={200} autoHeight
-                                autoHeightMin={0} thumbMinSize={30} universal autoHeightMax="calc(100vh - 92px)"
+                                autoHeightMin={0} thumbMinSize={30} universal autoHeightMax="calc(100vh - 64px)"
                                 classes={{view: styles.scrollbarView}}>
                         {this.getLicenseFile()}
                     </Scrollbars>

@@ -41,8 +41,9 @@ async function createWindow(): Promise<void> {
         webPreferences: {
             preload: path.join(__dirname, 'preload.bundled.js'),
             contextIsolation: true,
-            nodeIntegration: true,
+            nodeIntegration: false,
             webSecurity: true,
+            sandbox: false,
             devTools: enableDevTools
         }
     });
