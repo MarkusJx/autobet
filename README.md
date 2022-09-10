@@ -1,5 +1,7 @@
 # Autobet [![Version](https://img.shields.io/github/v/release/markusjx/autobet.svg)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest) [![autobet-build](https://github.com/MarkusJx/autobet/workflows/autobet-build/badge.svg)](https://github.com/MarkusJx/autobet/actions?query=workflow%3Aautobet-build)
 
+**Deprecation note: As GTA Online will no longer receive updates, autobet will also no longer receive feature updates, only bug fixes and security patches.**
+
 A simple GTA Online horse racing betting bot.
 
 Basically a script which automatically places bets on horses which are likely to win in the Inside Track inside GTA
