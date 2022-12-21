@@ -8,6 +8,7 @@ sqlitecpp/3.1.1
 brotli/1.0.9
 zlib/1.2.13
 jasper/2.0.33
+boost/1.74.0
 
 [generators]
 cmake
