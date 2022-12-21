@@ -477,14 +477,15 @@ bool utils::isAlreadyRunning(const std::string &programName) {
 }
 
 std::string utils::getDocumentsFolder() {
-    std::string res(MAX_PATH, '\0');
-    HRESULT result = SHGetFolderPathA(nullptr, CSIDL_MYDOCUMENTS, nullptr, SHGFP_TYPE_CURRENT, res.data());
+    PWSTR documentsFolder = nullptr;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &documentsFolder))) {
+        std::wstring ws(documentsFolder);
+        CoTaskMemFree(documentsFolder);
 
-    if (result != S_OK) {
-        return {};
+        return utils::utf_16_to_utf_8(ws);
     } else {
-        res.resize(strlen(res.c_str()));
-        return res;
+        CoTaskMemFree(documentsFolder);
+        return {};
     }
 }
 
