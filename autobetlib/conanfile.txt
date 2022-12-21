@@ -6,6 +6,7 @@ websocketpp/0.8.2
 openssl/1.1.1h
 sqlitecpp/3.1.1
 brotli/1.0.9
+zlib/1.2.12
 
 [generators]
 cmake

@@ -31,6 +31,7 @@
 #include <map>
 
 #include "windowUtils.hpp"
+#include "util/utils.hpp"
 
 // Basic function definitions =======================================
 
@@ -65,9 +66,9 @@ RECT calculateWindowRect(HWND hwnd) {
  * @param hwnd the hwnd to the window
  * @return the process name. May be empty if not found.
  */
-std::string getProcessName(HWND hwnd) {
+std::wstring getProcessName(HWND hwnd) {
     // Create the output string
-    std::string processName(MAX_PATH, '\0');
+    std::wstring processName(MAX_PATH, '\0');
     DWORD dwProcId = 0;
 
     // Get the process id
@@ -81,7 +82,7 @@ std::string getProcessName(HWND hwnd) {
 
         // Get the process name, if possible
         if (EnumProcessModules(hProc, &hMod, sizeof(void *), &cbNeeded)) {
-            GetModuleBaseNameA(hProc, hMod, processName.data(), static_cast<DWORD>(processName.size()));
+            GetModuleBaseNameW(hProc, hMod, processName.data(), static_cast<DWORD>(processName.size()));
         }
     }
 
@@ -89,38 +90,8 @@ std::string getProcessName(HWND hwnd) {
     CloseHandle(hProc);
 
     // Resize the process name to its actual length
-    processName.resize(strlen(processName.c_str()));
+    processName.resize(wcslen(processName.c_str()));
     return processName;
-}
-
-/**
- * Convert a std::string to a std::wstring
- *
- * @param in the string to convert
- * @return the converted wide string
- */
-std::wstring string_to_wstring(const std::string &in) {
-    std::wstring out(in.size() + 1, L' ');
-
-    size_t outSize;
-    errno_t err = mbstowcs_s(&outSize, (wchar_t *) out.data(), out.size(), in.c_str(), in.size());
-    if (err) throw std::runtime_error("Error creating wide string");
-    out.resize(in.size());
-
-    return out;
-}
-
-std::string wstring_to_string(const std::wstring &in) {
-    std::string out(in.size() + 1, '\0');
-    size_t outSize;
-
-    errno_t err = wcstombs_s(&outSize, (char *) out.data(), out.size(), in.c_str(), in.size());
-    if (err) {
-        return std::string();
-    }
-
-    out.resize(outSize);
-    return out;
 }
 
 using namespace windowUtils;
@@ -134,7 +105,7 @@ std::string windowSize::toString() const {
 
 // processInfo class ================================================
 
-processInfo::processInfo(const std::wstring &programName) : programName(wstring_to_string(programName)) {}
+processInfo::processInfo(const std::wstring &programName) : programName(utils::utf_16_to_utf_8(programName)) {}
 
 std::string processInfo::getProgramName() const {
     return programName;
@@ -184,10 +155,10 @@ std::string windowsProcessInfo::getWindowName() const {
     // If the handle isn't valid, throw an error
     if (isValid()) {
         // Get the window title
-        std::string title(GetWindowTextLength(handle->hwnd), '\0');
-        GetWindowTextA(handle->hwnd, title.data(), (int) title.size() + 1);
+        std::wstring title(GetWindowTextLengthW(handle->hwnd), '\0');
+        GetWindowTextW(handle->hwnd, title.data(), (int) title.size() + 1);
 
-        return title;
+        return utils::utf_16_to_utf_8(title);
     } else {
         throw std::runtime_error("The window handle is not valid anymore");
     }
@@ -225,13 +196,13 @@ public:
     std::vector<HWND> hwnds;
 };
 
-windowsProgramInfo::windowsProgramInfo(const std::string &programName, const programHandles &handles) {
-    this->programName = string_to_wstring(programName);
+windowsProgramInfo::windowsProgramInfo(const std::wstring &programName, const programHandles &handles) {
+    this->programName = programName;
     handle = std::make_shared<programHandles>(handles);
 }
 
 windowsProgramInfo::windowsProgramInfo(const std::string &programName) {
-    this->programName = string_to_wstring(programName);
+    this->programName = utils::utf_8_to_utf_16(programName);
     handle = getHandle(this->programName);
 }
 
@@ -301,7 +272,7 @@ std::shared_ptr<windowsProgramInfo::programHandles> windowsProgramInfo::getHandl
                 RECT rect = calculateWindowRect(hwnd);
 
                 // Only add this hwnd if the window has a size and the title is not empty
-                const int text_len = GetWindowTextLengthA(hwnd);
+                const int text_len = GetWindowTextLengthW(hwnd);
                 HWND parent = GetWindow(hwnd, GW_OWNER);
 
                 // Only continue if the window text is longer than zero and the parent window is null
@@ -317,11 +288,11 @@ std::shared_ptr<windowsProgramInfo::programHandles> windowsProgramInfo::getHandl
                         data.hwnds.push_back(hwnd);
                     } else {
                         // Get the window name
-                        std::string windowName(text_len + 1, '\0');
-                        GetWindowTextA(hwnd, windowName.data(), static_cast<int>(windowName.size()));
+                        std::wstring windowName(text_len + 1, '\0');
+                        GetWindowTextW(hwnd, windowName.data(), static_cast<int>(windowName.size()));
 
                         // Calculate the rect of the window
-                        rect = calculateWindowRect(FindWindowA(nullptr, windowName.c_str()));
+                        rect = calculateWindowRect(FindWindowW(nullptr, windowName.c_str()));
 
                         // Calculate the window positions and size
                         xPos = rect.left;
@@ -353,7 +324,7 @@ program_vector windowUtils::getAllOpenWindows() {
     // Create the info class as an inner class
     class info_c {
     public:
-        std::map<std::string, windowsProgramInfo::programHandles> m;
+        std::map<std::wstring, windowsProgramInfo::programHandles> m;
     };
 
     // Enumerate all windows
@@ -362,7 +333,7 @@ program_vector windowUtils::getAllOpenWindows() {
         info_c &info = *reinterpret_cast<info_c *>(lParam);
 
         // Get the window title length
-        const int text_len = GetWindowTextLengthA(hwnd);
+        const int text_len = GetWindowTextLengthW(hwnd);
 
         // Only continue if the window doesn't have a parent and if it has a valid title
         if (GetWindow(hwnd, GW_OWNER) == nullptr && text_len > 0 && IsWindowVisible(hwnd) && IsWindow(hwnd)) {
@@ -376,7 +347,7 @@ program_vector windowUtils::getAllOpenWindows() {
 
                 // Get the process name. If the process name is empty, return true
                 // to stop searching for the program
-                const std::string processName = getProcessName(hwnd);
+                const std::wstring processName = getProcessName(hwnd);
                 if (processName.empty()) return true;
 
                 // Add the hwnd to the result map if the window is valid
@@ -401,9 +372,9 @@ program_vector windowUtils::getAllOpenWindows() {
             // Try to insert the hwnd into the result map
             if (!try_insert(rect, hwnd)) {
                 // Get the window size by its window name
-                std::string windowName(text_len + 1, '\0');
-                GetWindowTextA(hwnd, windowName.data(), static_cast<int>(windowName.size()));
-                rect = calculateWindowRect(FindWindowA(nullptr, windowName.c_str()));
+                std::wstring windowName(text_len + 1, '\0');
+                GetWindowTextW(hwnd, windowName.data(), static_cast<int>(windowName.size()));
+                rect = calculateWindowRect(FindWindowW(nullptr, windowName.c_str()));
 
                 // Try to insert the hwnd into the result map
                 try_insert(rect, hwnd);

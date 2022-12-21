@@ -204,6 +204,10 @@ namespace utils {
      * @return the documents folder
      */
     std::string get_or_create_documents_folder();
+
+    std::string utf_16_to_utf_8(const std::wstring &in);
+
+    std::wstring utf_8_to_utf_16(const std::string &utf8);
 }
 
 #endif //GTA_ONLINE_AUTOBET_DEV_UTILS_HPP

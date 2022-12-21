@@ -10,7 +10,8 @@
      "35",
      "29",
      "37",
-     "18"
+     "18",
+     "2"
     ],
     "path": "conanfile.txt",
     "context": "host"
@@ -37,7 +38,7 @@
     "context": "host"
    },
    "2": {
-    "ref": "zlib/1.2.11",
+    "ref": "zlib/1.2.12",
     "options": "shared=False",
     "package_id": "3fb49604f9c2f729b85ba3115852006824e72cab",
     "prev": "0",
