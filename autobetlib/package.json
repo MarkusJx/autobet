@@ -14,9 +14,9 @@
         "postbuild:dev": "node prelaunch.js --dev",
         "postbuild": "node prelaunch.js",
         "clean": "cmake-js clean",
-        "preinstall": "conan install .",
+        "preinstall": "npm run conan_install",
         "conan_install:dev": "conan install . -s build_type=Debug",
-        "conan_install": "conan install ."
+        "conan_install": "conan install . --build missing"
     },
     "repository": {
         "type": "git",
