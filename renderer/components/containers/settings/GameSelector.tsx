@@ -83,9 +83,9 @@ export default class GameSelector extends React.Component<{}, GameSelectorState>
 
                     <FormControl fullWidth style={textFieldStyle} disabled={this.state.disabled}
                                  onClick={this.loadApplications.bind(this)}>
-                        <InputLabel id="game-select-label">Navigation Strategy</InputLabel>
+                        <InputLabel id="game-select-label">Application</InputLabel>
                         <Select labelId="game-select-label" id="game-select"
-                                value={JSON.stringify(this.selectedGame)} label="Navigation Strategy"
+                                value={JSON.stringify(this.selectedGame)} label="Application"
                                 onChange={this.onGameSelect.bind(this)}>
                             {this.getApplicationArray()}
                         </Select>

@@ -3,7 +3,7 @@ import {app, BrowserWindow, Menu, Tray} from "electron";
 type autobetLib_t = typeof import("@autobet/autobetlib");
 let tray: Tray | null = null;
 
-export default function createTrayMenu(mainWindow: BrowserWindow, autobetLib: autobetLib_t): Tray {
+export default function createTrayMenu(mainWindow: BrowserWindow, autobetLib: autobetLib_t | null): Tray {
     // Icon src: https://www.iconfinder.com/icons/3827994/business_cash_management_money_icon
     tray = new Tray('resources/icon.png');
     const contextMenu = Menu.buildFromTemplate([
@@ -35,7 +35,7 @@ export default function createTrayMenu(mainWindow: BrowserWindow, autobetLib: au
         };
 
         quitItem.enabled = false;
-        autobetLib!.shutdown().then(quit, quit);
+        autobetLib?.shutdown()?.then(quit, quit);
     };
 
     return tray;
