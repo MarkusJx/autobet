@@ -163,7 +163,7 @@ namespace windowUtils {
          * @param programName the name of the executable
          * @param handles the handles to the processes of the program
          */
-        explicit windowsProgramInfo(const std::string &programName, const programHandles &handles);
+        explicit windowsProgramInfo(const std::wstring &programName, const programHandles &handles);
 
         /**
          * Get information about a program by its name

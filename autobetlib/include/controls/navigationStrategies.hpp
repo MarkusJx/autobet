@@ -2,6 +2,7 @@
 #define AUTOBETLIB_NAVIGATION_STRATEGY_HPP
 
 #include "controls/controller.hpp"
+#include <string>
 
 /**
  * A namespace for ui navigation strategies

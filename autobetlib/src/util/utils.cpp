@@ -181,12 +181,19 @@ bool utils::getOwnIP(utils::IPv4 &myIP) {
 errno_t utils::isForeground(bool &res) {
     HWND h = GetForegroundWindow();
     if (h != nullptr) {
-        std::string title(GetWindowTextLengthA(h) + 1, '\0');
-        GetWindowTextA(h, title.data(), static_cast<int>(title.size())); //note: C++11 only
-        title.resize(strlen(title.c_str()));
+        std::wstring title(GetWindowTextLengthW(h) + 1, '\0');
+        GetWindowTextW(h, title.data(), static_cast<int>(title.size())); //note: C++11 only
+        title.resize(wcslen(title.c_str()));
 
-        logger::StaticLogger::debugStream() << "Currently focused window: " << title;
-        res = strcmp(title.c_str(), variables::game_process_name) == 0;
+        try {
+            const auto title_u8 = utils::utf_16_to_utf_8(title);
+            logger::StaticLogger::debugStream() << "Currently focused window: " << title_u8;
+            res = strcmp(title_u8.c_str(), variables::game_process_name) == 0;
+        } catch (const std::exception &e) {
+            logger::StaticLogger::errorStream() << "Could not convert window title to utf-8: " << e.what();
+            res = false;
+            return 1;
+        }
 
         return 0;
     } else {
@@ -470,14 +477,15 @@ bool utils::isAlreadyRunning(const std::string &programName) {
 }
 
 std::string utils::getDocumentsFolder() {
-    std::string res(MAX_PATH, '\0');
-    HRESULT result = SHGetFolderPathA(nullptr, CSIDL_MYDOCUMENTS, nullptr, SHGFP_TYPE_CURRENT, res.data());
+    PWSTR documentsFolder = nullptr;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &documentsFolder))) {
+        std::wstring ws(documentsFolder);
+        CoTaskMemFree(documentsFolder);
 
-    if (result != S_OK) {
-        return {};
+        return utils::utf_16_to_utf_8(ws);
     } else {
-        res.resize(strlen(res.c_str()));
-        return res;
+        CoTaskMemFree(documentsFolder);
+        return {};
     }
 }
 
@@ -494,4 +502,72 @@ std::string utils::get_or_create_documents_folder() {
     } else {
         return dir;
     }
+}
+
+std::wstring utils::utf_8_to_utf_16(const std::string &utf8) {
+    std::wstring utf16;
+    if (utf8.empty()) {
+        return utf16;
+    }
+    constexpr DWORD kFlags = MB_ERR_INVALID_CHARS;
+
+    if (utf8.length() > static_cast<size_t>(std::numeric_limits<int>::max())) {
+        throw std::overflow_error(
+                "Input string too long: size_t-length doesn't fit into int.");
+    }
+
+    if (utf8.length() > static_cast<size_t>((std::numeric_limits<int>::max)())) {
+        throw std::overflow_error(
+                "Input string too long: size_t-length doesn't fit into int.");
+    }
+
+    const int utf8Length = static_cast<int>(utf8.length());
+    const int utf16Length = ::MultiByteToWideChar(CP_UTF8, kFlags, utf8.data(), utf8Length, nullptr, 0);
+
+    if (utf16Length == 0) {
+        throw std::runtime_error(
+                "Cannot get result string length when converting from UTF-8 to UTF-16 (MultiByteToWideChar failed).");
+    }
+
+    utf16.resize(utf16Length);
+
+    int result = ::MultiByteToWideChar(CP_UTF8, kFlags, utf8.data(), utf8Length, &utf16[0], utf16Length);
+    if (result == 0) {
+        throw std::runtime_error(
+                "Cannot convert from UTF-8 to UTF-16 (MultiByteToWideChar failed).");
+    }
+
+    return utf16;
+}
+
+std::string utils::utf_16_to_utf_8(const std::wstring &in) {
+    std::string out;
+    if (in.empty()) {
+        return out;
+    }
+    constexpr DWORD kFlags = WC_ERR_INVALID_CHARS;
+
+    if (in.length() > static_cast<size_t>(std::numeric_limits<int>::max())) {
+        throw std::overflow_error(
+                "Input string too long: size_t-length doesn't fit into int.");
+    }
+
+    const int utf16Length = static_cast<int>(in.length());
+    const int utf8Length = ::WideCharToMultiByte(CP_UTF8, kFlags, in.data(), utf16Length, nullptr, 0, nullptr, nullptr);
+
+    if (utf8Length == 0) {
+        throw std::runtime_error(
+                "Cannot get result string length when converting from UTF-16 to UTF-8 (WideCharToMultiByte failed).");
+    }
+
+    out.resize(utf8Length);
+
+    int result = ::WideCharToMultiByte(CP_UTF8, kFlags, in.data(), utf16Length, &out[0], utf8Length, nullptr, nullptr);
+
+    if (result == 0) {
+        throw std::runtime_error(
+                "Cannot convert from UTF-16 to UTF-8 (WideCharToMultiByte failed).");
+    }
+
+    return out;
 }
