@@ -1,6 +1,7 @@
 # Autobet [![Version](https://img.shields.io/github/v/release/markusjx/autobet.svg)](https://github.com/MarkusJx/GTA-Online-Autobet/releases/latest) [![autobet-build](https://github.com/MarkusJx/autobet/workflows/autobet-build/badge.svg)](https://github.com/MarkusJx/autobet/actions?query=workflow%3Aautobet-build)
 
-**Deprecation note: As GTA Online will no longer receive updates, autobet will also no longer receive feature updates, only bug fixes and security patches.**
+**Deprecation note: As GTA Online will no longer receive updates, autobet will also no longer receive feature updates,
+only bug fixes and security patches.**
 
 A simple GTA Online horse racing betting bot.
 
@@ -8,6 +9,20 @@ Basically a script which automatically places bets on horses which are likely to
 Online's Casino. This should make you about $250K per hour (afk).
 
 [View project website](https://markusjx.github.io/autobet/)
+
+### Important notes
+
+**Us this software at your own risk. It's not guaranteed you'll make money or anything close to the
+advertised values. You might lose money. You are solely responsible for all your actions, including
+any money lost or gained using this program. This also includes any bans by rockstar games. Also, as
+the license states, this software is provided with no kind of warranty, thus, any money lost through
+bugs in the software will not be refunded. But feel free to create a new issue in order to resolve
+any issues with the program.**
+
+**Never invest real money through shark cards or other forms of money transfer into this game for gambling reasons.
+If you are underage, you should neither play this game nor gamble in any shape or form. If you feel the urge to
+invest money after losing some amount, please consult help. For more information on gambling addiction,
+read [this article by the NHS](https://www.nhs.uk/live-well/addiction-support/gambling-addiction/).**
 
 ## Features
 
