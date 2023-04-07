@@ -81,7 +81,7 @@
         "sass": "^1.57.1",
         "source-map-support": "^0.5.21",
         "uuid": "^9.0.0",
-        "vm2": "^3.9.13"
+        "vm2": "^3.9.15"
     },
     "build": {
         "appId": "markusjx.autobet",
