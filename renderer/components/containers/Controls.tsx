@@ -17,7 +17,7 @@ export default class Controls extends React.Component<{}, ControlsState> {
     private running: boolean = false;
     private paused: boolean = true;
     private pausing: boolean = false;
-    private timer?: NodeJS.Timer;
+    private timer?: NodeJS.Timeout;
 
     public constructor(props: {}) {
         super(props);
@@ -131,7 +131,7 @@ export default class Controls extends React.Component<{}, ControlsState> {
         StaticInstances.status!.setStatus(StatusValue.starting);
 
         let timeUntilStart: number = 15;
-        const interval: NodeJS.Timer = setInterval(() => {
+        const interval: NodeJS.Timeout = setInterval(() => {
             this.buttonText = `Starting in ${timeUntilStart}s`;
             timeUntilStart--;
 
@@ -160,7 +160,7 @@ export default class Controls extends React.Component<{}, ControlsState> {
         StaticInstances.status!.setStatus(StatusValue.stopping);
         this.disabled = true;
 
-        const timeout: NodeJS.Timer = setInterval(() => {
+        const timeout: NodeJS.Timeout = setInterval(() => {
             if (window.autobet.stopped()) {
                 clearInterval(timeout);
                 this.setPaused();

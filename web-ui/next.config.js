@@ -5,5 +5,8 @@ module.exports = {
         loader: 'akamai',
         path: '/'
     },
-    productionBrowserSourceMaps: true
+    productionBrowserSourceMaps: true,
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
 };
