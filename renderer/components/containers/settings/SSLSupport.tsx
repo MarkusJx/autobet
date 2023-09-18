@@ -12,7 +12,7 @@ interface SSLSupportState {
 }
 
 export default class SSLSupport extends React.Component<{}, SSLSupportState> implements Loadable {
-    private interval: NodeJS.Timer | null = null;
+    private interval: NodeJS.Timeout | null = null;
 
     public constructor(props: {}) {
         super(props);

@@ -9,7 +9,7 @@ interface TimeRunningState {
 
 export default class TimeRunning extends React.Component<{}, TimeRunningState> {
     private curTime: number = 0;
-    private timer: NodeJS.Timer | null = null;
+    private timer: NodeJS.Timeout | null = null;
 
     public constructor(props: {}) {
         super(props);
